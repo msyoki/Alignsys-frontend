@@ -1,0 +1,38 @@
+.login-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-side {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.right-side {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.right-side img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Media query for small screens */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .left-side, .right-side {
+    width: 100%;
+  }
+
+  .right-side {
+    display: none; /* Hide the right-side content */
+  }
+}

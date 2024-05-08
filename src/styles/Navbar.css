@@ -1,0 +1,41 @@
+/* Add this CSS to your existing stylesheet */
+.navbar {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .navbar-menu {
+    display: none;
+  }
+  
+  .navbar-menu ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .navbar-menu li {
+    padding: 10px;
+  }
+  
+  .navbar-menu.open {
+    display: block;
+  }
+  
+  @media screen and (max-width: 768px) {
+    .navbar-toggle {
+      display: block;
+    }
+  
+    .navbar-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      z-index: 999;
+    }
+  }
+  

@@ -1,0 +1,106 @@
+
+
+
+.e-custom-primary, .e-custom-primary:focus, .e-custom-primary:active {
+    background-color: #2364aa;
+    color: #fff;
+    border-color: #2364aa;
+    font-family: inherit;
+    text-align:center;
+    font-size: 12px !important;
+    border-radius: 30px; /* Adjust the value to control the roundness of the corners */
+    padding: 0 20px; /* Adjust padding as needed */
+  
+  }
+  
+  .e-custom-primary:hover{
+    background-color: #2364aa;
+    color: #fff;
+    border-color: #495057;
+    font-family: inherit;
+   
+  }
+  .overflow-cell{
+    height: 100px;
+  }
+  .e-custom-success, .e-custom-success:focus, .e-custom-success:active {
+    background-color: #2CB34A;
+    color: #fff;
+    border-color: #2CB34A;
+    font-family: inherit;
+    text-align:center;
+    font-size: 12px !important;
+    border-radius: 30px; /* Adjust the value to control the roundness of the corners */
+    padding: 0 20px; /* Adjust padding as needed */
+  
+  
+  }
+  .e-custom-success:hover{
+    background-color: #2CB34A;
+    color: #fff;
+    border-color: #495057;
+    font-family: inherit;
+  }
+  
+  .e-custom-light, .e-custom-light:focus, .e-custom-light:active {
+    background-color: #ffff;
+    color: #2364aa;
+    border-color: #ffff;
+    font-family: inherit;
+    text-align:center;
+    font-size: 12px !important;
+    border-radius: 30px; /* Adjust the value to control the roundness of the corners */
+  
+    padding: 0 20px; /* Adjust padding as needed */
+  
+  
+  }
+  .e-custom-light:hover{
+    background-color: #ffff;
+    color: #2364aa;
+    border-color: #495057;
+    font-family: inherit;
+    
+   
+  }
+  
+  .e-custom-warning, .e-custom-warning:focus, .e-custom-warning:active {
+    background-color: #ffda75;
+    color: #30343f;
+    border-color: #ffda75;
+    font-family: inherit;
+    text-align:center;
+    font-size: 12px !important;
+    border-radius: 30px; /* Adjust the value to control the roundness of the corners */
+    padding: 0 20px; /* Adjust padding as needed */
+  
+  
+  }
+  .e-custom-warning:hover{
+    background-color: #ffda75;
+    color: #30343f;
+    border-color: #495057;
+    font-family: inherit;
+   
+  }
+  .e-custom-danger, .e-custom-danger:focus, .e-custom-danger:active {
+    background-color: #ff6b6b;
+    color: #ffff;
+    border-color: #ff6b6b;
+    font-family: inherit;
+    text-align:center;
+    font-size: 12px !important;
+    border-radius: 30px; /* Adjust the value to control the roundness of the corners */
+    padding: 0 20px; /* Adjust padding as needed */
+  
+  
+  }
+  .e-custom-danger:hover{
+    background-color: #ff6b6b;
+    color: #ffff;
+    border-color: #495057;
+    font-family: inherit;
+   
+  }
+  
+  
