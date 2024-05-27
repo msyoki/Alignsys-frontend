@@ -15,6 +15,8 @@ export const AuthProvider = ({ children }) => {
     let [user, setUser] = useState(() => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null)
     let [loading, setLoading] = useState(true)
     let navigate = useNavigate()
+    let [vaults,setVaults]=useState(['Vault 1', 'Vault 2', 'Vault 3', 'Vault 4'])
+    let [selectedVault, setSelectedVault] = useState(() => localStorage.getItem('selectedVault') ? localStorage.getItem('selectedVault') : null);
 
     let [openalert, setOpenAlert] = useState(false)
     let [alertseverity, setAlertSeverity] = useState('')
@@ -36,7 +38,7 @@ export const AuthProvider = ({ children }) => {
                 setAuthtokens(data);
                 setUser(jwt_decode(data.access))
                 localStorage.setItem('authTokens', JSON.stringify(data))
-                navigate('/', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
+                navigate('/vault', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
 
                 // if (jwt_decode(response.data.access).is_superuser === 'True') {
 
@@ -64,10 +66,23 @@ export const AuthProvider = ({ children }) => {
         };
         setAuthtokens(null)
         setUser(null)
+        setSelectedVault(null)
+        localStorage.removeItem('selectedVault')
         localStorage.removeItem('authTokens')
     }
 
+    let loggedInVault=(event)=>{
+       
+        const vault = event.target.value;
+        setSelectedVault(vault);
+        localStorage.setItem('selectedVault', vault); // Store the selected vault in local storage
+        navigate('/');
+      
+    }
+
     // Update token
+
+    
 
     let updateToken = async () => {
         try {
@@ -128,6 +143,8 @@ export const AuthProvider = ({ children }) => {
     }
 
     let contextData = {
+        loggedInVault:loggedInVault,
+        selectedVault:selectedVault,
         user: user,
         updateToken: updateToken,
         authTokens: authTokens,

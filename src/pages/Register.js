@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import '../styles/Login.css'; // Import CSS file for styling
 import logo from '../images/m.png'
-import Authcontext from './Auth/Authprovider';
+import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Custombuttons.css'
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { Link, useLocation } from "react-router-dom";
@@ -14,16 +14,18 @@ import KeyIcon from '@mui/icons-material/Key';
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import EmailIcon from '@mui/icons-material/Email';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
-import * as constants from './Constants'
-import Alerts from './Alert';
+import * as constants from '../components/Constants'
+import Alerts from '../components/Alert';
 
 import Logo from '../images/m.png'
 import image from '../images/logo2.png'
+import MiniLoader from '../components/Modals/MiniLoader';
 
 const Register = () => {
   const [companyName, setCompanyName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [miniLoader,setMiniLoader]=useState(false);
 
   let { loginUser, alertmsg, alertseverity, openalert, setOpenAlert, setAlertMsg, setAlertSeverity } = useContext(Authcontext);
 
@@ -40,6 +42,7 @@ const Register = () => {
 
   const handleRegister = (e) => {
     e.preventDefault();
+    setMiniLoader(true)
     // Perform registration logic here using the state values
     const userData = {
       company_name: companyName,
@@ -51,15 +54,19 @@ const Register = () => {
     axios.post('http://localhost:8000/api/organization/signup/', userData)
       .then(response => {
         // Handle successful registration
+        setMiniLoader(false)
         alert('Registration was received !!!')
       })
       .catch(error => {
+        setMiniLoader(false)
+        alert('Account with similar credentials alredy exists !!!')
         // Handle registration error
       });
   }
 
   return (
     <div className="login-container d-flex justify-content-center align-items-center">
+      <MiniLoader loading={miniLoader} loaderMsg={'Processing Registration...'} setLoading={setMiniLoader}/>
       <div className="left-side bg-white d-flex justify-content-center align-items-center" style={{ height: '100vh', width: '50%' }}>
         <form onSubmit={handleRegister} className="text-center text-dark p-3">
           <div>
@@ -130,7 +137,7 @@ const Register = () => {
             </div>
           </div>
           <div className="text-center">
-            <small className="small mb-0">Already have an account?<br />Login <Link to={'/login'} style={{ textDecoration: 'none', color: '#2364aa' }}>here</Link> </small>
+            <small className="small mb-0">Already have an account?<br /> <Link to={'/login'} style={{ textDecoration: 'none', color: '#2364aa' }}>Login here</Link> </small>
           </div>
         </form>
       </div>

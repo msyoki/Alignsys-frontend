@@ -1,9 +1,10 @@
+
 .dashboard {
     display: flex;
   }
   
   .sidebar {
-    width: 150px;
+    width: 110px;
     background-color: #212529;
     color: #fff;
     transition: width 0.5s;
@@ -69,4 +70,8 @@
       flex-direction: column; /* Change to column layout on smaller screens */
     }
   }
+  
+
+
+
   

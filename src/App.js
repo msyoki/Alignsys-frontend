@@ -1,14 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './components/Auth/Authprovider';
 import PrivateRoute from './components/Auth/Privateroute';
 import { registerLicense } from '@syncfusion/ej2-base';
-import Vaults from './components/Vaults';
-import Register from './components/Register';
-import Home from './components/Home';
-import AdminDashboard from './components/AdminDashboard';
+import Register from './pages/Register';
+import AdminDashboard from './pages/AdminDashboard';
+import VaultSelectForm from './pages/Vault';
 
 
 
@@ -20,6 +19,7 @@ function App() {
       <div className="App bg-dark text-white">
         <Routes>
           <Route path="/"  exact={true} element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+          <Route path="/vault" element={<PrivateRoute><VaultSelectForm/></PrivateRoute>}></Route>
           <Route path="/admin"  exact={true} element={<PrivateRoute><AdminDashboard/></PrivateRoute>} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />

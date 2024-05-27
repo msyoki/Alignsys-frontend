@@ -2,7 +2,7 @@ import React, { useState,useContext } from 'react';
 import axios from 'axios';
 import '../styles/Login.css'; // Import CSS file for styling
 import logo from '../images/m.png'
-import Authcontext from './Auth/Authprovider';
+import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Custombuttons.css'
 import { ButtonComponent  } from '@syncfusion/ej2-react-buttons';
 import { Link ,useLocation} from "react-router-dom";
@@ -13,8 +13,8 @@ import Input from '@mui/material/Input';
 import KeyIcon from '@mui/icons-material/Key';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
-import * as constants from './Constants'
-import Alerts from './Alert';
+import * as constants from '../components/Constants'
+import Alerts from '../components/Alert';
 import image from '../images/logo2.png'
 
 import Logo from '../images/m.png'
