@@ -29,7 +29,9 @@ import { Spinner } from '@chakra-ui/react'
 import TransitionAlerts from './Alert';
 import ObjectView from './ObjectView';
 import NetworkIcon from './NetworkStatus';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
+import GridViewIcon from '@mui/icons-material/GridView';
 const baseurl = "http://41.89.92.225:5006"
 const baseurldata = "http://41.92.225.149:240"
 const baseurldss = "http://41.92.225.149"
@@ -152,7 +154,7 @@ const DocumentList = (props) => {
 
 
   };
-  let openObjectModal=()=>{
+  let openObjectModal = () => {
     props.setOpenObjectModal(true)
   }
   const getPropsFile = async (objId, internalId, classId, title) => {
@@ -233,8 +235,9 @@ const DocumentList = (props) => {
               {/* Box with vault information */}
               <Box sx={{ display: 'flex', alignItems: 'center', color: '#ffff' }}>
                 <img src={logo} alt="logo" style={{ width: '10%', height: '10%' }} />
-                <i className="fas fa-hdd mx-3" style={{ fontSize: '20px' }}></i>
+             
                 <Typography variant="body1">{JSON.parse(props.selectedVault).name}</Typography>
+                <i className="fas fa-hdd mx-3" style={{ fontSize: '15px' }}></i>
               </Box>
 
               {/* Box with buttons */}
@@ -286,7 +289,7 @@ const DocumentList = (props) => {
                 {/* Search Results */}
                 {props.data.length > 0 ?
                   <>
-                    <h6 className='p-2' style={{ fontSize: '12px',  backgroundColor: '#2a68af',color:'#fff'  }}><i class="fas fa-search mx-2"></i> Search Results</h6>
+                    <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i class="fas fa-search mx-2"></i> Search Results</h6>
                     <div style={{ height: '62vh', overflowY: 'scroll' }}>
                       {props.data.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                         <Accordion key={index} sx={{ mb: 0.5 }}>
@@ -341,7 +344,7 @@ const DocumentList = (props) => {
                     {/* Created By Me */}
                     {props.data2.length > 0 ?
                       <>
-                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af',color:'#fff' }}><i class="far fa-clock mx-2"></i> Created By Me</h6>
+                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i class="far fa-clock mx-2"></i> Created By Me</h6>
                         <div style={{ height: '65vh', overflowY: 'scroll' }}>
                           {props.data2.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                             <Accordion key={index} sx={{ mb: 0.5 }}>
@@ -391,7 +394,45 @@ const DocumentList = (props) => {
                           )}
                         </div>
                       </>
-                      : <></>
+                      :
+                      <>
+                        <div style={{ height: '65vh', overflowY: 'scroll' }}>
+
+                          <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}> My Views</h6>
+                          <a href='#hr-documents' className='text-decoration-none' style={{ color: '#2a68af' }}>
+                            <p className='mx-3 my-1'>
+                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
+                              <span style={{ fontSize: '15px' }} className='text-dark'>HR Documents</span>
+                            </p>
+                          </a>
+                          <a href='#invoices' className='text-decoration-none' style={{ color: '#2a68af' }}>
+                            <p className='mx-3 my-1'>
+
+                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
+                              <span style={{ fontSize: '15px' }} className='text-dark'>Invoices</span>
+                            </p>
+                          </a>
+                          <a href='#reports' className='text-decoration-none' style={{ color: '#2a68af' }}>
+                            <p className='mx-3 my-1'>
+
+                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
+                              <span style={{ fontSize: '15px' }} className='text-dark'>Reports</span>
+                            </p>
+                          </a>
+                          <a href='#other-documents' className='text-decoration-none' style={{ color: '#2a68af' }}>
+                            <p className='mx-3 my-1'>
+                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
+                              <span style={{ fontSize: '15px' }} className='text-dark'>Other Documents</span>
+                            </p>
+                          </a>
+                          <a href='#staff' className='text-decoration-none' style={{ color: '#2a68af' }}>
+                            <p className='mx-3 my-1'>
+                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
+                              <span style={{ fontSize: '15px' }} className='text-dark'>Staff</span>
+                            </p>
+                          </a>
+                        </div>
+                      </>
                     }
                   </>
                 }
@@ -412,7 +453,7 @@ const DocumentList = (props) => {
 
             <Box mr={2}>{props.user.first_name} {props.user.last_name}</Box>
             <Box mr={2} >
-              <NetworkIcon/>
+              <NetworkIcon />
             </Box>
           </Box>
 

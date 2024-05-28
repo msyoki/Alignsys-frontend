@@ -78,22 +78,22 @@ function Dashboard() {
   const { user, selectedVault, departments } = useContext(Authcontext);
   let [openObjectModal, setOpenObjectModal]= useState(false);
   const vaultGuid=`${JSON.parse(selectedVault).guid}`
-  const [data, setData] = useState([
-    {
-      objectID: 1,
-      internalID: 1001,
-      classID: 37,
-      title: "Sample Document 1"
-    },
-    {
-      objectID: 2,
-      internalID: 1002,
-      classID: 40,
-      title: "Sample Document 2"
-    },
-    // Add more search results data here as needed
-  ]);
-
+  // const [data, setData] = useState([
+  //   {
+  //     objectID: 1,
+  //     internalID: 1001,
+  //     classID: 37,
+  //     title: "Sample Document 1"
+  //   },
+  //   {
+  //     objectID: 2,
+  //     internalID: 1002,
+  //     classID: 40,
+  //     title: "Sample Document 2"
+  //   },
+  //   // Add more search results data here as needed
+  // ]);
+  const [data, setData] = useState([])
   const [searchTerm, setSearchTerm] = useState('');
   const [allrequisitions, setRequisitions] = useState([])
   // const [document, setSelectedDoc] = useState({})
@@ -102,70 +102,73 @@ function Dashboard() {
 
 
 
-  const data2 = [
-    {
-      objectID: 11,
-      internalID: 2001,
-      classID: 37,
-      title: "Sample Document 11"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
+  // const data2 = [
+  //   {
+  //     objectID: 11,
+  //     internalID: 2001,
+  //     classID: 37,
+  //     title: "Sample Document 11"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
 
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    },
-    {
-      objectID: 12,
-      internalID: 2002,
-      classID: 40,
-      title: "Sample Document 12"
-    }
-    // Add more created by me data here as needed
-  ];
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   },
+  //   {
+  //     objectID: 12,
+  //     internalID: 2002,
+  //     classID: 40,
+  //     title: "Sample Document 12"
+  //   }
+  //   // Add more created by me data here as needed
+  // ];
+  const data2=[
+
+  ]
 
 
   const allrequisitionsnew = allrequisitions.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
@@ -277,10 +280,10 @@ function Dashboard() {
                   <i className="fas fa-question-circle  mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '>Manual</span>
                 </li>
-                <li style={{ display: 'flex', alignItems: 'center' }} >
+                {/* <li style={{ display: 'flex', alignItems: 'center' }} >
                   <i className="fas fas fa-tools  mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '> Settings</span>
-                </li>
+                </li> */}
                 <li style={{ display: 'flex', alignItems: 'center' }} onClick={adminPage} >
                   <i className="fas fas fa-user-shield  mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '> Admin</span>
@@ -302,7 +305,7 @@ function Dashboard() {
  
                   <li onClick={()=>{setOpenObjectModal(true)}} className='mt-5' ><i class="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
                   <li><i class="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
-                  <li ><i class="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li>
+                  {/* <li ><i class="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
                   <li onClick={adminPage}><i class="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={logoutUser}><i class="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={toggleSidebar}><i class="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
