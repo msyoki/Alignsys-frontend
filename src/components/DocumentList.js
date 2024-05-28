@@ -224,7 +224,7 @@ const DocumentList = (props) => {
                 alignItems: 'center',
                 justifyContent: 'space-between', // Adjusted to space-between
                 padding: '8px',
-                backgroundColor: '#2a68af',
+                backgroundColor: '#293241',
                 textColor: '#fffff',
                 width: '100%',
                 // borderRadius: '8px'
@@ -232,22 +232,22 @@ const DocumentList = (props) => {
             >
               {/* Box with vault information */}
               <Box sx={{ display: 'flex', alignItems: 'center', color: '#ffff' }}>
-                {/* <img src={logo} alt="logo" style={{ width: '10%', height: '10%' }} /> */}
+                <img src={logo} alt="logo" style={{ width: '10%', height: '10%' }} />
                 <i className="fas fa-hdd mx-3" style={{ fontSize: '20px' }}></i>
-                <Typography variant="body1">{props.selectedVault}</Typography>
+                <Typography variant="body1">{JSON.parse(props.selectedVault).name}</Typography>
               </Box>
 
               {/* Box with buttons */}
               <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
                 {/* Create Button */}
-                <div onClick={openObjectModal} className="create-button mx-2 " style={{ color: '#fff', width: '40px', height: '38px', borderRadius: '50%', backgroundColor: '#2a68af', borderColor: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.3s ease', marginRight: '0' }} >
+                <div onClick={openObjectModal} className="create-button mx-2 " style={{ color: '#fff', width: '40px', height: '38px', borderRadius: '50%', backgroundColor: '#293241', borderColor: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.3s ease', marginRight: '0' }} >
                   <div className="button-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <i className="fas fa-plus" style={{ fontSize: '25px' }}></i>
                   </div>
                 </div>
 
                 {/* Home Button */}
-                <div className="home-button mx-2" style={{ color: '#fff', width: '40px', height: '38px', borderRadius: '50%', backgroundColor: '#2a68af', borderColor: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.3s ease' }} >
+                <div className="home-button mx-2" style={{ color: '#fff', width: '40px', height: '38px', borderRadius: '50%', backgroundColor: '#293241', borderColor: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.3s ease' }} >
                   <div className="button-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <i className="fas fa-home" style={{ fontSize: '25px' }}></i>
                   </div>
@@ -286,7 +286,7 @@ const DocumentList = (props) => {
                 {/* Search Results */}
                 {props.data.length > 0 ?
                   <>
-                    <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#adb5bd' }}><i class="fas fa-search mx-2"></i> Search Results</h6>
+                    <h6 className='p-2' style={{ fontSize: '12px',  backgroundColor: '#2a68af',color:'#fff'  }}><i class="fas fa-search mx-2"></i> Search Results</h6>
                     <div style={{ height: '62vh', overflowY: 'scroll' }}>
                       {props.data.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                         <Accordion key={index} sx={{ mb: 0.5 }}>
@@ -341,7 +341,7 @@ const DocumentList = (props) => {
                     {/* Created By Me */}
                     {props.data2.length > 0 ?
                       <>
-                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#adb5bd' }}><i class="far fa-clock mx-2"></i> Created By Me</h6>
+                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af',color:'#fff' }}><i class="far fa-clock mx-2"></i> Created By Me</h6>
                         <div style={{ height: '65vh', overflowY: 'scroll' }}>
                           {props.data2.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                             <Accordion key={index} sx={{ mb: 0.5 }}>

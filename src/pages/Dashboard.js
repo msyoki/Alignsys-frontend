@@ -76,8 +76,8 @@ function a11yProps(index) {
 function Dashboard() {
 
   const { user, selectedVault, departments } = useContext(Authcontext);
-  const [vaultObjects, setVaultObjects] = useState([]);
   let [openObjectModal, setOpenObjectModal]= useState(false);
+  const vaultGuid=`${JSON.parse(selectedVault).guid}`
   const [data, setData] = useState([
     {
       objectID: 1,
@@ -255,7 +255,7 @@ function Dashboard() {
 
   return (
     <>
-      <ObjectStructureList vaultObjects={vaultObjects} vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={()=>setOpenObjectModal(false)}/>
+      <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={()=>setOpenObjectModal(false)} selectedVault={vaultGuid}/>
       <div className="dashboard bg-dark">
 
         <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -379,13 +379,13 @@ function Dashboard() {
             data={data}
             data2={data2}
    
-          
+            selectedVault={selectedVault}
             setData={setData}
             getRequisition={getRequisition}
             setSearchTerm={setSearchTerm}
             user={user}
             departments={departments}
-            selectedVault={selectedVault}
+      
             docClasses={docClasses}
             allrequisitions={allrequisitions}
             logoutUser={logoutUser}

@@ -57,7 +57,7 @@ const NewObjectInstance = (props) => {
         <div>
 
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Select an Item</DialogTitle>
+                <DialogTitle style={{backgroundColor: '#2a68af',color:'#fff'}}>Select an Item</DialogTitle>
                 <DialogContent>
                     <List>
                         {items.map((item) => (
@@ -111,7 +111,7 @@ const NewObjectInstance = (props) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
-                        Close
+                        Cancel
                     </Button>
                 </DialogActions>
             </Dialog>

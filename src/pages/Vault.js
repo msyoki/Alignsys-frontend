@@ -1,18 +1,46 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import logo from '../images/ZF.png';
 import Authcontext from '../components/Auth/Authprovider';
-
+import axios from 'axios';
 
 const VaultSelectForm = () => {
-
-    let { loggedInVault, selectedVault } = useContext(Authcontext)
+    let { authTokens, loggedInVault, selectedVault } = useContext(Authcontext)
+    
+    const [vaults,setVaults] =useState([]);
     const handleVaultChange = (event) => {
         loggedInVault(event)
-    };
 
-    const vaults = ['Vault 1', 'Vault 2', 'Vault 3', 'Vault 4'];
+    };
+    
+    let getUserVaults = () => {
+        let config = {
+            method: 'get',
+            url: 'http://127.0.0.1:8000/api/user/vaults/',
+            headers : {
+                'Authorization': `Bearer ${authTokens.access}`,
+                'Content-Type': 'application/json'
+            }
+        };
+    
+        axios.request(config)
+            .then((response) => {
+                setVaults(response.data)
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    
+
+
+
+    useEffect(() => {
+        getUserVaults()
+    }, []);
+
 
     return (
         <Container
@@ -36,6 +64,7 @@ const VaultSelectForm = () => {
             >
                 <img className="my-3" src={logo} alt="Loading" width='60px' />
                 <p className="text-dark" style={{ fontSize: '13px' }}> The Smart way to work.</p>
+            
                 <FormControl fullWidth >
                     <InputLabel className='text-dark' id="vault-select-label">Select Vault</InputLabel>
                     <Select
@@ -45,9 +74,9 @@ const VaultSelectForm = () => {
                         onChange={handleVaultChange}
                         size='medium'
                     >
-                        {vaults.map((vault) => (
-                            <MenuItem key={vault} value={vault}>
-                                {vault}
+                        {vaults.map((vault,index) => (
+                            <MenuItem key={index} value={vault}>
+                                {vault.name}
                             </MenuItem>
                         ))}
                     </Select>

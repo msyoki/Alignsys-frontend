@@ -92,7 +92,7 @@ const Login = () => {
         <small className="small mb-0">Don't have an account?<br />Register your <Link to={'/register'} style={{ textDecoration: 'none', color: '#2364aa' }}>Organization account</Link> </small>
       </form>
     </div>
-    <div className="right-side bg-dark" style={{ height: '100vh', width: '50%' }}>
+    <div className="right-side " style={{ height: '100vh', width: '50%' }}>
       <div className='text-center'>
         <h3 className="text-center mt-2"><b style={{ color: "#ee6c4d" }}>ZEN</b>Files</h3>
         <p className="text-center responsive-font"><span style={{ color: "#e0fbfc" }}>The Smart way to work. </span></p>
