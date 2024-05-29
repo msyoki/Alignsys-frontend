@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemIcon, ListItemText, CircularProgress, TextField } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemIcon, ListItemText, CircularProgress, TextField, Checkbox, FormControlLabel } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
+import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faHandPointer, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import LookupSelect from '../NewObjectFormLookup';
+import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoader';
-import { FileUpload } from '@mui/icons-material';
-
+import logo from '../../images/ZF.png'
 
 const allIcons = {
     faFileAlt,
@@ -28,10 +28,10 @@ const findBestIconMatch = (name) => {
             if (iconName.toLowerCase().includes(word)) {
                 return allIcons[iconName];
             }
-            if (word.toLowerCase().includes('document') || word.toLowerCase().includes('invoice')) {
+            if (word.toLowerCase().includes('document') || word.toLowerCase().includes('invoice') || word.toLowerCase().includes('Petty Cash')) {
                 return faFile;
             }
-      
+
             if (word.toLowerCase().includes('staff') || word.toLowerCase().includes('employee')) {
                 return faUser;
             }
@@ -40,19 +40,18 @@ const findBestIconMatch = (name) => {
     return faFolder;
 };
 
-const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,selectedVault}) => {
+const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, selectedVault }) => {
     const [isDataOpen, setIsDataOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [miniLoader, setMiniLoader] = useState(false)
     const [selectedObjectId, setSelectedObjectId] = useState(null);
-    const [selectedObjectName,setSelectedObjectName]=useState('')
-    const [selectedClassName,setSelectedClassName]=useState('')
-    const [vaultObjectsList,setVaultObjectList]=useState([])
-    
+    const [selectedObjectName, setSelectedObjectName] = useState('');
+    const [selectedClassName, setSelectedClassName] = useState('');
+    const [vaultObjectsList, setVaultObjectList] = useState([]);
     const [selectedClassId, setSelectedClassId] = useState(null);
     const [groupedItems, setGroupedItems] = useState([]);
     const [ungroupedItems, setUngroupedItems] = useState([]);
-    const [uploadedFile,setUploadedFile]=useState(null)
+    const [uploadedFile, setUploadedFile] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formProperties, setFormProperties] = useState([]);
     const [formValues, setFormValues] = useState({});
@@ -70,27 +69,25 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
         setIsFormOpen(false);
     };
 
-    const getVaultObjects=()=>{
+    const getVaultObjects = () => {
         let config = {
             method: 'get',
             url: `http://192.236.194.251:240/api/MfilesObjects/GetVaultsObjects/${selectedVault}`,
-            headers : {
-            
-            }
+            headers: {}
         };
-    
+
         axios.request(config)
             .then((response) => {
-            setVaultObjectList(response.data)
-            console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+                setVaultObjectList(response.data);
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     }
 
-    const fetchItemData = async (objectid,objectname) => {
-        setSelectedObjectName(objectname)
+    const fetchItemData = async (objectid, objectname) => {
+        setSelectedObjectName(objectname);
         setIsLoading(true);
         try {
             const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/${selectedVault}/${objectid}`);
@@ -102,9 +99,9 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
             const totalClasses = response.data.grouped.reduce((acc, group) => acc + group.members.length, 0) + response.data.unGrouped.length;
             if (totalClasses === 1) {
                 if (response.data.grouped.length > 0) {
-                    handleClassSelection(response.data.grouped[0].members[0].classId,response.data.grouped[0].members[0].className, response.data.grouped[0].classGroupId);
+                    handleClassSelection(response.data.grouped[0].members[0].classId, response.data.grouped[0].members[0].className, response.data.grouped[0].classGroupId);
                 } else {
-                    handleClassSelection(response.data.unGrouped[0].classId,response.data.unGrouped[0].className);
+                    handleClassSelection(response.data.unGrouped[0].classId, response.data.unGrouped[0].className);
                 }
                 closeModal();
             } else {
@@ -116,8 +113,8 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
         }
     };
 
-    const handleClassSelection = async (classId,className,classGroupId = null) => {
-        setSelectedClassName(className)
+    const handleClassSelection = async (classId, className, classGroupId = null) => {
+        setSelectedClassName(className);
         try {
             const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/ClassProps/${selectedVault}/${classId}`);
             setSelectedClassId(classId);
@@ -147,13 +144,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
     const handleFileChange = (file) => {
         setUploadedFile(file)
     };
-      
 
     const handleSubmit = async () => {
-        setMiniLoader(true)
+
         const newFormErrors = {};
         const propertiesPayload = formProperties.map(prop => ({
-            value: formValues[prop.propId],
+            value: `${formValues[prop.propId]}`,
             propId: prop.propId,
             propertytype: prop.propertytype
         }));
@@ -165,14 +161,16 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
         });
 
         if (Object.keys(newFormErrors).length > 0) {
+
             setFormErrors(newFormErrors);
         } else {
-            let payload={}
-            if(selectedObjectId === 0 && uploadedFile){
+            setMiniLoader(true);
+            let payload = {};
+            if (selectedObjectId === 0 && uploadedFile) {
                 try {
                     const formData = new FormData();
-                    formData.append('formFiles', uploadedFile); // Assuming uploadedFile contains the selected file
-                
+                    formData.append('formFiles', uploadedFile);
+
                     const response = await axios.post(
                         'http://192.236.194.251:240/api/objectinstance/FilesUploadAsync',
                         formData,
@@ -183,32 +181,28 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
                             }
                         }
                     );
-                    console.log(response.data.uploadID)
+                    console.log(response.data.uploadID);
                     payload = {
                         objectID: selectedObjectId,
-                        classID: selectedClassId, // Assuming all properties belong to the same class
+                        classID: selectedClassId,
                         properties: propertiesPayload,
                         vaultGuid: selectedVault,
                         uploadId: response.data.uploadID
                     };
-                    // Handle successful response here
                     console.log('Upload successful:', response.data);
                 } catch (error) {
-                    // Handle error here
                     console.error('Error uploading file:', error);
                 }
-                
-
-            }else{
+            } else {
                 payload = {
                     objectID: selectedObjectId,
-                    classID: selectedClassId, // Assuming all properties belong to the same class
+                    classID: selectedClassId,
                     properties: propertiesPayload,
                     vaultGuid: selectedVault
                 };
             }
-           
-            console.log(payload)
+
+            console.log(payload);
             try {
                 const response = await axios.post('http://192.236.194.251:240/api/objectinstance/ObjectCreation', payload, {
                     headers: {
@@ -216,14 +210,14 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
                         'accept': '*/*'
                     }
                 });
-                setMiniLoader(false)
+                setMiniLoader(false);
                 console.log('Form submission successful:', response.data);
-                alert('Object was created successfully')
+                alert('Object was created successfully');
                 closeFormDialog();
             } catch (error) {
-                setMiniLoader(false)
+                setMiniLoader(false);
                 console.error('Error submitting form:', error);
-                alert(`${error}`)
+                alert(`${error}`);
             }
         }
     };
@@ -231,23 +225,20 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
     useEffect(() => {
         getVaultObjects();
     }, []); // Empty dependency array means this effect runs only once
-    
 
     return (
-
         <div>
             <MiniLoader loading={miniLoader} loaderMsg={'Creating new object...'} setLoading={setMiniLoader} />
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
-                <DialogTitle className='p-2' style={{backgroundColor: '#293241',color:'#fff',fontSize:'15px'}}>
-                    <FontAwesomeIcon icon={faPlus} className='mx-3' />
-                    Create Item
+                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
+                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
+                    Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' />
                 </DialogTitle>
-                <DialogContent >
-                    <p className='my-4' style={{ fontSize: '13px' }}>Please select from object options below</p>
-                    <List>
-                        
+                <DialogContent>
+                    <p className='my-4' style={{ fontSize: '13px' }}>Please select from Item types below</p>
+                    <List className='p-0'>
                         {vaultObjectsList.map((item) => (
-                            <ListItem  className='p-0 mx-2' button key={item.objectid} onClick={() => fetchItemData(item.objectid,item.namesingular)}>
+                            <ListItem className='p-0 mx-2' button key={item.objectid} onClick={() => fetchItemData(item.objectid, item.namesingular)}>
                                 <ListItemIcon>
                                     <FontAwesomeIcon icon={findBestIconMatch(item.namesingular)} className='mx-1' style={{ color: '#2a68af' }} />
                                 </ListItemIcon>
@@ -257,79 +248,104 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeModal} color="primary">
-                        Close
-                    </Button>
+                    <Button onClick={closeModal}>Close</Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth >
-                <DialogTitle className='p-2' style={{backgroundColor: '#293241',color:'#fff' ,fontSize:'15px'}}>
-                    <FontAwesomeIcon icon={findBestIconMatch(selectedObjectName)} className='mx-3' />
-                    {selectedObjectName}
+            <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
+                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
+                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
+
+
+                    Select {selectedObjectName} Class <FontAwesomeIcon icon={faHandPointer} className='mx-3' />
                 </DialogTitle>
-                <DialogContent >
-                    <p className='my-4' style={{ fontSize: '13px' }}>Please select from the class options below</p>
+                <DialogContent>
+
                     {isLoading ? (
-                        <CircularProgress />
+                        <div className="d-flex justify-content-center align-items-center w-100">
+                            <CircularProgress size={24} />
+                        </div>
                     ) : (
-                        <>
+                        <List className='p-0'>
                             {groupedItems.map((group) => (
                                 <div key={group.classGroupId}>
-                                    <h6 className='p-2 my-1' style={{  backgroundColor: '#2a68af',color:'#fff' ,fontSize:'14px' }}>
-                                        <FontAwesomeIcon icon={findBestIconMatch(group.classGroupName)} className='mx-1'/>
-                                        <span className='mx-2'>{group.classGroupName}</span>
-                                    </h6>
-                                    <List className='p-0 mx-2' >
+                                    <ListItem >
+                                        <ListItemText primary={group.classGroupName} className='shadow-lg p-2 mx-0' />
+                                    </ListItem>
+                                    <List component="div" disablePadding className='mx-4 '>
                                         {group.members.map((member) => (
-                                            <ListItem  className=' p-0 mx-3'  button key={member.classId} onClick={() => handleClassSelection(member.classId,member.className, group.classGroupId)}>
+                                            <ListItem key={member.classId} className='mx-4 p-0' button onClick={() => handleClassSelection(member.classId, member.className, group.classGroupId)}>
+                                                <ListItemIcon>
+                                                    <FontAwesomeIcon icon={findBestIconMatch(member.className)} style={{ color: '#2a68af' }} />
+                                                </ListItemIcon>
                                                 <ListItemText primary={member.className} />
                                             </ListItem>
                                         ))}
                                     </List>
+
                                 </div>
                             ))}
-                            <h6 className='p-2' style={{  backgroundColor: '#2a68af',color:'#fff'  ,fontSize:'14px'}}>
-                                <FontAwesomeIcon icon={findBestIconMatch('Others')} className='mx-1' />
-                                
-                                <span className='mx-2'>Others</span>
-                            </h6>
-                            <List className='p-0 my-1' >
-                                {ungroupedItems.map((item) => (
-                                    <ListItem   className=' p-0 mx-2' button key={item.classId} onClick={() => handleClassSelection(item.classId,item.className)}>
-                                        <ListItemText  primary={item.className} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </>
+
+                            <>
+                                <ListItem >
+                                    <ListItemText primary={'Others'} className='shadow-lg p-2 mx-0' />
+                                </ListItem>
+                                <List component="div" disablePadding className='mx-4 '>
+                                    {ungroupedItems.map((item) => (
+
+
+                                        <ListItem key={item.classId} className='mx-4 p-0 ' button onClick={() => handleClassSelection(item.classId, item.className)}>
+                                            <ListItemIcon>
+                                                <FontAwesomeIcon icon={findBestIconMatch(item.className)} style={{ color: '#2a68af' }} />
+                                            </ListItemIcon>
+                                            <ListItemText primary={item.className} />
+                                        </ListItem>
+
+                                    ))}
+                                </List>
+
+                            </>
+
+                        </List>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeDataDialog} color="primary">
-                        Cancel
-                    </Button>
+                    <Button onClick={closeDataDialog}>Close</Button>
                 </DialogActions>
             </Dialog>
 
             <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
-                <DialogTitle className='p-2' style={{backgroundColor: '#293241',color:'#fff',fontSize:'15px'}}>
-                    <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
-                        New {selectedClassName}
-                    </DialogTitle>
-                <DialogContent>
-   
+                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
+                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
+
+                    Create {selectedClassName} <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
+                </DialogTitle>
+                <DialogContent className='m-4'>
                     {formProperties.map((prop) => (
-                        <React.Fragment key={prop.propId}>
+                        <div key={prop.propId} className="my-3">
                             {prop.propertytype === 'MFDatatypeText' && (
                                 <TextField
                                     label={prop.title}
                                     value={formValues[prop.propId]}
                                     onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                    fullWidth
                                     required={prop.isRequired}
                                     error={!!formErrors[prop.propId]}
                                     helperText={formErrors[prop.propId]}
+                                    size='small'
+                                />
+                            )}
+                            {prop.propertytype === 'MFDatatypeMultiLineText' && (
+                                <TextField
+                                    label={prop.title}
+                                    value={formValues[prop.propId]}
+                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                     fullWidth
-                                    margin="normal"
+                                    required={prop.isRequired}
+                                    error={!!formErrors[prop.propId]}
+                                    helperText={formErrors[prop.propId]}
+                                    multiline
+                                    rows={4}
                                     size='small'
                                 />
                             )}
@@ -342,30 +358,57 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
                                     required={prop.isRequired}
                                     error={!!formErrors[prop.propId]}
                                     helperText={formErrors[prop.propId]}
+                                    selectedVault={selectedVault}
+                                    size='small'
                                 />
                             )}
-                            {selectedObjectId === 0 && (
-                                <div>
-                                    <input
-                                        type="file"
-                                        onChange={(e) => handleFileChange(e.target.files[0])}
-                                        required={true}
-                                        style={{ margin: '16px 0', display: 'block' }}
-                                    />
-                            
-                                </div>
+                            {prop.propertytype === 'MFDatatypeMultiSelectLookup' && (
+                                <LookupMultiSelect
+                                    propId={prop.propId}
+                                    label={prop.title}
+                                    onChange={handleInputChange}
+                                    value={formValues[prop.propId] || []}
+                                    required={prop.isRequired}
+                                    error={!!formErrors[prop.propId]}
+                                    helperText={formErrors[prop.propId]}
+                                    selectedVault={selectedVault}
+                                    size='small'
+                                />
                             )}
+                            {prop.propertytype === 'MFDatatypeDate' && (
+                                <TextField
+                                    label={prop.title}
+                                    type="date"
+                                    value={formValues[prop.propId]}
+                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                    fullWidth
+                                    required={prop.isRequired}
+                                    error={!!formErrors[prop.propId]}
+                                    helperText={formErrors[prop.propId]}
 
-                        </React.Fragment>
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    size='small'
+                                />
+                            )}
+                            {prop.propertytype === 'MFDatatypeBoolean' && (
+                                <FormControlLabel
+                                    control={<Checkbox checked={formValues[prop.propId]}
+                                        onChange={(e) => handleInputChange(prop.propId, e.target.checked)} />}
+                                    required={prop.isRequired}
+                                    error={!!formErrors[prop.propId]}
+                                    label={prop.title}
+                                    size='small'
+                                />
+
+                            )}
+                        </div>
                     ))}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeFormDialog} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} color="primary">
-                        Submit
-                    </Button>
+                    <Button onClick={closeFormDialog}>Cancel</Button>
+                    <Button onClick={handleSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
         </div>
@@ -373,4 +416,3 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal ,sele
 };
 
 export default ObjectStructureList;
-

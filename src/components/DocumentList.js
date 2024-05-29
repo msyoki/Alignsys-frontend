@@ -234,7 +234,7 @@ const DocumentList = (props) => {
             >
               {/* Box with vault information */}
               <Box sx={{ display: 'flex', alignItems: 'center', color: '#ffff' }}>
-                <img src={logo} alt="logo" style={{ width: '10%', height: '10%' }} />
+                <img src={logo} alt="logo" style={{ width: '8%'}}  className='mx-2'/>
              
                 <Typography variant="body1">{JSON.parse(props.selectedVault).name}</Typography>
                 <i className="fas fa-hdd mx-3" style={{ fontSize: '15px' }}></i>

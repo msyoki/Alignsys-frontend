@@ -2,25 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import axios from 'axios';
 
-const LookupSelect = ({ propId, label, onChange, value, required, error, helperText }) => {
-  const sampleData= [
-    {
-      "name": "Musyoki Mutua",
-      "value": 1,
-    },
-    {
-      "name": "Sam Kamau",
-       "value": 5
-    }
-  ]
-  const [lookupOptions, setLookupOptions] = useState(sampleData);
+const LookupSelect = ({ propId, label, onChange, value, required, error, helperText,selectedVault }) => {
+  // const sampleData= [
+  //   {
+  //     "name": "Musyoki Mutua",
+  //     "value": 1,
+  //   },
+  //   {
+  //     "name": "Sam Kamau",
+  //      "value": 5
+  //   }
+  // ]
+  const [lookupOptions, setLookupOptions] = useState([]);
 
   useEffect(() => {
-  
     const fetchLookupOptions = async () => {
       try {
-        const response = await axios.get(`http://your-api-url/${propId}/lookup`);
-        // setLookupOptions(response.data);
+        const response = await axios.get(`http://192.236.194.251:240/api/ValuelistInstance/${selectedVault}/${propId}`);
+        setLookupOptions(response.data);
       } catch (error) {
         console.error('Error fetching lookup options:', error);
       }
