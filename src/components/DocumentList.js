@@ -32,6 +32,8 @@ import NetworkIcon from './NetworkStatus';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import GridViewIcon from '@mui/icons-material/GridView';
+import ViewsList from './ViewsList';
+
 const baseurl = "http://41.89.92.225:5006"
 const baseurldata = "http://41.92.225.149:240"
 const baseurldss = "http://41.92.225.149"
@@ -51,11 +53,12 @@ const DocumentList = (props) => {
   const [openAlert, setOpenAlert] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('');
   const [alertMsg, setAlertMsg] = useState('');
-
+  const [loadingPreviewObject, setLoadingPreviewObject] = useState(false)
   const [pageNumber, setPageNumber] = useState(1);
   const [reqFiles, setReqFiles] = useState({})
   const [tabIndex, setTabIndex] = useState(0);
   const [isModalOpenUpdateFile, setIsModalOpenUpdateFile] = useState(false);
+  const[previewObjectProps,setPreviewObjectProps] = useState([])
 
 
   let [fileUrl, setFileUrl] = useState('')
@@ -93,6 +96,24 @@ const DocumentList = (props) => {
 
 
   }
+
+
+  // const getPreviewObject = async (id) => {
+  //   setLoadingFiles(true)
+  //   try {
+  //     let url = `${baseurldata}/api/RequisitionDocs/getalldocuments/${id}`
+  //     const response = await axios.get(url);
+  //     setReqFiles(response.data)
+  //     setLoadingFiles(false)
+  //   }
+  //   catch (error) {
+  //     setLoadingFiles(false)
+  //     console.error('Error fetching requisition data:', error);
+
+  //   }
+
+
+  // }
 
   const getProps = async (objId, internalId, classId, title) => {
     setSelectedObject({})
@@ -137,6 +158,10 @@ const DocumentList = (props) => {
     getPropsFile(0, selectedFile.internalID, selectedFile.classID, selectedFile.title)
     switchToTab(1)
   }
+
+  const reloadPage = () => {
+    window.location.reload();
+};
 
   const signDocument = async () => {
     setPreparingForSigning(true)
@@ -216,7 +241,7 @@ const DocumentList = (props) => {
       <FileUpdateModal isOpen={isModalOpenUpdateFile} onClose={() => setIsModalOpenUpdateFile(false)} selectedFile={selectedObject} refreshUpdate={refreshUpdate} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} />
 
       <div className="row shadow-lg"  >
-        <div className="col-md-5 col-sm-12 " >
+        <div className="col-md-6 col-sm-12 shadow-lg  bg-white" >
           <form onSubmit={handleSearch} >
 
             <Box
@@ -252,7 +277,7 @@ const DocumentList = (props) => {
                 {/* Home Button */}
                 <div className="home-button mx-2" style={{ color: '#fff', width: '40px', height: '38px', borderRadius: '50%', backgroundColor: '#293241', borderColor: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.3s ease' }} >
                   <div className="button-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <i className="fas fa-home" style={{ fontSize: '25px' }}></i>
+                    <i className="fas fa-home" style={{ fontSize: '25px' }} onClick={reloadPage}></i>
                   </div>
 
                 </div>
@@ -283,14 +308,14 @@ const DocumentList = (props) => {
 
           </form>
           {/* <p className="text-center my-2">Requisition # {props.data.requisitionNumber}</p> */}
-          <div className="table-responsive-sm shadow-lg  bg-white"  >
+          <div className="table-responsive-sm shadow-lg  bg-white" style={{ height: '80vh' ,overflowY:'scroll'}} >
             {loading ? <Loader /> :
               <>
                 {/* Search Results */}
                 {props.data.length > 0 ?
                   <>
                     <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i className="fas fa-search mx-2"></i> Search Results</h6>
-                    <div style={{ height: '62vh', overflowY: 'scroll' }}>
+                    <div >
                       {props.data.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                         <Accordion key={index} sx={{ mb: 0.5 }}>
                           {item.objectID === 0 ? <></> :
@@ -345,7 +370,7 @@ const DocumentList = (props) => {
                     {props.data2.length > 0 ?
                       <>
                         <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i className="far fa-clock mx-2"></i> Created By Me</h6>
-                        <div style={{ height: '65vh', overflowY: 'scroll' }}>
+                        <div >
                           {props.data2.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                             <Accordion key={index} sx={{ mb: 0.5 }}>
                               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
@@ -396,41 +421,10 @@ const DocumentList = (props) => {
                       </>
                       :
                       <>
-                        <div style={{ height: '65vh', overflowY: 'scroll' }}>
+                        <div >
 
-                          <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}> My Views</h6>
-                          <a href='#hr-documents' className='text-decoration-none' style={{ color: '#2a68af' }}>
-                            <p className='mx-3 my-1'>
-                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
-                              <span style={{ fontSize: '15px' }} className='text-dark'>HR Documents</span>
-                            </p>
-                          </a>
-                          <a href='#invoices' className='text-decoration-none' style={{ color: '#2a68af' }}>
-                            <p className='mx-3 my-1'>
-
-                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
-                              <span style={{ fontSize: '15px' }} className='text-dark'>Invoices</span>
-                            </p>
-                          </a>
-                          <a href='#reports' className='text-decoration-none' style={{ color: '#2a68af' }}>
-                            <p className='mx-3 my-1'>
-
-                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
-                              <span style={{ fontSize: '15px' }} className='text-dark'>Reports</span>
-                            </p>
-                          </a>
-                          <a href='#other-documents' className='text-decoration-none' style={{ color: '#2a68af' }}>
-                            <p className='mx-3 my-1'>
-                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
-                              <span style={{ fontSize: '15px' }} className='text-dark'>Other Documents</span>
-                            </p>
-                          </a>
-                          <a href='#staff' className='text-decoration-none' style={{ color: '#2a68af' }}>
-                            <p className='mx-3 my-1'>
-                              <i className="fas fa-th-large mx-1 my-2 mx-2" style={{ fontSize: '20px' }}></i>
-                              <span style={{ fontSize: '15px' }} className='text-dark'>Staff</span>
-                            </p>
-                          </a>
+                        
+                           <ViewsList selectedVault={JSON.parse(props.selectedVault).guid} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject}/>
                         </div>
                       </>
                     }
@@ -441,7 +435,7 @@ const DocumentList = (props) => {
           </div>
 
         </div>
-        <div className="col-md-7 col-sm-12 shadow-lg  bg-white" style={{ height: '100vh' }}>
+        <div className="col-md-6 col-sm-12 shadow-lg  bg-white" >
           <Box
             display="flex"
             justifyContent="flex-end"
@@ -457,7 +451,7 @@ const DocumentList = (props) => {
             </Box>
           </Box>
 
-          <ObjectView />
+          <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject}/>
         </div>
       </div>
 

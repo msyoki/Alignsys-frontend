@@ -324,7 +324,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     Metadata - Create {selectedClassName}  <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
 
                 </DialogTitle>
-                <DialogContent className='m-4'>
+                <DialogContent >
                     {formProperties.map((prop) => (
                         <div key={prop.propId} className="my-3">
                             {prop.propertytype === 'MFDatatypeText' && (

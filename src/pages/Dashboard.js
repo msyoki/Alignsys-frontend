@@ -317,66 +317,7 @@ function Dashboard() {
     {sidebarOpen ? 'Hide' : 'Show'}
   </div> */}
         </div>
-        <div className="content">
-
-
-
-
-          {/* <div className="column shadow-lg" style={{ height: '85vh' }}>
-
-  <p style={{ fontSize: '12.5px' }}><i className="fas fa-layer-group text-dark mx-2" ></i> Techedge Vault </p>
-      <form  >
-
-        <div className="input-group d-flex " >
-          <input
-
-            className="form-control form-control-sm"
-            type="text"
-            required
-            placeholder="Enter Search term"
-          // value={props.searchTerm}
-          // onChange={(e) => props.setSearchTerm(e.target.value)}
-          />
-          <button className="btn  btn-sm text-dark " style={{ backgroundColor: '#f6ae2d' }} type="submit">
-            <i className="fas fa-search"></i> Search
-          </button>
-          <button className="btn  btn-sm btn-primary mx-2"  >
-            <i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> Create
-          </button>
-        </div>
-      </form>
-      <p className='mx-2 my-3'>Search Results: </p>
-      <AccordionUsage />
-    </div>
-    <div className="column shadow-lg">
-
-
-      <div className='text-dark'>
-        <Box sx={{ width: '100%' ,fontSize:'12px'}}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Metadata" {...a11yProps(0)} >Metadata</Tab>
-              <Tab label="Preview"  {...a11yProps(1)} >Metadata</Tab>
-
-            </Tabs>
-          </Box>
-
-          <CustomTabPanel value={value} index={0}>
-            Metadata
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={1}>
-            <iframe
-              src="http://localhost:8000/api/preview/"
-              width="100%"
-              height="600"
-              frameborder="0"
-              scrolling="no"
-            ></iframe>
-          </CustomTabPanel>
-
-        </Box>
-      </div>
-    </div> */}
+        <div className="content" style={{ height:'100vh',overflowY:'scroll'}}>
           <DocumentList
             searchTerm={searchTerm}
             data={data}
