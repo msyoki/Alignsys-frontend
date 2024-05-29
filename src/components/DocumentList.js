@@ -289,13 +289,13 @@ const DocumentList = (props) => {
                 {/* Search Results */}
                 {props.data.length > 0 ?
                   <>
-                    <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i class="fas fa-search mx-2"></i> Search Results</h6>
+                    <h6 className='p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i className="fas fa-search mx-2"></i> Search Results</h6>
                     <div style={{ height: '62vh', overflowY: 'scroll' }}>
                       {props.data.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                         <Accordion key={index} sx={{ mb: 0.5 }}>
                           {item.objectID === 0 ? <></> :
                             <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                              <Typography variant="body1" style={{ fontSize: '11px' }}><i class="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }}></i> {item.title}</Typography>
+                              <Typography variant="body1" style={{ fontSize: '11px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }}></i> {item.title}</Typography>
                             </AccordionSummary>
                           }
                           {reqFiles ?
@@ -321,7 +321,7 @@ const DocumentList = (props) => {
                                       <tbody>
                                         {reqFiles.documents.map((item, index) => (
                                           <tr key={index} onClick={() => getProps(0, item.documentid, item.classID, item.title)}>
-                                            <td><i class="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> {item.title}</td>
+                                            <td><i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> {item.title}</td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -344,12 +344,12 @@ const DocumentList = (props) => {
                     {/* Created By Me */}
                     {props.data2.length > 0 ?
                       <>
-                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i class="far fa-clock mx-2"></i> Created By Me</h6>
+                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i className="far fa-clock mx-2"></i> Created By Me</h6>
                         <div style={{ height: '65vh', overflowY: 'scroll' }}>
                           {props.data2.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
                             <Accordion key={index} sx={{ mb: 0.5 }}>
                               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
-                                <Typography variant="body1" style={{ fontSize: '11px' }}>{item.objectID === 0 ? <i class="fas fa-file-pdf mx-1 " style={{ fontSize: '14px', color: '#2a68af' }}></i> : <i class="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }}></i>} {item.title}</Typography>
+                                <Typography variant="body1" style={{ fontSize: '11px' }}>{item.objectID === 0 ? <i className="fas fa-file-pdf mx-1 " style={{ fontSize: '14px', color: '#2a68af' }}></i> : <i className="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }}></i>} {item.title}</Typography>
                               </AccordionSummary>
                               {reqFiles.requisitionID === item.internalID ? <>
                                 {reqFiles ?
@@ -375,7 +375,7 @@ const DocumentList = (props) => {
                                             <tbody>
                                               {reqFiles.documents.map((item, index) => (
                                                 <tr key={index} onClick={() => getProps(0, item.documentid, item.classID, item.title)}>
-                                                  <td><i class="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> {item.title}</td>
+                                                  <td><i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> {item.title}</td>
                                                 </tr>
                                               ))}
                                             </tbody>

@@ -20,8 +20,8 @@ const Vaults = () => {
       <div className='text-center my-3'>
         <ButtonComponent  onClick={dashboard}    className='my-2' style={{textTransform: 'none',fontWeight:'lighter',width:'70%',padding:'10px'}} disabled={false}> Techedge</ButtonComponent>
     </div>
-      <button   onClick={logoutUser}class="btn btn-danger btn-sm">Logout</button>
-      {/* <ButtonComponent onClick={logoutUser} cssClass='e-custom-warning'  className='my-4' style={{textTransform: 'none',fontWeight:'lighter',width:'40%',padding:'10px'}} disabled={false}><i className='fas fa-logout'></i> Logout </ButtonComponent>
+      <button   onClick={logoutUser}className="btn btn-danger btn-sm">Logout</button>
+      {/* <ButtonComponent onClick={logoutUser} cssclassName='e-custom-warning'  className='my-4' style={{textTransform: 'none',fontWeight:'lighter',width:'40%',padding:'10px'}} disabled={false}><i className='fas fa-logout'></i> Logout </ButtonComponent>
     */}
     </div>
   </div>

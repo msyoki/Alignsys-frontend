@@ -229,7 +229,7 @@ function NewFileFormModal(props) {
         setIsOpen(true); 
         setSelectedClassProps([])
       
-      }}><a href="#attach_document"><i class="fas fa-paperclip mx-2" style={{ fontSize: '15px' }}></i>Attach New Document</a></li>
+      }}><a href="#attach_document"><i className="fas fa-paperclip mx-2" style={{ fontSize: '15px' }}></i>Attach New Document</a></li>
    
       {/* <button className='my-2 btn btn-primary btn-sm' style={{ fontSize: '12.5px' }} onClick={() => setIsOpen(true)} ><i className="fas fa-paperclip mx-2" ></i>Attach Document</button> */}
       <Modal isOpen={isOpen} isCentered size="lg">
@@ -237,7 +237,7 @@ function NewFileFormModal(props) {
 
 
         <ModalContent >
-          <ModalHeader className='text-center' style={{ color: "#ffff", backgroundColor: "#2364aa", fontSize: "15px" }}><i class="fas fa-paperclip mx-2" style={{ fontSize: '15px' }}></i>Upload New File</ModalHeader>
+          <ModalHeader className='text-center' style={{ color: "#ffff", backgroundColor: "#2364aa", fontSize: "15px" }}><i className="fas fa-paperclip mx-2" style={{ fontSize: '15px' }}></i>Upload New File</ModalHeader>
 
           {/* <ModalHeader></ModalHeader> */}
 
@@ -423,8 +423,8 @@ function NewFileFormModal(props) {
 
 
               <ModalFooter className="d-flex justify-content-center">
-                <Button size="sm" type="submit"     style={{backgroundColor:'#2a68af',fontSize:'13px',color:'#fff'}} className='mx-2' > <i class="fas fa-file-upload mx-2"></i> Upload File</Button>
-                <Button size="sm" colorScheme='yellow' className="mx-2" onClick={() => setIsOpen(false)} style={{backgroundColor:'#ffba08',fontSize:'13px'}}><i class="fas fa-times mx-2"></i>  Cancel</Button>
+                <Button size="sm" type="submit"     style={{backgroundColor:'#2a68af',fontSize:'13px',color:'#fff'}} className='mx-2' > <i className="fas fa-file-upload mx-2"></i> Upload File</Button>
+                <Button size="sm" colorScheme='yellow' className="mx-2" onClick={() => setIsOpen(false)} style={{backgroundColor:'#ffba08',fontSize:'13px'}}><i className="fas fa-times mx-2"></i>  Cancel</Button>
               </ModalFooter>
             </form>
          

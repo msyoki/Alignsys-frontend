@@ -68,7 +68,7 @@ const FileUploadModal = ({ isOpen, onClose ,selectedFile,refreshUpdate,setOpenAl
       <ModalOverlay />
       <ModalContent>
      
-        <ModalHeader className='text-center' style={{color:"#ffff",backgroundColor:"#2364aa",fontSize:"14px"}}><i class="fas fa-paperclip mx-2" style={{fontSize:'15px'}}></i>Update File </ModalHeader>
+        <ModalHeader className='text-center' style={{color:"#ffff",backgroundColor:"#2364aa",fontSize:"14px"}}><i className="fas fa-paperclip mx-2" style={{fontSize:'15px'}}></i>Update File </ModalHeader>
         <ModalBody>
           {loading?
           
@@ -116,7 +116,7 @@ const FileUploadModal = ({ isOpen, onClose ,selectedFile,refreshUpdate,setOpenAl
 
               </div>
               <ModalFooter className="d-flex justify-content-center my-3">
-              <Button onClick={handleUpload} size="sm"   style={{backgroundColor:'#2a68af',fontSize:'13px',color:'#fff'}} className='mx-2' > <i class="fas fa-exchange-alt mx-2"></i> 
+              <Button onClick={handleUpload} size="sm"   style={{backgroundColor:'#2a68af',fontSize:'13px',color:'#fff'}} className='mx-2' > <i className="fas fa-exchange-alt mx-2"></i> 
                 Upload 
               </Button>
            

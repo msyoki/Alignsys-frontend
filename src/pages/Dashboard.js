@@ -303,12 +303,12 @@ function Dashboard() {
               : <>
                 <>
  
-                  <li onClick={()=>{setOpenObjectModal(true)}} className='mt-5' ><i class="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
-                  <li><i class="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
-                  {/* <li ><i class="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
-                  <li onClick={adminPage}><i class="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
-                  <li className='mt-5' onClick={logoutUser}><i class="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
-                  <li className='mt-5' onClick={toggleSidebar}><i class="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
+                  <li onClick={()=>{setOpenObjectModal(true)}} className='mt-5' ><i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
+                  <li><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
+                  {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
+                  <li onClick={adminPage}><i className="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
+                  <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
+                  <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
                 </>
               </>}
 
@@ -324,7 +324,7 @@ function Dashboard() {
 
           {/* <div className="column shadow-lg" style={{ height: '85vh' }}>
 
-  <p style={{ fontSize: '12.5px' }}><i class="fas fa-layer-group text-dark mx-2" ></i> Techedge Vault </p>
+  <p style={{ fontSize: '12.5px' }}><i className="fas fa-layer-group text-dark mx-2" ></i> Techedge Vault </p>
       <form  >
 
         <div className="input-group d-flex " >
@@ -341,7 +341,7 @@ function Dashboard() {
             <i className="fas fa-search"></i> Search
           </button>
           <button className="btn  btn-sm btn-primary mx-2"  >
-            <i class="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> Create
+            <i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> Create
           </button>
         </div>
       </form>

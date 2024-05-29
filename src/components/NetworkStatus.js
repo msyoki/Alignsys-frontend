@@ -7,13 +7,15 @@ function getNetworkStatus() {
       downlink: connection.downlink,
       effectiveType: connection.effectiveType,
       rtt: connection.rtt,
+      online: navigator.onLine,
     };
   } else {
-    // Fallback method: For example, assuming good connection if API is not available
+    // Fallback method: Assuming a good connection if API is not available
     return {
       downlink: 10,
       effectiveType: '4g',
       rtt: 50,
+      online: navigator.onLine,
     };
   }
 }
@@ -26,19 +28,32 @@ const NetworkIcon = () => {
       setNetworkStatus(getNetworkStatus());
     };
 
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+
     if (navigator.connection) {
       navigator.connection.addEventListener('change', updateNetworkStatus);
-      return () => {
-        navigator.connection.removeEventListener('change', updateNetworkStatus);
-      };
     } else {
       const intervalId = setInterval(updateNetworkStatus, 5000);
       return () => clearInterval(intervalId);
     }
+
+    return () => {
+      window.removeEventListener('online', updateNetworkStatus);
+      window.removeEventListener('offline', updateNetworkStatus);
+
+      if (navigator.connection) {
+        navigator.connection.removeEventListener('change', updateNetworkStatus);
+      }
+    };
   }, []);
 
   const getSignalIcon = () => {
-    const { downlink } = networkStatus;
+    const { downlink, online } = networkStatus;
+
+    if (!online) {
+      return <i className="fas fa-signal" style={{ color: 'red', opacity: 1 }}></i>;
+    }
 
     if (downlink >= 10) {
       return <i className="fas fa-signal" style={{ color: 'green', opacity: 1 }}></i>;
@@ -55,7 +70,6 @@ const NetworkIcon = () => {
   return (
     <div className="network-status">
       {getSignalIcon()}
-    
     </div>
   );
 };

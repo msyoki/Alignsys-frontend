@@ -176,7 +176,7 @@ export default function NestedModal() {
                                     required
                                 />
                             </FormControl>
-                            <ButtonComponent size='sm' onClick={addProperty} className='mx-2' style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '12px' }} disabled={false}><i class="fas fa-tag mx-1"></i> Add Property</ButtonComponent>
+                            <ButtonComponent size='sm' onClick={addProperty} className='mx-2' style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '12px' }} disabled={false}><i className="fas fa-tag mx-1"></i> Add Property</ButtonComponent>
                             <ButtonComponent onClick={handleSubmit} className='mx-2' style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '12px' }} disabled={false}><i className='fas fa-plus-circle mx-1'></i> Create Object</ButtonComponent>
 
                         </Grid>

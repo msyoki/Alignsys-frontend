@@ -404,12 +404,12 @@ function AdminDashboard() {
                         : <>
                             <>
 
-                                {/* <li ><i class="fas fa-layer-group" style={{ fontSize: '20px' }}></i> </li> */}
-                                <li className='mt-5' onClick={homePage}><i class="fas fa-home" style={{ fontSize: '20px' }}></i></li>
+                                {/* <li ><i className="fas fa-layer-group" style={{ fontSize: '20px' }}></i> </li> */}
+                                <li className='mt-5' onClick={homePage}><i className="fas fa-home" style={{ fontSize: '20px' }}></i></li>
 
-                                <li ><i class="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
-                                <li className='mt-5' onClick={logoutUser}><i class="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
-                                <li className='mt-5' onClick={toggleSidebar}  ><i class="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
+                                <li ><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
+                                <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
+                                <li className='mt-5' onClick={toggleSidebar}  ><i className="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
 
                             </>
                         </>}

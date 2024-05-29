@@ -54,7 +54,7 @@ export default function AccordionUsage() {
     <div>
       <Accordion expanded={expanded === 'panel1'}  size='sm' onChange={handleChange('panel1')} >
         <AccordionSummary size={"sm"} aria-controls="panel1d-content" id="panel1d-header">
-          <Typography  style={{fontSize:'12px'}}><i class="fas fa-file-pdf  text-danger mx-1" ></i> Sample object</Typography>
+          <Typography  style={{fontSize:'12px'}}><i className="fas fa-file-pdf  text-danger mx-1" ></i> Sample object</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography style={{fontSize:'11px'}}>
@@ -67,7 +67,7 @@ export default function AccordionUsage() {
       </Accordion>
       <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
       <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-          <Typography style={{fontSize:'12px'}}><i class="fas fa-file-pdf  text-danger mx-1" s></i> Sample object</Typography>
+          <Typography style={{fontSize:'12px'}}><i className="fas fa-file-pdf  text-danger mx-1" s></i> Sample object</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography style={{fontSize:'11px'}}>
@@ -80,7 +80,7 @@ export default function AccordionUsage() {
       </Accordion>
       <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
       <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-          <Typography style={{fontSize:'12px'}}><i class="fas fa-file-pdf  text-danger mx-1"></i> Sample object</Typography>
+          <Typography style={{fontSize:'12px'}}><i className="fas fa-file-pdf  text-danger mx-1"></i> Sample object</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography style={{fontSize:'11px'}}>

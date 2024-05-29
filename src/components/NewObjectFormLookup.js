@@ -1,45 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import axios from 'axios';
+import Select from 'react-select';
 
-const LookupSelect = ({ propId, label, onChange, value, required, error, helperText,selectedVault }) => {
-  // const sampleData= [
-  //   {
-  //     "name": "Musyoki Mutua",
-  //     "value": 1,
-  //   },
-  //   {
-  //     "name": "Sam Kamau",
-  //      "value": 5
-  //   }
-  // ]
+const LookupSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault }) => {
   const [lookupOptions, setLookupOptions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchLookupOptions = async () => {
       try {
         const response = await axios.get(`http://192.236.194.251:240/api/ValuelistInstance/${selectedVault}/${propId}`);
-        setLookupOptions(response.data);
+        const formattedOptions = response.data.map(option => ({
+          label: option.name,
+          value: option.id,
+        }));
+        setLookupOptions(formattedOptions);
       } catch (error) {
         console.error('Error fetching lookup options:', error);
       }
     };
 
     fetchLookupOptions();
-  }, [propId]);
+  }, [propId, selectedVault]);
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (searchTerm.trim() === '') return;
+      try {
+        const response = await axios.get(`http://192.236.194.251:240/api/ValuelistInstance/Search/${selectedVault}/${searchTerm}/${propId}`);
+        const formattedOptions = response.data.map(option => ({
+          label: option.name,
+          value: option.id,
+        }));
+        setLookupOptions(formattedOptions);
+      } catch (error) {
+        console.error('Error fetching lookup options based on search term:', error);
+      }
+    };
+
+    fetchSearchResults();
+  }, [searchTerm, selectedVault, propId]);
+
+  const handleChange = (selectedOption) => {
+    // If the selectedOption is null (when cleared), set value to null or empty
+    if (!selectedOption) {
+      onChange(propId, null);
+    } else {
+      // Otherwise, set the value to the selected option's value (ID)
+      onChange(propId, selectedOption.value);
+    }
+  };
+
+  const handleInputChange = (newValue) => {
+    setSearchTerm(newValue);
+  };
+
+  // Custom styles for react-select
+  const customStyles = {
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: 'white', // Ensuring the background is not see-through
+      zIndex: 9999, // Ensure the dropdown appears above other elements
+    }),
+    control: (provided) => ({
+      ...provided,
+      borderColor: error ? 'red' : provided.borderColor, // Handling error state
+    }),
+  };
 
   return (
-    <FormControl fullWidth required={required} error={error} margin="normal">
-      <InputLabel shrink>{label}</InputLabel>
-      <Select value={value} onChange={(e) => onChange(propId, e.target.value)} size='small' label={label}>
-        {lookupOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.name}
-          </MenuItem>
-        ))}
-      </Select>
-      {helperText && <FormHelperText>{helperText}</FormHelperText>}
-    </FormControl>
+    <div>
+      <label><small>{label}</small></label>
+      <Select
+        label={`Select ${label}`}
+        value={lookupOptions.find(option => option.value === value)}
+        onChange={handleChange}
+        options={lookupOptions}
+        isClearable={true}
+        placeholder={`Select ${label}`}
+        onInputChange={handleInputChange}
+        noOptionsMessage={() => "No options found"}
+        styles={customStyles}
+        required={required}
+      />
+      {helperText && <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '12px' }} className='mx-3'>{helperText}</span>}
+    </div>
   );
 };
 

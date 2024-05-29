@@ -8,6 +8,7 @@ import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoader';
 import logo from '../../images/ZF.png'
 
+
 const allIcons = {
     faFileAlt,
     faFolderOpen,
@@ -19,6 +20,8 @@ const allIcons = {
     faFolder,
     faUserFriends,
 };
+
+
 
 const findBestIconMatch = (name) => {
     const nameWords = name.toLowerCase().split(' ');
@@ -234,7 +237,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
                     Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' />
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent >
                     <p className='my-4' style={{ fontSize: '13px' }}>Please select from Item types below</p>
                     <List className='p-0'>
                         {vaultObjectsList.map((item) => (
@@ -257,7 +260,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
 
 
-                    Select {selectedObjectName} Class <FontAwesomeIcon icon={faHandPointer} className='mx-3' />
+                    Select {selectedObjectName} Class <FontAwesomeIcon icon={findBestIconMatch(selectedObjectName)} className='mx-3' />
                 </DialogTitle>
                 <DialogContent>
 
@@ -318,7 +321,8 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
                     <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
 
-                    Create {selectedClassName} <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
+                    Metadata - Create {selectedClassName}  <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
+
                 </DialogTitle>
                 <DialogContent className='m-4'>
                     {formProperties.map((prop) => (
@@ -333,6 +337,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     error={!!formErrors[prop.propId]}
                                     helperText={formErrors[prop.propId]}
                                     size='small'
+                                    className='my-1'
                                 />
                             )}
                             {prop.propertytype === 'MFDatatypeMultiLineText' && (
@@ -347,6 +352,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     multiline
                                     rows={4}
                                     size='small'
+                                    className='my-1'
                                 />
                             )}
                             {prop.propertytype === 'MFDatatypeLookup' && (
@@ -360,10 +366,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     helperText={formErrors[prop.propId]}
                                     selectedVault={selectedVault}
                                     size='small'
+                                    className='my-1'
                                 />
                             )}
                             {prop.propertytype === 'MFDatatypeMultiSelectLookup' && (
                                 <LookupMultiSelect
+
                                     propId={prop.propId}
                                     label={prop.title}
                                     onChange={handleInputChange}
@@ -373,10 +381,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     helperText={formErrors[prop.propId]}
                                     selectedVault={selectedVault}
                                     size='small'
+                                    className='my-1'
                                 />
                             )}
                             {prop.propertytype === 'MFDatatypeDate' && (
                                 <TextField
+
                                     label={prop.title}
                                     type="date"
                                     value={formValues[prop.propId]}
@@ -385,11 +395,11 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     required={prop.isRequired}
                                     error={!!formErrors[prop.propId]}
                                     helperText={formErrors[prop.propId]}
-
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
                                     size='small'
+                                    className='my-1'
                                 />
                             )}
                             {prop.propertytype === 'MFDatatypeBoolean' && (
@@ -400,6 +410,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     error={!!formErrors[prop.propId]}
                                     label={prop.title}
                                     size='small'
+                                    className='my-1'
                                 />
 
                             )}

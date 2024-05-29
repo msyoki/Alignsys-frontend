@@ -24,7 +24,7 @@ const DocumentUpdate = () => {
         value={documentName}
         onChange={(e) => setDocumentName(e.target.value)}
       />
-      <a onClick={handleUpdate}><i class="fas fa-edit"></i> </a>
+      <a onClick={handleUpdate}><i className="fas fa-edit"></i> </a>
     </div>
   );
 };
