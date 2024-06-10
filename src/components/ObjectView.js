@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Typography, Box, List, ListItem, ListItemText } from '@mui/material';
 import MiniLoader from './Modals/MiniLoader';
+import DynamicFileViewer from './DynamicFileViewer';
+import DynamicFileViewer2 from './DynamicFileViewer2';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -61,7 +63,7 @@ export default function ObjectView(props) {
           <Tab label="Preview" {...a11yProps(1)} />
         </Tabs>
       </Box>
-      <CustomTabPanel value={value} index={0} style={{ height: '80vh', overflowY: 'scroll' }}>
+      <CustomTabPanel className='shadow-lg' value={value} index={0} style={{ height: '80vh', overflowY: 'scroll' }}>
         <div className='container' >
           {props.loadingPreviewObject ? (
             <MiniLoader loading={props.loadingPreviewObject} loaderMsg={'Loading...'} />
@@ -85,9 +87,11 @@ export default function ObjectView(props) {
           )}
         </div>
       </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        Preview
+      <CustomTabPanel className='shadow-lg' value={value} index={1} style={{ height: '80vh', overflow: 'scroll' }}>
+        {/* <DynamicFileViewer extension={props.extension} base64={props.base64}/> */}
+        <DynamicFileViewer2 base64Content={props.base64} fileExtension={props.extension} />
       </CustomTabPanel>
     </Box>
   );
 }
+

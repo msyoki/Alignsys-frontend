@@ -1,32 +1,134 @@
-import React,{useContext} from 'react';
-import Authcontext from './Auth/Authprovider';
-import '../styles/Dashboard.css'
-import '../styles/Custombuttons.css'
-import { ButtonComponent  } from '@syncfusion/ej2-react-buttons';
-import {  useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import Authcontext from '../components/Auth/Authprovider';
 
-const Vaults = () => {
-  const {logoutUser}=useContext(Authcontext)
-  const navigate=useNavigate()
-  const  dashboard = ()=>{
-    
-    navigate('/dashboard')
-  }
+function OrganizationVaultList(props) {
+  const [vaults, setVaults] = useState([]);
+  const [openVaults, setOpenVaults] = useState({});
+  const [showFlatSublists, setShowFlatSublists] = useState({});
+  const [showHierarchicalSublists, setShowHierarchicalSublists] = useState({});
+  let { authTokens } = useContext(Authcontext);
+
+  useEffect(() => {
+    const getOrganizationVaults = () => {
+      let config = {
+        method: 'get',
+        url: 'http://127.0.0.1:8000/api/organization-vaults/',
+        headers: {
+          'Authorization': `Bearer ${authTokens.access}`,
+          'Content-Type': 'application/json',
+        },
+      };
+
+      axios.request(config)
+        .then((response) => {
+          setVaults(response.data);
+          console.log(JSON.stringify(response.data));
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    getOrganizationVaults();
+  }, [authTokens]);
+
+  const toggleVaultSublist = (vault) => {
+    props.setSelectedVault(vault)
+    setOpenVaults(prevState => ({
+      ...prevState,
+      [vault.guid]: !prevState[vault.guid],
+    }));
+
+  };
+
+  const toggleFlatSublist = (guid) => {
+    setShowFlatSublists(prevState => ({
+      ...prevState,
+      [guid]: !prevState[guid],
+    }));
+  };
+
+  const toggleHierarchicalSublist = (guid) => {
+    setShowHierarchicalSublists(prevState => ({
+      ...prevState,
+      [guid]: !prevState[guid],
+    }));
+  };
+
   return (
-    <div className="container ">
-    <div className="content ">
-      <h3>Organization Vault(s)</h3>
-      <p>Please select vault below!</p>
-      <div className='text-center my-3'>
-        <ButtonComponent  onClick={dashboard}    className='my-2' style={{textTransform: 'none',fontWeight:'lighter',width:'70%',padding:'10px'}} disabled={false}> Techedge</ButtonComponent>
-    </div>
-      <button   onClick={logoutUser}className="btn btn-danger btn-sm">Logout</button>
-      {/* <ButtonComponent onClick={logoutUser} cssclassName='e-custom-warning'  className='my-4' style={{textTransform: 'none',fontWeight:'lighter',width:'40%',padding:'10px'}} disabled={false}><i className='fas fa-logout'></i> Logout </ButtonComponent>
-    */}
-    </div>
-  </div>
-  
-  );
-};
+    <ul style={{ listStyleType: 'none', padding: 0 }} className='shadow-lg p-2'>
+      {vaults.map((vault) => (
+        <li key={vault.guid} className='my-3'>
+          <div
+            onClick={() => toggleVaultSublist(vault)}
+            style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}
+          >
+            <i className="fas fa-hdd mx-2" style={{ fontSize: '1.5em' }}></i>
+            <span className='list-text'>{vault.name}</span>
+          </div>
 
-export default Vaults;
+          {openVaults[vault.guid] && (
+            <ul className='shadow-lg p-3'>
+              {/* <li onClick={props.viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i>
+                <span className='list-text'>Create New Vault Object</span>
+              </li> */}
+              {/* <li onClick={() => toggleFlatSublist(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
+                <span className='list-text'>Metadata Structure (Flat View)</span>
+              </li>
+
+              {showFlatSublists[vault.guid] && (
+                <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
+                  <li onClick={props.viewvaultobjects} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
+                    <span className='list-text'>Object Types</span>
+                  </li>
+                  <li style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                    <i className="fas fa-hashtag mx-2" style={{ fontSize: '1.5em' }}></i>
+                    <span className='list-text'>Classes</span>
+                  </li>
+                  <li style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                    <i className="fas fa-tag mx-2" style={{ fontSize: '1.5em' }}></i>
+                    <span className='list-text'>Properties</span>
+                  </li>
+                </ul>
+              )}
+              <li onClick={() => toggleHierarchicalSublist(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
+                <span className='list-text'>Metadata Structure (Hierarchical View)</span>
+              </li>
+              {showHierarchicalSublists[vault.guid] && (
+                <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
+                  {props.vaultObjects.map((object, index) => (
+                    <li onClick={() => { props.getObjectStructureById(object.object_id); }} key={index} className='my-3' style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                      <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
+                      <span className='list-text'>{object.object_name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <li onClick={props.viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                <i className="fas fa-shield-alt mx-2" style={{ fontSize: '1.5em', cursor: 'pointer' }}></i>
+                <span className='list-text'>Permissions</span>
+              </li> */}
+              <li onClick={()=>{props.viewvaultusers(vault.guid)}} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
+                <span className='list-text'>Users</span>
+              </li>
+
+
+            </ul>
+          )}
+        </li>
+      ))}
+      <li onClick={props.viewloginaccounts} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
+        <span className='list-text'>Login Accounts</span>
+      </li>
+    </ul>
+  );
+}
+
+export default OrganizationVaultList;

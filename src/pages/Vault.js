@@ -3,15 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import logo from '../images/ZF.png';
 import Authcontext from '../components/Auth/Authprovider';
+
 import axios from 'axios';
 
 const VaultSelectForm = () => {
-    let { authTokens, loggedInVault, selectedVault } = useContext(Authcontext)
-    
+    let { authTokens } = useContext(Authcontext)
+    let [selectedVault,setSelectedVault]=useState({})
+    const navigate = useNavigate()
     const [vaults,setVaults] =useState([]);
     const handleVaultChange = (event) => {
-        loggedInVault(event)
-
+        const value = event.target.value;
+        const selectedObj = vaults.find(vault => vault.guid === value);
+        setSelectedVault(selectedObj);
+        localStorage.setItem('selectedVault', JSON.stringify(selectedObj));
+        navigate('/');
     };
     
     let getUserVaults = () => {
@@ -69,13 +74,13 @@ const VaultSelectForm = () => {
                     <InputLabel className='text-dark' id="vault-select-label">Select Vault</InputLabel>
                     <Select
                         labelId="vault-select-label"
-                        value={selectedVault}
+                        value={selectedVault.guid}
                         label="Please Select Vault"
                         onChange={handleVaultChange}
                         size='medium'
                     >
                         {vaults.map((vault,index) => (
-                            <MenuItem key={index} value={vault}>
+                            <MenuItem key={index} value={vault.guid}>
                                 {vault.name}
                             </MenuItem>
                         ))}

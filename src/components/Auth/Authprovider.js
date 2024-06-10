@@ -11,11 +11,11 @@ export default Authcontext;
 
 export const AuthProvider = ({ children }) => {
 
-    let [authTokens, setAuthtokens] = useState(() => localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
-    let [user, setUser] = useState(() => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null)
+    let [authTokens, setAuthtokens] = useState(() => sessionStorage.getItem('authTokens') ? JSON.parse(sessionStorage.getItem('authTokens')) : null)
+    let [user, setUser] = useState(() => sessionStorage.getItem('authTokens') ? jwt_decode(sessionStorage.getItem('authTokens')) : null)
     let [loading, setLoading] = useState(true)
     let navigate = useNavigate()
-    let [selectedVault, setSelectedVault] = useState(() => localStorage.getItem('selectedVault') ? localStorage.getItem('selectedVault') : null);
+  
 
     let [openalert, setOpenAlert] = useState(false)
     let [alertseverity, setAlertSeverity] = useState('')
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
                 
                 setAuthtokens(data);
                 setUser(jwt_decode(data.access))
-                localStorage.setItem('authTokens', JSON.stringify(data))
+                sessionStorage.setItem('authTokens', JSON.stringify(data))
                 navigate('/vault', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
 
                 // if (jwt_decode(response.data.access).is_superuser === 'True') {
@@ -67,17 +67,11 @@ export const AuthProvider = ({ children }) => {
         };
         setAuthtokens(null)
         setUser(null)
-        setSelectedVault(null)
-        localStorage.removeItem('selectedVault')
-        localStorage.removeItem('authTokens')
+        sessionStorage.removeItem('selectedVault')
+        sessionStorage.removeItem('authTokens')
     }
 
-    let loggedInVault=(event)=>{
-        const vault =JSON.stringify(event.target.value)
-        setSelectedVault(vault);
-        localStorage.setItem('selectedVault', vault); // Store the selected vault in local storage
-        navigate('/');
-    }
+
 
     // Update token
 
@@ -86,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     let updateToken = async () => {
         try {
             // Get refresh token directly from local storage
-            const storedTokens = localStorage.getItem('authTokens');
+            const storedTokens = sessionStorage.getItem('authTokens');
             const refresh = storedTokens ? JSON.parse(storedTokens).refresh : null;
     
             console.log(`${refresh}`);
@@ -101,7 +95,7 @@ export const AuthProvider = ({ children }) => {
                 setAuthtokens(data);
                 setUser(jwt_decode(data.access));
                 let new_auth_token = { "access": data.access, "refresh": refresh };
-                localStorage.setItem('authTokens', JSON.stringify(new_auth_token));
+                sessionStorage.setItem('authTokens', JSON.stringify(new_auth_token));
             }
         } catch (error) {
             logoutUser();
@@ -128,7 +122,7 @@ export const AuthProvider = ({ children }) => {
             setAuthtokens(data)
             setUser(jwt_decode(data.access))
             // console.log(data.refresh)
-            localStorage.setItem('authTokens', JSON.stringify(data))
+            sessionStorage.setItem('authTokens', JSON.stringify(data))
             alert("user authenticated")
         } else {
             // console.log(response)
@@ -142,8 +136,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     let contextData = {
-        loggedInVault:loggedInVault,
-        selectedVault:selectedVault,
         user: user,
         updateToken: updateToken,
         authTokens: authTokens,

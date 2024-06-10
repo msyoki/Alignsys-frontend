@@ -23,6 +23,10 @@ import NestedModal from '../components/NewObjectModal';
 import DownloadCSV from '../components/DownloadCSV';
 import MiniLoader from '../components/Modals/MiniLoader';
 import LoadingMini from '../components/Loaders/LoaderMini';
+import OrganizationVaultList from '../components/Vaults';
+import OrganizationUsersTable from '../components/OrganizationUsers';
+import VaultUsersTable from '../components/VaultUsers';
+import AddUserToVault from '../components/AddUserToVault';
 
 
 function CustomTabPanel(props) {
@@ -67,18 +71,24 @@ function AdminDashboard() {
     const [vaultObjects, setVaultObjects] = useState([])
     const [miniLoader, setMiniLoader] = useState(false);
     const [loaderMsg, setLoaderMsg] = useState('');
-
+    const [vaultUsers,setVaultUsers] = useState([])
 
     const [viewPermissions, setViewpermissions] = useState(false);
     const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
+    const [viewVaultSettings, setViewVaultSettings] = useState(false);
+    
+    const [viewVaultUsers, setViewVaultUsers] = useState(false);
     const [viewObjectStructure, setViewObjectStructure] = useState(false);
     const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
+    const [selectedVault, setSelectedVault] = useState({});
+
 
 
     const [value, setValue] = React.useState(0);
     const [showSublist, setShowSublist] = useState(false);
+    const [showVaultSublist, setShowVaultSublist] = useState(false);
     
     const [showSublist1, setShowSublist1] = useState(false);
     const navigate = useNavigate()
@@ -86,6 +96,9 @@ function AdminDashboard() {
     const homePage = () => {
         navigate('/')
     }
+    const toggleVaultSublist = () => {
+        setShowVaultSublist(!showVaultSublist);
+    };
     const toggleSublist = () => {
         setShowSublist(!showSublist);
     };
@@ -300,6 +313,7 @@ function AdminDashboard() {
 
     const viewnewobject = () => {
         setViewCreateObject(true)
+        setViewVaultUsers(false)
         setViewLoginAccounts(false)
         setViewpermissions(false)
         setViewObjects(false)
@@ -309,6 +323,39 @@ function AdminDashboard() {
 
     const viewvaultobjects = () => {
         setViewObjects(true)
+        setViewVaultUsers(false)
+        setViewCreateObject(false)
+        setViewLoginAccounts(false)
+        setViewpermissions(false)
+        setViewObjectStructure(false)
+    }
+
+    const viewvaultusers = (vault) => {
+        let data = {
+            vault_id:vault
+        }
+        let config = {
+            method: 'post',
+            url: 'http://127.0.0.1:8000/api/users-linked-to-vault/',
+            headers: {
+            //   'Authorization': `Bearer ${authTokens.access}`,
+            //   'Content-Type': 'application/json',
+            },
+            data:data
+        };
+
+        axios.request(config)
+        .then((response) => {
+            setVaultUsers(response.data);
+            console.log(JSON.stringify(response.data));
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+      
+    
+        setViewVaultUsers(true)
+        setViewObjects(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
         setViewpermissions(false)
@@ -316,8 +363,8 @@ function AdminDashboard() {
     }
 
     const viewobjectstructure = () => {
-
         setViewObjectStructure(true)
+        setViewVaultUsers(false)
         setViewObjects(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
@@ -325,6 +372,7 @@ function AdminDashboard() {
     }
     const viewpermissions = () => {
         setViewpermissions(true)
+        setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
         setViewObjects(false)
@@ -334,6 +382,7 @@ function AdminDashboard() {
 
     const viewloginaccounts = () => {
         setViewLoginAccounts(true)
+        setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewpermissions(false)
         setViewObjects(false)
@@ -359,7 +408,7 @@ function AdminDashboard() {
         };
 
         fetchVaultObjects();
-    })
+    }, []);
 
     return (
 
@@ -371,21 +420,10 @@ function AdminDashboard() {
 
                     {sidebarOpen ?
                         <>
-
-
-
-
-                            {/* <li style={{ display: 'flex', alignItems: 'center' }}>
-                                <i className="fas fa-layer-group mx-2" style={{ fontSize: '20px' }}></i>
-                                <span className='list-text  '>New Object Type</span>
-                            </li> */}
                             <li className='mt-5' style={{ display: 'flex', alignItems: 'center' }} onClick={homePage}>
                                 <i className="fas fa-home   mx-2" style={{ fontSize: '20px' }}></i>
                                 <span className='list-text '>Home</span>
                             </li>
-
-
-
 
                             <li style={{ display: 'flex', alignItems: 'center' }}>
                                 <i className="fas fa-question-circle  mx-2" style={{ fontSize: '20px' }}></i>
@@ -418,77 +456,16 @@ function AdminDashboard() {
                 </ul>
 
             </div>
-            <div className="content bg-white" style={{height: '100vh', overflowY: 'scroll'}}>
-                <div className="row  content-container" >
-                    <div className="col-lg-4 col-md-4 col-sm-12  " style={{  fontSize: '12px' }}>
-                        <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULT MANAGEMENT</h6>
-                        <ul className='shadow-lg p-3' >
-                            <li onClick={viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Create New Vault Object</span>
-                            </li>
-                            <li onClick={toggleSublist} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Metadata Structure (Flat View)</span>
-                            </li>
-
-                            {showSublist && (
-                                <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
-
-                                    <li onClick={viewvaultobjects} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Object Types</span>
-                                    </li>
-                                    <li style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                        <i className="fas fa-hashtag mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Classes</span>
-                                    </li>
-                                    <li style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} >
-                                        <i className="fas fa-tag mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Properties</span>
-                                    </li>
-                                </ul>
-                            )}
-                            <li onClick={toggleSublist1} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Metadata Structure (Hierarchical View)</span>
-                            </li>
-                            {showSublist1 && (
-                                <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
-                                    {vaultObjects.map((object, index) => (
-                                        <li onClick={() => {  getObjectStructureById(object.object_id); }} key={index} className='my-3' style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} >
-                                            <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>{object.object_name}</span>
-                                        </li>
-                                    ))}
-                                    {/* <li onClick={viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }} >
-                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Employee</span>
-                                    </li>
-                                    <li onClick={viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }} className='my-3'>
-                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Contact Person</span>
-                                    </li>
-                                    <li onClick={viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }} className='my-3'>
-                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                        <span className='list-text'>Vendor</span>
-                                    </li> */}
-                                </ul>
-                            )}
-                            <li onClick={viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} >
-                                <i className="fas fa-shield-alt mx-2" style={{ fontSize: '1.5em', cursor: 'pointer' }}></i>
-                                <span className='list-text'>Permissions</span>
-                            </li>
-                            <li onClick={viewloginaccounts} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3' >
-                                <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Login Accounts</span>
-                            </li>
-
-                        </ul>
-
+            <div className="content " style={{height: '100vh', overflowY: 'scroll'}}>
+                <div className="row  content-container " >
+                    <div className="col-lg-4 col-md-4 col-sm-12  bg-white" style={{  fontSize: '12px' ,height:'100vh'}}>
+                        <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
+                   
+                        <OrganizationVaultList setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject}  showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewpermissions={viewpermissions} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts}/>
+                
 
                     </div>
-                    <div className="col-lg-8 col-md-8 col-sm-12 shadow-lg" style={{  fontSize: '12px' }}>
+                    <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg" style={{  fontSize: '12px' ,height:'100vh'}}>
                         {viewCreateObject ?
                             <div id='newobject' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
@@ -645,118 +622,9 @@ function AdminDashboard() {
                                         <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
                                             <i className="fas fa-edit mx-2" style={{ fontSize: '1.5em' }}></i> Update Object
                                         </h6>
-                                        {/* <p className='my-3' style={{ fontSize: '0.8em' }}>Please create your new object type below with the respective properties</p> */}
-                                    </div>
+                             </div>
 
-                                    {/* {selectedObjectStructure?
-                                    <>
-                                        <div className='card-body my-4' >
-                                                    <Grid container spacing={2}>
-                                                        <Grid item xs={12}>
-                                                            <FormControl variant='standard' fullWidth>
-                                                                <Input
-                                                                    id={selectedObjectStructure.object_id}
-                                                                    placeholder={selectedObjectStructure.object_name}
-                                                                    className='mx-2'
-                                                                    value={selectedObjectStructure.object_name}
-                                                                    onChange={(e) => setObjectName(e.target.value)}
-                                                                    type='text'
-                                                                    required
-                                                                    onInput={(e) => capitalize(e.target)}
-                                                                />
-                                                            </FormControl>
-                                                        </Grid>
-                                                        <Grid item xs={12}>
-                                                            <ButtonComponent
-                                                                size='sm'
-                                                                onClick={addProperty}
-                                                                className='mx-1'
-                                                                style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '10px' }}
-                                                                disabled={false}
-                                                            >
-                                                                <i className="fas fa-tag mx-1"></i> Add Property
-                                                            </ButtonComponent>
-                                                            <ButtonComponent
-                                                                onClick={handleSubmit}
-                                                                className='mx-1'
-                                                                style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '10px' }}
-                                                                disabled={false}
-                                                            >
-                                                                <i className='fas fa-plus-circle mx-1'></i> Update Object
-                                                            </ButtonComponent>
-                                                        </Grid>
-                                                    </Grid>
-                                        </div>
-                                        <div className='container-fluid'>
-                                            {selectedObjectStructure.properties.map((property, index) => (
-                                                <Grid container spacing={2} alignItems="center" key={index} style={{ fontSize: '9px', marginBottom: '10px' }}>
-                                                    <Grid item xs={12} sm={4}>
-                                                        <FormControl variant="standard" fullWidth>
-                                                            <Input
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
-                                                                id={property.property_id}
-                                                                placeholder={property.property_title}
-                                                                value={property.property_title}
-                                                                onChange={(e) => handlePropertyChange(index, 'title', e.target.value)}
-                                                                type='text'
-                                                                onInput={(e) => capitalize(e.target)}
-                                                                required
-                                                            />
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={4}>
-                                                        <FormControl variant='standard' fullWidth>
-                                                            <Select
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
-                                                                id={`dataType-select-${index}`}
-                                                                displayEmpty
-                                                                value={property.property_datatype}
-                                                                onChange={(e) => handlePropertyChange(index, 'dataType', e.target.value)}
-                                                                required
-                                                            >
-                                                                <MenuItem value="" disabled>Select Data Type</MenuItem>
-                                                                {PROP_DATA_TYPES.map((item, idx) => (
-                                                                    <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={2}>
-                                                        <FormControl variant='standard' fullWidth>
-                                                            <Select
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
-                                                                id={`required-select-${index}`}
-                                                                displayEmpty
-                                                                value={property.property_required}
-                                                                onChange={(e) => handlePropertyChange(index, 'required', e.target.value)}
-                                                                required
-                                                            >
-                                                                <MenuItem value="" disabled>Is required?</MenuItem>
-                                                                {PROP_REQUIRED.map((item, idx) => (
-                                                                    <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={2}>
-                                                        <ButtonComponent
-                                                            onClick={() => removeProperty(index)}
-                                                            className='mx-2'
-                                                            style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '9px' }}
-                                                            disabled={false}
-                                                        >
-                                                            <i className='fas fa-trash mx-1'></i> Remove Property
-                                                        </ButtonComponent>
-                                                    </Grid>
-                                                </Grid>
-                                            ))}
-                                        </div>
-                                    </>:
-                                    <></>
-                                    } */}
+                  
                                     <ObjComponent
                                         selectedObjectStructure={selectedObjectStructure}
                                         setSelectedObjectStructure={setSelectedObjectStructure}
@@ -789,14 +657,29 @@ function AdminDashboard() {
                                     <p className='my-3' style={{ fontSize: '10px' }}>user Account Management</p>
                                 </div>
                                 <DownloadCSV />
+                                <OrganizationUsersTable/>
                             </div>
                             : <></>
 
                         }
-                        {!viewLoginAccounts && !viewLoginAccounts && !viewPermissions && !viewObjects && !viewCreateObject && !viewObjectStructure ?
+                        {viewVaultUsers ?
+                            <div id='vaultusermanagement' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div>
+
+                                    <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i> Vault Accounts</h6>
+                                    <h6 className='my-3' style={{ fontSize: '12px' }}>{selectedVault.name}  -  {selectedVault.guid} </h6>
+                                </div>
+                                <AddUserToVault selectedVault={selectedVault}  viewvaultusers={viewvaultusers}/>
+                                <VaultUsersTable vaultUsers={vaultUsers} />
+                            </div>
+                            : <></>
+
+                        }
+
+                        {!viewLoginAccounts && !viewLoginAccounts && !viewPermissions && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers?
                             <div className='shadow-lg' style={{ fontSize: '12px', marginBottom: '20px' }}>
                             
-                                    <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Account Details </h5>
+                                    <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
                                     <ul className=' p-3' >
                                         <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
                                             <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>

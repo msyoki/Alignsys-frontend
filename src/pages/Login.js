@@ -81,14 +81,12 @@ const Login = () => {
         <div className="d-flex justify-content-between align-items-center mb-2">
           <p className='small'><a href={`${constants.apiurl}/api/reset_password/`} style={{ textDecoration: 'none', color: 'black' }}>Forgot password?</a></p>
         </div>
-        {/* <div className="form-check mt-1">
-          <input className="form-check-input" type="checkbox" id="flexCheckDisabled" required />
-        </div> */}
+   
         <div className="text-center text-lg-start mt-1 row">
-          <div className='col-lg-12'>
-            <ButtonComponent type="submit" cssClass='e-custom-primary' className='mb-3 m-2' style={{ textTransform: 'none', fontWeight: 'lighter', width: '100%', padding: '10px' }} disabled={false}> Login</ButtonComponent>
+            <div className='col-lg-12 text-center'>
+              <ButtonComponent type="submit" cssClass='e-custom-primary' className='mb-3 m-2' style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }} disabled={false}> Login</ButtonComponent>
+            </div>
           </div>
-        </div>
         <small className="small mb-0">Don't have an account?<br />Register your <Link to={'/register'} style={{ textDecoration: 'none', color: '#2364aa' }}>Organization account</Link> </small>
       </form>
     </div>

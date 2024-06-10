@@ -7,6 +7,7 @@ import LookupSelect from '../NewObjectFormLookup';
 import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoader';
 import logo from '../../images/ZF.png'
+import FileUploadComponent from '../FileUpload';
 
 
 const allIcons = {
@@ -43,22 +44,23 @@ const findBestIconMatch = (name) => {
     return faFolder;
 };
 
-const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, selectedVault }) => {
+const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, selectedVault, vaultObjectsList }) => {
     const [isDataOpen, setIsDataOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [miniLoader, setMiniLoader] = useState(false)
     const [selectedObjectId, setSelectedObjectId] = useState(null);
     const [selectedObjectName, setSelectedObjectName] = useState('');
     const [selectedClassName, setSelectedClassName] = useState('');
-    const [vaultObjectsList, setVaultObjectList] = useState([]);
     const [selectedClassId, setSelectedClassId] = useState(null);
     const [groupedItems, setGroupedItems] = useState([]);
     const [ungroupedItems, setUngroupedItems] = useState([]);
-    const [uploadedFile, setUploadedFile] = useState(null);
+
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formProperties, setFormProperties] = useState([]);
     const [formValues, setFormValues] = useState({});
     const [formErrors, setFormErrors] = useState({});
+    const [fileUploadError, setFileUploadError] = useState('');
+    const [uploadedFile, setUploadedFile] = useState(null);
 
     const closeModal = () => {
         setVaultObjectsModal();
@@ -72,28 +74,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         setIsFormOpen(false);
     };
 
-    const getVaultObjects = () => {
-        let config = {
-            method: 'get',
-            url: `http://192.236.194.251:240/api/MfilesObjects/GetVaultsObjects/${selectedVault}`,
-            headers: {}
-        };
-
-        axios.request(config)
-            .then((response) => {
-                setVaultObjectList(response.data);
-                console.log(JSON.stringify(response.data));
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
 
     const fetchItemData = async (objectid, objectname) => {
         setSelectedObjectName(objectname);
         setIsLoading(true);
         try {
-            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/${selectedVault}/${objectid}`);
+            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectid}`);
             setSelectedObjectId(objectid);
             setGroupedItems(response.data.grouped);
             setUngroupedItems(response.data.unGrouped);
@@ -119,7 +105,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
     const handleClassSelection = async (classId, className, classGroupId = null) => {
         setSelectedClassName(className);
         try {
-            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/ClassProps/${selectedVault}/${classId}`);
+            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/ClassProps/${selectedVault.guid}/${classId}`);
             setSelectedClassId(classId);
             setFormProperties(response.data);
             setFormValues(response.data.reduce((acc, prop) => {
@@ -145,11 +131,89 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
     };
 
     const handleFileChange = (file) => {
+        if (file) {
+            setFileUploadError('')
+        }
         setUploadedFile(file)
     };
 
-    const handleSubmit = async () => {
+    // const handleSubmit = async () => {
 
+    //     const newFormErrors = {};
+    //     const propertiesPayload = formProperties.map(prop => ({
+    //         value: `${formValues[prop.propId]}`,
+    //         propId: prop.propId,
+    //         propertytype: prop.propertytype
+    //     }));
+
+    //     formProperties.forEach((prop) => {
+    //         if (prop.isRequired && !formValues[prop.propId]) {
+    //             newFormErrors[prop.propId] = `${prop.title} is required`;
+    //         }
+    //     });
+
+    //     if (Object.keys(newFormErrors).length > 0) {
+
+    //         setFormErrors(newFormErrors);
+    //     } else {
+    //         setMiniLoader(true);
+    //         let payload = {};
+    //         if (selectedObjectId === 0 && uploadedFile) {
+    //             try {
+    //                 const formData = new FormData();
+    //                 formData.append('formFiles', uploadedFile);
+
+    //                 const response = await axios.post(
+    //                     'http://192.236.194.251:240/api/objectinstance/FilesUploadAsync',
+    //                     formData,
+    //                     {
+    //                         headers: {
+    //                             'Content-Type': 'multipart/form-data',
+    //                             'accept': '*/*'
+    //                         }
+    //                     }
+    //                 );
+    //                 console.log(response.data.uploadID);
+    //                 payload = {
+    //                     objectID: selectedObjectId,
+    //                     classID: selectedClassId,
+    //                     properties: propertiesPayload,
+    //                     vaultGuid: selectedVault,
+    //                     uploadId: response.data.uploadID
+    //                 };
+    //                 console.log('Upload successful:', response.data);
+    //             } catch (error) {
+    //                 console.error('Error uploading file:', error);
+    //             }
+    //         } else {
+    //             payload = {
+    //                 objectID: selectedObjectId,
+    //                 classID: selectedClassId,
+    //                 properties: propertiesPayload,
+    //                 vaultGuid: selectedVault
+    //             };
+    //         }
+
+    //         console.log(payload);
+    //         try {
+    //             const response = await axios.post('http://192.236.194.251:240/api/objectinstance/ObjectCreation', payload, {
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'accept': '*/*'
+    //                 }
+    //             });
+    //             setMiniLoader(false);
+    //             console.log('Form submission successful:', response.data);
+    //             alert('Object was created successfully');
+    //             closeFormDialog();
+    //         } catch (error) {
+    //             setMiniLoader(false);
+    //             console.error('Error submitting form:', error);
+    //             alert(`${error}`);
+    //         }
+    //     }
+    // };
+    const handleSubmit = async () => {
         const newFormErrors = {};
         const propertiesPayload = formProperties.map(prop => ({
             value: `${formValues[prop.propId]}`,
@@ -163,8 +227,11 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             }
         });
 
-        if (Object.keys(newFormErrors).length > 0) {
+        if (selectedObjectId === 0 && !uploadedFile) {
+            setFileUploadError('File upload is required.');
+        }
 
+        if (Object.keys(newFormErrors).length > 0 || (selectedObjectId === 0 && !uploadedFile)) {
             setFormErrors(newFormErrors);
         } else {
             setMiniLoader(true);
@@ -189,7 +256,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         objectID: selectedObjectId,
                         classID: selectedClassId,
                         properties: propertiesPayload,
-                        vaultGuid: selectedVault,
+                        vaultGuid: selectedVault.guid,
                         uploadId: response.data.uploadID
                     };
                     console.log('Upload successful:', response.data);
@@ -201,7 +268,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     objectID: selectedObjectId,
                     classID: selectedClassId,
                     properties: propertiesPayload,
-                    vaultGuid: selectedVault
+                    vaultGuid: selectedVault.guid
                 };
             }
 
@@ -216,6 +283,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 setMiniLoader(false);
                 console.log('Form submission successful:', response.data);
                 alert('Object was created successfully');
+                setUploadedFile(null)
                 closeFormDialog();
             } catch (error) {
                 setMiniLoader(false);
@@ -225,29 +293,27 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         }
     };
 
-    useEffect(() => {
-        getVaultObjects();
-    }, []); // Empty dependency array means this effect runs only once
-
     return (
-        <div>
+        <>
             <MiniLoader loading={miniLoader} loaderMsg={'Creating new object...'} setLoading={setMiniLoader} />
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
-                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
-                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
-                    Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' />
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+                    <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
+                    <span>Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' /></span>
                 </DialogTitle>
                 <DialogContent >
                     <p className='my-4' style={{ fontSize: '13px' }}>Please select from Item types below</p>
                     <List className='p-0'>
-                        {vaultObjectsList.map((item) => (
-                            <ListItem className='p-0 mx-2' button key={item.objectid} onClick={() => fetchItemData(item.objectid, item.namesingular)}>
-                                <ListItemIcon>
-                                    <FontAwesomeIcon icon={findBestIconMatch(item.namesingular)} className='mx-1' style={{ color: '#2a68af' }} />
-                                </ListItemIcon>
-                                <ListItemText primary={item.namesingular} />
-                            </ListItem>
-                        ))}
+                        {vaultObjectsList ? <>
+                            {vaultObjectsList.map((item) => (
+                                <ListItem className='p-0 mx-2' button key={item.objectid} onClick={() => fetchItemData(item.objectid, item.namesingular)}>
+                                    <ListItemIcon>
+                                        <FontAwesomeIcon icon={findBestIconMatch(item.namesingular)} className='mx-1' style={{ color: '#2a68af' }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary={item.namesingular} />
+                                </ListItem>
+                            ))}
+                        </> : <></>}
                     </List>
                 </DialogContent>
                 <DialogActions>
@@ -256,11 +322,11 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             </Dialog>
 
             <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
-                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
-                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
 
+                    <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
+                    <span>Select {selectedObjectName} Class <FontAwesomeIcon icon={findBestIconMatch(selectedObjectName)} className='mx-3' /></span>
 
-                    Select {selectedObjectName} Class <FontAwesomeIcon icon={findBestIconMatch(selectedObjectName)} className='mx-3' />
                 </DialogTitle>
                 <DialogContent>
 
@@ -291,7 +357,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
                             <>
                                 <ListItem >
-                                    <ListItemText primary={'Others'} className='shadow-lg p-2 mx-0' />
+                                    <ListItemText primary={'Ungrouped'} className='shadow-lg p-2 mx-0' />
                                 </ListItem>
                                 <List component="div" disablePadding className='mx-4 '>
                                     {ungroupedItems.map((item) => (
@@ -318,10 +384,11 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             </Dialog>
 
             <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
-                <DialogTitle className='p-2' style={{ backgroundColor: '#293241', color: '#fff', fontSize: '15px' }}>
-                    <img src={logo} alt="logo" style={{ width: '5%' }} className='mx-2' />
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
 
-                    Metadata - Create {selectedClassName}  <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' />
+                    <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
+                    <span>Metadata - Create {selectedClassName}  <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' /></span>
+
 
                 </DialogTitle>
                 <DialogContent >
@@ -414,15 +481,26 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                 />
 
                             )}
+
                         </div>
                     ))}
+                    {selectedObjectId === 0 && (
+
+                        <div>
+                            <FileUploadComponent handleFileChange={handleFileChange} uploadedFile={uploadedFile} />
+                            {fileUploadError && (
+                                <div style={{ color: '#CC3333', fontSize: '12px' }}>{fileUploadError}</div>
+                            )}
+                        </div>
+
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={closeFormDialog}>Cancel</Button>
                     <Button onClick={handleSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </>
     );
 };
 
