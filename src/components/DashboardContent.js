@@ -98,39 +98,9 @@ const DocumentList = (props) => {
 
   }
 
+
   const previewObject = async (objectId, classId, objectType) => {
     getLinkedObjects(objectId, classId, objectType)
-    try {
-      // setLoadingPreviewObject(true)
-      const response = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId} `);
-      setPreviewObjectProps(response.data)
-      console.log(response.data)
-      // setLoadingPreviewObject(false)
-
-    } catch (error) {
-      console.error('Error fetching view objects:', error);
-    }
-    if (objectType === 0) {
-      try {
-        const response = await axios.get(
-          `http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`,
-          {
-            headers: {
-              Accept: '*/*'
-            }
-          }
-        );
-        console.log(response.data);
-        alert(`${response.data[0].fileID}`)
-        // Handle response data
-      } catch (error) {
-        console.error('Error:', error);
-        // Handle error
-      }
-    }
-  };
-
-  const previewSublistObject = async (objectId, classId, objectType) => {
     try {
       const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
       setPreviewObjectProps(propsResponse.data);
@@ -141,6 +111,7 @@ const DocumentList = (props) => {
     }
 
     if (objectType === 0) {
+      setLoadingFiles(true)
       try {
         const filesResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
           headers: {
@@ -156,14 +127,66 @@ const DocumentList = (props) => {
               Accept: '*/*'
             }
           });
+         
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
+          setLoadingFiles(false)
 
         } catch (error) {
           console.error('Error downloading file:', error);
+          setLoadingFiles(false)
         }
       } catch (error) {
         console.error('Error fetching object files:', error);
+        setLoadingFiles(false)
+      }
+    }
+    else {
+      setBase64('');
+      setExtension('');
+    }
+  };
+
+
+  const previewSublistObject = async (objectId, classId, objectType) => {
+    try {
+      const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
+      setPreviewObjectProps(propsResponse.data);
+      console.log(propsResponse.data);
+    } catch (error) {
+      console.error('Error fetching view objects:', error);
+      return;
+    }
+
+    if (objectType === 0) {
+      setLoadingFiles(true)
+      try {
+        const filesResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
+          headers: {
+            Accept: '*/*'
+          }
+        });
+        console.log(filesResponse.data);
+        const fileId = filesResponse.data[0].fileID;
+
+        try {
+          const downloadResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
+            headers: {
+              Accept: '*/*'
+            }
+          });
+         
+          setBase64(downloadResponse.data.base64);
+          setExtension(downloadResponse.data.extension.replace('.', ''));
+          setLoadingFiles(false)
+
+        } catch (error) {
+          console.error('Error downloading file:', error);
+          setLoadingFiles(false)
+        }
+      } catch (error) {
+        console.error('Error fetching object files:', error);
+        setLoadingFiles(false)
       }
     }
     else {
@@ -581,7 +604,7 @@ const DocumentList = (props) => {
         <div className="col-md-7 col-sm-12 shadow-lg  bg-white" style={{ height: '100vh' }}>
         
 
-          <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} extension={extension} base64={base64} />
+          <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} extension={extension} base64={base64} loadingfiles={loadingfiles} />
         </div>
       </div>
 

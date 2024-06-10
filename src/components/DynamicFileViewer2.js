@@ -191,7 +191,16 @@ const DynamicFileViewer2 = ({ base64Content, fileExtension }) => {
 
     const renderContent = () => {
         if (!base64Content || !fileExtension) {
-            return <p>Select a file to preview</p>;
+            return (
+                <div className="d-flex justify-content-center align-items-center text-dark" style={{width: "100%", height:"50%",position: "absolute", top: "25%", left: "25%"}}>
+                    <div>
+                    <p className="text-center">
+                        <i className="fas fa-tv" style={{fontSize: "100px"}}></i>
+                    </p>
+                    <p className="text-center">Select a file to preview</p>
+                    </div>
+                </div>
+            );
         }
 
         switch (fileExtension) {
@@ -227,7 +236,29 @@ const DynamicFileViewer2 = ({ base64Content, fileExtension }) => {
                     </div>
                 );
             case 'xlsx':
-                return <iframe src={fileUrl} style={{ width: '100%', height: '600px' }} />;
+                return (
+                    <div style={{ fontSize: '11px' }}>
+                        <table className='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    {csvContent.length > 0 && csvContent[0].map((header, index) => (
+                                        <th key={index}>{header}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {csvContent.slice(1).map((row, index) => (
+                                    <tr key={index}>
+                                        {row.map((cell, cellIndex) => (
+                                            <td key={cellIndex}>{cell}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                );
             case 'csv':
                 return (
                     <div style={{ fontSize: '11px' }}>

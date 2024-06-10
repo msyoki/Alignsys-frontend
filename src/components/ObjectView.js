@@ -4,6 +4,7 @@ import { Tabs, Tab, Typography, Box, List, ListItem, ListItemText } from '@mui/m
 import MiniLoader from './Modals/MiniLoader';
 import DynamicFileViewer from './DynamicFileViewer';
 import DynamicFileViewer2 from './DynamicFileViewer2';
+import LoadingMini from './Loaders/LoaderMini';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -64,32 +65,106 @@ export default function ObjectView(props) {
         </Tabs>
       </Box>
       <CustomTabPanel className='shadow-lg' value={value} index={0} style={{ height: '80vh', overflowY: 'scroll' }}>
-        <div className='container' >
+        {/* <div className='container' >
           {props.loadingPreviewObject ? (
             <MiniLoader loading={props.loadingPreviewObject} loaderMsg={'Loading...'} />
           ) : (
-             filteredProps && (
-              <List>
-                {filteredProps.map((item, index) => (
-                  <ListItem className='p-0' key={index} style={{ fontSize: '12px' }}>
-                    <div className="row w-100">
-                      <span className="col-4 d-flex justify-content-end">
-                        <label><b>{item.propName}</b></label>
-                      </span>
-                      <span className="col-8 d-flex justify-content-start">
-                        <p>: {item.value}</p>
-                      </span>
-                    </div>
-                  </ListItem>
-                ))}
-              </List>
-            )
+            <>
+            {filteredProps ?
+              filteredProps && (
+                <List>
+                  {filteredProps.map((item, index) => (
+                    <ListItem className='p-0' key={index} style={{ fontSize: '12px' }}>
+                      <div className="row w-100">
+                        <span className="col-4 d-flex justify-content-end">
+                          <label><b>{item.propName}</b></label>
+                        </span>
+                        <span className="col-8 d-flex justify-content-start">
+                          <p>: {item.value}</p>
+                        </span>
+                      </div>
+                    </ListItem>
+                  ))}
+                </List>
+              )
+           :
+           <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "50%", height: "50%", position: "relative", top: "25%", left: "25%" }}>
+             <div>
+               <p className="text-center">
+                 <i className="fas fa-tv mt-4" style={{ fontSize: "100px" ,color:'#1d3557'}}></i>
+               </p>
+               <p className="text-center">Nothing to Preview</p>
+               <p className="text-center" style={{fontSize:'11px'}}>Select a document to view its content</p>
+
+             </div>
+           </div>
+         }
+         </>
+            
+
+          
           )}
-        </div>
+        </div> */}
+        <div className='container'>
+      {props.loadingPreviewObject ? (
+        <MiniLoader loading={props.loadingPreviewObject} loaderMsg={'Loading...'} />
+      ) : (
+        <>
+          {filteredProps && filteredProps.length > 0 ? (
+            <List>
+              {filteredProps.map((item, index) => (
+                <ListItem className='p-0' key={index} style={{ fontSize: '12px' }}>
+                  <div className="row w-100">
+                    <span className="col-4 d-flex justify-content-end">
+                      <label><b>{item.propName}</b></label>
+                    </span>
+                    <span className="col-8 d-flex justify-content-start">
+                      <p>: {item.value}</p>
+                    </span>
+                  </div>
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "50%", height: "50%", position: "relative", top: "25%", left: "25%" }}>
+              <div>
+                <p className="text-center">
+                  <i className="fas fa-tag mt-4" style={{ fontSize: "80px", color: '#1d3557' }}></i>
+                </p>
+                <p className="text-center">Metadata Card</p>
+                <p className="text-center" style={{ fontSize: '11px' }}>Select an object to view its metadata</p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  
       </CustomTabPanel>
       <CustomTabPanel className='shadow-lg' value={value} index={1} style={{ height: '80vh', overflow: 'scroll' }}>
         {/* <DynamicFileViewer extension={props.extension} base64={props.base64}/> */}
-        <DynamicFileViewer2 base64Content={props.base64} fileExtension={props.extension} />
+
+        {props.loadingfiles ?
+          <LoadingMini /> :
+          <>
+            {props.base64 ?
+              <DynamicFileViewer2 base64Content={props.base64} fileExtension={props.extension} />
+              :
+              <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "50%", height: "50%", position: "relative", top: "25%", left: "25%" }}>
+                <div>
+                  <p className="text-center">
+                    <i className="fas fa-tv mt-4" style={{ fontSize: "80px" ,color:'#1d3557'}}></i>
+                  </p>
+                  <p className="text-center">Nothing to Preview</p>
+                  <p className="text-center" style={{fontSize:'11px'}}>Select a document to view its content</p>
+
+                </div>
+              </div>
+            }
+          </>
+
+        }
+
       </CustomTabPanel>
     </Box>
   );
