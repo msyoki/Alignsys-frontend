@@ -112,7 +112,7 @@ const DynamicFileViewer2 = ({ base64Content, fileExtension }) => {
     const [htmlContent, setHtmlContent] = useState('');
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
-    const [zoomLevel, setZoomLevel] = useState(1.0);
+    const [zoomLevel, setZoomLevel] = useState(0.8);
     const [csvContent, setCSVContent] = useState([]);
 
     const handleViewFile = async () => {
@@ -207,6 +207,7 @@ const DynamicFileViewer2 = ({ base64Content, fileExtension }) => {
             case 'jpg':
             case 'jpeg':
             case 'png':
+            case 'PNG':
             case 'gif':
                 return <img src={fileUrl} alt="Loaded content" style={{ maxWidth: '100%' }} />;
             case 'pdf':

@@ -1,6 +1,19 @@
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileAlt,faFolderOpen, faTasks, faChartBar, faUser, faHandPointer, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
-import React, { useEffect } from 'react'
+import {
+    faFileAlt,
+    faFolderOpen,
+    faTasks,
+    faChartBar,
+    faUser,
+    faHandPointer,
+    faCar,
+    faFile,
+    faFolder,
+    faUserFriends,
+    faPlus,
+    faTag
+} from '@fortawesome/free-solid-svg-icons';
 
 const allIcons = {
     faFileAlt,
@@ -14,24 +27,26 @@ const allIcons = {
     faUserFriends,
 };
 
-function GetIcon({name}) {
+const GetIcon = ({ name }) => {
     const nameWords = name.toLowerCase().split(' ');
 
     for (let iconName in allIcons) {
         for (let word of nameWords) {
             if (iconName.toLowerCase().includes(word)) {
-                return allIcons[iconName];
+                return <FontAwesomeIcon icon={allIcons[iconName]} />;
             }
-            if (word.toLowerCase().includes('document') || word.toLowerCase().includes('invoice') || word.toLowerCase().includes('Petty Cash')) {
-                return faFile;
+            if (word.toLowerCase().includes('document') || word.toLowerCase().includes('invoice') || word.toLowerCase().includes('petty cash')) {
+                return <FontAwesomeIcon icon={faFile} />;
             }
-
             if (word.toLowerCase().includes('staff') || word.toLowerCase().includes('employee')) {
-                return faUser;
+                return <FontAwesomeIcon icon={faUser} />;
+            }
+            if (word.toLowerCase().includes('Car')){
+                return <FontAwesomeIcon icon={faCar} />;
             }
         }
     }
-    return faFolder;
-}
+    return <FontAwesomeIcon icon={faFolder} />;
+};
 
-export default GetIcon
+export default GetIcon;

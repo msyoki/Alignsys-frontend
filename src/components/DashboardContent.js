@@ -14,7 +14,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Box from '@mui/material/Box';
+import ObjectPropValue from './ObjectPropValue';
 
+ import GetIcon from './GetIcon'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   // Accordion,
@@ -35,6 +37,7 @@ import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, fa
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewsList from './ViewsList';
 import VaultSelectForm from './SelectVault';
+
 
 const baseurl = "http://41.89.92.225:5006"
 const baseurldata = "http://41.92.225.149:240"
@@ -104,7 +107,6 @@ const DocumentList = (props) => {
     try {
       const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
       setPreviewObjectProps(propsResponse.data);
-      console.log(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
       return;
@@ -127,18 +129,18 @@ const DocumentList = (props) => {
               Accept: '*/*'
             }
           });
-         
+
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
-          setLoadingFiles(false)
+   
 
         } catch (error) {
           console.error('Error downloading file:', error);
-          setLoadingFiles(false)
+        
         }
       } catch (error) {
         console.error('Error fetching object files:', error);
-        setLoadingFiles(false)
+        
       }
     }
     else {
@@ -152,21 +154,19 @@ const DocumentList = (props) => {
     try {
       const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
       setPreviewObjectProps(propsResponse.data);
-      console.log(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
       return;
     }
 
     if (objectType === 0) {
-      setLoadingFiles(true)
+
       try {
         const filesResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
           headers: {
             Accept: '*/*'
           }
         });
-        console.log(filesResponse.data);
         const fileId = filesResponse.data[0].fileID;
 
         try {
@@ -175,18 +175,18 @@ const DocumentList = (props) => {
               Accept: '*/*'
             }
           });
-         
+
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
-          setLoadingFiles(false)
+        
 
         } catch (error) {
           console.error('Error downloading file:', error);
-          setLoadingFiles(false)
+         
         }
       } catch (error) {
         console.error('Error fetching object files:', error);
-        setLoadingFiles(false)
+      
       }
     }
     else {
@@ -322,77 +322,77 @@ const DocumentList = (props) => {
 
       {/* <FileUpdateModal isOpen={isModalOpenUpdateFile} onClose={() => setIsModalOpenUpdateFile(false)} selectedFile={selectedObject} refreshUpdate={refreshUpdate} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
       <Box
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '2px',
+          backgroundColor: '#1d3557',
+          color: '#ffffff',
+        }}
+      >
+        {/* Vault information */}
+        <Box style={{ display: 'flex', alignItems: 'center' }}>
+          {/* <img src={logo} alt="logo" style={{ width: '8%', marginRight: '10px' }} /> */}
+          <h3 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h3>
+          <i className="fas fa-hdd mx-2" style={{ fontSize: '25px' }}></i>
+          <VaultSelectForm activeVault={props.selectedVault} />
+          <div
+            onClick={props.getVaultObjects}
+            className="create-button mx-4"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '2px',
+              color: '#fff',
+              width: '40px',
+              height: '38px',
+              borderRadius: '50%',
               backgroundColor: '#1d3557',
-              color: '#ffffff',
+              borderColor: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
+              marginRight: '10px',
             }}
           >
-            {/* Vault information */}
-            <Box style={{ display: 'flex', alignItems: 'center' }}>
-              {/* <img src={logo} alt="logo" style={{ width: '8%', marginRight: '10px' }} /> */}
-              <h3 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h3>
-              <i className="fas fa-hdd mx-2" style={{ fontSize: '25px' }}></i>
-              <VaultSelectForm activeVault={props.selectedVault} />
-              <div
-                onClick={props.getVaultObjects}
-                className="create-button mx-4"
-                style={{
-                  color: '#fff',
-                  width: '40px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  backgroundColor: '#1d3557',
-                  borderColor: '#fff',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease',
-                  marginRight: '10px',
-                }}
-              >
-                <i className="fas fa-plus" style={{ fontSize: '25px' }}></i>
-              </div>
+            <i className="fas fa-plus" style={{ fontSize: '25px' }}></i>
+          </div>
 
-              {/* Home Button */}
-              <div
-                className="home-button mx-2"
-                style={{
-                  color: '#fff',
-                  width: '40px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  backgroundColor: '#1d3557',
-                  borderColor: '#fff',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease',
-                }}
-                onClick={reloadPage}
-              >
-                <i className="fas fa-home" style={{ fontSize: '25px' }}></i>
-              </div>
-            </Box>
+          {/* Home Button */}
+          <div
+            className="home-button mx-2"
+            style={{
+              color: '#fff',
+              width: '40px',
+              height: '38px',
+              borderRadius: '50%',
+              backgroundColor: '#1d3557',
+              borderColor: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
+            }}
+            onClick={reloadPage}
+          >
+            <i className="fas fa-home" style={{ fontSize: '25px' }}></i>
+          </div>
+        </Box>
 
-            {/* Buttons */}
-            <Box style={{ display: 'flex', alignItems: 'center' }}>
-              {/* Create Button */}
-           
-              <Box
+        {/* Buttons */}
+        <Box style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Create Button */}
+
+          <Box
             display="flex"
             justifyContent="flex-end"
             alignItems="center"
             color="text.white"
             fontSize="12.5px"
-         
+
           >
 
             <Box mr={3}>{props.user.first_name} {props.user.last_name}</Box>
@@ -400,11 +400,11 @@ const DocumentList = (props) => {
               <NetworkIcon />
             </Box>
           </Box>
-            </Box>
-          </Box>
+        </Box>
+      </Box>
       <div className="row"  >
-        <div className="col-md-5 col-sm-12 shadow-lg  " style={{ height: '100vh' }}>
-        
+        <div className="col-md-4 col-sm-12 shadow-lg  " style={{ height: '100vh' }}>
+
 
           <form onSubmit={handleSearch} >
 
@@ -440,10 +440,10 @@ const DocumentList = (props) => {
                 {/* Search Results */}
                 {props.data.length > 0 ?
                   <>
-    
-                    <h6  className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em',color:'#2a68af' }}></i> Search Results </h6>
 
-                    <div  style={{ height: '65vh', overflowY: 'scroll' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Search Results </h6>
+
+                    <div style={{ height: '65vh', overflowY: 'scroll' }} className='p-3 shadow-lg'>
                       {props.data.map((item, index) =>
                         <Accordion key={index}
                           expanded={selectedIndex === index}
@@ -463,12 +463,12 @@ const DocumentList = (props) => {
                               id={`panel${index}a-header`}
                               sx={{
                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                              }} onClick={() => previewObject(item.id, item.classID, item.objectID)}>
-                              <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i> {item.title} </Typography>
+                              }} >
+                              <Typography onClick={() => previewObject(item.id, item.classID, item.objectID)} variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
                             </AccordionSummary>
                           }
                           {linkedObjects ?
-                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm'>
+                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
                               {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
                               {linkedObjects.requisitionID === item.internalID ? <>
                                 {loadingfiles ?
@@ -488,17 +488,63 @@ const DocumentList = (props) => {
                                   </div>
                                   :
                                   <>
-                                    {linkedObjects.length > 0 ? <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Documents </Typography> : <></>}
-                                    <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                      <tbody>
-                                        {linkedObjects.map((item, index) => (
-                                          <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)}>
-                                            <td>{item.objectID === 0 ? <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> : <i className="fas fa-folder text-danger mx-1" style={{ fontSize: '14px' }} ></i>} {item.title}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                    {!linkedObjects.length > 0 ? <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No attached Documents</p> : <></>}
+                                    {linkedObjects.length > 0 ?
+                                      <>
+                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Objects </Typography>
+                                        <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
+                                      
+                                          <tbody>
+
+                                            {linkedObjects.map((item, index) => (
+                                              <>
+                                                {item.objectID != 0 ?
+                                                  <>
+
+
+                                                    <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                      <td ><i className="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
+                                                   
+                                                    </tr>
+
+                                                  </> :
+                                                  <>
+
+                                                  </>}
+
+                                              </>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Documents </Typography>
+                                        <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
+                                          <tbody>
+                                           
+                                            {linkedObjects.map((item, index) => (
+                                              <>
+                                                {item.objectID === 0 ?
+                                                  <>
+
+                                                    <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                    <td><i className="fas fa-file mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
+                                                   
+
+                                                    </tr>
+                                                  </> :
+                                                  <>
+
+                                                  </>}
+
+                                              </>
+                                            ))}
+                                          </tbody>
+                                        </table>
+
+                                      </>
+                                      :
+                                      <>
+                                        <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No attached Documents</p>
+                                      </>
+                                    }
                                   </>
                                 }
                               </> : <></>}
@@ -513,87 +559,8 @@ const DocumentList = (props) => {
                   </>
                   :
                   <>
-                    {/* Created By Me */}
-                    {props.data2.length > 0 ?
-                      <>
-                        <h6 className=' p-2' style={{ fontSize: '12px', backgroundColor: '#2a68af', color: '#fff' }}><i className="far fa-clock mx-2"></i> Created By Me</h6>
-                        
-                    <h6  className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em',color:'#2a68af' }}></i> Search Results </h6>
-
-                        <div  style={{ height: '65vh', overflowY: 'scroll' }}>
-                          {props.data2.filter((item => item.classID === 37 || item.classID === 40 || item.classID === 41 || item.classID === 42 || item.classID === 43 || item.classID === 44 || item.classID === 45 || item.classID === 46 || item.classID === 47 || item.classID === 48 || item.classID === 49 || item.classID === 50 || item.classID === 51)).map((item, index) =>
-                            <Accordion key={index}
-                              expanded={selectedIndex === index}
-                              onChange={handleAccordionChange(index)}
-                              sx={{
-                                border: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
-                                '&:not(:last-child)': {
-                                  borderBottom: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
-                                },
-                                '&::before': {
-                                  display: 'none',
-                                },
-                              }} >
-                              {item.objectID === 0 ? <></> :
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${index}a-content`}
-                                  id={`panel${index}a-header`}
-                                  sx={{
-                                    bgcolor: selectedIndex === index ? 'rgba(63, 81, 181, 0.1)' : 'inherit',
-                                  }} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)}>
-                                  <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i> {item.title} </Typography>
-                                </AccordionSummary>
-                              }
-                              {linkedObjects ?
-                                <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm'>
-                                  {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
-                                  {linkedObjects.requisitionID === item.internalID ? <>
-                                    {loadingfiles ?
-                                      <div className='text-center'>
-                                        <Spinner
-                                          thickness='4px'
-                                          speed='0.65s'
-                                          emptyColor='gray.200'
-                                          color='blue.500'
-                                          size='xl'
-                                          style={{ width: '40px', height: '40px' }}
-                                        />
-                                        <p className='text-dark my-2' style={{ fontSize: '11px' }}>Searching attachments...</p>
-                                      </div>
-                                      :
-                                      <>
-                                        {/* {linkedObjects.documents.length > 0 ? <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Documents </Typography> : <></>}
-                                        <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                          <tbody>
-                                            {linkedObjects.documents.map((item, index) => (
-                                              <tr key={index} onClick={() => getProps(0, item.documentid, item.classID, item.title)}>
-                                                <td><i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '14px' }} ></i> {item.title}</td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                        {!linkedObjects.documents.length > 0 ? <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No attached Documents</p> : <></>} */}
-                                      </>
-                                    }
-                                  </> : <></>}
-                                </AccordionDetails>
-                                :
-                                <>
-                                </>
-                              }
-                            </Accordion>
-                          )}
-                        </div>
-                      </>
-                      :
-                      <>
-                        <div >
-
-
-                          <ViewsList previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingfiles={loadingfiles} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
-                        </div>
-                      </>
-                    }
+                    {/* Views */}
+                    <ViewsList previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingfiles={loadingfiles} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
                   </>
                 }
               </>
@@ -601,8 +568,8 @@ const DocumentList = (props) => {
           </div>
 
         </div>
-        <div className="col-md-7 col-sm-12 shadow-lg  bg-white" style={{ height: '100vh' }}>
-        
+        <div className="col-md-8 col-sm-12 shadow-lg  bg-white" style={{ height: '100vh' }}>
+
 
           <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} extension={extension} base64={base64} loadingfiles={loadingfiles} />
         </div>

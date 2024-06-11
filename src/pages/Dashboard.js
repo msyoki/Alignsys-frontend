@@ -272,7 +272,7 @@ function Dashboard() {
     {sidebarOpen ? 'Hide' : 'Show'}
   </div> */}
         </div>
-        <div className="content">
+        <div className="content" style={{overflowY:'scroll'}}>
           <DocumentList
             searchTerm={searchTerm}
             data={data}
