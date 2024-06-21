@@ -723,7 +723,7 @@ function AdminDashboard() {
                                                             onClick={() => fetchObjectPermisions(row)}
 
                                                         >
-                                                            <small>View </small>
+                                                            <small>  <i className="fas fa-shield-alt" style={{ fontSize: '11px', cursor: 'pointer' }}></i> View </small>
                                                         </Button>
                                                         {/* <Button
                                                             size="small"

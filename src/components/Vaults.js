@@ -112,10 +112,10 @@ function OrganizationVaultList(props) {
                   ))}
                 </ul>
               )}
-              <li onClick={props.viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+              {/* <li onClick={props.viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                 <i className="fas fa-shield-alt mx-2" style={{ fontSize: '1.5em', cursor: 'pointer' }}></i>
                 <span className='list-text'>Permissions</span>
-              </li>
+              </li> */}
               <li onClick={() => { props.setSelectedVault(vault); props.viewvaultusers(vault.guid); }} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
                 <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
                 <span className='list-text'>Vault Users</span>
