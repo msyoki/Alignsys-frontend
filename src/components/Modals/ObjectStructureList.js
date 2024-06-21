@@ -8,6 +8,7 @@ import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoader';
 import logo from '../../images/ZF.png'
 import FileUploadComponent from '../FileUpload';
+import * as constants from '../Auth/configs'
 
 
 const allIcons = {
@@ -21,8 +22,6 @@ const allIcons = {
     faFolder,
     faUserFriends,
 };
-
-
 
 const findBestIconMatch = (name) => {
     const nameWords = name.toLowerCase().split(' ');
@@ -74,12 +73,11 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         setIsFormOpen(false);
     };
 
-
     const fetchItemData = async (objectid, objectname) => {
         setSelectedObjectName(objectname);
         setIsLoading(true);
         try {
-            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectid}`);
+            const response = await axios.get(`${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectid}`);
             setSelectedObjectId(objectid);
             setGroupedItems(response.data.grouped);
             setUngroupedItems(response.data.unGrouped);
@@ -105,7 +103,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
     const handleClassSelection = async (classId, className, classGroupId = null) => {
         setSelectedClassName(className);
         try {
-            const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/ClassProps/${selectedVault.guid}/${classId}`);
+            const response = await axios.get(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${classId}`);
             setSelectedClassId(classId);
             setFormProperties(response.data);
             setFormValues(response.data.reduce((acc, prop) => {
@@ -118,17 +116,32 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         }
         closeDataDialog();
     };
-
     const handleInputChange = (propId, value) => {
+        // Update formValues with the new value
         setFormValues({
             ...formValues,
             [propId]: value
         });
-        setFormErrors({
-            ...formErrors,
-            [propId]: ''
-        });
+
+        // Find the property associated with the given propId
+        const property = formProperties.find(prop => prop.propId === propId);
+
+        // Check if the value is empty or not
+        const newFormErrors = { ...formErrors };
+        if (!value && property.isRequired) {
+            // If the value is empty and the field is required, set the error message
+            newFormErrors[propId] = `${property.title} is required`;
+        } else {
+            // If the value is not empty or the field is not required, clear the error message
+            delete newFormErrors[propId];
+        }
+
+        // Update the formErrors state with the new error messages
+        setFormErrors(newFormErrors);
     };
+
+
+
 
     const handleFileChange = (file) => {
         if (file) {
@@ -137,89 +150,16 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         setUploadedFile(file)
     };
 
-    // const handleSubmit = async () => {
-
-    //     const newFormErrors = {};
-    //     const propertiesPayload = formProperties.map(prop => ({
-    //         value: `${formValues[prop.propId]}`,
-    //         propId: prop.propId,
-    //         propertytype: prop.propertytype
-    //     }));
-
-    //     formProperties.forEach((prop) => {
-    //         if (prop.isRequired && !formValues[prop.propId]) {
-    //             newFormErrors[prop.propId] = `${prop.title} is required`;
-    //         }
-    //     });
-
-    //     if (Object.keys(newFormErrors).length > 0) {
-
-    //         setFormErrors(newFormErrors);
-    //     } else {
-    //         setMiniLoader(true);
-    //         let payload = {};
-    //         if (selectedObjectId === 0 && uploadedFile) {
-    //             try {
-    //                 const formData = new FormData();
-    //                 formData.append('formFiles', uploadedFile);
-
-    //                 const response = await axios.post(
-    //                     'http://192.236.194.251:240/api/objectinstance/FilesUploadAsync',
-    //                     formData,
-    //                     {
-    //                         headers: {
-    //                             'Content-Type': 'multipart/form-data',
-    //                             'accept': '*/*'
-    //                         }
-    //                     }
-    //                 );
-    //                 console.log(response.data.uploadID);
-    //                 payload = {
-    //                     objectID: selectedObjectId,
-    //                     classID: selectedClassId,
-    //                     properties: propertiesPayload,
-    //                     vaultGuid: selectedVault,
-    //                     uploadId: response.data.uploadID
-    //                 };
-    //                 console.log('Upload successful:', response.data);
-    //             } catch (error) {
-    //                 console.error('Error uploading file:', error);
-    //             }
-    //         } else {
-    //             payload = {
-    //                 objectID: selectedObjectId,
-    //                 classID: selectedClassId,
-    //                 properties: propertiesPayload,
-    //                 vaultGuid: selectedVault
-    //             };
-    //         }
-
-    //         console.log(payload);
-    //         try {
-    //             const response = await axios.post('http://192.236.194.251:240/api/objectinstance/ObjectCreation', payload, {
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'accept': '*/*'
-    //                 }
-    //             });
-    //             setMiniLoader(false);
-    //             console.log('Form submission successful:', response.data);
-    //             alert('Object was created successfully');
-    //             closeFormDialog();
-    //         } catch (error) {
-    //             setMiniLoader(false);
-    //             console.error('Error submitting form:', error);
-    //             alert(`${error}`);
-    //         }
-    //     }
-    // };
     const handleSubmit = async () => {
         const newFormErrors = {};
-        const propertiesPayload = formProperties.map(prop => ({
-            value: `${formValues[prop.propId]}`,
-            propId: prop.propId,
-            propertytype: prop.propertytype
-        }));
+        const propertiesPayload = formProperties
+            .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '') // Filter out properties with empty values
+            .map(prop => ({
+                value: `${formValues[prop.propId]}`,
+                propId: prop.propId,
+                propertytype: prop.propertytype
+            }));
+
 
         formProperties.forEach((prop) => {
             if (prop.isRequired && !formValues[prop.propId]) {
@@ -234,6 +174,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         if (Object.keys(newFormErrors).length > 0 || (selectedObjectId === 0 && !uploadedFile)) {
             setFormErrors(newFormErrors);
         } else {
+
             setMiniLoader(true);
             let payload = {};
             if (selectedObjectId === 0 && uploadedFile) {
@@ -242,7 +183,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     formData.append('formFiles', uploadedFile);
 
                     const response = await axios.post(
-                        'http://192.236.194.251:240/api/objectinstance/FilesUploadAsync',
+                        `${constants.mfiles_api}/api/objectinstance/FilesUploadAsync`,
                         formData,
                         {
                             headers: {
@@ -274,7 +215,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
             console.log(payload);
             try {
-                const response = await axios.post('http://192.236.194.251:240/api/objectinstance/ObjectCreation', payload, {
+                const response = await axios.post(`${constants.mfiles_api}/api/objectinstance/ObjectCreation`, payload, {
                     headers: {
                         'Content-Type': 'application/json',
                         'accept': '*/*'
@@ -297,13 +238,13 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         <>
             <MiniLoader loading={miniLoader} loaderMsg={'Creating new object...'} setLoading={setMiniLoader} />
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
-                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                     <span>Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' /></span>
                 </DialogTitle>
                 <DialogContent >
                     <p className='my-4' style={{ fontSize: '13px' }}>Please select from Item types below</p>
-                    <List className='p-0'>
+                    <List className='p-0 list-group'>
                         {vaultObjectsList ? <>
                             {vaultObjectsList.map((item) => (
                                 <ListItem className='p-0 mx-2' button key={item.objectid} onClick={() => fetchItemData(item.objectid, item.namesingular)}>
@@ -322,20 +263,20 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             </Dialog>
 
             <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
-                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
 
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                     <span>Select {selectedObjectName} Class <FontAwesomeIcon icon={findBestIconMatch(selectedObjectName)} className='mx-3' /></span>
 
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent className=''>
 
                     {isLoading ? (
                         <div className="d-flex justify-content-center align-items-center w-100">
                             <CircularProgress size={24} />
                         </div>
                     ) : (
-                        <List className='p-0'>
+                        <List className='p-0 list-group'>
                             {groupedItems.map((group) => (
                                 <div key={group.classGroupId}>
                                     <ListItem >
@@ -384,14 +325,14 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             </Dialog>
 
             <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
-                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
 
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                     <span>Metadata - Create {selectedClassName}  <FontAwesomeIcon icon={findBestIconMatch(selectedClassName)} className='mx-3' /></span>
 
 
                 </DialogTitle>
-                <DialogContent >
+                <DialogContent className='form-group'>
                     {formProperties.map((prop) => (
                         <div key={prop.propId} className="my-3">
                             {prop.propertytype === 'MFDatatypeText' && (
@@ -451,6 +392,34 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     className='my-1'
                                 />
                             )}
+
+                            {prop.propertytype === 'MFDatatypeBoolean' && (
+                                <div>
+                                    <label>{prop.title} :</label>
+                                    <FormControlLabel
+
+                                        control={<Checkbox
+                                            checked={formValues[prop.propId] === true} // Set checked state for "true"
+                                            onChange={(e) => handleInputChange(prop.propId, true)} // Set value to true when checked
+                                        />}
+                                        label="True"
+                                        size='small'
+                                        className='my-1 mx-2'
+                                    />
+                                    <FormControlLabel
+                                        control={<Checkbox
+                                            checked={formValues[prop.propId] === false} // Set checked state for "false"
+                                            onChange={(e) => handleInputChange(prop.propId, false)} // Set value to false when checked
+                                        />}
+                                        label="False"
+                                        size='small'
+                                        className='my-1'
+                                    />
+                                    {prop.isRequired && !!formErrors[prop.propId] && (
+                                        <div style={{ color: '#f44336', fontSize: '0.75rem', marginTop: '8px' }}>{formErrors[prop.propId]}</div>
+                                    )}
+                                </div>
+                            )}
                             {prop.propertytype === 'MFDatatypeDate' && (
                                 <TextField
 
@@ -469,35 +438,23 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     className='my-1'
                                 />
                             )}
-                            {prop.propertytype === 'MFDatatypeBoolean' && (
-                                <FormControlLabel
-                                    control={<Checkbox checked={formValues[prop.propId]}
-                                        onChange={(e) => handleInputChange(prop.propId, e.target.checked)} />}
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    label={prop.title}
-                                    size='small'
-                                    className='my-1'
-                                />
-
-                            )}
 
                         </div>
                     ))}
                     {selectedObjectId === 0 && (
-
                         <div>
                             <FileUploadComponent handleFileChange={handleFileChange} uploadedFile={uploadedFile} />
                             {fileUploadError && (
                                 <div style={{ color: '#CC3333', fontSize: '12px' }}>{fileUploadError}</div>
                             )}
                         </div>
-
                     )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={closeFormDialog}>Cancel</Button>
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button onClick={handleSubmit} variant="contained" color="primary">
+                        Create
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>
@@ -505,3 +462,5 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 };
 
 export default ObjectStructureList;
+
+

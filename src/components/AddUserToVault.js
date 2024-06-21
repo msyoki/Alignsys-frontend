@@ -1,70 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
+import Select from 'react-select';
+import { CircularProgress } from '@mui/material';
+import * as constants from './Auth/configs'
+
 
 const AddUserToVault = (props) => {
-    const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState('');
-    const [loading, setLoading] = useState(true);
+    
+    const [selectedUser, setSelectedUser] = useState(null);
+ 
 
-    const fetchUsers = async () => {
-        try {
-
-            const response = await axios.post('http://localhost:8000/api/users-not-linked-to-vault/', { vault_id: props.selectedVault.guid });
-            setUsers(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            setLoading(false);
-        }
-    };
-
-    const handleSelectChange = async (event) => {
-        const userId = event.target.value;
-        setSelectedUser(userId);
+    const handleSelectChange = async (selectedOption) => {
+        const userId = selectedOption.value;
+        setSelectedUser(selectedOption);
 
         try {
-            await axios.post('http://localhost:8000/api/assign-vault/', { user_id: userId, vault_id: props.selectedVault.guid });
+            await axios.post(`${constants.auth_api}/api/assign-vault/`, { user_id: userId, vault_id: props.selectedVault.guid });
             // Remove selected user from the list
-            setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+            props.fetchUsersNotLinkedToVault(props.selectedVault.guid);
             props.viewvaultusers(props.selectedVault.guid)
         } catch (error) {
             console.error('Error posting user ID:', error);
         }
     };
+
     useEffect(() => {
         // Fetch the list of users
-
-
-        fetchUsers();
+        props.fetchUsersNotLinkedToVault(props.selectedVault.guid);
     }, []);
 
-    if (loading) {
+    if (props.loading) {
         return <CircularProgress />;
     }
 
     return (
-        <FormControl fullWidth>
-            <InputLabel id="user-select-label">Add User</InputLabel>
+        <div>
+            <label>Add User</label>
             <Select
-                labelId="user-select-label"
-                id="user-select"
+                openMenuOnFocus={props.fetchUsers}
                 value={selectedUser}
                 onChange={handleSelectChange}
-                label="Select User"
-            >
-
-                {users.length === 0 ? (
-                    <MenuItem disabled>All users have access</MenuItem>
-                ) : (
-                    users.map((user) => (
-                        <MenuItem key={user.id} value={user.id}>
-                            {user.first_name} {user.last_name} <small className='mx-2'> ( {user.email} )</small>
-                        </MenuItem>
-                    ))
-                )}
-            </Select>
-        </FormControl>
+                options={props.usersnotlinkedtovault}
+                placeholder="Select User"
+            />
+        </div>
     );
 };
 

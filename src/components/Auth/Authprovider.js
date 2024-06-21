@@ -4,7 +4,7 @@ import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import Loading from '../Loaders/Loader';
 import axios from "axios"
-import * as constants from '../Constants'
+import * as constants from './configs'
 const Authcontext = createContext()
 
 export default Authcontext;
@@ -26,8 +26,7 @@ export const AuthProvider = ({ children }) => {
     let loginUser = async (e) => {
         e.preventDefault()
         try {
-            
-            const response = await axios.post(`${constants.apiurl}/api/token/`, {
+            const response = await axios.post(`${constants.auth_api}/api/token/`, {
                 email: e.target.email.value,
                 password: e.target.password.value
             });
@@ -85,7 +84,7 @@ export const AuthProvider = ({ children }) => {
     
             console.log(`${refresh}`);
     
-            const response = await axios.post(`${constants.apiurl}/api/token/refresh/`, {
+            const response = await axios.post(`${constants.auth_api}/api/token/refresh/`, {
                 refresh: refresh
             });
     
@@ -108,7 +107,7 @@ export const AuthProvider = ({ children }) => {
     
 
     let authenticateGuest = async (rtoken) => {
-        let response = await fetch(`${constants.apiurl}/api/token/refresh/`, {
+        let response = await fetch(`${constants.auth_api}/api/token/refresh/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

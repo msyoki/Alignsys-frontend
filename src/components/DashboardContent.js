@@ -15,6 +15,8 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Box from '@mui/material/Box';
 import ObjectPropValue from './ObjectPropValue';
+import * as constants from './Auth/configs'
+
 
  import GetIcon from './GetIcon'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -85,7 +87,7 @@ const DocumentList = (props) => {
   const getLinkedObjects = async (id, classid, objectType) => {
     setLoadingFiles(true)
     try {
-      let url = `http://192.236.194.251:240/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}`
+      let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}`
       const response = await axios.get(url);
       console.log(response.data)
       setLinkedObjects(response.data)
@@ -105,7 +107,7 @@ const DocumentList = (props) => {
   const previewObject = async (objectId, classId, objectType) => {
     getLinkedObjects(objectId, classId, objectType)
     try {
-      const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
+      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
@@ -115,7 +117,7 @@ const DocumentList = (props) => {
     if (objectType === 0) {
       setLoadingFiles(true)
       try {
-        const filesResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
+        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
           headers: {
             Accept: '*/*'
           }
@@ -124,7 +126,7 @@ const DocumentList = (props) => {
         const fileId = filesResponse.data[0].fileID;
 
         try {
-          const downloadResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
+          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
             headers: {
               Accept: '*/*'
             }
@@ -152,7 +154,7 @@ const DocumentList = (props) => {
 
   const previewSublistObject = async (objectId, classId, objectType) => {
     try {
-      const propsResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
+      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
@@ -162,7 +164,7 @@ const DocumentList = (props) => {
     if (objectType === 0) {
 
       try {
-        const filesResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
+        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
           headers: {
             Accept: '*/*'
           }
@@ -170,7 +172,7 @@ const DocumentList = (props) => {
         const fileId = filesResponse.data[0].fileID;
 
         try {
-          const downloadResponse = await axios.get(`http://192.236.194.251:240/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
+          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
             headers: {
               Accept: '*/*'
             }
@@ -403,7 +405,7 @@ const DocumentList = (props) => {
         </Box>
       </Box>
       <div className="row"  >
-        <div className="col-md-4 col-sm-12 shadow-lg  " style={{ height: '100vh' }}>
+        <div className="col-md-5 col-sm-12  " style={{ height: '100vh' }}>
 
 
           <form onSubmit={handleSearch} >
@@ -458,13 +460,13 @@ const DocumentList = (props) => {
                             },
                           }} >
                           {item.objectID === 0 ? <></> :
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}
+                            <AccordionSummary onClick={() => previewObject(item.id, item.classID, item.objectID)} expandIcon={<ExpandMoreIcon />}
                               aria-controls={`panel${index}a-content`}
                               id={`panel${index}a-header`}
                               sx={{
                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
                               }} >
-                              <Typography onClick={() => previewObject(item.id, item.classID, item.objectID)} variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
+                              <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography>
                             </AccordionSummary>
                           }
                           {linkedObjects ?
@@ -490,7 +492,7 @@ const DocumentList = (props) => {
                                   <>
                                     {linkedObjects.length > 0 ?
                                       <>
-                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Objects </Typography>
+                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Related Objects </Typography>
                                         <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                       
                                           <tbody>
@@ -515,7 +517,7 @@ const DocumentList = (props) => {
                                             ))}
                                           </tbody>
                                         </table>
-                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Documents </Typography>
+                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Attached Documents </Typography>
                                         <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                           <tbody>
                                            
@@ -568,7 +570,7 @@ const DocumentList = (props) => {
           </div>
 
         </div>
-        <div className="col-md-8 col-sm-12 shadow-lg  bg-white" style={{ height: '100vh' }}>
+        <div className="col-md-7 col-sm-12   bg-white" style={{ height: '100vh' ,overflowY:'scroll',scrollBehavior:'smooth'}}>
 
 
           <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} extension={extension} base64={base64} loadingfiles={loadingfiles} />

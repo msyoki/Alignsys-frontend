@@ -67,7 +67,7 @@ export default function ObjectView(props) {
           <Tab label="Preview" {...a11yProps(1)} />
         </Tabs>
       </Box>
-      <CustomTabPanel className="shadow-lg" value={value} index={0} style={{ height: '80vh', overflowY: 'scroll' }}>
+      <CustomTabPanel value={value} index={0} style={{ height: '100vh', overflowY: 'scroll' }}>
         {props.previewObjectProps.length > 0 ?
           <>
             <div className="text-end" style={{ fontSize: '12px' }}>
@@ -121,7 +121,7 @@ export default function ObjectView(props) {
           )}
         </div>
       </CustomTabPanel>
-      <CustomTabPanel className="shadow-lg" value={value} index={1} style={{ height: '80vh', overflow: 'scroll' }}>
+      <CustomTabPanel  value={value} className='bg-white' index={1} style={{ height: '100vh',width:'100%' }}>
         {props.loadingfiles ? (
           <LoadingMini />
         ) : (
@@ -131,7 +131,7 @@ export default function ObjectView(props) {
             ) : (
               <div
                 className="d-flex justify-content-center align-items-center text-dark"
-                style={{ width: '50%', height: '50%', position: 'relative', top: '25%', left: '25%' }}
+                style={{ width: '50%', height: '100%', position: 'relative', top: '25%', left: '25%' }}
               >
                 <div>
                   <p className="text-center">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import logo from '../images/ZF.png';
 import Authcontext from '../components/Auth/Authprovider';
+import * as constants from '../components/Auth/configs'
 
 import axios from 'axios';
 
@@ -22,7 +23,7 @@ const VaultSelectForm = () => {
     let getUserVaults = () => {
         let config = {
             method: 'get',
-            url: 'http://127.0.0.1:8000/api/user/vaults/',
+            url: `${constants.auth_api}/api/user/vaults/`,
             headers : {
                 'Authorization': `Bearer ${authTokens.access}`,
                 'Content-Type': 'application/json'

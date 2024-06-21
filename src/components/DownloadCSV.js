@@ -1,10 +1,12 @@
 import React from 'react';
+import { Button } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
 
 class DownloadCSV extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            csvData: "email,first_name,last_name\nuser1@example.com,John,Doe\nuser2@example.com,Jane,Smith\nuser3@example.com,Alice,Johnson"
+            csvData: "email,first_name,last_name,password" // Include the 'password' field in the CSV data template
         };
     }
 
@@ -13,7 +15,7 @@ class DownloadCSV extends React.Component {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'users.csv';
+        a.download = 'users_template.csv';
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -22,11 +24,16 @@ class DownloadCSV extends React.Component {
 
     render() {
         return (
-
-            <li onClick={this.downloadCSV} style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }} className='my-3 btn' >
-                <i className="fas fa-file-csv mx-2" style={{ fontSize: '1.5em' }}></i>
-                <span className='list-text'>Bulk Registration CSV</span>
-            </li>
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<DownloadIcon />}
+                onClick={this.downloadCSV}
+                style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }}
+                className='my-3'
+            >
+                Download CSV Template
+            </Button>
         );
     }
 }

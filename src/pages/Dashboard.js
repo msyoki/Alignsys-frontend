@@ -18,17 +18,13 @@ import logo from "../images/ZF.png";
 import axios from 'axios'
 import DocumentList from '../components/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureList';
-
-
-const baseurl = "http://41.89.92.225:5006"
-const baseurldata = "http://41.92.225.149:240"
-const baseurldss = "http://41.92.225.149"
+import * as constants from '../components/Auth/configs'
 
 
 const searchObject = async (search, vault) => {
   try {
-    console.log(`http://192.236.194.251:240/api/objectinstance/Search/${vault}/${search}`)
-    const response = await axios.get(`http://192.236.194.251:240/api/objectinstance/Search/${vault}/${search}`);
+    console.log(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}`)
+    const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}`);
     console.log(response.data)
     return response.data
   }
@@ -104,7 +100,7 @@ function Dashboard() {
   const getVaultObjects = () => {
     let config = {
         method: 'get',
-        url: `http://192.236.194.251:240/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}`,
+        url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}`,
         headers: {}
     };
 
@@ -134,7 +130,7 @@ function Dashboard() {
 
   const getDocClasses = async () => {
     try {
-      const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/%7BE19BECA0-7542-451B-81E5-4CADB636FCD5%7D/129`)
+      const response = await axios.get(`${constants.mfiles_api}/api/MfilesObjects/%7BE19BECA0-7542-451B-81E5-4CADB636FCD5%7D/129`)
       setDocClasses(response.data)
 
     } catch (error) {
@@ -145,15 +141,6 @@ function Dashboard() {
 
 
 
-  const getRequisitionCreatedByMe = async () => {
-    try {
-      const response = await axios.get(`${baseurldata}/api/Requisition/Requisition/Get/${user.staffNumber}`)
-      setRequisitions(response.data)
-
-    } catch (error) {
-      console.error('Error fetching requisition data:', error);
-    }
-  }
 
   function getNetworkStatus() {
     if (navigator.connection) {
@@ -240,7 +227,7 @@ function Dashboard() {
                   <span className='list-text '> Settings</span>
                 </li> */}
                 <li style={{ display: 'flex', alignItems: 'center' }} onClick={adminPage} >
-                  <i className="fas fas fa-user-shield  mx-2" style={{ fontSize: '20px' }}></i>
+                  <i className="fas fas fa-server mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '> Admin</span>
                 </li>
 
@@ -261,7 +248,7 @@ function Dashboard() {
                   <li onClick={getVaultObjects} className='mt-5' ><i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
                   <li><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                   {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
-                  <li onClick={adminPage}><i className="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
+                  <li onClick={adminPage}><i className="fas fas fa-server" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
                 </>

@@ -13,6 +13,8 @@ import { Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ObjectPropValue, {getObjectPropValue} from './ObjectPropValue'
+import * as constants from './Auth/configs'
+
 
 const ViewsList = (props) => {
     const [otherviews, setOtherViews] = useState([]);
@@ -50,7 +52,7 @@ const ViewsList = (props) => {
 
     const fetchViewObjects = async (viewId, viewName, viewCategory) => {
         try {
-            const response = await axios.get(`http://192.236.194.251:240/api/Views/GetViewObjects/${props.selectedVault.guid}/${viewId} `);
+            const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViewObjects/${props.selectedVault.guid}/${viewId} `);
             setSelectedViewObjects(response.data);
             setSelectedViewName(viewName)
             setSelectedViewCategory(viewCategory)
@@ -64,7 +66,7 @@ const ViewsList = (props) => {
 
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://192.236.194.251:240/api/Views/GetViews/${JSON.parse(savedOption).guid}`);
+                const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViews/${JSON.parse(savedOption).guid}`);
                 setOtherViews(response.data.otherViews); // Assuming you want to render items from otherViews
                 console.log(response.data.otherViews)
                 setCommonViews(response.data.commonViews); // Assuming you want to render items from otherViews
@@ -99,13 +101,13 @@ const ViewsList = (props) => {
                                         },
                                     }} >
                                     {item.objectID === 0 ? <></> :
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}
+                                        <AccordionSummary onClick={() => props.previewObject(item.id, item.classID, item.objectID)} expandIcon={<ExpandMoreIcon />}
                                             aria-controls={`panel${index}a-content`}
                                             id={`panel${index}a-header`}
                                             sx={{
                                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
                                             }} >
-                                            <Typography onClick={() => props.previewObject(item.id, item.classID, item.objectID)} variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
+                                            <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
                                         </AccordionSummary>
                                     }
                                     {props.linkedObjects ?
@@ -131,7 +133,7 @@ const ViewsList = (props) => {
                                            <>
                                              {props.linkedObjects.length > 0 ?
                                                <>
-                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Objects </Typography>
+                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Related Objects </Typography>
                                                  <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                                
                                                    <tbody>
@@ -156,7 +158,7 @@ const ViewsList = (props) => {
                                                      ))}
                                                    </tbody>
                                                  </table>
-                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Documents </Typography>
+                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Attached Documents </Typography>
                                                  <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                                    <tbody>
                                                     

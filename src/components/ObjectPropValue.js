@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import * as constants from './Auth/configs'
+
 
 const ObjectPropValue = ({ vault, objectId, classId, propName }) => {
     const [value, setValue] = useState(null);
@@ -9,7 +11,7 @@ const ObjectPropValue = ({ vault, objectId, classId, propName }) => {
             
             try {
                 
-                const response = await axios.get(`http://192.236.194.251:240/api/objectinstance/GetObjectViewProps/${vault}/${objectId}/${classId}`);
+                const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${vault}/${objectId}/${classId}`);
                 const foundItem = response.data.find(item => item.propName === propName);
                 if (foundItem) {
                     

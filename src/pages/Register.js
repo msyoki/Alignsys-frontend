@@ -14,12 +14,13 @@ import KeyIcon from '@mui/icons-material/Key';
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import EmailIcon from '@mui/icons-material/Email';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
-import * as constants from '../components/Constants'
 import Alerts from '../components/Alert';
 
 import Logo from '../images/m.png'
 import image from '../images/logo2.png'
 import MiniLoader from '../components/Modals/MiniLoader';
+import * as constants from '../components/Auth/configs'
+
 
 const Register = () => {
   const [companyName, setCompanyName] = useState('');
@@ -51,7 +52,7 @@ const Register = () => {
     };
     console.log("form submitted")
     // Make API call to register user
-    axios.post('http://localhost:8000/api/organization/signup/', userData)
+    axios.post(`${constants.auth_api}/api/organization/signup/`, userData)
       .then(response => {
         // Handle successful registration
         setMiniLoader(false)

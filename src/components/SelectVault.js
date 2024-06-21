@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Authcontext from '../components/Auth/Authprovider';
 import axios from 'axios';
+import * as constants from './Auth/configs'
+
 
 const VaultSelectForm = () => {
     let { authTokens } = useContext(Authcontext);
@@ -19,7 +21,7 @@ const VaultSelectForm = () => {
     const getUserVaults = () => {
         let config = {
             method: 'get',
-            url: 'http://127.0.0.1:8000/api/user/vaults/',
+            url: `${constants.auth_api}/api/user/vaults/`,
             headers: {
                 'Authorization': `Bearer ${authTokens.access}`,
                 'Content-Type': 'application/json'

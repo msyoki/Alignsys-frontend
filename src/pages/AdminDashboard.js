@@ -18,7 +18,7 @@ import axios from 'axios'
 import ObjComponent from '../components/Admin/SelectedObjComponent';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
-import { Grid, MenuItem, Select, Input, TextField, FormControl, InputAdornment, InputLabel } from '@mui/material';
+import { Grid, MenuItem, Select, Input, TextField, FormControl, Button } from '@mui/material';
 import NestedModal from '../components/NewObjectModal';
 import DownloadCSV from '../components/DownloadCSV';
 import MiniLoader from '../components/Modals/MiniLoader';
@@ -27,6 +27,11 @@ import OrganizationVaultList from '../components/Vaults';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
 import AddUserToVault from '../components/AddUserToVault';
+import UserRegistrationModal from '../components/RegisterUser';
+import BulkUserRegistrationDialog from '../components/RegisterBulkUsers';
+import * as constants from '../components/Auth/configs'
+import PermissionDialog from '../components/VaultObjectPermissionsDialog';
+import AddPermissionDialog from '../components/AddVaulObjectPermissionDialog';
 
 
 function CustomTabPanel(props) {
@@ -71,25 +76,33 @@ function AdminDashboard() {
     const [vaultObjects, setVaultObjects] = useState([])
     const [miniLoader, setMiniLoader] = useState(false);
     const [loaderMsg, setLoaderMsg] = useState('');
-    const [vaultUsers,setVaultUsers] = useState([])
+    const [vaultUsers, setVaultUsers] = useState([])
+    const [organizationusers, setOrganizationUsers] = useState([])
 
     const [viewPermissions, setViewpermissions] = useState(false);
     const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
     const [viewVaultSettings, setViewVaultSettings] = useState(false);
-    
+
     const [viewVaultUsers, setViewVaultUsers] = useState(false);
     const [viewObjectStructure, setViewObjectStructure] = useState(false);
     const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
     const [selectedVault, setSelectedVault] = useState({});
+    const [usersnotlinkedtovault, setUsersNotLinkedToVault] = useState([]);
+    const [openObjectPermissionsDialog, setOpenObjectPermissionsDialog] = useState(false)
+    const [openAddPermissionDialog, setOpenAddPermissionDialog] = useState(false)
+    const [objectpermissions, setObjectPermissions] = useState([])
+    const [selectedObject, setSelectedObject] = useState([])
+    const [listwithoughtpermissions,setListWithoughtPermissions] = useState({})
+
 
 
 
     const [value, setValue] = React.useState(0);
     const [showSublist, setShowSublist] = useState(false);
     const [showVaultSublist, setShowVaultSublist] = useState(false);
-    
+
     const [showSublist1, setShowSublist1] = useState(false);
     const navigate = useNavigate()
 
@@ -120,6 +133,38 @@ function AdminDashboard() {
 
         // Update the input value with the capitalized text
         input.value = capitalizedInput;
+    }
+
+    const handleAddPermission = (guid,object_id) => {
+
+  
+        let data = JSON.stringify({
+            "vault_guid": guid,
+            "object_id": object_id
+        });
+     
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: 'http://192.236.194.251:8000/api/list-users-without-permissions/',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        axios.request(config)
+            .then((response) => {  
+               
+                setListWithoughtPermissions(response.data)
+                setOpenAddPermissionDialog(true)
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
     }
 
 
@@ -162,7 +207,7 @@ function AdminDashboard() {
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
-            url: `http://localhost:8000/api/structure/object/${id}/`,
+            url: `${constants.auth_api}/api/structure/object/${id}/`,
             headers: {},
         };
 
@@ -239,7 +284,7 @@ function AdminDashboard() {
             if (!alertsTriggered) {
                 // Your additional code here
                 console.log(payload)
-                const response = await axios.post('http://localhost:8000/api/new/object/', payload, {
+                const response = await axios.post(`${constants.auth_api}/api/new/object/`, payload, {
                     headers: {
                         'Authorization': `Bearer ${authTokens.access}`,
                         'Content-Type': 'application/json'
@@ -255,7 +300,7 @@ function AdminDashboard() {
                 }
             }
             setMiniLoader(false)
-           
+
 
 
         } catch (error) {
@@ -332,28 +377,28 @@ function AdminDashboard() {
 
     const viewvaultusers = (vault) => {
         let data = {
-            vault_id:vault
+            vault_id: vault
         }
         let config = {
             method: 'post',
-            url: 'http://127.0.0.1:8000/api/users-linked-to-vault/',
+            url: `${constants.auth_api}/api/users-linked-to-vault/`,
             headers: {
-            //   'Authorization': `Bearer ${authTokens.access}`,
-            //   'Content-Type': 'application/json',
+                //   'Authorization': `Bearer ${authTokens.access}`,
+                //   'Content-Type': 'application/json',
             },
-            data:data
+            data: data
         };
 
         axios.request(config)
-        .then((response) => {
-            setVaultUsers(response.data);
-            console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-            console.log(error);
-        });
-      
-    
+            .then((response) => {
+                setVaultUsers(response.data);
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
         setViewVaultUsers(true)
         setViewObjects(false)
         setViewCreateObject(false)
@@ -389,40 +434,100 @@ function AdminDashboard() {
         setViewObjectStructure(false)
     }
 
-    useEffect(() => {
-        const fetchVaultObjects = async () => {
-            try {
-                const payload = {
-                    vault: user.vault
-                }
+    const fetchObjectPermisions = async (object) => {
+        setSelectedObject(object)
+        let data = JSON.stringify({
+            "object_id": object.object_id,
+            "vault_guid": selectedVault.guid
+        });
 
-                const headers = {
-                    'Authorization': `Bearer ${authTokens.access}`,
-                    'Content-Type': 'application/json'
-                }
-                const response = await axios.post('http://localhost:8000/api/vault/objects/', payload, headers);
-                setVaultObjects(response.data);
-            } catch (error) {
-                console.error('Error fetching vault objects:', error);
-            }
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: 'http://192.236.194.251:8000/api/get-vault-object-permissions/',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
         };
 
-        fetchVaultObjects();
+        axios.request(config)
+            .then((response) => {
+
+                console.log(JSON.stringify(response.data));
+                setObjectPermissions(response.data)
+                setOpenObjectPermissionsDialog(true)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
+    const fetchUsersNotLinkedToVault = async (vault) => {
+
+        try {
+            const response = await axios.post(`${constants.auth_api}/api/users-not-linked-to-vault/`, { vault_id: vault });
+            setUsersNotLinkedToVault(response.data.map(user => ({ value: user.id, label: `${user.first_name} ${user.last_name} (${user.email})` })));
+        } catch (error) {
+            console.error('Error fetching users:', error);
+
+        }
+    };
+
+    const fetchVaultObjects = async (guid) => {
+        try {
+            const payload = {
+                guid: guid
+            }
+
+            const headers = {
+                'Authorization': `Bearer ${authTokens.access}`,
+                'Content-Type': 'application/json'
+            }
+            const response = await axios.post(`${constants.auth_api}/api/get-vault-objects/`, payload, headers);
+            setVaultObjects(response.data);
+            console.log(response.data)
+        } catch (error) {
+            console.error('Error fetching vault objects:', error);
+        }
+    };
+    const fetchOrgUsers = async () => {
+        let config = {
+            method: 'get',
+            maxBodyLength: Infinity,
+            url: `${constants.auth_api}/api/users/organization/${user.organizationid}/`,
+            headers: {}
+        };
+
+        try {
+            const response = await axios.request(config);
+            setOrganizationUsers(response.data)
+            console.log(JSON.stringify(response.data));
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrgUsers();
     }, []);
+
+
 
     return (
 
         <div className="dashboard">
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
             <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                <img className=' mb-4' src={logo} alt="logo" width='100%' height='12%' />
+
                 <ul className='text-center' style={{ listStyleType: 'none', fontSize: '13px' }}>
 
                     {sidebarOpen ?
                         <>
                             <li className='mt-5' style={{ display: 'flex', alignItems: 'center' }} onClick={homePage}>
-                                <i className="fas fa-home   mx-2" style={{ fontSize: '20px' }}></i>
-                                <span className='list-text '>Home</span>
+                                <i className="fas fa-columns   mx-2" style={{ fontSize: '20px' }}></i>
+                                <span className='list-text '>Dashboard</span>
                             </li>
 
                             <li style={{ display: 'flex', alignItems: 'center' }}>
@@ -444,7 +549,7 @@ function AdminDashboard() {
                             <>
 
                                 {/* <li ><i className="fas fa-layer-group" style={{ fontSize: '20px' }}></i> </li> */}
-                                <li className='mt-5' onClick={homePage}><i className="fas fa-home" style={{ fontSize: '20px' }}></i></li>
+                                <li className='mt-5' onClick={homePage}><i className="fas fa-columns" style={{ fontSize: '20px' }}></i></li>
 
                                 <li ><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                                 <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
@@ -456,16 +561,20 @@ function AdminDashboard() {
                 </ul>
 
             </div>
-            <div className="content " style={{height: '100vh', overflowY: 'scroll'}}>
+            <div className="content " style={{ height: '100vh', overflowY: 'scroll' }}>
+                <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
+
+                <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject}  selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
+
                 <div className="row  content-container " >
-                    <div className="col-lg-4 col-md-4 col-sm-12  bg-white" style={{  fontSize: '12px' ,height:'100vh'}}>
+                    <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#2a68af" }}>
                         <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
-                   
-                        <OrganizationVaultList setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject}  showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewpermissions={viewpermissions} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts}/>
-                
+
+                        <OrganizationVaultList fetchVaultObjects={fetchVaultObjects} fetchOrgUsers={fetchOrgUsers} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject} showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewpermissions={viewpermissions} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts} />
+
 
                     </div>
-                    <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg" style={{  fontSize: '12px' ,height:'100vh'}}>
+                    <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg" style={{ fontSize: '12px', height: '100vh' }}>
                         {viewCreateObject ?
                             <div id='newobject' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
@@ -587,30 +696,55 @@ function AdminDashboard() {
 
                         {viewObjects ?
                             <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
-                                
 
-                                    <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i> Vault Objects</h6>
-                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
-                                        <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow className='my-3'>
-                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
-                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
+
+                                <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} - Vault Objects</h6>
+                                <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
+                                    <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow className='my-3'>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Permissions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {vaultObjects.map((row) => (
+                                                <TableRow key={row.object_id}>
+                                                    <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
+                                                    <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i> {row.name_singular}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            size="small"
+                                                            variant="contained"
+                                                            color="warning"
+                                                            onClick={() => fetchObjectPermisions(row)}
+
+                                                        >
+                                                            <small>View </small>
+                                                        </Button>
+                                                        {/* <Button
+                                                            size="small"
+                                                            variant="contained"
+                                                            color="primary"
+                                                            className='mx-2'
+                                                            onClick={handleAddPermission}
+
+
+                                                        >
+                                                            <small>Add </small>
+                                                        </Button> */}
+                                                    </TableCell>
+
+
                                                 </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {vaultObjects.map((row) => (
-                                                    <TableRow key={row.object_id}>
-                                                        <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                            <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i> {row.object_name}
-                                                        </TableCell>
-                                                        <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                              
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+
                             </div>
                             : <></>
 
@@ -622,9 +756,9 @@ function AdminDashboard() {
                                         <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
                                             <i className="fas fa-edit mx-2" style={{ fontSize: '1.5em' }}></i> Update Object
                                         </h6>
-                             </div>
+                                    </div>
 
-                  
+
                                     <ObjComponent
                                         selectedObjectStructure={selectedObjectStructure}
                                         setSelectedObjectStructure={setSelectedObjectStructure}
@@ -656,8 +790,12 @@ function AdminDashboard() {
                                     <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i>Login Accounts</h6>
                                     <p className='my-3' style={{ fontSize: '10px' }}>user Account Management</p>
                                 </div>
-                                <DownloadCSV />
-                                <OrganizationUsersTable/>
+                                <div className='btn-group my-3' role="group" aria-label="Basic example">
+                                    <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
+                                    <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
+                                </div>
+
+                                <OrganizationUsersTable users={organizationusers} />
                             </div>
                             : <></>
 
@@ -667,35 +805,37 @@ function AdminDashboard() {
                                 <div>
 
                                     <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i> Vault Accounts</h6>
-                                    <h6 className='my-3' style={{ fontSize: '12px' }}>{selectedVault.name}  -  {selectedVault.guid} </h6>
+                                    <h6 className='my-3' style={{ fontSize: '12px' }}><b style={{ color: "#2a68af" }}>Name</b>: {selectedVault.name} </h6>
+                                    <h6 className='my-3' style={{ fontSize: '12px' }}><b style={{ color: "#2a68af" }}>Unique ID</b>: ({selectedVault.guid}) </h6>
                                 </div>
-                                <AddUserToVault selectedVault={selectedVault}  viewvaultusers={viewvaultusers}/>
-                                <VaultUsersTable vaultUsers={vaultUsers} />
+
+                                <VaultUsersTable fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
                             </div>
                             : <></>
 
                         }
 
-                        {!viewLoginAccounts && !viewLoginAccounts && !viewPermissions && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers?
-                            <div className='shadow-lg' style={{ fontSize: '12px', marginBottom: '20px' }}>
-                            
-                                    <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
-                                    <ul className=' p-3' >
-                                        <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Organization Name: {user.organization}</span>
-                                        </li>
-                                        <li className='my-2' onClick={toggleSublist} style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-hdd mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Vault ID : {user.vault}</span>
-                                        </li>
-                                        <li className='my-2' onClick={toggleSublist} style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-users mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Number of Users : 20</span>
-                                        </li>
+                        {!viewLoginAccounts && !viewLoginAccounts && !viewPermissions && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
+                            <div style={{ fontSize: '12px', marginBottom: '20px' }}>
 
-                                    </ul>
-                          
+                                <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
+                                <ul className=' p-3' >
+                                    <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
+                                        <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
+                                        <span className='list-text'>Organization Name: <b>{user.organization}</b></span>
+                                    </li>
+                                    <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
+                                        <i className="fas fa-hdd mx-3" style={{ fontSize: '1.5em' }}></i>
+                                        <span className='list-text'>Number of Vaults: <b>{user.vaultcount}</b></span>
+                                    </li>
+
+                                    <li className='my-2' onClick={toggleSublist} style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
+                                        <i className="fas fa-users mx-3" style={{ fontSize: '1.5em' }}></i>
+                                        <span className='list-text'>Number of Users : <b>{organizationusers.length}</b></span>
+                                    </li>
+
+                                </ul>
+
 
                             </div>
                             : <></>

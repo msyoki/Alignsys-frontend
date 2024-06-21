@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
+import * as constants from './Auth/configs'
+
 
 const LookupSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault }) => {
   const [lookupOptions, setLookupOptions] = useState([]);
@@ -9,7 +11,7 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
   useEffect(() => {
     const fetchLookupOptions = async () => {
       try {
-        const response = await axios.get(`http://192.236.194.251:240/api/ValuelistInstance/${selectedVault.guid}/${propId}`);
+        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}`);
         const formattedOptions = response.data.map(option => ({
           label: option.name,
           value: option.id,
@@ -27,7 +29,7 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
     const fetchSearchResults = async () => {
       if (searchTerm.trim() === '') return;
       try {
-        const response = await axios.get(`http://192.236.194.251:240/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}`);
+        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}`);
         const formattedOptions = response.data.map(option => ({
           label: option.name,
           value: option.id,
