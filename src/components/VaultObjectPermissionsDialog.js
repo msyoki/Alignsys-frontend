@@ -46,13 +46,12 @@ function PermissionDialog(props) {
     const handleCheckboxChange = (event) => {
 
         const { name, checked } = event.target;
-        // alert(selectedPermission.id)
-        // alert(props.selectedObject.object_id)
-        // alert(`${name} : ${checked}`)
+    
         setSelectedPermission(prevPermission => ({
             ...prevPermission,
             [name]: checked
         }));
+        props.fetchObjectPermisions(props.selectedObject)
 
         let data = JSON.stringify({
           "id": selectedPermission.id,

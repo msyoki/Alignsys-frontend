@@ -39,6 +39,7 @@ import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, fa
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewsList from './ViewsList';
 import VaultSelectForm from './SelectVault';
+import FileExt from './FileExt';
 
 
 const baseurl = "http://41.89.92.225:5006"
@@ -152,6 +153,7 @@ const DocumentList = (props) => {
   };
 
 
+
   const previewSublistObject = async (objectId, classId, objectType) => {
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
@@ -164,6 +166,7 @@ const DocumentList = (props) => {
     if (objectType === 0) {
 
       try {
+      
         const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
           headers: {
             Accept: '*/*'
@@ -466,7 +469,7 @@ const DocumentList = (props) => {
                               sx={{
                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
                               }} >
-                              <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography>
+                              <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography>
                             </AccordionSummary>
                           }
                           {linkedObjects ?
@@ -504,7 +507,7 @@ const DocumentList = (props) => {
 
 
                                                     <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
-                                                      <td ><i className="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
+                                                      <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
                                                    
                                                     </tr>
 
@@ -527,9 +530,7 @@ const DocumentList = (props) => {
                                                   <>
 
                                                     <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
-                                                    <td><i className="fas fa-file mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
-                                                   
-
+                                                    <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
                                                     </tr>
                                                   </> :
                                                   <>

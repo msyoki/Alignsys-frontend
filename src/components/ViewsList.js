@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ObjectPropValue, {getObjectPropValue} from './ObjectPropValue'
 import * as constants from './Auth/configs'
+import FileExt from './FileExt';
 
 
 const ViewsList = (props) => {
@@ -107,7 +108,7 @@ const ViewsList = (props) => {
                                             sx={{
                                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
                                             }} >
-                                            <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
+                                            <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
                                         </AccordionSummary>
                                     }
                                     {props.linkedObjects ?
@@ -145,7 +146,7 @@ const ViewsList = (props) => {
          
          
                                                              <tr key={index} onClick={() => props.previewObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
-                                                               <td ><i className="fas fa-folder mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
+                                                               <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
                                                             
                                                              </tr>
          
@@ -168,8 +169,8 @@ const ViewsList = (props) => {
                                                            <>
          
                                                              <tr key={index} onClick={() => props.previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
-                                                             <td><i className="fas fa-file mx-1" style={{ fontSize: '14px', color: '#2a68af' }} ></i> {item.title}</td>
-                                                            
+                                                
+                                                             <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
          
                                                              </tr>
                                                            </> :
@@ -214,7 +215,7 @@ const ViewsList = (props) => {
                                     <ul style={{ listStyleType: 'none', padding: 0,  fontSize: '12px' }}>
 
                                         <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Common Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                            <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#2a68af', fontSize: '20px' }} />
+                                            <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#0077b6', fontSize: '20px' }} />
                                             <span className='list-text'>{view.viewName}</span>
                                         </li>
 
@@ -235,7 +236,7 @@ const ViewsList = (props) => {
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
 
                                         <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Other Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
-                                            <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#2a68af', fontSize: '20px' }} />
+                                            <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#0077b6', fontSize: '20px' }} />
                                             <span className='list-text'>{view.viewName}</span>
                                         </li>
 

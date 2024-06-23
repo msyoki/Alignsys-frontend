@@ -15,7 +15,7 @@ import Box from '@mui/material/Box';
 import AccordionUsage from '../components/Accordion';
 import logo from "../images/ZF.png";
 import axios from 'axios'
-import ObjComponent from '../components/Admin/SelectedObjComponent';
+import ObjComponent from '../components/Admin/ObjStructureComponent';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 import { Grid, MenuItem, Select, Input, TextField, FormControl, Button } from '@mui/material';
@@ -23,7 +23,7 @@ import NestedModal from '../components/NewObjectModal';
 import DownloadCSV from '../components/DownloadCSV';
 import MiniLoader from '../components/Modals/MiniLoader';
 import LoadingMini from '../components/Loaders/LoaderMini';
-import OrganizationVaultList from '../components/Vaults';
+import OrganizationVaultList from '../components/OrganizationVaultList';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
 import AddUserToVault from '../components/AddUserToVault';
@@ -284,20 +284,29 @@ function AdminDashboard() {
             if (!alertsTriggered) {
                 // Your additional code here
                 console.log(payload)
-                const response = await axios.post(`${constants.auth_api}/api/new/object/`, payload, {
-                    headers: {
-                        'Authorization': `Bearer ${authTokens.access}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.status === 201) {
+          
+                let config = {
+                    method: 'post',
+                    maxBodyLength: Infinity,
+                    url: 'http://192.236.194.251:240/api/objectstracture/CreateObjectAdmin',
+                    headers: { 
+                      'Content-Type': 'application/json'
+                    },
+                    data : payload
+                  };
+                  
+                  axios.request(config)
+                  .then((response) => {
                     setMiniLoader(false)
-                    alert('Object creacted successfully !!');
                     setObjectName('')
                     setProperties([])
-                    // Handle success scenario
-                }
+                    alert('Object creacted successfully !!');
+                    console.log(JSON.stringify(response.data));
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+                  
             }
             setMiniLoader(false)
 
@@ -540,7 +549,7 @@ function AdminDashboard() {
                             </li>
 
                             <li className='mt-5' onClick={toggleSidebar} style={{ display: 'flex', alignItems: 'center' }}>
-                                <i className="fas fa-arrow-left mx-2" style={{ fontSize: '20px' }}></i>
+                                <i className="fas fa-chevron-left mx-2" style={{ fontSize: '20px' }}></i>
                                 <span className='list-text '>Hide</span>
                             </li>
 
@@ -553,7 +562,7 @@ function AdminDashboard() {
 
                                 <li ><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                                 <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
-                                <li className='mt-5' onClick={toggleSidebar}  ><i className="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
+                                <li className='mt-5' onClick={toggleSidebar}  ><i className="fas fa-chevron-right" style={{ fontSize: '20px' }}></i></li>
 
                             </>
                         </>}
@@ -562,7 +571,7 @@ function AdminDashboard() {
 
             </div>
             <div className="content " style={{ height: '100vh', overflowY: 'scroll' }}>
-                <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
+                <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions}  open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
 
                 <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject}  selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
 
@@ -698,32 +707,35 @@ function AdminDashboard() {
                             <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
 
 
-                                <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} - Vault Objects</h6>
+                                <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( Vault Objects )</h6>
                                 <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
                                     <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                         <TableHead>
                                             <TableRow className='my-3'>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
+                                               
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Permissions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {vaultObjects.map((row) => (
                                                 <TableRow key={row.object_id}>
-                                                    <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
+                                                   
                                                     <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i> {row.name_singular}
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color:'#2a68af' }}></i> {row.name_singular}
                                                     </TableCell>
+                                                    <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
                                                     <TableCell>
                                                         <Button
                                                             size="small"
                                                             variant="contained"
                                                             color="warning"
                                                             onClick={() => fetchObjectPermisions(row)}
+                                                            style={{ textTransform: 'none' }}
 
                                                         >
-                                                            <small>  <i className="fas fa-shield-alt" style={{ fontSize: '11px', cursor: 'pointer' }}></i> View </small>
+                                                            <small>  <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Settings </small>
                                                         </Button>
                                                         {/* <Button
                                                             size="small"

@@ -36,11 +36,11 @@ function VaultUsersTable(props) {
         <Table className='table table-sm'>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
+              {/* <TableCell>ID</TableCell> */}
               <TableCell>Email</TableCell>
               <TableCell>First Name</TableCell>
               <TableCell>Last Name</TableCell>
-              <TableCell>Staff</TableCell>
+              {/* <TableCell>Staff</TableCell> */}
               <TableCell>Active</TableCell>
               <TableCell>Admin</TableCell>
               {/* <TableCell>Organization</TableCell> */}
@@ -50,11 +50,11 @@ function VaultUsersTable(props) {
           <TableBody>
             {props.vaultUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.email}</TableCell>
+                {/* <TableCell>{user.id}</TableCell> */}
+                <TableCell><i className='fas fa-user mx-2' style={{color:'#2a68af'}}></i> {user.email}</TableCell>
                 <TableCell>{user.first_name}</TableCell>
                 <TableCell>{user.last_name}</TableCell>
-                <TableCell>{user.is_staff ? 'Yes' : 'No'}</TableCell>
+                {/* <TableCell>{user.is_staff ? 'Yes' : 'No'}</TableCell> */}
                 <TableCell>{user.is_active ? 'Yes' : 'No'}</TableCell>
                 <TableCell>{user.is_admin ? 'Yes' : 'No'}</TableCell>
                 {/* <TableCell>{user.organization}</TableCell> */}
@@ -65,7 +65,7 @@ function VaultUsersTable(props) {
                     color="warning"
                     onClick={() => handleDetach(user.id)}
                   >
-                    <small>Detach</small> 
+                    <small><i className='fas fa-unlink mx-2'></i>Detach</small> 
                   </Button>
                 </TableCell>
               </TableRow>

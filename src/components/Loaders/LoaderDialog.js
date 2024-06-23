@@ -1,4 +1,4 @@
-import  React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,13 +7,15 @@ import DialogContentText from '@mui/material/DialogContentText';
 import CircularProgress from '@mui/material/CircularProgress';
 
 
-import { ButtonComponent  } from '@syncfusion/ej2-react-buttons';
+import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import LoadingMini from './LoaderMini';
 import Loading from './Loader';
 import loadingimg from "../../images/loading.svg";
 import logo from "../../images/ZF.png";
+import LinearProgress from '@mui/material/LinearProgress';
+import Box from '@mui/material/Box';
 
-const LoadingDialog=(props) =>{
+const LoadingDialog = (props) => {
   const [fullWidth, setFullWidth] = React.useState(true);
   const [maxWidth, setMaxWidth] = React.useState('sm');
   return (
@@ -24,19 +26,22 @@ const LoadingDialog=(props) =>{
         maxWidth={maxWidth}
         keepMounted
         aria-describedby="alert-dialog-slide-description"
-        // className='App-header5'
-        // style={{backgroundColor:'#2364aa'}}
-      
-       
-      >
-       {/* <Loading/> */}
-      <div className='text-center p-3'>
-      <img src={logo} alt="logo" width='250px'  />
-        <br/>
-        <img className="spinner" src={loadingimg} alt="Loading" width='100px ' />
-        <p className="mt-2" style={{fontSize:'12.5px'}}>Please wait, processing ...</p>
+      // className='App-header5'
+      // style={{backgroundColor:'#2364aa'}}
 
-      </div>
+
+      >
+        {/* <Loading/> */}
+        <div className='text-center p-3'>
+          <img src={logo} alt="logo" width='250px' />
+          <br />
+          <Box sx={{ width: '20%' }}>
+            <LinearProgress />
+
+          </Box>
+          <p className="mt-2" style={{ fontSize: '12.5px' }}>Please wait, processing ...</p>
+
+        </div>
         {/* <DialogContent >
           <DialogContentText >
             <div className="container height-100 d-flex justify-content-center align-items-center"> 
@@ -45,12 +50,12 @@ const LoadingDialog=(props) =>{
             </div>
           </DialogContentText>
         </DialogContent> */}
-    
+
       </Dialog>
     </div>
   );
 }
 
 
-export default  LoadingDialog
+export default LoadingDialog
 

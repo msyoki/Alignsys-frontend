@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import Authcontext from '../components/Auth/Authprovider';
+import Authcontext from './Auth/Authprovider';
 import * as constants from './Auth/configs'
 
 
@@ -59,12 +59,41 @@ function OrganizationVaultList(props) {
     }));
   };
 
+
+  const sycVaultObjects = async(guid) => {
+ 
+    let data = JSON.stringify({
+      "guid": `${guid}`
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: 'http://192.236.194.251:8000/api/update-specific-vault-objects/',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    axios.request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        props.viewvaultobjects(); 
+        props.fetchVaultObjects(guid)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+  }
+
   return (
     <ul style={{ listStyleType: 'none', padding: 0 }} className='shadow-lg p-2'>
       {vaults.map((vault) => (
         <li key={vault.guid} className='my-3'>
           <div
-            onClick={() => { toggleVaultSublist(vault);}}
+            onClick={() => { toggleVaultSublist(vault); }}
             style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}
           >
             <i className="fas fa-hdd mx-2" style={{ fontSize: '1.5em' }}></i>
@@ -73,10 +102,10 @@ function OrganizationVaultList(props) {
 
           {openVaults[vault.guid] && (
             <ul className='shadow-lg p-3'>
-              <li onClick={props.viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+              {/* <li onClick={props.viewnewobject} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
                 <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i>
                 <span className='list-text'>Create New Vault Object</span>
-              </li>
+              </li> */}
               <li onClick={() => toggleFlatSublist(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                 <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
                 <span className='list-text'>Metadata Structure (Flat View)</span>
@@ -84,7 +113,7 @@ function OrganizationVaultList(props) {
 
               {showFlatSublists[vault.guid] && (
                 <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
-                  <li onClick={()=>{props.viewvaultobjects();props.fetchVaultObjects(vault.guid);}} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                  <li onClick={() => { props.viewvaultobjects(); props.fetchVaultObjects(vault.guid); }} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
                     <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
                     <span className='list-text'>Object Types</span>
                   </li>
@@ -98,7 +127,7 @@ function OrganizationVaultList(props) {
                   </li> */}
                 </ul>
               )}
-              <li onClick={() => toggleHierarchicalSublist(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+              {/* <li onClick={() => toggleHierarchicalSublist(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
                 <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
                 <span className='list-text'>Metadata Structure (Hierarchical View)</span>
               </li>
@@ -111,11 +140,15 @@ function OrganizationVaultList(props) {
                     </li>
                   ))}
                 </ul>
-              )}
+              )} */}
               {/* <li onClick={props.viewpermissions} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                 <i className="fas fa-shield-alt mx-2" style={{ fontSize: '1.5em', cursor: 'pointer' }}></i>
                 <span className='list-text'>Permissions</span>
               </li> */}
+              <li  onClick={()=>sycVaultObjects(vault.guid)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                <i className="fas fa-sync-alt mx-2" style={{ fontSize: '1.5em', cursor: 'pointer' }}></i>
+                <span className='list-text'>Sync Vault</span>
+              </li>
               <li onClick={() => { props.setSelectedVault(vault); props.viewvaultusers(vault.guid); }} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
                 <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
                 <span className='list-text'>Vault Users</span>

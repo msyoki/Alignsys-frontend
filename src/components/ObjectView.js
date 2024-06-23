@@ -71,8 +71,9 @@ export default function ObjectView(props) {
         {props.previewObjectProps.length > 0 ?
           <>
             <div className="text-end" style={{ fontSize: '12px' }}>
-              <p className='my-0'>Created: {getPropValue('Created')} {getPropValue('Created by')}</p>
-              <p className='my-0'>Last modified: {getPropValue('Last modified')} {getPropValue('Last modified by')}</p>
+            
+              <p className='my-0'>Created: {getPropValue('Created')} </p>
+              <p className='my-0'>Last modified: {getPropValue('Last modified')} </p>
             </div>
           </>
 

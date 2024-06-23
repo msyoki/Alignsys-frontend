@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import AccordionUsage from '../components/Accordion';
 import logo from "../images/ZF.png";
 import axios from 'axios'
-import DocumentList from '../components/DashboardContent';
+import DashboardContent from '../components/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureList';
 import * as constants from '../components/Auth/configs'
 
@@ -237,7 +237,7 @@ function Dashboard() {
                   <span className='list-text '>Logout</span>
                 </li>
                 <li className='mt-5' onClick={toggleSidebar} style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fas fa-arrow-left  mx-2" style={{ fontSize: '20px' }}></i>
+                  <i className="fas fa-chevron-left  mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '>Hide</span>
                 </li>
 
@@ -250,7 +250,7 @@ function Dashboard() {
                   {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
                   <li onClick={adminPage}><i className="fas fas fa-server" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
-                  <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-arrow-right" style={{ fontSize: '20px' }}></i></li>
+                  <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-chevron-right" style={{ fontSize: '20px' }}></i></li>
                 </>
               </>}
 
@@ -260,7 +260,7 @@ function Dashboard() {
   </div> */}
         </div>
         <div className="content" style={{overflowY:'scroll'}}>
-          <DocumentList
+          <DashboardContent
             searchTerm={searchTerm}
             data={data}
             data2={data2}
