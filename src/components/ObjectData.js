@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, List, ListItem, ListItemText } from '@mui/material';
 import MiniLoader from './Modals/MiniLoader';
-import DynamicFileViewer2 from './DynamicFileViewer2';
+import DynamicFileViewer from './DynamicFileViewer';
 import LoadingMini from './Loaders/LoaderMini';
+import SignButton from './SignDocument';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -38,7 +39,7 @@ function a11yProps(index) {
   };
 }
 
-export default function ObjectView(props) {
+export default function ObjectData(props) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -71,9 +72,10 @@ export default function ObjectView(props) {
         {props.previewObjectProps.length > 0 ?
           <>
             <div className="text-end" style={{ fontSize: '12px' }}>
-            
+              <p className='my-0'> ID: {props.selectedObject.id}</p>
               <p className='my-0'>Created: {getPropValue('Created')} </p>
               <p className='my-0'>Last modified: {getPropValue('Last modified')} </p>
+
             </div>
           </>
 
@@ -81,9 +83,7 @@ export default function ObjectView(props) {
           <></>
         }
         <div className="container">
-          {props.loadingPreviewObject ? (
-            <MiniLoader loading={props.loadingPreviewObject} loaderMsg="Loading..." />
-          ) : (
+       
             <>
               {filteredProps && filteredProps.length > 0 ? (
                 <List>
@@ -92,7 +92,7 @@ export default function ObjectView(props) {
                       <div className="row w-100">
                         <span className="col-4 d-flex justify-content-end">
                           <label>
-                            <b>{item.propName}</b>
+                            <b>{item.propName} </b>
                           </label>
                         </span>
                         <span className="col-8 d-flex justify-content-start">
@@ -101,6 +101,22 @@ export default function ObjectView(props) {
                       </div>
                     </ListItem>
                   ))}
+                  <ListItem className="p-0" style={{ fontSize: '12px' }}>
+           
+                    {props.selectedObject.objectID === 0 && props.extension === 'pdf'?
+                    <div className="row w-100">
+                      <span className="col-4 d-flex justify-content-end">
+                        <label>
+                          <b>Sign Now </b>
+                        </label>
+                      </span>
+                      <span className="col-8 d-flex justify-content-start">
+                        <p>:<SignButton objectid={props.selectedObject.id} fileId={props.selectedFileId} vault={props.vault.guid} email={props.email}/> </p>
+
+                      </span>
+                    </div>
+                    :<></>}
+                    </ListItem>
                 </List>
               ) : (
                 <div
@@ -119,40 +135,38 @@ export default function ObjectView(props) {
                 </div>
               )}
             </>
-          )}
+          
         </div>
       </CustomTabPanel>
-      <CustomTabPanel  value={value} className='bg-white' index={1} style={{ height: '100vh',width:'100%' }}>
-        {props.loadingfiles ? (
-          <LoadingMini />
-        ) : (
-          <>
-            {props.base64 ? (
-              <DynamicFileViewer2 base64Content={props.base64} fileExtension={props.extension} />
-            ) : (
-              <div
-                className="d-flex justify-content-center align-items-center text-dark"
-                style={{ width: '50%', height: '100%', position: 'relative', top: '25%', left: '25%' }}
-              >
-                <div>
-                  <p className="text-center">
-                    <i className="fas fa-tv mt-4" style={{ fontSize: '80px', color: '#1d3557' }}></i>
-                  </p>
-                  <p className="text-center">Nothing to Preview</p>
-                  <p className="text-center" style={{ fontSize: '11px' }}>
-                    Select a document to view its content
-                  </p>
-                </div>
+      <CustomTabPanel value={value} className='bg-white' index={1} style={{ height: '100vh', width: '100%' }}>
+ 
+        <>
+          {props.base64 ? (
+            <DynamicFileViewer  base64Content={props.base64} fileExtension={props.extension} objectid={props.selectedObject.id} fileId={props.selectedFileId} vault={props.vault.guid} email={props.email}/>
+          ) : (
+            <div
+              className="d-flex justify-content-center align-items-center text-dark"
+              style={{ width: '50%', height: '100%', position: 'relative', top: '25%', left: '25%' }}
+            >
+              <div>
+                <p className="text-center">
+                  <i className="fas fa-tv mt-4" style={{ fontSize: '80px', color: '#1d3557' }}></i>
+                </p>
+                <p className="text-center">Nothing to Preview</p>
+                <p className="text-center" style={{ fontSize: '11px' }}>
+                  Select a document to view its content
+                </p>
               </div>
-            )}
-          </>
-        )}
+            </div>
+          )}
+        </>
+        
       </CustomTabPanel>
     </Box>
   );
 }
 
-ObjectView.propTypes = {
+ObjectData.propTypes = {
   previewObjectProps: PropTypes.arrayOf(
     PropTypes.shape({
       propName: PropTypes.string.isRequired,

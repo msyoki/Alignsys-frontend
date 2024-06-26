@@ -21,19 +21,7 @@ import ObjectStructureList from '../components/Modals/ObjectStructureList';
 import * as constants from '../components/Auth/configs'
 
 
-const searchObject = async (search, vault) => {
-  try {
-    console.log(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}`)
-    const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}`);
-    console.log(response.data)
-    return response.data
-  }
-  catch (error) {
-    console.error('Error fetching requisition data:', error);
-    return [];
 
-  }
-}
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -72,50 +60,60 @@ function a11yProps(index) {
 
 function Dashboard() {
 
-  const { user, departments } = useContext(Authcontext);
-  let [openObjectModal, setOpenObjectModal]= useState(false);
+  const { user,authTokens, departments } = useContext(Authcontext);
+  let [openObjectModal, setOpenObjectModal] = useState(false);
+  const [viewableobjects,setViewableObjects]=useState([]);
 
-  // const [data, setData] = useState([
-  //   {
-  //     objectID: 1,
-  //     internalID: 1001,
-  //     classID: 37,
-  //     title: "Sample Document 1"
-  //   },
-  //   {
-  //     objectID: 2,
-  //     internalID: 1002,
-  //     classID: 40,
-  //     title: "Sample Document 2"
-  //   },
-  //   // Add more search results data here as needed
-  // ]);
   const [data, setData] = useState([])
   const [searchTerm, setSearchTerm] = useState('');
   const [allrequisitions, setRequisitions] = useState([])
-  const [selectedVault,setSelectedVault]=useState(null)
-  const [vaultObjectsList,setVaultObjectsList]=useState(null)
+  const [selectedVault, setSelectedVault] = useState(null)
+  const [vaultObjectsList, setVaultObjectsList] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
+  const { logoutUser } = useContext(Authcontext);
 
+  const [value, setValue] = React.useState(0);
+  const navigate = useNavigate()
+
+  const searchObject = async (search, vault) => {
+    try {
+      const array = viewableobjects;
+      const formattedString = array.join(',\n    ');
+   
   
+      const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${formattedString}`);
+    
+      return response.data
+    }
+    catch (error) {
+      console.error('Error fetching requisition data:', error);
+      return [];
+  
+    }
+  }
+
+
   const getVaultObjects = () => {
+   
     let config = {
-        method: 'get',
-        url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}`,
-        headers: {}
+      method: 'get',
+      url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}`,
+      headers: {}
     };
 
     axios.request(config)
-        .then((response) => {
-            setVaultObjectsList(response.data);
-            setOpenObjectModal(true)
-            console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-            console.log(error);
-        });
-}
-  
-  const data2=[
+      .then((response) => {
+        setVaultObjectsList(response.data);
+        setOpenObjectModal(true)
+    
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  const data2 = [
 
   ]
 
@@ -127,19 +125,6 @@ function Dashboard() {
 
 
   let [docClasses, setDocClasses] = useState([])
-
-  const getDocClasses = async () => {
-    try {
-      const response = await axios.get(`${constants.mfiles_api}/api/MfilesObjects/%7BE19BECA0-7542-451B-81E5-4CADB636FCD5%7D/129`)
-      setDocClasses(response.data)
-
-    } catch (error) {
-      console.error('Error fetching requisition data:', error);
-    }
-
-  }
-
-
 
 
   function getNetworkStatus() {
@@ -162,19 +147,28 @@ function Dashboard() {
 
 
 
+  const getViewableObjects = ()=>{
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${constants.auth_api}/api/viewable-objects/`,
+      headers: { 
+        'Authorization': `Bearer ${authTokens.access}`
+      }
+    };
+    
+    axios.request(config)
+    .then((response) => {
+      setViewableObjects(response.data)
+     
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+    
 
+  }
 
-
-
-
-
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
-  const { logoutUser } = useContext(Authcontext);
-
-  const [value, setValue] = React.useState(0);
-  const navigate = useNavigate()
 
   const adminPage = () => {
     navigate('/admin')
@@ -192,15 +186,16 @@ function Dashboard() {
     setMenuOpen(!menuOpen);
   };
   useEffect(() => {
+    getViewableObjects()
     getNetworkStatus()
-    let vault= localStorage.getItem('selectedVault')
+    let vault = localStorage.getItem('selectedVault')
     setSelectedVault(JSON.parse(vault));
- 
+
   }, []);
 
   return (
     <>
-      <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={()=>setOpenObjectModal(false)} selectedVault={selectedVault} vaultObjectsList={vaultObjectsList}/>
+      <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={() => setOpenObjectModal(false)} selectedVault={selectedVault} vaultObjectsList={vaultObjectsList} />
       <div className="dashboard bg-dark">
 
         <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -211,7 +206,7 @@ function Dashboard() {
               <>
 
 
-                <li  onClick={getVaultObjects} className='mt-5' style={{ display: 'flex', alignItems: 'center' }}>
+                <li onClick={getVaultObjects} className='mt-5' style={{ display: 'flex', alignItems: 'center' }}>
                   <i className="fas fa-plus-circle  mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text  '>Create</span>
                 </li>
@@ -244,7 +239,7 @@ function Dashboard() {
               </>
               : <>
                 <>
- 
+
                   <li onClick={getVaultObjects} className='mt-5' ><i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
                   <li><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                   {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
@@ -259,25 +254,27 @@ function Dashboard() {
     {sidebarOpen ? 'Hide' : 'Show'}
   </div> */}
         </div>
-        <div className="content" style={{overflowY:'scroll'}}>
+        <div className="content" style={{ overflowY: 'scroll' }}>
           <DashboardContent
             searchTerm={searchTerm}
             data={data}
             data2={data2}
-   
+
             getVaultObjects={getVaultObjects}
             setData={setData}
             searchObject={searchObject}
             setSearchTerm={setSearchTerm}
             user={user}
             departments={departments}
-      
+
             docClasses={docClasses}
             allrequisitions={allrequisitions}
             logoutUser={logoutUser}
             selectedVault={selectedVault}
-          
-    
+            viewableobjects={viewableobjects}
+         
+
+
           />
         </div>
       </div>

@@ -159,7 +159,7 @@ function AdminDashboard() {
                
                 setListWithoughtPermissions(response.data)
                 setOpenAddPermissionDialog(true)
-                console.log(JSON.stringify(response.data));
+             
             })
             .catch((error) => {
                 console.log(error);
@@ -235,7 +235,7 @@ function AdminDashboard() {
                     isRequired: property.required
                 }))
             };
-            console.log(payload)
+          
             const emptyItems = [];
             let alertsTriggered = false; // Flag to track if alerts were triggered
 
@@ -283,7 +283,7 @@ function AdminDashboard() {
             // If no alerts were triggered, run another code
             if (!alertsTriggered) {
                 // Your additional code here
-                console.log(payload)
+              
           
                 let config = {
                     method: 'post',
@@ -301,7 +301,7 @@ function AdminDashboard() {
                     setObjectName('')
                     setProperties([])
                     alert('Object creacted successfully !!');
-                    console.log(JSON.stringify(response.data));
+                   
                   })
                   .catch((error) => {
                     console.log(error);
@@ -401,7 +401,7 @@ function AdminDashboard() {
         axios.request(config)
             .then((response) => {
                 setVaultUsers(response.data);
-                console.log(JSON.stringify(response.data));
+            
             })
             .catch((error) => {
                 console.log(error);
@@ -463,7 +463,7 @@ function AdminDashboard() {
         axios.request(config)
             .then((response) => {
 
-                console.log(JSON.stringify(response.data));
+              
                 setObjectPermissions(response.data)
                 setOpenObjectPermissionsDialog(true)
             })
@@ -496,7 +496,7 @@ function AdminDashboard() {
             }
             const response = await axios.post(`${constants.auth_api}/api/get-vault-objects/`, payload, headers);
             setVaultObjects(response.data);
-            console.log(response.data)
+      
         } catch (error) {
             console.error('Error fetching vault objects:', error);
         }
@@ -512,7 +512,7 @@ function AdminDashboard() {
         try {
             const response = await axios.request(config);
             setOrganizationUsers(response.data)
-            console.log(JSON.stringify(response.data));
+          
         } catch (error) {
             console.log(error);
         }

@@ -32,7 +32,7 @@ import FileUpdateModal from './UpdateFile';
 
 import { Spinner } from '@chakra-ui/react'
 import TransitionAlerts from './Alert';
-import ObjectView from './ObjectView';
+import ObjectData from './ObjectData';
 import NetworkIcon from './NetworkStatus';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
@@ -54,7 +54,7 @@ const DocumentList = (props) => {
   let [docProps, setDocProps] = useState({})
   let [selectedObject, setSelectedObject] = useState({})
   let [selectedFile, setSelectedFile] = useState({});
-  let [loadingfiles, setLoadingFiles] = useState(false)
+  let [loadingobjects, setLoadingObjects] = useState(false)
   let [selectedFileId, setSelectedFileId] = useState(null)
   let [preparingforsigning, setPreparingForSigning] = useState(false)
 
@@ -71,6 +71,7 @@ const DocumentList = (props) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [base64, setBase64] = useState('')
   const [extension, setExtension] = useState('')
+  const [loadingfile,setLoadingFile]=useState(false)
 
 
   const handleAccordionChange = (index) => (event, isExpanded) => {
@@ -86,110 +87,84 @@ const DocumentList = (props) => {
 
 
   const getLinkedObjects = async (id, classid, objectType) => {
-    setLoadingFiles(true)
+    setLoadingObjects(true)
     try {
       let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}`
       const response = await axios.get(url);
-      console.log(response.data)
+    
       setLinkedObjects(response.data)
-      setLoadingFiles(false)
+      setLoadingObjects(false)
     }
     catch (error) {
-      setLoadingFiles(false)
+      setLoadingObjects(false)
       setLinkedObjects([])
       console.error('Error fetching requisition data:', error);
 
     }
-
-
   }
 
 
-  const previewObject = async (objectId, classId, objectType) => {
-    getLinkedObjects(objectId, classId, objectType)
+  const previewObject = async (item) => {
+  
+    getLinkedObjects(item.id, item.classID, item.objectID)
+    setSelectedObject(item)
     try {
-      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
+      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
       return;
     }
-
-    if (objectType === 0) {
-      setLoadingFiles(true)
-      try {
-        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
-          headers: {
-            Accept: '*/*'
-          }
-        });
-        console.log(filesResponse.data);
-        const fileId = filesResponse.data[0].fileID;
-
-        try {
-          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
-            headers: {
-              Accept: '*/*'
-            }
-          });
-
-          setBase64(downloadResponse.data.base64);
-          setExtension(downloadResponse.data.extension.replace('.', ''));
-   
-
-        } catch (error) {
-          console.error('Error downloading file:', error);
-        
-        }
-      } catch (error) {
-        console.error('Error fetching object files:', error);
-        
-      }
-    }
-    else {
-      setBase64('');
-      setExtension('');
-    }
+    setBase64('');
+    setExtension('');
+    
   };
 
 
 
-  const previewSublistObject = async (objectId, classId, objectType) => {
+  const previewSublistObject = async(item) => {
+    
+    setSelectedObject(item)
     try {
-      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${objectId}/${classId}`);
+      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       console.error('Error fetching view objects:', error);
       return;
     }
 
-    if (objectType === 0) {
-
+    if (item.objectID === 0) {
+      setLoadingFile(true)
       try {
       
-        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${objectId}/${objectType}`, {
+        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.objectID}`, {
           headers: {
             Accept: '*/*'
           }
         });
         const fileId = filesResponse.data[0].fileID;
+        setSelectedFileId(fileId)
+      
 
         try {
-          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${objectId}/${objectType}/${fileId}`, {
+          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.objectID}/${fileId}`, {
             headers: {
               Accept: '*/*'
             }
           });
 
           setBase64(downloadResponse.data.base64);
+          setLoadingFile(false)
           setExtension(downloadResponse.data.extension.replace('.', ''));
         
 
         } catch (error) {
+          setLoadingFile(false)
           console.error('Error downloading file:', error);
          
         }
       } catch (error) {
+        setLoadingFile(false)
         console.error('Error fetching object files:', error);
       
       }
@@ -201,44 +176,7 @@ const DocumentList = (props) => {
   };
 
 
-  const getProps = async (objId, internalId, classId, title) => {
-    setSelectedObject({})
-    switchToTab(0)
-    setDocProps({})
-    setFileUrl('')
-    setRequisitionProps({})
-    // console.log({ "objID": objId, "internalID": internalId, "classID": classId, "title": title })
-    setSelectedObject({ "objID": objId, "internalID": internalId, "classID": classId, "title": title })
-    try {
-      let url = '';
-      if (objId === 0) {
-        setSelectedFileId(internalId)
-        url = `${baseurldata}/api/RequisitionDocs?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
-      } else {
-        getLinkedObjects(objId)
-        url = `${baseurldata}/api/Requisition/getRequisitionProps?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
-      }
 
-      const response = await axios.get(url);
-      // console.log(response.data)
-      if (objId === 0) {
-
-        setDocProps(response.data)
-        setFileUrl(response.data.files[0].base64)
-        setRequisitionProps({})
-      }
-      else {
-        setRequisitionProps(response.data)
-        setDocProps({})
-        setFileUrl('')
-      }
-
-    }
-    catch (error) {
-      console.error('Error fetching requisition data:', error);
-
-    }
-  }
 
   function refreshUpdate() {
     getPropsFile(0, selectedFile.internalID, selectedFile.classID, selectedFile.title)
@@ -408,6 +346,8 @@ const DocumentList = (props) => {
         </Box>
       </Box>
       <div className="row"  >
+
+        {/* Object List  */}
         <div className="col-md-5 col-sm-12  " style={{ height: '100vh' }}>
 
 
@@ -463,7 +403,7 @@ const DocumentList = (props) => {
                             },
                           }} >
                           {item.objectID === 0 ? <></> :
-                            <AccordionSummary onClick={() => previewObject(item.id, item.classID, item.objectID)} expandIcon={<ExpandMoreIcon />}
+                            <AccordionSummary onClick={() => previewObject(item)} expandIcon={<ExpandMoreIcon />}
                               aria-controls={`panel${index}a-content`}
                               id={`panel${index}a-header`}
                               sx={{
@@ -476,7 +416,7 @@ const DocumentList = (props) => {
                             <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
                               {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
                               {linkedObjects.requisitionID === item.internalID ? <>
-                                {loadingfiles ?
+                                {loadingobjects ?
                                   <div className='text-center'>
                                     {/* <Spinner
                                       thickness='4px'
@@ -506,7 +446,7 @@ const DocumentList = (props) => {
                                                   <>
 
 
-                                                    <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                    <tr key={index} onClick={() => previewObject(item)} style={{cursor:'pointer'}}>
                                                       <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
                                                    
                                                     </tr>
@@ -529,7 +469,7 @@ const DocumentList = (props) => {
                                                 {item.objectID === 0 ?
                                                   <>
 
-                                                    <tr key={index} onClick={() => previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                    <tr key={index} onClick={() => previewSublistObject(item)} style={{cursor:'pointer'}}>
                                                     <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
                                                     </tr>
                                                   </> :
@@ -563,7 +503,7 @@ const DocumentList = (props) => {
                   :
                   <>
                     {/* Views */}
-                    <ViewsList previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingfiles={loadingfiles} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
+                    <ViewsList viewableobjects={props.viewableobjects} previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingobjects={loadingobjects} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
                   </>
                 }
               </>
@@ -571,10 +511,10 @@ const DocumentList = (props) => {
           </div>
 
         </div>
+
+        {/* Object View List */}
         <div className="col-md-7 col-sm-12   bg-white" style={{ height: '100vh' ,overflowY:'scroll',scrollBehavior:'smooth'}}>
-
-
-          <ObjectView previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} extension={extension} base64={base64} loadingfiles={loadingfiles} />
+          <ObjectData vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} />
         </div>
       </div>
 

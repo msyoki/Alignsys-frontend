@@ -53,7 +53,9 @@ const ViewsList = (props) => {
 
     const fetchViewObjects = async (viewId, viewName, viewCategory) => {
         try {
-            const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViewObjects/${props.selectedVault.guid}/${viewId} `);
+            const array = props.viewableobjects;
+            const formattedString = array.join(',\n    ');
+            const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViewObjects/${props.selectedVault.guid}/${viewId}/${formattedString}`);
             setSelectedViewObjects(response.data);
             setSelectedViewName(viewName)
             setSelectedViewCategory(viewCategory)
@@ -69,9 +71,9 @@ const ViewsList = (props) => {
             try {
                 const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViews/${JSON.parse(savedOption).guid}`);
                 setOtherViews(response.data.otherViews); // Assuming you want to render items from otherViews
-                console.log(response.data.otherViews)
+             
                 setCommonViews(response.data.commonViews); // Assuming you want to render items from otherViews
-                console.log(response.data.commonViews)
+            
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -102,7 +104,7 @@ const ViewsList = (props) => {
                                         },
                                     }} >
                                     {item.objectID === 0 ? <></> :
-                                        <AccordionSummary onClick={() => props.previewObject(item.id, item.classID, item.objectID)} expandIcon={<ExpandMoreIcon />}
+                                        <AccordionSummary onClick={() => props.previewObject(item)} expandIcon={<ExpandMoreIcon />}
                                             aria-controls={`panel${index}a-content`}
                                             id={`panel${index}a-header`}
                                             sx={{
@@ -115,7 +117,7 @@ const ViewsList = (props) => {
                                        <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
                                        {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
                                        {props.linkedObjects.requisitionID === item.internalID ? <>
-                                         {props.loadingfiles ?
+                                         {props.loadingobjects ?
                                            <div className='text-center'>
                                              {/* <Spinner
                                                thickness='4px'
@@ -145,7 +147,7 @@ const ViewsList = (props) => {
                                                            <>
          
          
-                                                             <tr key={index} onClick={() => props.previewObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                             <tr key={index} onClick={() => props.previewObject(item)} style={{cursor:'pointer'}}>
                                                                <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
                                                             
                                                              </tr>
@@ -168,7 +170,7 @@ const ViewsList = (props) => {
                                                          {item.objectID === 0 ?
                                                            <>
          
-                                                             <tr key={index} onClick={() => props.previewSublistObject(item.id, item.classID, item.objectID)} style={{cursor:'pointer'}}>
+                                                             <tr key={index} onClick={() => props.previewSublistObject(item)} style={{cursor:'pointer'}}>
                                                 
                                                              <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
          

@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
             const storedTokens = sessionStorage.getItem('authTokens');
             const refresh = storedTokens ? JSON.parse(storedTokens).refresh : null;
     
-            console.log(`${refresh}`);
+          
     
             const response = await axios.post(`${constants.auth_api}/api/token/refresh/`, {
                 refresh: refresh

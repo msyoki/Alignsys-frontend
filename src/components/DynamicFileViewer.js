@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import mammoth from 'mammoth';
 import styled from 'styled-components';
+import * as XLSX from 'xlsx';
+import LinearProgress from '@mui/material/LinearProgress';
+import Box from '@mui/material/Box';
+import SignButton from './SignDocument';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -17,7 +21,7 @@ const Container = styled.div`
 
 const FileViewerContainer = styled.div`
   width: 100%;
-  height: 75vh;
+  height: 100vh;
   overflow-y: auto;
   background-color: #ffffff;
   border: 1px solid #dee2e6;
@@ -25,27 +29,34 @@ const FileViewerContainer = styled.div`
   padding: 20px;
 `;
 
-const Controls = styled.div`
+const ZoomControls = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 10px;
 `;
 
-const ZoomControls = styled.div`
+const ControlsContainer = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const Button = styled.button`
-  padding: 10px 15px;
+  padding: 5px 10px;
   margin: 0 5px;
   border: none;
   border-radius: 4px;
-  background-color: #007bff;
+  background-color: #2a68af;
   color: #ffffff;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 12px;
 
   &:disabled {
     background-color: #6c757d;
@@ -53,27 +64,11 @@ const Button = styled.button`
   }
 
   &:hover:not(:disabled) {
-    background-color: #0056b3;
+    background-color: #1d3557;
   }
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-`;
-
-const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber, zoomLevel, setZoomLevel }) => {
+const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber, zoomLevel, setZoomLevel, objectid ,fileId , vault , email}) => {
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   };
@@ -96,15 +91,18 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
 
   return (
     <FileViewerContainer>
-      <Controls>
-        <Button onClick={handlePreviousPage} disabled={pageNumber <= 1}>Previous</Button>
-        <span>Page {pageNumber} of {numPages}</span>
-        <Button onClick={handleNextPage} disabled={pageNumber >= numPages}>Next</Button>
-      </Controls>
-      <ZoomControls>
-        <Button onClick={handleZoomOut}>Zoom Out</Button>
-        <Button onClick={handleZoomIn}>Zoom In</Button>
-      </ZoomControls>
+      <ControlsContainer>
+        <ButtonContainer>
+          <SignButton objectid={objectid} fileId={fileId} vault={vault} email={email}/>
+          <Button onClick={handlePreviousPage} disabled={pageNumber <= 1}>Previous</Button>
+          <span>Page {pageNumber} of {numPages}</span>
+          <Button onClick={handleNextPage} disabled={pageNumber >= numPages}>Next</Button>
+        </ButtonContainer>
+        <ButtonContainer>
+          <Button onClick={handleZoomOut}>Zoom Out</Button>
+          <Button onClick={handleZoomIn}>Zoom In</Button>
+        </ButtonContainer>
+      </ControlsContainer>
       <Document file={fileurl} onLoadSuccess={onDocumentLoadSuccess}>
         <Page pageNumber={pageNumber} scale={zoomLevel} />
       </Document>
@@ -112,19 +110,13 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = () => {
-  const [base64Content, setBase64Content] = useState('');
-  const [fileExtension, setFileExtension] = useState('');
+const DynamicFileViewer = ({ base64Content, fileExtension,objectid,fileId,vault,email }) => {
   const [fileUrl, setFileUrl] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [zoomLevel, setZoomLevel] = useState(1.0);
-
-  const handleFileExtensionChange = (event) => {
-    const extension = event.target.value.toLowerCase();
-    setFileExtension(extension);
-  };
+  const [zoomLevel, setZoomLevel] = useState(0.8);
+  const [csvContent, setCSVContent] = useState([]);
 
   const handleViewFile = async () => {
     if (base64Content && fileExtension) {
@@ -150,13 +142,30 @@ const DynamicFileViewer = () => {
           setHtmlContent(result.value);
           return;
         case 'xlsx':
-          src = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${base64Content}`;
-          break;
+          blob = base64ToBlob(base64Content, fileExtension);
+          const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const csv = XLSX.utils.sheet_to_csv(worksheet);
+          setCSVContent(parseCSV(csv));
+          return;
+        case 'csv':
+          const decodedCSVContent = atob(base64Content);
+          setCSVContent(parseCSV(decodedCSVContent));
+          return;
         default:
           break;
       }
       setFileUrl(src);
     }
+  };
+
+  const parseCSV = (csvContent) => {
+    // Handle numbers with commas by considering quoted values
+    const rows = csvContent.split('\n');
+    return rows.map(row => {
+      const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+      return matches ? matches.map(cell => cell.replace(/(^"|"$)/g, '')) : [];
+    });
   };
 
   const base64ToBlob = (base64, extension) => {
@@ -194,13 +203,24 @@ const DynamicFileViewer = () => {
 
   const renderContent = () => {
     if (!base64Content || !fileExtension) {
-      return <p>Please provide valid base64 content and file extension.</p>;
+      return (
+        <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "100%", height: "100vh" }}>
+          <div>
+            <p className="text-center">
+              <i className="fas fa-tv" style={{ fontSize: "100px" }}></i>
+            </p>
+             <p className="text-center">Select a file to preview</p>
+
+          </div>
+        </div>
+      );
     }
 
     switch (fileExtension) {
       case 'jpg':
       case 'jpeg':
       case 'png':
+      case 'PNG':
       case 'gif':
         return <img src={fileUrl} alt="Loaded content" style={{ maxWidth: '100%' }} />;
       case 'pdf':
@@ -213,6 +233,10 @@ const DynamicFileViewer = () => {
             setPageNumber={setPageNumber}
             zoomLevel={zoomLevel}
             setZoomLevel={setZoomLevel}
+            objectid={objectid} 
+            fileId={fileId} 
+            vault={vault} 
+            email={email}
           />
         );
       case 'txt':
@@ -222,14 +246,37 @@ const DynamicFileViewer = () => {
         return (
           <div>
             <ZoomControls>
-              <Button onClick={() => setZoomLevel(zoomLevel - 0.2)} disabled={zoomLevel <= 0.4}>Zoom Out</Button>
+              <Button size='small' onClick={() => setZoomLevel(zoomLevel - 0.2)}
+                disabled={zoomLevel <= 0.4}>Zoom Out</Button>
               <Button onClick={() => setZoomLevel(zoomLevel + 0.2)}>Zoom In</Button>
             </ZoomControls>
             <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: '0 0' }} dangerouslySetInnerHTML={{ __html: htmlContent }} />
           </div>
         );
       case 'xlsx':
-        return <iframe src={fileUrl} style={{ width: '100%', height: '600px' }} />;
+      case 'csv':
+        return (
+          <div style={{ fontSize: '11px' }}>
+            <table className='table table-bordered'>
+              <thead>
+                <tr>
+                  {csvContent.length > 0 && csvContent[0].map((header, index) => (
+                    <th key={index}>{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {csvContent.slice(1).map((row, index) => (
+                  <tr key={index}>
+                    {row.map((cell, cellIndex) => (
+                      <td key={cellIndex}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
       default:
         return <p>Unsupported file type.</p>;
     }
@@ -242,27 +289,9 @@ const DynamicFileViewer = () => {
   }, [base64Content, fileExtension]);
 
   return (
-    <Container>
-      <h1>Dynamic File Viewer</h1>
-      <label htmlFor="base64Content">Base64 Content:</label><br />
-      <TextArea
-        id="base64Content"
-        rows="10"
-        value={base64Content}
-        onChange={(e) => setBase64Content(e.target.value)}
-      /><br /><br />
-      
-      <label htmlFor="fileExtension">File Extension:</label><br />
-      <Input
-        type="text"
-        id="fileExtension"
-        value={fileExtension}
-        onChange={handleFileExtensionChange}
-      /><br /><br />
-      
-      <h2>File Preview:</h2>
+    <>
       {renderContent()}
-    </Container>
+    </>
   );
 };
 
