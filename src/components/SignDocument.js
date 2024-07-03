@@ -45,10 +45,9 @@ const SignButton = (props) => {
             color="primary"
             onClick={postData}
             style={{ textTransform: 'none' }}
-            className='mx-3'
-
+           
         >
-            <small>  <i className="fas fa-signature" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Click to sign</small>
+            <small>  <i className="fas fa-signature" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Sign now</small>
         </Button>
     );
 };

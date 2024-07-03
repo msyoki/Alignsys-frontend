@@ -25,12 +25,14 @@ const UserRegistrationDialog = (props) => {
             [e.target.name]: e.target.value,
         });
     };
-
+   
     const handleSubmit = async (e) => {
+        console.log(formValues)
         e.preventDefault();
         setLoading(true);
         setError('');
         setSuccess('');
+        
 
         try {
             const response = await axios.post(`${constants.auth_api}/api/register/`, {

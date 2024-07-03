@@ -1,38 +1,46 @@
+/* Adjust the CSS file for responsiveness */
 .login-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.left-side,
+.right-side {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
 .left-side {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background-color: white;
 }
 
 .right-side {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  /* background-color: #2a9d8f; */
+  color: white;
+  text-align: center;
+  padding: 40px 20px;
 }
 
-.right-side img {
-  max-width: 100%;
-  height: auto;
+.responsive-font {
+  font-size: 16px;
 }
 
-/* Media query for small screens */
-@media (max-width: 768px) {
+form {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (min-width: 768px) {
   .login-container {
-    flex-direction: column;
+    flex-direction: row;
   }
 
-  .left-side, .right-side {
-    width: 100%;
-  }
-
+  .left-side,
   .right-side {
-    display: none; /* Hide the right-side content */
+    width: 50%;
   }
 }

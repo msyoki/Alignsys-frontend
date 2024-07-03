@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import NewFileFormModal from './UploadNewFile';
-import FileInputModal from './showFileInput';
-import Loader from './Loaders/LoaderMini';
-import { Table, Thead, Tbody, Tr, Th, Td, IconButton, Button } from '@chakra-ui/react';
-import { EditIcon, DownloadIcon, ViewIcon } from '@chakra-ui/icons';
-import logo from "../images/ZF.png";
-import MFilesDocumentPreviewer from './Previewer';
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import Loader from '../Loaders/LoaderMini';
+import {  Button } from '@chakra-ui/react';
+
 import { Typography } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import CircularProgress from '@mui/material/CircularProgress';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Box from '@mui/material/Box';
-import ObjectPropValue from './ObjectPropValue';
-import * as constants from './Auth/configs'
+import ObjectPropValue from '../ObjectPropValue';
+import * as constants from '../Auth/configs'
 
 
- import GetIcon from './GetIcon'
+ import GetIcon from '../GetIcon'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   // Accordion,
@@ -28,18 +23,18 @@ import {
   // AccordionIcon,
   // Box
 } from '@chakra-ui/react'
-import FileUpdateModal from './UpdateFile';
+import FileUpdateModal from '../UpdateFile';
 
 import { Spinner } from '@chakra-ui/react'
-import TransitionAlerts from './Alert';
+import TransitionAlerts from '../Alert';
 import ObjectData from './ObjectData';
-import NetworkIcon from './NetworkStatus';
+import NetworkIcon from '../NetworkStatus';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewsList from './ViewsList';
-import VaultSelectForm from './SelectVault';
-import FileExt from './FileExt';
+import VaultSelectForm from '../SelectVault';
+import FileExt from '../FileExt';
 
 
 const baseurl = "http://41.89.92.225:5006"
@@ -143,6 +138,7 @@ const DocumentList = (props) => {
           }
         });
         const fileId = filesResponse.data[0].fileID;
+    
         setSelectedFileId(fileId)
       
 
@@ -354,22 +350,26 @@ const DocumentList = (props) => {
           <form onSubmit={handleSearch} >
 
 
-            <div className="input-group d-flex p-3" >
+            <div className="input-group d-flex p-2" >
               <input
 
                 className="form-control form-control-sm"
                 type="text"
                 required
-                placeholder="Search "
+                placeholder="Enter search term... "
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
               />
               <Button
                 variant="contained"
-                color="warning"
+                color="primary"
                 size="medium"
-                style={{ backgroundColor: '#f4b942', fontSize: '13px', borderColor: '#ffba08' }} type="submit">
-                <i className="fas fa-search mx-2"></i> Quick Search
+                style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff' , color:'#2a68af'}} 
+                type="submit"
+                className='shadow-lg mx-1'
+                >
+                Quick Search <i className="fas fa-search mx-2" style={{fontSize:'20px'}}></i>   
+                
               </Button>
 
             </div>
@@ -435,7 +435,7 @@ const DocumentList = (props) => {
                                   <>
                                     {linkedObjects.length > 0 ?
                                       <>
-                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Related Objects </Typography>
+                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Related Objects </Typography>
                                         <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                       
                                           <tbody>
@@ -460,7 +460,7 @@ const DocumentList = (props) => {
                                             ))}
                                           </tbody>
                                         </table>
-                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Attached Documents </Typography>
+                                        <Typography variant="body2"  style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Attached Documents </Typography>
                                         <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                           <tbody>
                                            

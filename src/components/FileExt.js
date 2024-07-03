@@ -35,6 +35,8 @@ const FileExt = (props) => {
     return <p>Error: {error}</p>;
   }
 
+ 
+
   switch (extension) {
     case 'pdf':
       return <i className="fas fa-file-pdf mx-1" style={{ fontSize: '15px', color: '#f21b3f' }}></i>;
@@ -50,8 +52,10 @@ const FileExt = (props) => {
       return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
     case 'jpeg':
       return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
+    case '.jpg':
+      return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
     default:
-      return <i className="fas fa-file mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>;
+      return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>;
   }
 };
 

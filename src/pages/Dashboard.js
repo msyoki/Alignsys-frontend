@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import AccordionUsage from '../components/Accordion';
 import logo from "../images/ZF.png";
 import axios from 'axios'
-import DashboardContent from '../components/DashboardContent';
+import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureList';
 import * as constants from '../components/Auth/configs'
 
@@ -69,7 +69,7 @@ function Dashboard() {
   const [allrequisitions, setRequisitions] = useState([])
   const [selectedVault, setSelectedVault] = useState(null)
   const [vaultObjectsList, setVaultObjectsList] = useState(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
   const { logoutUser } = useContext(Authcontext);
 
@@ -80,8 +80,7 @@ function Dashboard() {
     try {
       const array = viewableobjects;
       const formattedString = array.join(',\n    ');
-   
-  
+
       const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${formattedString}`);
     
       return response.data

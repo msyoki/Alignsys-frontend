@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileAlt, faFolderOpen, faTable, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
-import { Spinner } from '@chakra-ui/react';
-import NewFileFormModal from './UploadNewFile';
+import { faTable } from '@fortawesome/free-solid-svg-icons';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -12,9 +10,9 @@ import { Typography } from '@mui/material';
 
 import CircularProgress from '@mui/material/CircularProgress';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ObjectPropValue, {getObjectPropValue} from './ObjectPropValue'
-import * as constants from './Auth/configs'
-import FileExt from './FileExt';
+import ObjectPropValue from '../ObjectPropValue'
+import * as constants from '../Auth/configs'
+import FileExt from '../FileExt';
 
 
 const ViewsList = (props) => {
@@ -110,7 +108,7 @@ const ViewsList = (props) => {
                                             sx={{
                                                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
                                             }} >
-                                            <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
+                                            <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
                                         </AccordionSummary>
                                     }
                                     {props.linkedObjects ?
@@ -128,15 +126,15 @@ const ViewsList = (props) => {
                                                style={{ width: '40px', height: '40px' }}
                                              /> */}
          
-                                             <CircularProgress style={{ width: '40px', height: '40px' }} />
+                                             <CircularProgress style={{ width: '20px', height: '20px' }} />
          
-                                             <p className='text-dark ' style={{ fontSize: '11px' }}>Searching attachments...</p>
+                                             <p className='text-dark ' style={{ fontSize: '11px' }}>Searching relationships...</p>
                                            </div>
                                            :
                                            <>
                                              {props.linkedObjects.length > 0 ?
                                                <>
-                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Related Objects </Typography>
+                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Related Objects </Typography>
                                                  <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                                
                                                    <tbody>
@@ -161,7 +159,7 @@ const ViewsList = (props) => {
                                                      ))}
                                                    </tbody>
                                                  </table>
-                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#2a68af" }} className='mx-1'>Attached Documents </Typography>
+                                                 <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Attached Documents </Typography>
                                                  <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                                    <tbody>
                                                     
@@ -188,7 +186,7 @@ const ViewsList = (props) => {
                                                </>
                                                :
                                                <>
-                                                 <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No attached Documents</p>
+                                                 <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
                                                </>
                                              }
                                            </>
@@ -209,10 +207,10 @@ const ViewsList = (props) => {
 
 
                     {commonviews.length > 0 ? <>
-                        <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5',cursor:'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em' ,color:'#2a68af'}}></i> Common Views ( {commonviews.length} ) </h6>
+                        <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5',cursor:'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em' ,color:'#2a68af'}}></i> Common Views <small>( {commonviews.length} )</small>  </h6>
 
                         {showCommonViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-1 shadow-lg'>
+                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-1'>
                                 {commonviews.map((view) => (
                                     <ul style={{ listStyleType: 'none', padding: 0,  fontSize: '12px' }}>
 
@@ -230,10 +228,10 @@ const ViewsList = (props) => {
                     </> : <></>}
 
                     {otherviews.length > 0 ? <>
-                        <h6 onClick={toggleOtherViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5',cursor:'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em',color:'#2a68af' }}></i> Other Views ( {otherviews.length} ) </h6>
+                        <h6 onClick={toggleOtherViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5',cursor:'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em',color:'#2a68af' }}></i> Other Views <small>( {otherviews.length} )</small> </h6>
 
                         {showOtherViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-1 shadow-lg'>
+                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-1'>
                                 {otherviews.map((view) => (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
 

@@ -7,14 +7,14 @@ import Button from '@mui/material/Button';
 
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { Link } from "react-router-dom";
-import Navbar from './Navbar';
-import ImageAvatars from './Avatar';
+import Navbar from '../Navbar';
+import ImageAvatars from '../Avatar';
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
-import AccordionUsage from './Accordion';
-import logo from "../images/ZF.png";
+import AccordionUsage from '../Accordion';
+import logo from "../../images/ZF.png";
 import axios from 'axios'
 import { Grid, MenuItem, Select, Input, FormControl, InputAdornment, InputLabel } from '@mui/material';
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import { SignalWifi1BarIcon } from '@mui/icons-material/SignalWifi1Bar';
 function getNetworkStatus() {
   if (navigator.connection) {
     const connection = navigator.connection;
@@ -52,19 +52,78 @@ const NetworkIcon = () => {
     const { downlink, online } = networkStatus;
 
     if (!online) {
-      return <i className="fas fa-signal" style={{ color: 'red', opacity: 1 }}></i>;
+      return (
+        <>
+
+          <span style={{ fontSize: '10px' }}>
+            <i class="fas fa-circle " style={{ color: 'red' }}></i>
+            <i class="fas fa-circle " style={{ color: 'red' }}></i>
+            <i class="fas fa-circle " style={{ color: 'red' }}></i>
+            <i class="fas fa-circle " style={{ color: 'red' }}></i>
+            <i class="fas fa-signal-alt-1"></i>
+
+          </span>
+        </>
+      )
     }
 
     if (downlink >= 10) {
-      return <i className="fas fa-signal" style={{ color: 'green', opacity: 1 }}></i>;
+      return (
+        <>
+
+          <span style={{ fontSize: '10px' }}>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+          </span>
+        </>
+
+      );
     }
     if (downlink >= 5) {
-      return <i className="fas fa-signal" style={{ color: 'green', opacity: 0.75 }}></i>;
+      return (
+
+        <>
+
+          <span style={{ fontSize: '10px' }}>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'white' }}></i>
+
+          </span>
+        </>
+      );
     }
     if (downlink >= 1) {
-      return <i className="fas fa-signal" style={{ color: 'green', opacity: 0.5 }}></i>;
+      return (
+
+        <>
+
+          <span style={{ fontSize: '10px' }}>
+            <i class="fas fa-circle " style={{ color: 'green' }}></i>
+            <i class="fas fa-circle " style={{ color: 'white' }}></i>
+            <i class="fas fa-circle " style={{ color: 'white' }}></i>
+            <i class="fas fa-circle " style={{ color: 'white' }}></i>
+
+          </span>
+        </>
+      );
     }
-    return <i className="fas fa-signal" style={{ color: 'red', opacity: 1 }}></i>;
+    return (
+
+      <>
+        <span style={{ fontSize: '10px' }}>
+          <i class="fas fa-circle " style={{ color: 'white' }}></i>
+          <i class="fas fa-circle " style={{ color: 'white' }}></i>
+          <i class="fas fa-circle " style={{ color: 'white' }}></i>
+          <i class="fas fa-circle " style={{ color: 'white' }}></i>
+          <i class="fas fa-signal-alt-1"></i>
+
+        </span>
+      </>
+    );
   };
 
   return (

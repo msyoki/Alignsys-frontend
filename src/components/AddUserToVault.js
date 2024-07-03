@@ -35,13 +35,14 @@ const AddUserToVault = (props) => {
 
     return (
         <div>
-            <label>Add User</label>
+            <label >Select to add new login account</label>
             <Select
                 openMenuOnFocus={props.fetchUsers}
                 value={selectedUser}
                 onChange={handleSelectChange}
                 options={props.usersnotlinkedtovault}
-                placeholder="Select User"
+                placeholder="Select an account"
+                className='my-2'
             />
         </div>
     );

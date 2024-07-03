@@ -19,19 +19,19 @@ import ObjComponent from '../components/Admin/ObjStructureComponent';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 import { Grid, MenuItem, Select, Input, TextField, FormControl, Button } from '@mui/material';
-import NestedModal from '../components/NewObjectModal';
+import NestedModal from '../components/Modals/NewObjectModal';
 import DownloadCSV from '../components/DownloadCSV';
 import MiniLoader from '../components/Modals/MiniLoader';
 import LoadingMini from '../components/Loaders/LoaderMini';
-import OrganizationVaultList from '../components/OrganizationVaultList';
+import OrganizationVaultList from '../components/MainComponents/OrganizationVaultList';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
 import AddUserToVault from '../components/AddUserToVault';
 import UserRegistrationModal from '../components/RegisterUser';
 import BulkUserRegistrationDialog from '../components/RegisterBulkUsers';
 import * as constants from '../components/Auth/configs'
-import PermissionDialog from '../components/VaultObjectPermissionsDialog';
-import AddPermissionDialog from '../components/AddVaulObjectPermissionDialog';
+import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
+import AddPermissionDialog from '../components/Modals/AddVaulObjectPermissionDialog';
 
 
 function CustomTabPanel(props) {
@@ -70,7 +70,7 @@ function a11yProps(index) {
 
 function AdminDashboard() {
     const [progress, setProgress] = React.useState(10);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
     const { user, authTokens, logoutUser } = useContext(Authcontext);
     const [vaultObjects, setVaultObjects] = useState([])
@@ -78,8 +78,7 @@ function AdminDashboard() {
     const [loaderMsg, setLoaderMsg] = useState('');
     const [vaultUsers, setVaultUsers] = useState([])
     const [organizationusers, setOrganizationUsers] = useState([])
-
-    const [viewPermissions, setViewpermissions] = useState(false);
+    const [vaultGroups, setViewVaultGroups] = useState(false);
     const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
@@ -95,6 +94,7 @@ function AdminDashboard() {
     const [objectpermissions, setObjectPermissions] = useState([])
     const [selectedObject, setSelectedObject] = useState([])
     const [listwithoughtpermissions,setListWithoughtPermissions] = useState({})
+    const [userGroups,setuserGroups]=useState([])
 
 
 
@@ -133,6 +133,23 @@ function AdminDashboard() {
 
         // Update the input value with the capitalized text
         input.value = capitalizedInput;
+    }
+
+    const VaultUsergroups=()=>{
+        let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: `${constants.auth_api}/api/vault-groups/`,
+        headers: { }
+        };
+        axios.request(config)
+        .then((response) => {
+            setuserGroups(response.data)
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+
     }
 
     const handleAddPermission = (guid,object_id) => {
@@ -369,7 +386,7 @@ function AdminDashboard() {
         setViewCreateObject(true)
         setViewVaultUsers(false)
         setViewLoginAccounts(false)
-        setViewpermissions(false)
+        setViewVaultGroups(false)
         setViewObjects(false)
         setViewObjectStructure(false)
 
@@ -380,11 +397,12 @@ function AdminDashboard() {
         setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
-        setViewpermissions(false)
+        setViewVaultGroups(false)
         setViewObjectStructure(false)
     }
 
     const viewvaultusers = (vault) => {
+
         let data = {
             vault_id: vault
         }
@@ -401,7 +419,6 @@ function AdminDashboard() {
         axios.request(config)
             .then((response) => {
                 setVaultUsers(response.data);
-            
             })
             .catch((error) => {
                 console.log(error);
@@ -412,7 +429,7 @@ function AdminDashboard() {
         setViewObjects(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
-        setViewpermissions(false)
+        setViewVaultGroups(false)
         setViewObjectStructure(false)
     }
 
@@ -422,10 +439,10 @@ function AdminDashboard() {
         setViewObjects(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
-        setViewpermissions(false)
+        setViewVaultGroups(false)
     }
-    const viewpermissions = () => {
-        setViewpermissions(true)
+    const viewvaultgroups = () => {
+        setViewVaultGroups(true)
         setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
@@ -438,7 +455,7 @@ function AdminDashboard() {
         setViewLoginAccounts(true)
         setViewVaultUsers(false)
         setViewCreateObject(false)
-        setViewpermissions(false)
+        setViewVaultGroups(false)
         setViewObjects(false)
         setViewObjectStructure(false)
     }
@@ -579,7 +596,7 @@ function AdminDashboard() {
                     <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#2a68af" }}>
                         <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
 
-                        <OrganizationVaultList fetchVaultObjects={fetchVaultObjects} fetchOrgUsers={fetchOrgUsers} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject} showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewpermissions={viewpermissions} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts} />
+                        <OrganizationVaultList VaultUsergroups={VaultUsergroups} fetchVaultObjects={fetchVaultObjects} fetchOrgUsers={fetchOrgUsers} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject} showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewvaultgroups={viewvaultgroups} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts} />
 
 
                     </div>
@@ -715,7 +732,7 @@ function AdminDashboard() {
                                                
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Permissions</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -735,7 +752,7 @@ function AdminDashboard() {
                                                             style={{ textTransform: 'none' }}
 
                                                         >
-                                                            <small>  <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Settings </small>
+                                                            <small>  <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions </small>
                                                         </Button>
                                                         {/* <Button
                                                             size="small"
@@ -783,12 +800,49 @@ function AdminDashboard() {
 
                         }
 
-                        {viewPermissions ?
+                        {vaultGroups ?
                             <div id='permissions' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
 
-                                    <h6 className='shadow-lg p-3'><i className="fas fa-user-secret  mx-2" style={{ fontSize: '1.5em' }}></i>Permissions</h6>
-                                    <p className='my-3' style={{ fontSize: '10px' }}>Vault permissions Management</p>
+                                <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
+                              <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
+                                    <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow className='my-3'>
+                                               
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Name</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}> ID</TableCell>
+                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {userGroups.map((row) => (
+                                                <TableRow key={row.object_id}>
+                                                   
+                                                    <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
+                                                        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color:'#2a68af' }}></i> {row.title}
+                                                    </TableCell>
+                                                    <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            size="small"
+                                                            variant="contained"
+                                                            color="warning"
+                                                            onClick={() => fetchObjectPermisions(row)}
+                                                            style={{ textTransform: 'none' }}
+
+                                                        >
+                                                            <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users </small>
+                                                        </Button>
+                              
+                                                    </TableCell>
+
+
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                                 </div>
                             </div>
                             : <></>
@@ -816,9 +870,7 @@ function AdminDashboard() {
                             <div id='vaultusermanagement' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
 
-                                    <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i> Vault Accounts</h6>
-                                    <h6 className='my-3' style={{ fontSize: '12px' }}><b style={{ color: "#2a68af" }}>Name</b>: {selectedVault.name} </h6>
-                                    <h6 className='my-3' style={{ fontSize: '12px' }}><b style={{ color: "#2a68af" }}>Unique ID</b>: ({selectedVault.guid}) </h6>
+                                    <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i> {selectedVault.name} Vault Accounts</h6>
                                 </div>
 
                                 <VaultUsersTable fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
@@ -827,7 +879,7 @@ function AdminDashboard() {
 
                         }
 
-                        {!viewLoginAccounts && !viewLoginAccounts && !viewPermissions && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
+                        {!viewLoginAccounts && !viewLoginAccounts && !viewvaultgroups && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
                             <div style={{ fontSize: '12px', marginBottom: '20px' }}>
 
                                 <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
