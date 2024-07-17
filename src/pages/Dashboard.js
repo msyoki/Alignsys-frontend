@@ -19,6 +19,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureList';
 import * as constants from '../components/Auth/configs'
+import Chatbot from '../components/Chatbot';
 
 
 
@@ -194,12 +195,13 @@ function Dashboard() {
 
   return (
     <>
+      <Chatbot/>
       <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={() => setOpenObjectModal(false)} selectedVault={selectedVault} vaultObjectsList={vaultObjectsList} />
       <div className="dashboard bg-dark">
 
         <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
 
-          <ul className='text-center' style={{ listStyleType: 'none', padding: 0, fontSize: '13px' }}>
+          <ul className='text-center' style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
 
             {sidebarOpen ?
               <>

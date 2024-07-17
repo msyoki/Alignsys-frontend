@@ -27,7 +27,7 @@ const ObjectPropValue = ({ vault, objectId, classId, propName }) => {
         fetchData();
     }, [vault, objectId, classId, propName]);
 
-    return <span style={{color: '#0077b6'}} >{value} </span>;
+    return <span style={{color: '#1d3557'}} >{value} </span>;
 };
 
 export default ObjectPropValue;

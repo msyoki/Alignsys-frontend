@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemIcon, ListItemText, CircularProgress, TextField, Checkbox, FormControlLabel } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions,Select,MenuItem, List, ListItem, ListItemIcon, ListItemText, CircularProgress, TextField, Checkbox, FormControlLabel } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faHandPointer, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
@@ -396,7 +396,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                             {prop.propertytype === 'MFDatatypeBoolean' && (
                                 <div>
                                     <label>{prop.title} :</label>
-                                    <FormControlLabel
+                                    {/* <FormControlLabel
 
                                         control={<Checkbox
                                             checked={formValues[prop.propId] === true} // Set checked state for "true"
@@ -417,7 +417,23 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     />
                                     {prop.isRequired && !!formErrors[prop.propId] && (
                                         <div style={{ color: '#f44336', fontSize: '0.75rem', marginTop: '8px' }}>{formErrors[prop.propId]}</div>
+                                    )} */}
+                    
+                              <Select
+                                size='small'
+                                value={formValues[prop.propId] ?? (prop.value === "Yes" ? true : (prop.value === "No" ? false : ''))}
+                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                displayEmpty
+                                fullWidth
+                              >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                <MenuItem value={true}>True</MenuItem>
+                                <MenuItem value={false}>False</MenuItem>
+                              </Select>
+                              {prop.isRequired && !!formErrors[prop.propId] && (
+                                        <div style={{ color: '#f44336', fontSize: '0.75rem', marginTop: '8px' }}>{formErrors[prop.propId]}</div>
                                     )}
+                        
                                 </div>
                             )}
                             {prop.propertytype === 'MFDatatypeDate' && (

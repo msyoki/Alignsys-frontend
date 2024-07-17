@@ -35,6 +35,7 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import ViewsList from './ViewsList';
 import VaultSelectForm from '../SelectVault';
 import FileExt from '../FileExt';
+import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObject';
 
 
 const baseurl = "http://41.89.92.225:5006"
@@ -62,12 +63,102 @@ const DocumentList = (props) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [isModalOpenUpdateFile, setIsModalOpenUpdateFile] = useState(false);
   const [previewObjectProps, setPreviewObjectProps] = useState([])
-
+  const [formValues, setFormValues] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [base64, setBase64] = useState('')
   const [extension, setExtension] = useState('')
   const [loadingfile,setLoadingFile]=useState(false)
+  const [loadingobject,setLoadingObject]=useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [uptatingObject,setUpdatingObject]=useState(false)
 
+  const handleOpenDialog = () => setDialogOpen(true);
+  const handleCloseDialog = () => setDialogOpen(false);
+  
+
+  const relatedObjects = linkedObjects.filter(item => item.objectID !== 0);
+  const relatedDocuments =linkedObjects.filter(item => item.objectID === 0);
+ 
+
+  
+
+  // const transformFormValues = () => {
+  //   console.log( {
+  //     objectid: selectedObject.id,
+  //     props: Object.entries(formValues).map(([id, { value, datatype }]) => ({
+  //       id: parseInt(id, 10),  // Convert string ID to number
+  //       value,
+  //       datatype
+  //     })),
+  //     vaultGuid: props.selectedVault?props.selectedVault.guid:"" // Ensure you replace "string" with the actual vaultGuid
+  //   })
+  // };
+  const transformFormValues = () => {
+    const requestData ={
+
+      objectid: selectedObject.id,
+      objectypeid: selectedObject.objectID,
+      classid: selectedObject.classID,
+      props: Object.entries(formValues).map(([id, { value, datatype }]) => {
+        // Transform value based on its datatype
+        let transformedValue;
+  
+        switch (datatype) {
+          case 'MFDatatypeMultiSelectLookup':
+            transformedValue = value.join(", ");  // Convert array to a comma-separated string
+            break;
+          case 'MFDatatypeBoolean':
+            transformedValue = value ? "true" : "false";  // Convert boolean to string "true" or "false"
+            break;
+          case 'MFDatatypeMultiLineText':
+            transformedValue = value;  // Keep the string as is
+            break;
+          case 'MFDatatypeLookup':
+          case 'MFDatatypeNumber':
+            transformedValue = value.toString();  // Convert number to string
+            break;
+          default:
+            transformedValue = value;  // Default case, just in case there's an unexpected datatype
+            break;
+        }
+  
+        return {
+          id: parseInt(id, 10),  // Convert string ID to number
+          value: transformedValue,
+          datatype
+        };
+      }),
+      vaultGuid: props.selectedVault ? props.selectedVault.guid : ""  // Ensure you replace "string" with the actual vaultGuid
+    };
+    console.log(requestData)
+    setUpdatingObject(true)
+    setDialogOpen(true)
+    const headers = {
+      'accept': '*/*',
+      'Content-Type': 'application/json'
+    };
+    
+    const updateObjectProps = async () => {
+      try {
+        
+        // Make the PUT request using axios
+        const response = await axios.put(`${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`, requestData, { headers });
+        setFormValues({})
+        setUpdatingObject(false)
+        setDialogOpen(false)
+        
+        // Handle the response
+        console.log('Response:', response.data);
+      } catch (error) {
+        // Handle any errors
+        console.error('Error:', error);
+      }
+    };
+    
+    // Call the function
+    updateObjectProps();
+  };
+  
 
   const handleAccordionChange = (index) => (event, isExpanded) => {
     setSelectedIndex(isExpanded ? index : null);
@@ -100,15 +191,22 @@ const DocumentList = (props) => {
 
 
   const previewObject = async (item) => {
-  
+    if(Object.keys(formValues || {}).length > 0 ){
+      handleOpenDialog();
+     
+    }
+    setLoadingObject(true)
+    // console.log(formValues)
+    setFormValues({})
     getLinkedObjects(item.id, item.classID, item.objectID)
     setSelectedObject(item)
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
       setPreviewObjectProps(propsResponse.data);
+      setLoadingObject(false)
     } catch (error) {
       console.error('Error fetching view objects:', error);
-      return;
+      setLoadingObject(false)
     }
     setBase64('');
     setExtension('');
@@ -118,14 +216,19 @@ const DocumentList = (props) => {
 
 
   const previewSublistObject = async(item) => {
-    
+    if(Object.keys(formValues || {}).length > 0 ){
+      handleOpenDialog();
+    }
+    setLoadingObject(true)
+    setFormValues({})
     setSelectedObject(item)
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
       setPreviewObjectProps(propsResponse.data);
+      setLoadingObject(false)
     } catch (error) {
       console.error('Error fetching view objects:', error);
-      return;
+      setLoadingObject(false)
     }
 
     if (item.objectID === 0) {
@@ -258,14 +361,21 @@ const DocumentList = (props) => {
 
   return (
     <>
-
+      <ConfirmUpdateDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onConfirm={transformFormValues}
+        uptatingObject={uptatingObject}
+        message="Would you like to save the changes edited?"
+      />
       {/* <FileUpdateModal isOpen={isModalOpenUpdateFile} onClose={() => setIsModalOpenUpdateFile(false)} selectedFile={selectedObject} refreshUpdate={refreshUpdate} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
       <Box
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '2px',
+          padding: '1px',
+          fontSize:'12px !important',
           backgroundColor: '#1d3557',
           color: '#ffffff',
         }}
@@ -273,15 +383,15 @@ const DocumentList = (props) => {
         {/* Vault information */}
         <Box style={{ display: 'flex', alignItems: 'center' }}>
           {/* <img src={logo} alt="logo" style={{ width: '8%', marginRight: '10px' }} /> */}
-          <h3 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h3>
-          <i className="fas fa-hdd mx-2" style={{ fontSize: '25px' }}></i>
+          <h4 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h4>
+          <i className="fas fa-hdd mx-2" style={{ fontSize: '20px' }}></i>
           <VaultSelectForm activeVault={props.selectedVault} />
           <div
             onClick={props.getVaultObjects}
-            className="create-button mx-4"
+            className="create-button mx-2"
             style={{
               color: '#fff',
-              width: '40px',
+              width: '44px',
               height: '38px',
               borderRadius: '50%',
               backgroundColor: '#1d3557',
@@ -292,10 +402,10 @@ const DocumentList = (props) => {
               alignItems: 'center',
               cursor: 'pointer',
               transition: 'background-color 0.3s ease',
-              marginRight: '10px',
+             
             }}
           >
-            <i className="fas fa-plus" style={{ fontSize: '25px' }}></i>
+            <i className="fas fa-plus" style={{ fontSize: '28px' }}></i>
           </div>
 
           {/* Home Button */}
@@ -317,8 +427,9 @@ const DocumentList = (props) => {
             }}
             onClick={reloadPage}
           >
-            <i className="fas fa-home" style={{ fontSize: '25px' }}></i>
+            <i className="fas fa-home" style={{ fontSize: '28px' }}></i>
           </div>
+         
         </Box>
 
         {/* Buttons */}
@@ -334,17 +445,17 @@ const DocumentList = (props) => {
 
           >
 
-            <Box mr={3}>{props.user.first_name} {props.user.last_name}</Box>
+            <Box mr={1}>{props.user.first_name} {props.user.last_name}</Box>
             <Box mr={3} >
               <NetworkIcon />
             </Box>
           </Box>
         </Box>
       </Box>
-      <div className="row"  >
+      <div className="row p-2"  >
 
         {/* Object List  */}
-        <div className="col-md-5 col-sm-12  " style={{ height: '100vh' }}>
+        <div className="col-md-4 col-sm-12  p-1" style={{ height: '100vh' }}>
 
 
           <form onSubmit={handleSearch} >
@@ -356,7 +467,7 @@ const DocumentList = (props) => {
                 className="form-control form-control-sm"
                 type="text"
                 required
-                placeholder="Enter search term... "
+                placeholder="Search term ... "
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
               />
@@ -364,13 +475,14 @@ const DocumentList = (props) => {
                 variant="contained"
                 color="primary"
                 size="medium"
-                style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff' , color:'#2a68af'}} 
+                style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff' , color:'#1d3557'}} 
                 type="submit"
                 className='shadow-lg mx-1'
                 >
-                Quick Search <i className="fas fa-search mx-2" style={{fontSize:'20px'}}></i>   
+                  <i className="fas fa-search mx-1" style={{fontSize:'20px'}}></i>   <span className='mx-1'>Search</span> 
                 
               </Button>
+       
 
             </div>
 
@@ -386,7 +498,7 @@ const DocumentList = (props) => {
                 {props.data.length > 0 ?
                   <>
 
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Search Results </h6>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Search Results </h6>
 
                     <div style={{ height: '65vh', overflowY: 'scroll' }} className='p-3 shadow-lg'>
                       {props.data.map((item, index) =>
@@ -403,7 +515,7 @@ const DocumentList = (props) => {
                             },
                           }} >
                           {item.objectID === 0 ? <></> :
-                            <AccordionSummary onClick={() => previewObject(item)} expandIcon={<ExpandMoreIcon />}
+                            <AccordionSummary onClick={() => previewObject(item)} className='shadow-sm'  expandIcon={<ExpandMoreIcon /> }
                               aria-controls={`panel${index}a-content`}
                               id={`panel${index}a-header`}
                               sx={{
@@ -435,32 +547,35 @@ const DocumentList = (props) => {
                                   <>
                                     {linkedObjects.length > 0 ?
                                       <>
-                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Related Objects </Typography>
-                                        <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
-                                      
-                                          <tbody>
+                                        {relatedObjects.length > 0 ?<>
+                                          <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#1d3557' }} className=' p-1'>Related Objects ({relatedObjects.length}) </Typography>
+                                          <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
+                                        
+                                            <tbody>
 
-                                            {linkedObjects.map((item, index) => (
-                                              <>
-                                                {item.objectID != 0 ?
-                                                  <>
+                                              {linkedObjects.map((item, index) => (
+                                                <>
+                                                  {item.objectID != 0 ?
+                                                    <>
 
 
-                                                    <tr key={index} onClick={() => previewObject(item)} style={{cursor:'pointer'}}>
-                                                      <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
-                                                   
-                                                    </tr>
+                                                      <tr key={index} onClick={() => previewObject(item)} style={{cursor:'pointer'}}>
+                                                        <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
+                                                    
+                                                      </tr>
 
-                                                  </> :
-                                                  <>
+                                                    </> :
+                                                    <>
 
-                                                  </>}
+                                                    </>}
 
-                                              </>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                        <Typography variant="body2"  style={{ fontSize: '11px', color: "#fff",backgroundColor:'#2a68af' }} className=' p-1'>Attached Documents </Typography>
+                                                </>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </>:<></>}
+                                        {relatedDocuments.length > 0 ?<>
+                                        <Typography variant="body2"  style={{ fontSize: '11px', color: "#fff",backgroundColor:'#1d3557' }} className=' p-1'>Attached Documents ({relatedDocuments.length}) </Typography>
                                         <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
                                           <tbody>
                                            
@@ -481,11 +596,11 @@ const DocumentList = (props) => {
                                             ))}
                                           </tbody>
                                         </table>
-
+                                        </>:<></>}
                                       </>
                                       :
                                       <>
-                                        <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No attached Documents</p>
+                                        <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
                                       </>
                                     }
                                   </>
@@ -513,8 +628,8 @@ const DocumentList = (props) => {
         </div>
 
         {/* Object View List */}
-        <div className="col-md-7 col-sm-12   bg-white" style={{ height: '100vh' ,overflowY:'scroll',scrollBehavior:'smooth'}}>
-          <ObjectData vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} />
+        <div className="col-md-8 col-sm-12 p-0  bg-white shadow-lg" style={{scrollBehavior:'smooth'}}>
+          <ObjectData transformFormValues={transformFormValues}   formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile}  loadingobject={loadingobject}/>
         </div>
       </div>
 
