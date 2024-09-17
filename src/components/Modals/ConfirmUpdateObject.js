@@ -33,12 +33,15 @@ const ConfirmUpdateDialog = (props) => {
 
             </DialogContent>
             <DialogActions>
-                <Button onClick={props.onClose}>Discard</Button>
+                <Button onClick={
+                    props.discardChange  
+                }>
+                    Discard
+                </Button>
                 <Button
-                    onClick={() => {
-                        props.onConfirm(); // Call onConfirm only when the confirm button is clicked
-                        props.onClose();
-                    }}
+                    onClick={
+                        props.onConfirm   
+                    }
                     color="primary"
                 >
                     Save

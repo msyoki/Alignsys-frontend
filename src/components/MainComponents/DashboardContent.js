@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
-import {  Button } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 
 import { Typography } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
@@ -13,7 +13,7 @@ import ObjectPropValue from '../ObjectPropValue';
 import * as constants from '../Auth/configs'
 
 
- import GetIcon from '../GetIcon'
+import GetIcon from '../GetIcon'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   // Accordion,
@@ -67,20 +67,24 @@ const DocumentList = (props) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [base64, setBase64] = useState('')
   const [extension, setExtension] = useState('')
-  const [loadingfile,setLoadingFile]=useState(false)
-  const [loadingobject,setLoadingObject]=useState(false)
+  const [loadingfile, setLoadingFile] = useState(false)
+  const [loadingobject, setLoadingObject] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [uptatingObject,setUpdatingObject]=useState(false)
+  const [uptatingObject, setUpdatingObject] = useState(false)
+  const [selectedObkjWf, setSelectedObjWf] = useState({})
+  const [currentState, setCurrentState] = useState({})
+  const [selectedState, setSelectedState] = useState({});
+
 
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
-  
+
 
   const relatedObjects = linkedObjects.filter(item => item.objectID !== 0);
-  const relatedDocuments =linkedObjects.filter(item => item.objectID === 0);
- 
+  const relatedDocuments = linkedObjects.filter(item => item.objectID === 0);
 
-  
+
+
 
   // const transformFormValues = () => {
   //   console.log( {
@@ -93,72 +97,118 @@ const DocumentList = (props) => {
   //     vaultGuid: props.selectedVault?props.selectedVault.guid:"" // Ensure you replace "string" with the actual vaultGuid
   //   })
   // };
-  const transformFormValues = () => {
-    const requestData ={
 
+
+  const transformFormValues = async() => {
+    setUpdatingObject(true);
+    const requestData = {
       objectid: selectedObject.id,
       objectypeid: selectedObject.objectID,
       classid: selectedObject.classID,
       props: Object.entries(formValues).map(([id, { value, datatype }]) => {
         // Transform value based on its datatype
         let transformedValue;
-  
+
         switch (datatype) {
           case 'MFDatatypeMultiSelectLookup':
-            transformedValue = value.join(", ");  // Convert array to a comma-separated string
+            transformedValue = value.join(", "); // Convert array to a comma-separated string
             break;
           case 'MFDatatypeBoolean':
-            transformedValue = value ? "true" : "false";  // Convert boolean to string "true" or "false"
+            transformedValue = value ? "true" : "false"; // Convert boolean to string "true" or "false"
             break;
           case 'MFDatatypeMultiLineText':
-            transformedValue = value;  // Keep the string as is
+            transformedValue = value; // Keep the string as is
             break;
           case 'MFDatatypeLookup':
           case 'MFDatatypeNumber':
-            transformedValue = value.toString();  // Convert number to string
+            transformedValue = value.toString(); // Convert number to string
             break;
           default:
-            transformedValue = value;  // Default case, just in case there's an unexpected datatype
+            transformedValue = value; // Default case, just in case there's an unexpected datatype
             break;
         }
-  
+
         return {
-          id: parseInt(id, 10),  // Convert string ID to number
+          id: parseInt(id, 10), // Convert string ID to number
           value: transformedValue,
-          datatype
+          datatype,
         };
       }),
-      vaultGuid: props.selectedVault ? props.selectedVault.guid : ""  // Ensure you replace "string" with the actual vaultGuid
+      vaultGuid: props.selectedVault ? props.selectedVault.guid : "", // Ensure vaultGuid is correct
     };
-    console.log(requestData)
-    setUpdatingObject(true)
-    setDialogOpen(true)
+
     const headers = {
-      'accept': '*/*',
-      'Content-Type': 'application/json'
+      accept: '*/*',
+      'Content-Type': 'application/json',
     };
-    
-    const updateObjectProps = async () => {
-      try {
-        
-        // Make the PUT request using axios
-        const response = await axios.put(`${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`, requestData, { headers });
-        setFormValues({})
-        setUpdatingObject(false)
-        setDialogOpen(false)
-        
-        // Handle the response
-        console.log('Response:', response.data);
-      } catch (error) {
-        // Handle any errors
-        console.error('Error:', error);
+
+    try {
+      const response = await axios.put(
+        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+        requestData,
+        { headers }
+      );
+
+      // If successful, update the UI and reload object metadata if no state is selected
+      if (selectedState === undefined) {
+        reloadObjectMetadata();
       }
-    };
-    
-    // Call the function
-    updateObjectProps();
+
+      // Reset the form and close the dialog
+      setFormValues({});
+      setDialogOpen(false);
+    } catch (error) {
+      // Handle any errors
+      setDialogOpen(false);
+      console.error('Error:', error);
+    }
   };
-  
+
+
+  const transitionState = async () => {
+    setUpdatingObject(true)
+    const data = {
+      vaultGuid: `${props.selectedVault.guid}`,    // Replace with actual value
+      objectTypeId: selectedObject.objectID,        // Replace with actual value
+      objectId: selectedObject.id,            // Replace with actual value
+      nextStateId: selectedState.id,         // Replace with actual value
+    };
+
+    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
+      headers: {
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      }
+    })
+      .then(response => {
+        setSelectedState({})
+        if (formValues === undefined) {
+          reloadObjectMetadata()
+        }
+
+        setDialogOpen(false)
+      })
+      .catch(error => {
+        setDialogOpen(false)
+        console.error('Error:', error);
+      });
+
+  }
+
+  const updateObjectMetadata = () => {
+    if (Object.keys(formValues || {}).length > 0) {
+      transformFormValues()
+    }
+    if (selectedState.title) {
+      transitionState()
+    }
+    
+    setUpdatingObject(false)
+    reloadObjectMetadata()
+  }
+
+
+
 
   const handleAccordionChange = (index) => (event, isExpanded) => {
     setSelectedIndex(isExpanded ? index : null);
@@ -177,7 +227,7 @@ const DocumentList = (props) => {
     try {
       let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}`
       const response = await axios.get(url);
-    
+
       setLinkedObjects(response.data)
       setLoadingObjects(false)
     }
@@ -189,91 +239,146 @@ const DocumentList = (props) => {
     }
   }
 
+  const reloadObjectMetadata = () => {
+    if (selectedObject.objectID === 0) {
+
+      previewObject(selectedObject)
+    }
+    else {
+
+      previewSublistObject(selectedObject)
+    }
+  }
+
 
   const previewObject = async (item) => {
-    if(Object.keys(formValues || {}).length > 0 ){
+    if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
       handleOpenDialog();
-     
     }
-    setLoadingObject(true)
-    // console.log(formValues)
-    setFormValues({})
-    getLinkedObjects(item.id, item.classID, item.objectID)
-    setSelectedObject(item)
-    try {
-      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
-      setPreviewObjectProps(propsResponse.data);
-      setLoadingObject(false)
-    } catch (error) {
-      console.error('Error fetching view objects:', error);
-      setLoadingObject(false)
+    else {
+      setSelectedState({})
+      setLoadingObject(true)
+      // console.log(formValues)
+      setFormValues({})
+      getLinkedObjects(item.id, item.classID, item.objectID)
+      setSelectedObject(item)
+      getSelectedObjWorkflow(item.objectID, item.id)
+
+      try {
+        const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
+        setPreviewObjectProps(propsResponse.data);
+        setLoadingObject(false)
+      } catch (error) {
+        console.error('Error fetching view objects:', error);
+        setLoadingObject(false)
+      }
+      setBase64('');
+      setExtension('');
     }
-    setBase64('');
-    setExtension('');
-    
+
   };
 
-
-
-  const previewSublistObject = async(item) => {
-    if(Object.keys(formValues || {}).length > 0 ){
-      handleOpenDialog();
-    }
-    setLoadingObject(true)
+  const discardChange = () => {
+    setSelectedState({})
     setFormValues({})
-    setSelectedObject(item)
-    try {
-      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
-      setPreviewObjectProps(propsResponse.data);
-      setLoadingObject(false)
-    } catch (error) {
-      console.error('Error fetching view objects:', error);
-      setLoadingObject(false)
-    }
+  }
 
-    if (item.objectID === 0) {
-      setLoadingFile(true)
+  const previewSublistObject = async (item) => {
+    if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
+      handleOpenDialog();
+    } else {
+      setSelectedState({})
+      setLoadingObject(true)
+      setFormValues({})
+      setSelectedObject(item)
+      getSelectedObjWorkflow(item.objectID, item.id)
+
       try {
-      
-        const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.objectID}`, {
-          headers: {
-            Accept: '*/*'
-          }
-        });
-        const fileId = filesResponse.data[0].fileID;
-    
-        setSelectedFileId(fileId)
-      
+        const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
+        setPreviewObjectProps(propsResponse.data);
+        setLoadingObject(false)
+      } catch (error) {
+        console.error('Error fetching view objects:', error);
+        setLoadingObject(false)
+      }
 
+      if (item.objectID === 0) {
+        setLoadingFile(true)
         try {
-          const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.objectID}/${fileId}`, {
+
+          const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.objectID}`, {
             headers: {
               Accept: '*/*'
             }
           });
+          const fileId = filesResponse.data[0].fileID;
 
-          setBase64(downloadResponse.data.base64);
-          setLoadingFile(false)
-          setExtension(downloadResponse.data.extension.replace('.', ''));
-        
+          setSelectedFileId(fileId)
 
+
+          try {
+            const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.objectID}/${fileId}`, {
+              headers: {
+                Accept: '*/*'
+              }
+            });
+
+            setBase64(downloadResponse.data.base64);
+            setLoadingFile(false)
+            setExtension(downloadResponse.data.extension.replace('.', ''));
+
+
+          } catch (error) {
+            setLoadingFile(false)
+            console.error('Error downloading file:', error);
+
+          }
         } catch (error) {
           setLoadingFile(false)
-          console.error('Error downloading file:', error);
-         
+          console.error('Error fetching object files:', error);
+
         }
-      } catch (error) {
-        setLoadingFile(false)
-        console.error('Error fetching object files:', error);
-      
       }
+      else {
+        setBase64('');
+        setExtension('');
+      }
+
     }
-    else {
-      setBase64('');
-      setExtension('');
-    }
+
   };
 
+
+  const getSelectedObjWorkflow = async (dataType, objectsId) => {
+    const data = {
+      vaultGuid: props.selectedVault.guid,
+      objectTypeId: dataType,
+      objectId: objectsId
+    };
+
+
+    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/GetObjectworkflowstates`, data, {
+      headers: {
+        'accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+
+        setSelectedObjWf(response.data)
+        console.log(response.data)
+        setCurrentState({
+          stateTitle: response.data.currentStateTitle,
+          stateId: response.data.currentStateid
+        })
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setSelectedObjWf(null)
+
+      });
+  }
 
 
 
@@ -364,272 +469,252 @@ const DocumentList = (props) => {
       <ConfirmUpdateDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        onConfirm={transformFormValues}
+        onConfirm={updateObjectMetadata}
         uptatingObject={uptatingObject}
-        message="Would you like to save the changes edited?"
+        message="Would you like to save the changes you made?"
+        discardChange={discardChange}
       />
       {/* <FileUpdateModal isOpen={isModalOpenUpdateFile} onClose={() => setIsModalOpenUpdateFile(false)} selectedFile={selectedObject} refreshUpdate={refreshUpdate} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
-      <Box
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1px',
-          fontSize:'12px !important',
-          backgroundColor: '#1d3557',
-          color: '#ffffff',
-        }}
-      >
-        {/* Vault information */}
-        <Box style={{ display: 'flex', alignItems: 'center' }}>
-          {/* <img src={logo} alt="logo" style={{ width: '8%', marginRight: '10px' }} /> */}
-          <h4 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h4>
-          <i className="fas fa-hdd mx-2" style={{ fontSize: '20px' }}></i>
-          <VaultSelectForm activeVault={props.selectedVault} />
-          <div
-            onClick={props.getVaultObjects}
-            className="create-button mx-2"
-            style={{
-              color: '#fff',
-              width: '44px',
-              height: '38px',
-              borderRadius: '50%',
-              backgroundColor: '#1d3557',
-              borderColor: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease',
-             
-            }}
-          >
-            <i className="fas fa-plus" style={{ fontSize: '28px' }}></i>
-          </div>
 
-          {/* Home Button */}
-          <div
-            className="home-button mx-2"
-            style={{
-              color: '#fff',
-              width: '40px',
-              height: '38px',
-              borderRadius: '50%',
-              backgroundColor: '#1d3557',
-              borderColor: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease',
-            }}
-            onClick={reloadPage}
-          >
-            <i className="fas fa-home" style={{ fontSize: '28px' }}></i>
-          </div>
-         
-        </Box>
-
-        {/* Buttons */}
-        <Box style={{ display: 'flex', alignItems: 'center' }}>
-          {/* Create Button */}
-
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            color="text.white"
-            fontSize="12.5px"
-
-          >
-
-            <Box mr={1}>{props.user.first_name} {props.user.last_name}</Box>
-            <Box mr={3} >
-              <NetworkIcon />
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-      <div className="row p-2"  >
+      <div className="row bg"  >
 
         {/* Object List  */}
-        <div className="col-md-4 col-sm-12  p-1" style={{ height: '100vh' }}>
+        <div className="col-md-5 col-sm-12 p-0" style={{ height: '100vh', overflow: 'clip' }}>
+          <Box
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '2px',
+              fontSize: '12px !important',
+              backgroundColor: '#1d3557',
+              color: '#ffffff',
+            }}
+          >
+
+            <Box style={{ display: 'flex', alignItems: 'center' }} className='mx-1'>
+
+              <h4 className="text-center p-2 mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h4>
+              <i className="fas fa-hdd mx-2" style={{ fontSize: '20px' }}></i>
+              <VaultSelectForm activeVault={props.selectedVault} />
+            </Box>
 
 
-          <form onSubmit={handleSearch} >
+            <Box style={{ display: 'flex', alignItems: 'left' }}>
+
+              <Box
+                display="flex"
+                justifyContent="flex-end"
+                alignItems="center"
+                color="text.white"
+                fontSize="12.5px"
+
+              >
+
+                <Box mr={1}>{props.user.first_name} {props.user.last_name}</Box>
+                <Box mr={3} >
+                  <NetworkIcon />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
+          <div className='p-2'>
 
 
-            <div className="input-group d-flex p-2" >
-              <input
+            <form onSubmit={handleSearch} className='mx-2'>
 
-                className="form-control form-control-sm"
-                type="text"
-                required
-                placeholder="Search term ... "
-                value={props.searchTerm}
-                onChange={(e) => props.setSearchTerm(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                size="medium"
-                style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff' , color:'#1d3557'}} 
-                type="submit"
-                className='shadow-lg mx-1'
+
+              <div className="input-group d-flex mx-3 my-2" >
+                <i onClick={reloadPage} className="fas fa-home text-white " style={{ fontSize: '28px' }}></i>
+
+                <i onClick={props.getVaultObjects} className="fas fa-plus text-white mx-3" style={{ fontSize: '28px' }}></i>
+
+                <input
+
+                  className="form-control form-control-sm "
+                  type="text"
+                  required
+                  placeholder="Search term ... "
+                  value={props.searchTerm}
+                  onChange={(e) => props.setSearchTerm(e.target.value)}
+                />
+                <button
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff', color: '#1d3557' }}
+                  type="submit"
+                  className='shadow-lg mx-1'
                 >
-                  <i className="fas fa-search mx-1" style={{fontSize:'20px'}}></i>   <span className='mx-1'>Search</span> 
-                
-              </Button>
-       
+                  <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>   <span className='mx-1'>Search</span>
 
+                </button>
+
+              </div>
+
+              <TransitionAlerts setOpen={setOpenAlert} open={openAlert} alertSeverity={alertSeverity} alertmsg={alertMsg} />
+
+
+            </form>
+            {/* <p className="text-center my-2">Requisition # {props.data.requisitionNumber}</p> */}
+            <div className="table-responsive-sm   bg-white p-3"  >
+              {loading ? <Loader /> :
+                <>
+                  {/* Search Results */}
+                  {props.data.length > 0 ?
+                    <>
+
+                      <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Search Results </h6>
+
+                      <div style={{ height: '60vh', overflowY: 'scroll' }} className='shadow-lg p-4'>
+                        {props.data.map((item, index) =>
+                          <Accordion key={index}
+                            expanded={selectedIndex === index}
+                            onChange={handleAccordionChange(index)}
+                            sx={{
+                              border: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
+                              '&:not(:last-child)': {
+                                borderBottom: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
+                              },
+                              '&::before': {
+                                display: 'none',
+                              },
+                            }} >
+                            {item.objectID === 0 ? <>
+                              <AccordionSummary onClick={() => previewSublistObject(item)} expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${index}a-content`}
+                                id={`panel${index}a-header`}
+                                sx={{
+                                  bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                }}
+                                className='shadow-sm'
+                              >
+                                {/* <Typography variant="body1" style={{ fontSize: '12px' }}><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography> */}
+                                <Typography variant="body1" style={{ fontSize: '12px' }}><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} />  {item.title} </Typography>
+                              </AccordionSummary>
+
+
+                            </> :
+                              <AccordionSummary onClick={() => previewObject(item)} expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${index}a-content`}
+                                id={`panel${index}a-header`}
+                                sx={{
+                                  bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                }}
+                                className='shadow-sm'
+                              >
+                                <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> {item.title} </Typography>
+                                {/* <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography> */}
+                              </AccordionSummary>
+                            }
+                            {linkedObjects ?
+                              <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
+                                {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
+                                {linkedObjects.requisitionID === item.internalID ? <>
+                                  {loadingobjects ?
+                                    <div className='text-center'>
+                                      {/* <Spinner
+                          thickness='4px'
+                          speed='0.65s'
+                          emptyColor='white.200'
+                          color='blue.500'
+                          size='xl'
+                          style={{ width: '40px', height: '40px' }}
+                        /> */}
+
+                                      <CircularProgress style={{ width: '40px', height: '40px' }} />
+
+                                      <p className='text-dark ' style={{ fontSize: '11px' }}>Searching attachments...</p>
+                                    </div>
+                                    :
+                                    <>
+                                      {linkedObjects.length > 0 ?
+                                        <>
+                                          {relatedObjects.length > 0 ? <>
+                                            <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className=' p-1'>Related Objects ({relatedObjects.length}) </Typography>
+                                            <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
+
+                                              <tbody>
+
+                                                {linkedObjects.map((item, index) => (
+                                                  <>
+                                                    {item.objectID != 0 ?
+                                                      <>
+
+
+                                                        <tr key={index} onClick={() => previewObject(item)} style={{ cursor: 'pointer' }}>
+                                                          <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
+
+                                                        </tr>
+
+                                                      </> :
+                                                      <>
+
+                                                      </>}
+
+                                                  </>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          </> : <></>}
+                                          {relatedDocuments.length > 0 ? <>
+                                            <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className=' p-1'>Attached Documents ({relatedDocuments.length}) </Typography>
+                                            <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
+                                              <tbody>
+
+                                                {linkedObjects.map((item, index) => (
+                                                  <>
+                                                    {item.objectID === 0 ?
+                                                      <>
+
+                                                        <tr key={index} onClick={() => previewSublistObject(item)} style={{ cursor: 'pointer' }}>
+                                                          <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
+                                                        </tr>
+                                                      </> :
+                                                      <>
+
+                                                      </>}
+
+                                                  </>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          </> : <></>}
+                                        </>
+                                        :
+                                        <>
+                                          <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
+                                        </>
+                                      }
+                                    </>
+                                  }
+                                </> : <></>}
+                              </AccordionDetails>
+                              :
+                              <>
+                              </>
+                            }
+                          </Accordion>
+                        )}
+                      </div>
+                    </>
+                    :
+                    <>
+                      {/* Views */}
+                      <ViewsList viewableobjects={props.viewableobjects} previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingobjects={loadingobjects} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
+                    </>
+                  }
+                </>
+              }
             </div>
 
-            <TransitionAlerts setOpen={setOpenAlert} open={openAlert} alertSeverity={alertSeverity} alertmsg={alertMsg} />
-
-
-          </form>
-          {/* <p className="text-center my-2">Requisition # {props.data.requisitionNumber}</p> */}
-          <div className="table-responsive-sm shadow-lg  bg-white"  >
-            {loading ? <Loader /> :
-              <>
-                {/* Search Results */}
-                {props.data.length > 0 ?
-                  <>
-
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Search Results </h6>
-
-                    <div style={{ height: '65vh', overflowY: 'scroll' }} className='p-3 shadow-lg'>
-                      {props.data.map((item, index) =>
-                        <Accordion key={index}
-                          expanded={selectedIndex === index}
-                          onChange={handleAccordionChange(index)}
-                          sx={{
-                            border: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
-                            '&:not(:last-child)': {
-                              borderBottom: selectedIndex === index ? '2px solid #2a68af' : '1px solid rgba(0, 0, 0, .125)',
-                            },
-                            '&::before': {
-                              display: 'none',
-                            },
-                          }} >
-                          {item.objectID === 0 ? <></> :
-                            <AccordionSummary onClick={() => previewObject(item)} className='shadow-sm'  expandIcon={<ExpandMoreIcon /> }
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                              }} >
-                              <Typography  variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography>
-                            </AccordionSummary>
-                          }
-                          {linkedObjects ?
-                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
-                              {/* <NewFileFormModal internalId={`${selectedObject.internalID}`} selectedObjTitle={selectedObject.title} searchTerm={props.searchTerm} handleSearch={props.handleSearch2} docClasses={props.docClasses} allrequisitions={props.allrequisitions} user={props.user} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
-                              {linkedObjects.requisitionID === item.internalID ? <>
-                                {loadingobjects ?
-                                  <div className='text-center'>
-                                    {/* <Spinner
-                                      thickness='4px'
-                                      speed='0.65s'
-                                      emptyColor='white.200'
-                                      color='blue.500'
-                                      size='xl'
-                                      style={{ width: '40px', height: '40px' }}
-                                    /> */}
-
-                                    <CircularProgress style={{ width: '40px', height: '40px' }} />
-
-                                    <p className='text-dark ' style={{ fontSize: '11px' }}>Searching attachments...</p>
-                                  </div>
-                                  :
-                                  <>
-                                    {linkedObjects.length > 0 ?
-                                      <>
-                                        {relatedObjects.length > 0 ?<>
-                                          <Typography variant="body2" style={{ fontSize: '11px', color: "#fff",backgroundColor:'#1d3557' }} className=' p-1'>Related Objects ({relatedObjects.length}) </Typography>
-                                          <table id='createdByMe' className="table " style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
-                                        
-                                            <tbody>
-
-                                              {linkedObjects.map((item, index) => (
-                                                <>
-                                                  {item.objectID != 0 ?
-                                                    <>
-
-
-                                                      <tr key={index} onClick={() => previewObject(item)} style={{cursor:'pointer'}}>
-                                                        <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
-                                                    
-                                                      </tr>
-
-                                                    </> :
-                                                    <>
-
-                                                    </>}
-
-                                                </>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </>:<></>}
-                                        {relatedDocuments.length > 0 ?<>
-                                        <Typography variant="body2"  style={{ fontSize: '11px', color: "#fff",backgroundColor:'#1d3557' }} className=' p-1'>Attached Documents ({relatedDocuments.length}) </Typography>
-                                        <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }} >
-                                          <tbody>
-                                           
-                                            {linkedObjects.map((item, index) => (
-                                              <>
-                                                {item.objectID === 0 ?
-                                                  <>
-
-                                                    <tr key={index} onClick={() => previewSublistObject(item)} style={{cursor:'pointer'}}>
-                                                    <td><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title}</td>
-                                                    </tr>
-                                                  </> :
-                                                  <>
-
-                                                  </>}
-
-                                              </>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                        </>:<></>}
-                                      </>
-                                      :
-                                      <>
-                                        <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
-                                      </>
-                                    }
-                                  </>
-                                }
-                              </> : <></>}
-                            </AccordionDetails>
-                            :
-                            <>
-                            </>
-                          }
-                        </Accordion>
-                      )}
-                    </div>
-                  </>
-                  :
-                  <>
-                    {/* Views */}
-                    <ViewsList viewableobjects={props.viewableobjects} previewSublistObject={previewSublistObject} selectedObject={selectedObject} linkedObjects={linkedObjects} loadingobjects={loadingobjects} selectedVault={props.selectedVault} setPreviewObjectProps={setPreviewObjectProps} setLoadingPreviewObject={setLoadingPreviewObject} previewObject={previewObject} />
-                  </>
-                }
-              </>
-            }
           </div>
-
         </div>
 
         {/* Object View List */}
-        <div className="col-md-8 col-sm-12 p-0  bg-white shadow-lg" style={{scrollBehavior:'smooth'}}>
-          <ObjectData transformFormValues={transformFormValues}   formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile}  loadingobject={loadingobject}/>
+        <div className="col-md-7 col-sm-12 p-0 shadow-sm" style={{ height: '100vh', overflow: 'clip', backgroundColor: "#e5e5e5" }}>
+          <ObjectData openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>
 

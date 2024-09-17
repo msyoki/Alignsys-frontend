@@ -4,22 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Dashboard.css'
 import '../styles/Custombuttons.css'
 import '../styles/Navbar.css'
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import { Link } from "react-router-dom";
-import Navbar from '../components/Navbar';
-import ImageAvatars from '../components/Avatar';
+
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import AccordionUsage from '../components/Accordion';
-import logo from "../images/ZF.png";
+
 import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureList';
 import * as constants from '../components/Auth/configs'
-import Chatbot from '../components/Chatbot';
 
 
 
@@ -70,7 +65,7 @@ function Dashboard() {
   const [allrequisitions, setRequisitions] = useState([])
   const [selectedVault, setSelectedVault] = useState(null)
   const [vaultObjectsList, setVaultObjectsList] = useState(null)
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
   const { logoutUser } = useContext(Authcontext);
 
@@ -195,7 +190,7 @@ function Dashboard() {
 
   return (
     <>
-      <Chatbot/>
+
       <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={() => setOpenObjectModal(false)} selectedVault={selectedVault} vaultObjectsList={vaultObjectsList} />
       <div className="dashboard bg-dark">
 
@@ -223,7 +218,7 @@ function Dashboard() {
                   <span className='list-text '> Settings</span>
                 </li> */}
                 <li style={{ display: 'flex', alignItems: 'center' }} onClick={adminPage} >
-                  <i className="fas fas fa-server mx-2" style={{ fontSize: '20px' }}></i>
+                  <i className="fas fas fa-user-shield mx-2" style={{ fontSize: '20px' }}></i>
                   <span className='list-text '> Admin</span>
                 </li>
 
@@ -244,7 +239,7 @@ function Dashboard() {
                   <li onClick={getVaultObjects} className='mt-5' ><i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
                   <li><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                   {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
-                  <li onClick={adminPage}><i className="fas fas fa-server" style={{ fontSize: '20px' }}></i></li>
+                  <li onClick={adminPage}><i className="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
                   <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-chevron-right" style={{ fontSize: '20px' }}></i></li>
                 </>
@@ -255,7 +250,7 @@ function Dashboard() {
     {sidebarOpen ? 'Hide' : 'Show'}
   </div> */}
         </div>
-        <div className="content" style={{ overflowY: 'scroll' }}>
+        <div className="content" style={{ height:'100vh',overflowY: 'scroll' }}>
           <DashboardContent
             searchTerm={searchTerm}
             data={data}

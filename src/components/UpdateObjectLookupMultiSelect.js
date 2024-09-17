@@ -98,6 +98,7 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
+        className='my-2'
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

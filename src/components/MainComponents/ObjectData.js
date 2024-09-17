@@ -8,6 +8,15 @@ import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../UpdateObjectLookupMultiSelect';
 import LookupSelect from '../UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
+import Bot from '../Bot';
+
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
+
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -47,6 +56,24 @@ const formatDateForInput = (dateString) => {
 
 export default function ObjectData(props) {
   const [value, setValue] = useState(0);
+
+  const changeState = () => {
+
+    alert("change state")
+  }
+
+  // Handle state change
+  const handleStateChange = (event) => {
+    const selectedTitle = event.target.value;
+    const selectedState = props.selectedObkjWf.nextStates.find(state => state.title === selectedTitle);
+
+    if (props.selectedState) {
+      props.setSelectedState(selectedState);
+
+    }
+
+  };
+
 
   // const [formValues, setFormValues] = useState({});
 
@@ -121,26 +148,28 @@ export default function ObjectData(props) {
   };
 
   return (
-    <Box sx={{ display: 'flex' }} >
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh',backgroundColor: '#e5e5e5' }} className='shadow-lg'>
+    <Box  >
+      <Box sx={{ display: 'flex', flexDirection: 'column' }} className='bg-white'>
         <Tabs
-          orientation="vertical"
+          // orientation="vertical"
           variant="scrollable"
           value={value}
           onChange={handleChange}
           aria-label="Vertical tabs example"
-          sx={{ borderColor: 'divider', marginTop: '100%' }}
+          sx={{ borderColor: 'divider' }}
           className='bg-white'
         >
-          <Tab label="Metadata" {...a11yProps(0)} />
-          <Tab label="Preview" {...a11yProps(1)} />
+          <Tab style={{ textTransform: 'none' }} label="Metadata" {...a11yProps(0)} />
+          <Tab style={{ textTransform: 'none' }} label="Preview" {...a11yProps(1)} />
+          <Tab style={{ textTransform: 'none' }} label="AI Chatbot" {...a11yProps(2)} />
+
         </Tabs>
       </Box>
-      <Box sx={{ flexGrow: 1 }} >
-        <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#e5e5e5', height: '100vh' }}>
+      <Box sx={{ flexGrow: 1, margin: 0 }} >
+        <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#e5e5e5', height: '90vh', padding: '0%', width: '100%' }}>
           {props.previewObjectProps.length < 1 && (
             <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-              <i className="fas fa-tag" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+              <i className="fas fa-tag my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
               {props.loadingobject ? <>
                 <Box sx={{ width: '50%' }} className="my-2">
                   <LinearProgress />
@@ -148,76 +177,74 @@ export default function ObjectData(props) {
                 <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Loading metadata...</Typography>
               </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Metadata Card</Typography></>}
 
-              <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '11px' }}>
+              <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
                 Select an object to view its metadata
               </Typography>
             </Box>
           )}
           {props.previewObjectProps.length > 0 && (
+
             <Box>
-              <Box sx={{ mt: 2 }} className="my-1" display="flex" justifyContent="space-between">
-                <Box sx={{ width: '60%', mb: 1, display: 'flex', alignItems: 'center' }}>
-                  {Object.keys(props.formValues || {}).length > 0 && (
-                    <Box>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => console.log(props.transformFormValues())}
-                        sx={{ textTransform: 'none', mr: 1 }}
-                      >
-                        <i className="fas fa-save" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
-                        <small>Save</small>
-                      </Button>
-                    </Box>
-                  )}
-                  {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                    <Box >
-                      <SignButton objectid={props.selectedObject.id} fileId={props.selectedFileId} vault={props.vault.guid} email={props.email} />
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        onClick={downloadFile}
-                        sx={{ textTransform: 'none', ml: 1 }}
-                      >
-                        <i className="fas fa-download" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
-                        <small>Download</small>
-                      </Button>
-                    </Box>
-                  )}
+              <Box className=" bg-white p-1  my-1 shadow-lg" >
+                <Box className="my-1 bg-white" display="flex" justifyContent="space-between">
 
 
-                </Box>
+                  <Box className="input-group" sx={{ width: '50%', mb: 1, display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                    <span className='text-center mx-3 '><span style={{ color: '#1d3557' }} className='mx-1 fas fa-tag'></span><span style={{ color: '#1d3557' }}> Class:  </span>  {getPropValue('Class')}</span>
 
-                <Box sx={{ textAlign: 'end', fontSize: '12px', width: '40%' }}>
-                  <p className='my-0'>Created: {getPropValue('Created')}</p>
-                  <p className='my-0'>Last modified: {getPropValue('Last modified')}</p>
-                </Box>
-              </Box>
-           
-              <Box sx={{ width: '100%', height: '80vh', overflowY: 'scroll' }} className='shadow-lg bg-white '>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }} className="my-3">
-                  <Typography variant="body2" sx={{ color: '#1d3557', fontWeight: 'bold', flexBasis: '30%', fontSize: '14px', textAlign: 'end' }}>
-                    Class:
-                  </Typography>
-                  <Box sx={{ flexBasis: '70%', fontSize: '14px', textAlign: 'start', ml: 1 }}>
-                    {getPropValue('Class')}
+
+
+                  </Box>
+
+                  <Box className='input-group' sx={{ textAlign: 'end', fontSize: '12px', width: '50%', fontSize: '10px' }}>
+                    {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
+                      <Box>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          onClick={() => props.openDialog()}
+                          sx={{ textTransform: 'none', mr: 1 }}
+                        >
+                          <i className="fas fa-save" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
+                          <small> Save </small>
+                        </Button>
+                      </Box>
+                    )}
+
+                    {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                      <Box >
+                        <SignButton objectid={props.selectedObject.id} fileId={props.selectedFileId} vault={props.vault.guid} email={props.email} />
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          onClick={downloadFile}
+                          sx={{ textTransform: 'none', ml: 1 }}
+                        >
+                          <i className="fas fa-download" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
+                          <small>Download</small>
+                        </Button>
+
+                      </Box>
+                    )}
+
                   </Box>
                 </Box>
+              </Box>
+              <Box className='shadow-lg p-4 shadow-sm' sx={{ width: '100%', height: '60vh', overflowY: 'scroll', backgroundColor: '#e8f9fa' }}>
 
                 <List sx={{ p: 0 }}>
                   {filteredProps.map((item, index) => (
                     <ListItem key={index} sx={{ p: 0 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-
-                        <Typography variant="body2" sx={{ color: '#1d3557', fontWeight: 'bold', flexBasis: '30%', fontSize: '12px', textAlign: 'end' }}>
+                        <Typography className='my-2' variant="body2" sx={{ color: '#1d3557', fontWeight: 'bold', flexBasis: '30%', fontSize: '12px', textAlign: 'end' }}>
                           {item.propName}:
                         </Typography>
 
                         <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                          {item.propName === 'Class' && <>{item.value}</>}
 
+                          {item.propName === 'Class' && <>{item.value}</>}
                           {item.datatype === 'MFDatatypeText' && (
                             <input
                               value={props.formValues?.[item.id]?.value || ''}
@@ -226,17 +253,30 @@ export default function ObjectData(props) {
                               className='form-control form-control-sm my-1'
                             />
                           )}
+                          {item.propName === "Assignment description" ?
+                            <>
+                              <textarea
+                                placeholder={item.value}
+                                value={props.formValues?.[item.id]?.value || ''}
+                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                rows={2}
+                                disabled
+                                className='form-control form-control-sm my-1'
+                              />
+                            </> :
+                            <>
+                              {item.datatype === 'MFDatatypeMultiLineText' && (
+                                <textarea
+                                  placeholder={item.value}
+                                  value={props.formValues?.[item.id]?.value || ''}
+                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                  rows={2}
+                                  className='form-control form-control-sm my-1'
+                                />
+                              )}
 
-                          {item.datatype === 'MFDatatypeMultiLineText' && (
-                            <textarea
-                              placeholder={item.value}
-                              value={props.formValues?.[item.id]?.value || ''}
-                              onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                              rows={2}
-                              className='form-control form-control-sm my-1'
-                            />
-                          )}
-
+                            </>
+                          }
                           {item.datatype === 'MFDatatypeDate' && (
                             <input
                               placeholder={item.value}
@@ -246,23 +286,22 @@ export default function ObjectData(props) {
                               className='form-control form-control-sm my-1'
                             />
                           )}
-
                           {item.datatype === 'MFDatatypeBoolean' && (
-                            <div>
-                              <Select
-                                size='small'
-                                value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                displayEmpty
-                                fullWidth
-                              >
-                                <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem value={true}>True</MenuItem>
-                                <MenuItem value={false}>False</MenuItem>
-                              </Select>
-                            </div>
-                          )}
 
+                            <Select
+                              size='small'
+                              value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
+                              onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                              displayEmpty
+                              fullWidth
+                              className='form-control form-control-sm bg-white my-1'
+                            >
+                              <MenuItem value=""><em>None</em></MenuItem>
+                              <MenuItem value={true}>No</MenuItem>
+                              <MenuItem value={false}>Yes</MenuItem>
+                            </Select>
+
+                          )}
                           {item.datatype === 'MFDatatypeMultiSelectLookup' && (
                             <LookupMultiSelect
                               propId={item.id}
@@ -270,14 +309,11 @@ export default function ObjectData(props) {
                               value={props.formValues?.[item.id]?.value || []}  // Ensure `value` is an array for multi-select
                               selectedVault={props.vault}
                               label={item.propName}
-                              className='my-1'
+
                               itemValue={item.value}  // Assuming item.value is a string of ;-separated values
+
                             />
                           )}
-
-
-
-
                           {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
                             <LookupSelect
                               propId={item.id}
@@ -285,20 +321,93 @@ export default function ObjectData(props) {
                               onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
                               value={props.formValues?.[item.id]?.value || ''}
                               selectedVault={props.vault}
-                              className='my-1'
+
                               itemValue={item.value}
                             />
                           )}
+
                         </Box>
                       </Box>
                     </ListItem>
                   ))}
                 </List>
+
+                {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }} className="my-3">
+                  <Typography variant="body2" sx={{ color: '#1d3557', fontWeight: 'bold', flexBasis: '30%', fontSize: '12px', textAlign: 'end' }}>
+                    Assignment Description:
+                  </Typography>
+                  <Box sx={{ flexBasis: '70%', fontSize: '14px', textAlign: 'start', ml: 1 }}>
+                    {props.selectedObkjWf && <>{props.selectedObkjWf.assignmentdesc}</>}
+                  </Box>
+                </Box> */}
+
+              </Box>
+              <Box className="bg-white p-2 shadow-sm my-1" display="flex" justifyContent="space-between">
+
+
+                <Box sx={{ textAlign: 'start', fontSize: '12px', width: '80%' }} >
+                  {props.selectedObkjWf ?
+                    <>
+                      <p className='my-1'>
+                        <i className="fas fa-circle-notch bold text-danger mx-2"></i>
+
+                        <span ><small style={{color:'#1d3557',fontWeight:'bold'}}>Workflow</small> :  {props.selectedObkjWf.workflowTitle}</span>
+                      </p>
+                      <p className='my-1'>
+                        <i className="fas fa-square-full bold text-warning mx-2"></i>
+
+                        <span ><small style={{color:'#1d3557',fontWeight:'bold'}}>State</small> :  {props.currentState.stateTitle}</span>
+                        {props.selectedObkjWf.nextStates ? <>
+                          {/* {props.selectedObkjWf.nextStates.length > 0 ?
+                            <i className="mx-1 fas fa-long-arrow-alt-right text-primary text-bold"></i>
+                            : <></>
+                          } */}
+
+                          <Select
+                            value={props.selectedState.title}
+                            onChange={handleStateChange}
+                            size="small"
+                            sx={{ fontSize: '12px', height: '20px' }}
+                            className='mx-1 '
+                          >
+                            {/* Include the current state as an option */}
+
+                            {props.selectedObkjWf.nextStates.map((state) => (
+                              <MenuItem key={state.id} value={state.title}>
+                                <i className="mx-1 fas fa-long-arrow-alt-right text-primary"></i>  {state.title}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </> : <></>}
+                      </p>
+                    </>
+                    : <>
+                      <p className='my-0'>
+                        {/* <i className="fas fa-network-wired bold text-danger mx-2"></i>
+                        <span style={{color:'#1d3557',fontWeight:'bold'}}> Workflow : </span> */}
+                        <span className='mx-2'> --- </span>
+                      </p>
+                      <p className='my-0'>
+                        {/* <i className="fas fa-square-full bold text-warning mx-2"></i>
+                        <span style={{color:'#1d3557',fontWeight:'bold'}}> State : </span> */}
+                        <span className='mx-2'> --- </span>
+                      </p>
+
+                    </>
+                  }
+                </Box>
+                <Box sx={{ textAlign: 'end', fontSize: '12px', width: '30%', fontSize: '10px' }}>
+                  <p className='my-0'>Created: {getPropValue('Created')}</p>
+                  <p className='my-0'>Last modified: {getPropValue('Last modified')}</p>
+
+
+                </Box>
+
               </Box>
             </Box>
           )}
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={1} style={{ backgroundColor: '#e5e5e5', height: '100vh' }}>
+        <CustomTabPanel value={value} index={1} style={{ backgroundColor: '#e5e5e5', height: '90vh', padding: '0%', width: '100%' }}>
           {props.base64 ? (
             <DynamicFileViewer
               base64Content={props.base64}
@@ -311,24 +420,61 @@ export default function ObjectData(props) {
           ) : (
             <Box
               sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}
+
             >
-              <i className="fas fa-tv" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+              <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
 
               {props.loadingfile ? <>
                 <Box sx={{ width: '50%' }} className="my-2">
                   <LinearProgress />
                 </Box>
                 <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Loading file...</Typography>
-              </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Nothing to Preview</Typography></>}
-              <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '11px' }}>
-                Select a document to view its content
-              </Typography>
+                <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                  Please wait as we load the document
+                </Typography>
+
+              </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Nothing to Preview</Typography>
+                <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                  Select a document to view its content
+                </Typography>
+              </>}
+
             </Box>
           )}
         </CustomTabPanel>
+        <CustomTabPanel value={value} index={2} style={{ backgroundColor: '#e5e5e5', height: '90vh', padding: '0%', width: '100%' }} >
+          {props.base64 && props.extension === 'pdf' ? (
+            <Bot base64={props.base64} objectTitle={props.selectedObject.title} />
+          ) : (
+            <>
+
+              <Box
+                sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}
+              >
+                <i className="fas fa-robot my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+
+                {props.loadingfile ? <>
+                  <Box sx={{ width: '50%' }} className="my-2">
+                    <LinearProgress />
+                  </Box>
+                  <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Starting chat...</Typography>
+                  <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                    Please wait as we load the resources
+                  </Typography>
+                </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>No PDF Selected</Typography>
+                  <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                    Please select a PDF to interact with the chatbot
+                  </Typography>
+                </>}
+
+              </Box>
+            </>
+          )}
+
+        </CustomTabPanel>
       </Box>
 
-  
+
     </Box>
   );
 }

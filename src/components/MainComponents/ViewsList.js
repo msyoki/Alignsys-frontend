@@ -21,7 +21,7 @@ const ViewsList = (props) => {
     const [selectedViewObjects, setSelectedViewObjects] = useState([]);
     const [selectedViewName, setSelectedViewName] = useState('');
     const [selectedViewCategory, setSelectedViewCategory] = useState('');
-    const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
+    const [showOtherViewSublist, setshowOtherViewSublist] = useState(false);
     const [showCommonViewSublist, setshowCommonViewSublist] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(null);
 
@@ -85,13 +85,13 @@ const ViewsList = (props) => {
     }, []);
 
     return (
-        <div >
+        <div style={{ height: '100%' }}>
             {selectedViewObjects.length > 0 ?
                 <>
 
                     {selectedViewObjects.length > 0 ? <>
-                        <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}>  <FontAwesomeIcon icon={faTable} className='mx-3 ' style={{ color: '#1d3557', fontSize: '20px' }} /><span onClick={backHome} style={{ cursor: 'pointer' }}>{selectedViewCategory}</span> <i class="fas fa-chevron-right mx-2" style={{color:'#2a68af'}}></i> {selectedViewName} </h6>
-                        <div style={{ height: '65vh', overflowY: 'scroll' }} className='p-3 shadow-lg'>
+                        <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}>  <FontAwesomeIcon icon={faTable} className='mx-3 ' style={{ color: '#1d3557', fontSize: '20px' }} /><span onClick={backHome} style={{ cursor: 'pointer' }}>{selectedViewCategory}</span> <i class="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></i> {selectedViewName} </h6>
+                        <div style={{ height: '60vh', overflowY: 'scroll' }} className='shadow-lg p-4'>
                             {selectedViewObjects.map((item, index) => (
                                 <Accordion key={index}
 
@@ -106,12 +106,26 @@ const ViewsList = (props) => {
                                             display: 'none',
                                         },
                                     }} >
-                                    {item.objectID === 0 ? <></> :
-                                        <AccordionSummary className='shadow-sm' onClick={() => props.previewObject(item)} expandIcon={<ExpandMoreIcon />}
+                                    {item.objectID === 0 ? <>
+                                        <AccordionSummary onClick={() => props.previewSublistObject(item)} expandIcon={<ExpandMoreIcon />}
                                             aria-controls={`panel${index}a-content`}
                                             id={`panel${index}a-header`}
+                                            sx={{
+                                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                            }} 
+                                              className='shadow-sm'
+                                            >
+                                                {/* <Typography variant="body1" style={{ fontSize: '12px' }}><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography> */}
+                                            <Typography variant="body1" style={{ fontSize: '12px' }}><FileExt guid={props.selectedVault.guid} objectId={item.id} classId={item.classID} /> {item.title} </Typography>
+                                        </AccordionSummary>
+                                    </> :
+                                        <AccordionSummary onClick={() => props.previewObject(item)} expandIcon={<ExpandMoreIcon />}
+                                            aria-controls={`panel${index}a-content`}
+                                            id={`panel${index}a-header`}
+                                            className='shadow-sm'
                                         >
-                                            <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography>
+                                            {/* <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> <ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> - {item.title} </Typography> */}
+                                            <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> {item.title} </Typography>
                                         </AccordionSummary>
                                     }
                                     {props.linkedObjects ?
@@ -221,14 +235,14 @@ const ViewsList = (props) => {
 
 
                     {commonviews.length > 0 ? <>
-                        <h6 onClick={toggleCommonViewSublist} className='text-dark p-2' style={{ fontSize: '12px', backgroundColor: '#e5e5e5', cursor: 'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small  style={{color:'#2a68af'}}>( {commonviews.length} )</small>  </h6>
+                        <h6 onClick={toggleCommonViewSublist} className='text-dark p-2' style={{ fontSize: '12px', backgroundColor: '#e5e5e5', cursor: 'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small style={{ color: '#2a68af' }}>( {commonviews.length} )</small>  </h6>
 
                         {showCommonViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} >
+                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='ml-4 shadow-lg'>
                                 {commonviews.map((view) => (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
 
-                                        <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Common Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                                        <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Common Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} >
                                             <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1d3557', fontSize: '20px' }} />
                                             <span className='list-text'>{view.viewName}</span>
                                         </li>
@@ -242,14 +256,14 @@ const ViewsList = (props) => {
                     </> : <></>}
 
                     {otherviews.length > 0 ? <>
-                        <h6 onClick={toggleOtherViewSublist} className=' text-dark p-2' style={{ fontSize: '12px', backgroundColor: '#e5e5e5', cursor: 'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Other Views <small  style={{color:'#2a68af'}}>( {otherviews.length} )</small> </h6>
+                        <h6 onClick={toggleOtherViewSublist} className=' text-dark p-2' style={{ fontSize: '12px', backgroundColor: '#e5e5e5', cursor: 'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Other Views <small style={{ color: '#2a68af' }}>( {otherviews.length} )</small> </h6>
 
                         {showOtherViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} >
+                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='ml-4 shadow-lg'>
                                 {otherviews.map((view) => (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
 
-                                        <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Other Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} className='my-3'>
+                                        <li onClick={() => fetchViewObjects(view.id, view.viewName, 'Other Views')} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }} >
                                             <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1d3557', fontSize: '20px' }} />
                                             <span className='list-text'>{view.viewName}</span>
                                         </li>

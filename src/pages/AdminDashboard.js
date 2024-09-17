@@ -31,7 +31,10 @@ import UserRegistrationModal from '../components/RegisterUser';
 import BulkUserRegistrationDialog from '../components/RegisterBulkUsers';
 import * as constants from '../components/Auth/configs'
 import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
-import AddPermissionDialog from '../components/Modals/AddVaulObjectPermissionDialog';
+import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
+import { ConstructionOutlined } from '@mui/icons-material';
+import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
+import CreateNewUserGroupDialog from '../components/Modals/CreateNewUserGroupDialog';
 
 
 function CustomTabPanel(props) {
@@ -93,8 +96,10 @@ function AdminDashboard() {
     const [openAddPermissionDialog, setOpenAddPermissionDialog] = useState(false)
     const [objectpermissions, setObjectPermissions] = useState([])
     const [selectedObject, setSelectedObject] = useState([])
-    const [listwithoughtpermissions,setListWithoughtPermissions] = useState({})
-    const [userGroups,setuserGroups]=useState([])
+    const [listwithoughtpermissions, setListWithoughtPermissions] = useState({})
+    const [userGroups, setuserGroups] = useState([])
+    const [selecedGroup,setSelectedGroup] =useState({})
+    const [openGroupUsersDialog,setOpenGroupUsersDialog]=useState(false)
 
 
 
@@ -135,31 +140,45 @@ function AdminDashboard() {
         input.value = capitalizedInput;
     }
 
-    const VaultUsergroups=()=>{
+    const VaultUsergroups = () => {
+
+        let data = JSON.stringify({
+            "vault_guid": selectedVault.guid,
+        });
+        console.log(selectedVault.guid)
+
         let config = {
-        method: 'get',
-        maxBodyLength: Infinity,
-        url: `${constants.auth_api}/api/vault-groups/`,
-        headers: { }
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${constants.auth_api}/api/vault-groups/`,
+            headers: {  'Content-Type': 'application/json'},
+            data: data
         };
         axios.request(config)
-        .then((response) => {
-            setuserGroups(response.data)
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+            .then((response) => {
+                setuserGroups(response.data)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
 
     }
 
-    const handleAddPermission = (guid,object_id) => {
 
-  
+    let selectedGroupUsers= (row)=>{
+        let group= userGroups.find(item=>item.id === row.id)
+        setSelectedGroup(group)
+        setOpenGroupUsersDialog(true)
+    } 
+
+    const handleAddPermission = (guid, object_id) => {
+
+
         let data = JSON.stringify({
             "vault_guid": guid,
             "object_id": object_id
         });
-     
+
 
         let config = {
             method: 'post',
@@ -172,11 +191,11 @@ function AdminDashboard() {
         };
 
         axios.request(config)
-            .then((response) => {  
-               
+            .then((response) => {
+
                 setListWithoughtPermissions(response.data)
                 setOpenAddPermissionDialog(true)
-             
+
             })
             .catch((error) => {
                 console.log(error);
@@ -252,7 +271,7 @@ function AdminDashboard() {
                     isRequired: property.required
                 }))
             };
-          
+
             const emptyItems = [];
             let alertsTriggered = false; // Flag to track if alerts were triggered
 
@@ -300,30 +319,30 @@ function AdminDashboard() {
             // If no alerts were triggered, run another code
             if (!alertsTriggered) {
                 // Your additional code here
-              
-          
+
+
                 let config = {
                     method: 'post',
                     maxBodyLength: Infinity,
                     url: 'http://192.236.194.251:240/api/objectstracture/CreateObjectAdmin',
-                    headers: { 
-                      'Content-Type': 'application/json'
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
-                    data : payload
-                  };
-                  
-                  axios.request(config)
-                  .then((response) => {
-                    setMiniLoader(false)
-                    setObjectName('')
-                    setProperties([])
-                    alert('Object creacted successfully !!');
-                   
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-                  
+                    data: payload
+                };
+
+                axios.request(config)
+                    .then((response) => {
+                        setMiniLoader(false)
+                        setObjectName('')
+                        setProperties([])
+                        alert('Object creacted successfully !!');
+
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
             }
             setMiniLoader(false)
 
@@ -480,7 +499,7 @@ function AdminDashboard() {
         axios.request(config)
             .then((response) => {
 
-              
+
                 setObjectPermissions(response.data)
                 setOpenObjectPermissionsDialog(true)
             })
@@ -513,7 +532,7 @@ function AdminDashboard() {
             }
             const response = await axios.post(`${constants.auth_api}/api/get-vault-objects/`, payload, headers);
             setVaultObjects(response.data);
-      
+
         } catch (error) {
             console.error('Error fetching vault objects:', error);
         }
@@ -529,7 +548,7 @@ function AdminDashboard() {
         try {
             const response = await axios.request(config);
             setOrganizationUsers(response.data)
-          
+
         } catch (error) {
             console.log(error);
         }
@@ -552,7 +571,7 @@ function AdminDashboard() {
                     {sidebarOpen ?
                         <>
                             <li className='mt-5' style={{ display: 'flex', alignItems: 'center' }} onClick={homePage}>
-                                <i className="fas fa-columns   mx-2" style={{ fontSize: '20px' }}></i>
+                                <i className="fas fa-home   mx-2" style={{ fontSize: '20px' }}></i>
                                 <span className='list-text '>Dashboard</span>
                             </li>
 
@@ -575,7 +594,7 @@ function AdminDashboard() {
                             <>
 
                                 {/* <li ><i className="fas fa-layer-group" style={{ fontSize: '20px' }}></i> </li> */}
-                                <li className='mt-5' onClick={homePage}><i className="fas fa-columns" style={{ fontSize: '20px' }}></i></li>
+                                <li className='mt-5' onClick={homePage}><i className="fas fa-home" style={{ fontSize: '20px' }}></i></li>
 
                                 <li ><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
                                 <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
@@ -588,11 +607,10 @@ function AdminDashboard() {
 
             </div>
             <div className="content " style={{ height: '100vh', overflowY: 'scroll' }}>
-                <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions}  open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
-
-                <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject}  selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
-
-                <div className="row  content-container " >
+                <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
+                <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid}  open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
+                <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
+               <div className="row  content-container " >
                     <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#2a68af" }}>
                         <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
 
@@ -729,7 +747,7 @@ function AdminDashboard() {
                                     <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                         <TableHead>
                                             <TableRow className='my-3'>
-                                               
+
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
                                                 <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
@@ -738,9 +756,9 @@ function AdminDashboard() {
                                         <TableBody>
                                             {vaultObjects.map((row) => (
                                                 <TableRow key={row.object_id}>
-                                                   
+
                                                     <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color:'#2a68af' }}></i> {row.name_singular}
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.name_singular}
                                                     </TableCell>
                                                     <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
                                                     <TableCell>
@@ -804,45 +822,57 @@ function AdminDashboard() {
                             <div id='permissions' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
 
-                                <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
-                              <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
-                                    <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
-                                        <TableHead>
-                                            <TableRow className='my-3'>
-                                               
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Name</TableCell>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}> ID</TableCell>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {userGroups.map((row) => (
-                                                <TableRow key={row.object_id}>
-                                                   
-                                                    <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color:'#2a68af' }}></i> {row.title}
-                                                    </TableCell>
-                                                    <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            size="small"
-                                                            variant="contained"
-                                                            color="warning"
-                                                            onClick={() => fetchObjectPermisions(row)}
-                                                            style={{ textTransform: 'none' }}
+                                    <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
 
-                                                        >
-                                                            <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users </small>
-                                                        </Button>
-                              
-                                                    </TableCell>
+                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
+                                        <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => alert("add user group")}
+                                            style={{ textTransform: 'none' }}
+                                            className='my-2'
 
+                                        >
+                                            <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group </small>
+                                        </Button>
+                                        <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
+                                            <TableHead>
+                                                <TableRow className='my-3'>
 
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Name</TableCell>
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}> ID</TableCell>
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
+                                            </TableHead>
+                                            <TableBody>
+                                                {userGroups.map((row) => (
+                                                    <TableRow key={row.object_id}>
+
+                                                        <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
+                                                            <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.title}
+                                                        </TableCell>
+                                                        <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
+                                                        <TableCell>
+                                                            <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                color="warning"
+                                                                onClick={() => selectedGroupUsers(row)}
+                                                                style={{ textTransform: 'none' }}
+
+                                                            >
+                                                                <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users </small>
+                                                            </Button>
+
+                                                        </TableCell>
+
+
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
                                 </div>
                             </div>
                             : <></>

@@ -38,11 +38,11 @@ const FileExt = (props) => {
  
 
   switch (extension) {
-    case 'pdf':
+    case 'pdf' :
       return <i className="fas fa-file-pdf mx-1" style={{ fontSize: '15px', color: '#f21b3f' }}></i>;
-    case 'csv':
+    case 'csv' :
       return <i className="fas fa-file-csv mx-1" style={{ fontSize: '15px', color: '#3e8914' }}></i>;
-    case 'txt':
+    case 'txt' :
       return <i className="fas fa-file-alt mx-1 text-secondary" style={{ fontSize: '15px' }}></i>;
     case 'xlsx':
       return <i className="fas fa-file-excel mx-1" style={{ fontSize: '15px', color: '#3e8914' }}></i>;
@@ -52,7 +52,7 @@ const FileExt = (props) => {
       return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
     case 'jpeg':
       return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
-    case '.jpg':
+    case 'jpg':
       return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
     default:
       return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>;

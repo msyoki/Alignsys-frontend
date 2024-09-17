@@ -7,11 +7,6 @@
     background: #1d3557; /* Background color of the scrollbar track */
 }
 
-::-webkit-scrollbar-thumb {
-    background: #ffffff; /* Color of the scrollbar thumb */
-    border-radius: 10px; /* Rounded corners of the scrollbar thumb */
-}
-
 #chat-circle {
     position: fixed;
     bottom: 20px;
@@ -68,19 +63,18 @@
 
 .chat-box-body {
     padding: 10px;
-    max-height: 300px;
-    overflow-y: auto;
 }
 
 .chat-logs {
-    /* max-height: 300px;
-    overflow-y: auto; */
+    max-height: 800px;
+    overflow-y: scroll;
     margin-bottom: 10px;
 }
 
 .chat-msg {
     display: flex;
     margin-bottom: 10px;
+    font-size: 12px;
 }
 
 .chat-msg.self {
@@ -100,7 +94,6 @@
 .cm-msg-text {
     background: #e76f51; /* Message bubble color for self */
     color: #fff;
-    align-self: flex-end;
     font-size: 13px; /* Increased font size for better readability */
     border-radius: 25px;
     padding: 10px 15px;
@@ -110,8 +103,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    white-space: pre-wrap; /* Ensure text wraps to new lines within bubble */
 }
-
 
 .loading-dots {
     display: inline-block;
@@ -161,26 +154,17 @@
     padding: 10px;
     border-top: 1px solid #ddd;
     border-radius: 0 0 8px 8px;
-    background: #ffff;
+    background: #fff;
 }
-
-.input-group {
-    display: flex;
-    align-items: center;
-}
-
 
 .chat-submit {
     background: #2a68af;
-    border: none;
     color: #fff;
-    border-radius: 25px;
     padding: 6px 10px;
     cursor: pointer;
-    margin-left: 10px;
 }
 
-.chat-submit:hover{
+.chat-submit:hover {
     background: #2a68af;
     border: none;
     color: #fff;
@@ -227,9 +211,6 @@
         font-size: 14px;
     }
 
-    .chat-submit {
-        padding: 6px 10px;
-    }
     .chat-submit i {
         font-size: 14px;
     }

@@ -68,7 +68,7 @@ const Button = styled.button`
   }
 `;
 
-const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber, zoomLevel, setZoomLevel, objectid ,fileId , vault , email}) => {
+const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber, zoomLevel, setZoomLevel, objectid, fileId, vault, email }) => {
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   };
@@ -93,7 +93,7 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
     <FileViewerContainer>
       <ControlsContainer>
         <ButtonContainer>
-          <SignButton objectid={objectid} fileId={fileId} vault={vault} email={email}/>
+          <SignButton objectid={objectid} fileId={fileId} vault={vault} email={email} />
           <Button onClick={handlePreviousPage} disabled={pageNumber <= 1}>Previous</Button>
           <span>Page {pageNumber} of {numPages}</span>
           <Button onClick={handleNextPage} disabled={pageNumber >= numPages}>Next</Button>
@@ -110,7 +110,7 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = ({ base64Content, fileExtension,objectid,fileId,vault,email }) => {
+const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email }) => {
   const [fileUrl, setFileUrl] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [numPages, setNumPages] = useState(null);
@@ -204,12 +204,12 @@ const DynamicFileViewer = ({ base64Content, fileExtension,objectid,fileId,vault,
   const renderContent = () => {
     if (!base64Content || !fileExtension) {
       return (
-        <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "100%", height: "100vh" }}>
+        <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "100%", height: "60vh", overflowY: 'scroll' }}>
           <div>
             <p className="text-center">
               <i className="fas fa-tv" style={{ fontSize: "100px" }}></i>
             </p>
-             <p className="text-center">Select a file to preview</p>
+            <p className="text-center">Select a file to preview</p>
 
           </div>
         </div>
@@ -233,31 +233,35 @@ const DynamicFileViewer = ({ base64Content, fileExtension,objectid,fileId,vault,
             setPageNumber={setPageNumber}
             zoomLevel={zoomLevel}
             setZoomLevel={setZoomLevel}
-            objectid={objectid} 
-            fileId={fileId} 
-            vault={vault} 
+            objectid={objectid}
+            fileId={fileId}
+            vault={vault}
             email={email}
           />
         );
       case 'txt':
         const decodedContent = atob(base64Content);
-        return <pre style={{ whiteSpace: 'pre-wrap' }}>{decodedContent}</pre>;
+        return <div className='bg-white shadow-lg p-3'><pre style={{ whiteSpace: 'pre-wrap' }}>{decodedContent}</pre></div>;
       case 'docx':
         return (
-          <div>
+          <>
             <ZoomControls>
               <Button size='small' onClick={() => setZoomLevel(zoomLevel - 0.2)}
                 disabled={zoomLevel <= 0.4}>Zoom Out</Button>
               <Button onClick={() => setZoomLevel(zoomLevel + 0.2)}>Zoom In</Button>
             </ZoomControls>
-            <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: '0 0' }} dangerouslySetInnerHTML={{ __html: htmlContent }} />
-          </div>
+            <div style={{ overflowY: 'scroll', height: '100%' }} className='bg-white shadow-lg p-3'>
+
+              <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: '0 0' }} dangerouslySetInnerHTML={{ __html: htmlContent }} />
+            </div>
+          </>
+
         );
       case 'xlsx':
       case 'csv':
         return (
           <div style={{ fontSize: '11px' }}>
-            <table className='table table-bordered'>
+            <table className='table table-bordered bg-white shadow-lg'>
               <thead>
                 <tr>
                   {csvContent.length > 0 && csvContent[0].map((header, index) => (

@@ -55,7 +55,7 @@ const NetworkIcon = () => {
       return (
         <>
 
-          <span style={{ fontSize: '10px' }}>
+          <span style={{ fontSize: '9px' }}>
             <i class="fas fa-circle " style={{ color: 'red' }}></i>
             <i class="fas fa-circle " style={{ color: 'red' }}></i>
             <i class="fas fa-circle " style={{ color: 'red' }}></i>
@@ -71,7 +71,7 @@ const NetworkIcon = () => {
       return (
         <>
 
-          <span style={{ fontSize: '10px' }}>
+          <span style={{ fontSize: '9px' }}>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
@@ -86,7 +86,7 @@ const NetworkIcon = () => {
 
         <>
 
-          <span style={{ fontSize: '10px' }}>
+          <span style={{ fontSize: '9px' }}>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
@@ -101,7 +101,7 @@ const NetworkIcon = () => {
 
         <>
 
-          <span style={{ fontSize: '10px' }}>
+          <span style={{ fontSize: '9px' }}>
             <i class="fas fa-circle " style={{ color: 'green' }}></i>
             <i class="fas fa-circle " style={{ color: 'white' }}></i>
             <i class="fas fa-circle " style={{ color: 'white' }}></i>
@@ -114,7 +114,7 @@ const NetworkIcon = () => {
     return (
 
       <>
-        <span style={{ fontSize: '10px' }}>
+        <span style={{ fontSize: '9px' }}>
           <i class="fas fa-circle " style={{ color: 'white' }}></i>
           <i class="fas fa-circle " style={{ color: 'white' }}></i>
           <i class="fas fa-circle " style={{ color: 'white' }}></i>
