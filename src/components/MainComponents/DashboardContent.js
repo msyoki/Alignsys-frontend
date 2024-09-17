@@ -526,9 +526,9 @@ const DocumentList = (props) => {
 
 
               <div className="input-group d-flex mx-3 my-2" >
-                <i onClick={reloadPage} className="fas fa-home text-white " style={{ fontSize: '28px' }}></i>
+                <i onClick={reloadPage} className="fas fa-home text-white " style={{ fontSize: '25px' }}></i>
 
-                <i onClick={props.getVaultObjects} className="fas fa-plus text-white mx-3" style={{ fontSize: '28px' }}></i>
+                <i onClick={props.getVaultObjects} className="fas fa-plus text-white mx-3" style={{ fontSize: '25px' }}></i>
 
                 <input
 
