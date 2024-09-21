@@ -76,7 +76,7 @@ function Dashboard() {
     try {
       const array = viewableobjects;
       const formattedString = array.join(',\n    ');
-
+     
       const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${formattedString}`);
     
       return response.data

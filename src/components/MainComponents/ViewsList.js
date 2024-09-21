@@ -88,7 +88,6 @@ const ViewsList = (props) => {
         <div style={{ height: '100%' }}>
             {selectedViewObjects.length > 0 ?
                 <>
-
                     {selectedViewObjects.length > 0 ? <>
                         <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e5e5e5' }}>  <FontAwesomeIcon icon={faTable} className='mx-3 ' style={{ color: '#1d3557', fontSize: '20px' }} /><span onClick={backHome} style={{ cursor: 'pointer' }}>{selectedViewCategory}</span> <i class="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></i> {selectedViewName} </h6>
                         <div style={{ height: '60vh', overflowY: 'scroll' }} className='shadow-lg p-4'>
@@ -232,8 +231,6 @@ const ViewsList = (props) => {
                     </> : <></>}
                 </> :
                 <>
-
-
                     {commonviews.length > 0 ? <>
                         <h6 onClick={toggleCommonViewSublist} className='text-dark p-2' style={{ fontSize: '12px', backgroundColor: '#e5e5e5', cursor: 'pointer' }}> <i className="fas fa-list mx-2 " style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small style={{ color: '#2a68af' }}>( {commonviews.length} )</small>  </h6>
 

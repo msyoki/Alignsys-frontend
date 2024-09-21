@@ -15,6 +15,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CommentsCompoenent from '../ObjectComments'
 
 
 
@@ -54,13 +55,12 @@ const formatDateForInput = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
+
+
 export default function ObjectData(props) {
   const [value, setValue] = useState(0);
 
-  const changeState = () => {
 
-    alert("change state")
-  }
 
   // Handle state change
   const handleStateChange = (event) => {
@@ -162,6 +162,7 @@ export default function ObjectData(props) {
           <Tab style={{ textTransform: 'none' }} label="Metadata" {...a11yProps(0)} />
           <Tab style={{ textTransform: 'none' }} label="Preview" {...a11yProps(1)} />
           <Tab style={{ textTransform: 'none' }} label="AI Chatbot" {...a11yProps(2)} />
+          <Tab style={{ textTransform: 'none' }} label="Comments" {...a11yProps(3)} />
 
         </Tabs>
       </Box>
@@ -169,7 +170,7 @@ export default function ObjectData(props) {
         <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#e5e5e5', height: '90vh', padding: '0%', width: '100%' }}>
           {props.previewObjectProps.length < 1 && (
             <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-              <i className="fas fa-tag my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+              <i className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
               {props.loadingobject ? <>
                 <Box sx={{ width: '50%' }} className="my-2">
                   <LinearProgress />
@@ -189,27 +190,42 @@ export default function ObjectData(props) {
                 <Box className="my-1 bg-white" display="flex" justifyContent="space-between">
 
 
-                  <Box className="input-group" sx={{ width: '50%', mb: 1, display: 'flex', alignItems: 'center', fontSize: '14px' }}>
+                  <Box className="input-group" sx={{ width: '40%', mb: 1, display: 'flex', alignItems: 'center', fontSize: '14px' }}>
                     <span className='text-center mx-3 '><span style={{ color: '#1d3557' }} className='mx-1 fas fa-tag'></span><span style={{ color: '#1d3557' }}> Class:  </span>  {getPropValue('Class')}</span>
 
 
 
                   </Box>
 
-                  <Box className='input-group' sx={{ textAlign: 'end', fontSize: '12px', width: '50%', fontSize: '10px' }}>
+                  <Box className='input-group' sx={{ textAlign: 'end', fontSize: '12px', width: '60%', fontSize: '10px' }}>
                     {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
-                      <Box>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => props.openDialog()}
-                          sx={{ textTransform: 'none', mr: 1 }}
-                        >
-                          <i className="fas fa-save" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
-                          <small> Save </small>
-                        </Button>
-                      </Box>
+                      <>
+                        <Box>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => props.openDialog()}
+                            sx={{ textTransform: 'none', mr: 1 }}
+                          >
+                            <i className="fas fa-save" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
+                            <small> Save </small>
+                          </Button>
+                        </Box>
+                        <Box>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => props.discardChange()}
+                            sx={{ textTransform: 'none', mr: 1 }}
+                          >
+                            <i className="fas fa-trash" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
+                            <small> Discard </small>
+                          </Button>
+                        </Box>
+                      </>
+
                     )}
 
                     {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
@@ -239,7 +255,10 @@ export default function ObjectData(props) {
                     <ListItem key={index} sx={{ p: 0 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                         <Typography className='my-2' variant="body2" sx={{ color: '#1d3557', fontWeight: 'bold', flexBasis: '30%', fontSize: '12px', textAlign: 'end' }}>
-                          {item.propName}:
+
+                          {item.propName === "Comment" ? <>Latest Comment</> : <> {item.propName}</>}
+
+                          :
                         </Typography>
 
                         <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
@@ -253,7 +272,7 @@ export default function ObjectData(props) {
                               className='form-control form-control-sm my-1'
                             />
                           )}
-                          {item.propName === "Assignment description" ?
+                          {item.propName === "Assignment description" || item.propName === "Comment" ?
                             <>
                               <textarea
                                 placeholder={item.value}
@@ -265,15 +284,22 @@ export default function ObjectData(props) {
                               />
                             </> :
                             <>
-                              {item.datatype === 'MFDatatypeMultiLineText' && (
-                                <textarea
-                                  placeholder={item.value}
-                                  value={props.formValues?.[item.id]?.value || ''}
-                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                  rows={2}
-                                  className='form-control form-control-sm my-1'
-                                />
-                              )}
+                              {item.propName === "Comment" ?
+                                <>
+                                </> :
+                                <>
+                                  {item.datatype === 'MFDatatypeMultiLineText' && (
+                                    <textarea
+                                      placeholder={item.value}
+                                      value={props.formValues?.[item.id]?.value || ''}
+                                      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                      rows={2}
+                                      className='form-control form-control-sm my-1'
+                                    />
+                                  )}
+
+                                </>
+                              }
 
                             </>
                           }
@@ -351,12 +377,12 @@ export default function ObjectData(props) {
                       <p className='my-1'>
                         <i className="fas fa-circle-notch bold text-danger mx-2"></i>
 
-                        <span ><small style={{color:'#1d3557',fontWeight:'bold'}}>Workflow</small> :  {props.selectedObkjWf.workflowTitle}</span>
+                        <span ><small style={{ color: '#1d3557', fontWeight: 'bold' }}>Workflow</small> :  {props.selectedObkjWf.workflowTitle}</span>
                       </p>
                       <p className='my-1'>
                         <i className="fas fa-square-full bold text-warning mx-2"></i>
 
-                        <span ><small style={{color:'#1d3557',fontWeight:'bold'}}>State</small> :  {props.currentState.stateTitle}</span>
+                        <span ><small style={{ color: '#1d3557', fontWeight: 'bold' }}>State</small> :  {props.currentState.stateTitle}</span>
                         {props.selectedObkjWf.nextStates ? <>
                           {/* {props.selectedObkjWf.nextStates.length > 0 ?
                             <i className="mx-1 fas fa-long-arrow-alt-right text-primary text-bold"></i>
@@ -464,6 +490,36 @@ export default function ObjectData(props) {
                 </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>No PDF Selected</Typography>
                   <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
                     Please select a PDF to interact with the chatbot
+                  </Typography>
+                </>}
+
+              </Box>
+            </>
+          )}
+
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={3} style={{ backgroundColor: '#e5e5e5', height: '90vh', padding: '0%', width: '100%' }} >
+          {props.comments.length > 0 ? (
+            <CommentsCompoenent user={props.user} comments={props.comments} getObjectComments={props.getObjectComments} />
+          ) : (
+            <>
+
+              <Box
+                sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}
+              >
+                <i className="fas fa-comments my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+
+                {props.loadingcomments ? <>
+                  <Box sx={{ width: '50%' }} className="my-2">
+                    <LinearProgress />
+                  </Box>
+                  <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>Searching comments...</Typography>
+                  <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                    Please wait as we load the comments
+                  </Typography>
+                </> : <> <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>No Comments</Typography>
+                  <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                    Please select an object to preview comments
                   </Typography>
                 </>}
 

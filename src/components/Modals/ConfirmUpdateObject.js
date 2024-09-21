@@ -14,7 +14,7 @@ const ConfirmUpdateDialog = (props) => {
         <Dialog open={props.open} aria-labelledby="confirm-dialog-title">
             <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
                 <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
-                <span>Save Changes? <i className='fas fa-edit mx-2' ></i> </span>
+                <span className='mx-3'> Apply Changes  <i className='fas fa-pen-nib mx-2'  style={{fontSize:'15px'}}></i></span>
             </DialogTitle>
             <DialogContent style={{ width: '400px' }}>
                 {props.uptatingObject ?
@@ -32,21 +32,32 @@ const ConfirmUpdateDialog = (props) => {
 
 
             </DialogContent>
-            <DialogActions>
-                <Button onClick={
-                    props.discardChange  
-                }>
-                    Discard
-                </Button>
-                <Button
-                    onClick={
-                        props.onConfirm   
-                    }
-                    color="primary"
-                >
-                    Save
-                </Button>
-            </DialogActions>
+            {props.uptatingObject ?
+                <>
+                 <DialogActions className='p-3'>
+                     
+                    </DialogActions>
+                </>
+                :
+                <>
+                    <DialogActions>
+                        <Button onClick={
+                            props.discardChange
+                        }>
+                            Discard
+                        </Button>
+                        <Button
+                            onClick={
+                                props.onConfirm
+                            }
+                            color="primary"
+                        >
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </>
+            }
+
         </Dialog>
     );
 };

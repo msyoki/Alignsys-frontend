@@ -32,10 +32,11 @@ import NetworkIcon from '../NetworkStatus';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import GridViewIcon from '@mui/icons-material/GridView';
-import ViewsList from './ViewsList';
+import ViewsList from './ViewsList2';
 import VaultSelectForm from '../SelectVault';
 import FileExt from '../FileExt';
 import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObject';
+import TimedAlert from '../TimedAlert';
 
 
 const baseurl = "http://41.89.92.225:5006"
@@ -74,6 +75,9 @@ const DocumentList = (props) => {
   const [selectedObkjWf, setSelectedObjWf] = useState({})
   const [currentState, setCurrentState] = useState({})
   const [selectedState, setSelectedState] = useState({});
+  const [comments, setComments] = useState([]);
+  const [loadingcomments, setLoadingComments] = useState(false);
+
 
 
   const handleOpenDialog = () => setDialogOpen(true);
@@ -83,131 +87,124 @@ const DocumentList = (props) => {
   const relatedObjects = linkedObjects.filter(item => item.objectID !== 0);
   const relatedDocuments = linkedObjects.filter(item => item.objectID === 0);
 
-
-
-
-  // const transformFormValues = () => {
-  //   console.log( {
-  //     objectid: selectedObject.id,
-  //     props: Object.entries(formValues).map(([id, { value, datatype }]) => ({
-  //       id: parseInt(id, 10),  // Convert string ID to number
-  //       value,
-  //       datatype
-  //     })),
-  //     vaultGuid: props.selectedVault?props.selectedVault.guid:"" // Ensure you replace "string" with the actual vaultGuid
-  //   })
-  // };
-
-
-  const transformFormValues = async() => {
-    setUpdatingObject(true);
-    const requestData = {
-      objectid: selectedObject.id,
-      objectypeid: selectedObject.objectID,
-      classid: selectedObject.classID,
-      props: Object.entries(formValues).map(([id, { value, datatype }]) => {
-        // Transform value based on its datatype
-        let transformedValue;
-
-        switch (datatype) {
-          case 'MFDatatypeMultiSelectLookup':
-            transformedValue = value.join(", "); // Convert array to a comma-separated string
-            break;
-          case 'MFDatatypeBoolean':
-            transformedValue = value ? "true" : "false"; // Convert boolean to string "true" or "false"
-            break;
-          case 'MFDatatypeMultiLineText':
-            transformedValue = value; // Keep the string as is
-            break;
-          case 'MFDatatypeLookup':
-          case 'MFDatatypeNumber':
-            transformedValue = value.toString(); // Convert number to string
-            break;
-          default:
-            transformedValue = value; // Default case, just in case there's an unexpected datatype
-            break;
-        }
-
-        return {
-          id: parseInt(id, 10), // Convert string ID to number
-          value: transformedValue,
-          datatype,
-        };
-      }),
-      vaultGuid: props.selectedVault ? props.selectedVault.guid : "", // Ensure vaultGuid is correct
-    };
-
-    const headers = {
-      accept: '*/*',
-      'Content-Type': 'application/json',
-    };
-
+  const transformFormValues = async () => {
     try {
-      const response = await axios.put(
+      setUpdatingObject(true);
+  
+      const requestData = {
+        objectid: selectedObject.id,
+        objectypeid: selectedObject.objectTypeId,
+        classid: selectedObject.objectTypeId === 0 ?  selectedObject.classID : selectedObject.classId,
+        props: Object.entries(formValues).map(([id, { value, datatype }]) => {
+          let transformedValue = value;
+  
+          // Handle transformation based on datatype
+          switch (datatype) {
+            case 'MFDatatypeMultiSelectLookup':
+              transformedValue = value.join(", ");
+              break;
+            case 'MFDatatypeBoolean':
+              transformedValue = value ? "true" : "false";
+              break;
+            case 'MFDatatypeNumber':
+            case 'MFDatatypeLookup':
+              transformedValue = value.toString();
+              break;
+          }
+  
+          return {
+            id: parseInt(id, 10), // Ensure ID is a number
+            value: transformedValue,
+            datatype,
+          };
+        }),
+        vaultGuid: props.selectedVault?.guid || "", // Ensure valid vaultGuid
+      };
+
+      console.log(requestData)
+  
+      await axios.put(
         `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
         requestData,
-        { headers }
+        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
       );
-
-      // If successful, update the UI and reload object metadata if no state is selected
-      if (selectedState === undefined) {
-        reloadObjectMetadata();
+  
+      if (!selectedState) {
+        await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
       }
-
-      // Reset the form and close the dialog
+  
       setFormValues({});
-      setDialogOpen(false);
     } catch (error) {
-      // Handle any errors
-      setDialogOpen(false);
-      console.error('Error:', error);
+      console.error('Error updating object props:', error);
     }
   };
-
-
+  
   const transitionState = async () => {
-    setUpdatingObject(true)
-    const data = {
-      vaultGuid: `${props.selectedVault.guid}`,    // Replace with actual value
-      objectTypeId: selectedObject.objectID,        // Replace with actual value
-      objectId: selectedObject.id,            // Replace with actual value
-      nextStateId: selectedState.id,         // Replace with actual value
-    };
-
-    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
-      headers: {
-        'accept': '*/*',
-        'Content-Type': 'application/json',
-      }
-    })
-      .then(response => {
-        setSelectedState({})
-        if (formValues === undefined) {
-          reloadObjectMetadata()
-        }
-
-        setDialogOpen(false)
-      })
-      .catch(error => {
-        setDialogOpen(false)
-        console.error('Error:', error);
+    try {
+      setUpdatingObject(true);
+  
+      const data = {
+        vaultGuid: props.selectedVault.guid,
+        objectTypeId: selectedObject.objectTypeId,
+        objectId: selectedObject.id,
+        nextStateId: selectedState.id,
+      };
+  
+      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
+        headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
-
-  }
-
-  const updateObjectMetadata = () => {
-    if (Object.keys(formValues || {}).length > 0) {
-      transformFormValues()
+  
+      setSelectedState({});
+      if (!formValues) {
+        await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
+      }
+  
+    } catch (error) {
+      console.error('Error transitioning state:', error);
     }
-    if (selectedState.title) {
-      transitionState()
+  };
+  
+  const updateObjectMetadata = async () => {
+    const hasFormValues = Object.keys(formValues || {}).length > 0;
+    const hasSelectedState = Boolean(selectedState?.title);
+  
+    // Process form values if any
+    if (hasFormValues) {
+      await transformFormValues();
     }
-    
-    setUpdatingObject(false)
-    reloadObjectMetadata()
-  }
+  
+    // Process state transition if a state is selected
+    if (hasSelectedState) {
+      await transitionState();
+    }
+  
+    // Reload metadata
+    await reloadObjectMetadata();
+  
+    // Close the dialog after all operations are done
+    setDialogOpen(false);
+  
+    // Set updating object to false after the dialog is closed
+    setUpdatingObject(false);
 
+    setAlertPopOpen(true);
+    setAlertPopSeverity("success");
+    setAlertPopMessage("Updated successfully!");
+  
+  
+  };
+  
+  const reloadObjectMetadata = async () => {
+    await getSelectedObjWorkflow(selectedObject.objectTypeId, selectedObject.id);
+  
+    if (selectedObject.objectTypeId === 0) {
+      await previewObject(selectedObject);  // Await previewObject to ensure it's completed
+    } else {
+      await previewSublistObject(selectedObject);  // Await previewSublistObject to ensure it's completed
+    }
 
+  };
+  
 
 
   const handleAccordionChange = (index) => (event, isExpanded) => {
@@ -239,19 +236,11 @@ const DocumentList = (props) => {
     }
   }
 
-  const reloadObjectMetadata = () => {
-    if (selectedObject.objectID === 0) {
-
-      previewObject(selectedObject)
-    }
-    else {
-
-      previewSublistObject(selectedObject)
-    }
-  }
 
 
   const previewObject = async (item) => {
+    setComments([])
+    console.log(item)
     if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
       handleOpenDialog();
     }
@@ -260,12 +249,13 @@ const DocumentList = (props) => {
       setLoadingObject(true)
       // console.log(formValues)
       setFormValues({})
-      getLinkedObjects(item.id, item.classID, item.objectID)
+      getLinkedObjects(item.id, item.classId, item.objectTypeId)
       setSelectedObject(item)
-      getSelectedObjWorkflow(item.objectID, item.id)
+      getSelectedObjWorkflow(item.objectTypeId, item.id)
 
       try {
-        const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
+        const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classId}`);
+        console.log(propsResponse.data)
         setPreviewObjectProps(propsResponse.data);
         setLoadingObject(false)
       } catch (error) {
@@ -275,15 +265,12 @@ const DocumentList = (props) => {
       setBase64('');
       setExtension('');
     }
-
+    getObjectComments();
   };
 
-  const discardChange = () => {
-    setSelectedState({})
-    setFormValues({})
-  }
-
   const previewSublistObject = async (item) => {
+    setComments([])
+    console.log(item)
     if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
       handleOpenDialog();
     } else {
@@ -291,7 +278,7 @@ const DocumentList = (props) => {
       setLoadingObject(true)
       setFormValues({})
       setSelectedObject(item)
-      getSelectedObjWorkflow(item.objectID, item.id)
+      getSelectedObjWorkflow(item.objectTypeId, item.id)
 
       try {
         const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${item.classID}`);
@@ -302,11 +289,11 @@ const DocumentList = (props) => {
         setLoadingObject(false)
       }
 
-      if (item.objectID === 0) {
+      if (item.objectTypeId === 0) {
         setLoadingFile(true)
         try {
 
-          const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.objectID}`, {
+          const filesResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.objectTypeId}`, {
             headers: {
               Accept: '*/*'
             }
@@ -317,7 +304,7 @@ const DocumentList = (props) => {
 
 
           try {
-            const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.objectID}/${fileId}`, {
+            const downloadResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.objectTypeId}/${fileId}`, {
               headers: {
                 Accept: '*/*'
               }
@@ -345,8 +332,17 @@ const DocumentList = (props) => {
       }
 
     }
+    getObjectComments();
 
   };
+
+  const discardChange = () => {
+    setDialogOpen(false)
+    setSelectedState({})
+    setFormValues({})
+  }
+
+ 
 
 
   const getSelectedObjWorkflow = async (dataType, objectsId) => {
@@ -379,6 +375,29 @@ const DocumentList = (props) => {
 
       });
   }
+
+  const getObjectComments = async() => {
+    setLoadingComments(true)
+    // Define the API URL
+    const url = 'http://192.236.194.251:240/api/Comments?ObjectId=18&VaultGuid=%7BE19BECA0-7542-451B-81E5-4CADB636FCD5%7D&ObjectTypeId=0';
+ 
+    // Fetch the comments using Axios
+    await axios.get(url, {
+      headers: {
+        'accept': '*/*'
+      }
+    })
+      .then(response => {
+        console.log(response.data)
+        setComments(response.data);  // Set the comments from the response data
+        setLoadingComments(false);
+      })
+      .catch(err => {
+        setLoadingComments(false);
+      });
+ 
+  }
+
 
 
 
@@ -463,6 +482,17 @@ const DocumentList = (props) => {
 
   };
 
+  const [alertOpen, setAlertPopOpen] = useState(false);
+  const [severity, setAlertPopSeverity] = useState("success");
+  const [message, setAlertPopMessage] = useState("This is a success message!");
+
+
+
+  const handleAlertClose = () => {
+    setAlertPopOpen(false);
+  };
+
+
 
   return (
     <>
@@ -471,8 +501,17 @@ const DocumentList = (props) => {
         onClose={handleCloseDialog}
         onConfirm={updateObjectMetadata}
         uptatingObject={uptatingObject}
-        message="Would you like to save the changes you made?"
+        message="Confirm to save staged changes!"
         discardChange={discardChange}
+       
+      />
+       <TimedAlert
+        open={alertOpen}
+        onClose={handleAlertClose}
+        severity={severity}  // Options: "error", "warning", "info", "success"
+        message={message}  // The alert message
+        setSeverity={setAlertPopSeverity}
+        setMessage={setAlertPopMessage}
       />
       {/* <FileUpdateModal isOpen={isModalOpenUpdateFile} onClose={() => setIsModalOpenUpdateFile(false)} selectedFile={selectedObject} refreshUpdate={refreshUpdate} setOpenAlert={setOpenAlert} setAlertSeverity={setAlertSeverity} setAlertMsg={setAlertMsg} /> */}
 
@@ -604,8 +643,8 @@ const DocumentList = (props) => {
                                 }}
                                 className='shadow-sm'
                               >
-                                <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> {item.title} </Typography>
-                                {/* <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography> */}
+                                <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i> {item.title} </Typography>
+                                {/* <Typography variant="body1" style={{ fontSize: '12px' }}><i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i><ObjectPropValue vault={props.selectedVault.guid} objectId={item.id} classId={item.classID} propName={'Class'} /> {item.title} </Typography> */}
                               </AccordionSummary>
                             }
                             {linkedObjects ?
@@ -644,7 +683,7 @@ const DocumentList = (props) => {
 
 
                                                         <tr key={index} onClick={() => previewObject(item)} style={{ cursor: 'pointer' }}>
-                                                          <td ><i className="fas fa-folder mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
+                                                          <td ><i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }} ></i> {item.title}</td>
 
                                                         </tr>
 
@@ -714,7 +753,7 @@ const DocumentList = (props) => {
 
         {/* Object View List */}
         <div className="col-md-7 col-sm-12 p-0 shadow-sm" style={{ height: '100vh', overflow: 'clip', backgroundColor: "#e5e5e5" }}>
-          <ObjectData openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
+          <ObjectData   user={props.user}  getObjectComments={getObjectComments} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>
 
