@@ -84,9 +84,9 @@ function PermissionDialog(props) {
     return (
         <div>
             <Dialog open={props.open} maxWidth="md">
-                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#2a68af', color: '#fff' }}>
+                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#1d3557', color: '#fff' }}>
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
-                    <span className='mx-2' style={{fontSize:'12px'}}> {props.selectedObject.name_singular} Object Permissions <i className="fas fa-shield-alt" style={{ fontSize: '11px', cursor: 'pointer' }}></i></span>
+                    <span className='mx-2' style={{fontSize:'13px'}}> {props.selectedObject.name_singular} Object Permissions <i className="fas fa-shield-alt mx-1" style={{ fontSize: '13px', cursor: 'pointer' }}></i></span>
                 </DialogTitle>
                 <DialogContent style={{ width: '500px' }}>
                     <div className="row p-2 shadow-lg">

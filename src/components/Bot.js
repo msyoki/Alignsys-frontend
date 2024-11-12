@@ -112,8 +112,12 @@ function Bot(props) {
     return (
         <div>
             <p className='text-dark' style={{ fontSize: '12px' }}>
-                <span style={{ color: "#1d3557", fontSize: '14px', fontWeight: 'bold' }}>Document: </span> {props.objectTitle}.pdf
+                <span style={{ color: "#1d3557", fontSize: '14px', fontWeight: 'bold' }}>
+                    Document:
+                </span>
+                {' '}{props.objectTitle}.pdf
             </p>
+
             <form onSubmit={handleChatSubmit} className='input-group my-3'>
                 <input
                     type="text"
@@ -125,38 +129,55 @@ function Bot(props) {
                     onChange={(e) => setInputValue(e.target.value)}
                 />
                 <button type="submit" className='btn btn-sm btn-success'>
-                    <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i> <small>Search</small>
+                    <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>
+                    <small>Search</small>
                 </button>
             </form>
-            <div className='shadow-sm p-4' style={{ height: '65vh', overflowY: 'scroll', scrollbarColor: '#1d3557', scrollBehavior: 'smooth', backgroundColor: '#f8f0e5' }}>
+
+            <div 
+                className='shadow-sm p-4' 
+                style={{ 
+                    height: '65vh',
+                    overflowY: 'scroll',
+                    scrollbarColor: '#1d3557',
+                    scrollBehavior: 'smooth',
+                    backgroundColor: '#f8f0e5'
+                }}
+            >
                 {messages.map((message) => (
-                    <>
-                        <div key={message.id} className={`chat-msg ${message.type}`}>
-                            <span className="msg-avatar">
-                                <i className={`fas ${message.type === 'self' ? 'fa-user' : 'fa-robot'}`} style={{ color: '#1d3557', fontSize: '20px' }}></i>
-                            </span>
-                            <div className="cm-msg-text" style={{
+                    <div key={message.id} className={`chat-msg ${message.type}`}>
+                        <span className="msg-avatar">
+                            <i 
+                                className={`fas ${message.type === 'self' ? 'fa-user' : 'fa-robot'}`}
+                                style={{ color: '#1d3557', fontSize: '20px' }}
+                            />
+                        </span>
+
+                        <div 
+                            className="cm-msg-text" 
+                            style={{
                                 backgroundColor: message.type === 'self' ? '#e76f51' : '#2a68af'
-                            }}>
-                                {message.msg === "..." ? (
-                                    <div className="loading-dots">
-                                        <small>
-                                            <span></span>
-                                            <span></span>
-                                            <span></span>
-                                        </small>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <span>{message.msg}</span>
-                                    </>
-                                )}
-                            </div>
-                            <div className="timestamp mx-2" style={{fontSize:'10px'}}><small>{message.timestamp}</small></div> {/* Add timestamp */}
+                            }}
+                        >
+                            {message.msg === "..." ? (
+                                <div className="loading-dots">
+                                    <small>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </small>
+                                </div>
+                            ) : (
+                                <span>{message.msg}</span>
+                            )}
                         </div>
-                    </>
+
+                        <div className="timestamp mx-2" style={{ fontSize: '10px' }}>
+                            <small>{message.timestamp}</small>
+                        </div>
+                    </div>
                 ))}
-                <div ref={chatLogsEndRef} /> {/* Scroll to this div */}
+                <div ref={chatLogsEndRef} />
             </div>
         </div>
     );

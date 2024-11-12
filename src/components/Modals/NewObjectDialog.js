@@ -25,7 +25,7 @@ const style = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 400,
-    bgcolor: 'background.paper',
+    bgcolor: '#1d3557',
     border: '2px solid #000',
     boxShadow: 24,
     pt: 2,
@@ -100,7 +100,7 @@ export default function NestedModal() {
                     data_type: property.dataType
                 }))
             };
-            console.log(payload)
+       
 
             // const response = await axios.post('http://localhost:8000/api/create_object_with_properties/', payload, {
             //     headers: {

@@ -13,9 +13,9 @@ import Box from '@mui/material/Box';
 
 import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
-import ObjectStructureList from '../components/Modals/ObjectStructureList';
+import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-
+import logo from '../images/ZF.png';
 
 
 
@@ -190,87 +190,83 @@ function Dashboard() {
 
   return (
     <>
+      <ObjectStructureList 
+        vaultObjectModalsOpen={openObjectModal} 
+        setVaultObjectsModal={() => setOpenObjectModal(false)} 
+        selectedVault={selectedVault} 
+        vaultObjectsList={vaultObjectsList} 
+      />
 
-      <ObjectStructureList vaultObjectModalsOpen={openObjectModal} setVaultObjectsModal={() => setOpenObjectModal(false)} selectedVault={selectedVault} vaultObjectsList={vaultObjectsList} />
       <div className="dashboard bg-dark">
-
-        <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-
+        <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'} shadow-lg`}>
+          <img src={logo} alt="Loading" width='60px' />
+          
           <ul className='text-center' style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-
-            {sidebarOpen ?
+            {sidebarOpen ? (
               <>
-
-
                 <li onClick={getVaultObjects} className='mt-5' style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fas fa-plus-circle  mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text  '>Create</span>
+                  <i className="fas fa-plus-circle mx-2" style={{ fontSize: '20px' }}></i>
+                  <span className='list-text'>Create</span>
                 </li>
-
-
 
                 <li style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fas fa-question-circle  mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text '>Manual</span>
-                </li>
-                {/* <li style={{ display: 'flex', alignItems: 'center' }} >
-                  <i className="fas fas fa-tools  mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text '> Settings</span>
-                </li> */}
-                <li style={{ display: 'flex', alignItems: 'center' }} onClick={adminPage} >
-                  <i className="fas fas fa-user-shield mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text '> Admin</span>
+                  <i className="fas fa-question-circle mx-2" style={{ fontSize: '20px' }}></i>
+                  <span className='list-text'>Manual</span>
                 </li>
 
+                <li style={{ display: 'flex', alignItems: 'center' }} onClick={adminPage}>
+                  <i className="fas fas fa-user-shield mx-2" style={{ fontSize: '20px' }}></i>
+                  <span className='list-text'>Admin</span>
+                </li>
 
                 <li className='mt-5' onClick={logoutUser} style={{ display: 'flex', alignItems: 'center' }}>
                   <i className="fas fa-power-off mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text '>Logout</span>
+                  <span className='list-text'>Logout</span>
                 </li>
+
                 <li className='mt-5' onClick={toggleSidebar} style={{ display: 'flex', alignItems: 'center' }}>
-                  <i className="fas fa-chevron-left  mx-2" style={{ fontSize: '20px' }}></i>
-                  <span className='list-text '>Hide</span>
+                  <i className="fas fa-chevron-left mx-2" style={{ fontSize: '20px' }}></i>
+                  <span className='list-text'>Hide</span>
                 </li>
-
               </>
-              : <>
-                <>
-
-                  <li onClick={getVaultObjects} className='mt-5' ><i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i> </li>
-                  <li><i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i></li>
-                  {/* <li ><i className="fas fas fa-tools" style={{ fontSize: '20px' }}></i></li> */}
-                  <li onClick={adminPage}><i className="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i></li>
-                  <li className='mt-5' onClick={logoutUser}><i className="fas fa-power-off" style={{ fontSize: '20px' }}></i></li>
-                  <li className='mt-5' onClick={toggleSidebar}><i className="fas fa-chevron-right" style={{ fontSize: '20px' }}></i></li>
-                </>
-              </>}
-
+            ) : (
+              <>
+                <li onClick={getVaultObjects} className='mt-5'>
+                  <i className="fas fa-plus-circle" style={{ fontSize: '20px' }}></i>
+                </li>
+                <li>
+                  <i className="fas fa-question-circle" style={{ fontSize: '20px' }}></i>
+                </li>
+                <li onClick={adminPage}>
+                  <i className="fas fas fa-user-shield" style={{ fontSize: '20px' }}></i>
+                </li>
+                <li className='mt-5' onClick={logoutUser}>
+                  <i className="fas fa-power-off" style={{ fontSize: '20px' }}></i>
+                </li>
+                <li className='mt-5' onClick={toggleSidebar}>
+                  <i className="fas fa-chevron-right" style={{ fontSize: '20px' }}></i>
+                </li>
+              </>
+            )}
           </ul>
-          {/* <div className="toggle-button" onClick={toggleSidebar}>
-    {sidebarOpen ? 'Hide' : 'Show'}
-  </div> */}
         </div>
-        <div className="content" style={{ height:'100vh',overflowY: 'scroll' }}>
+
+        <div className="content" style={{ height: '100vh', overflowY: 'scroll' }}>
           <DashboardContent
             searchTerm={searchTerm}
             data={data}
             data2={data2}
-
             getVaultObjects={getVaultObjects}
             setData={setData}
             searchObject={searchObject}
             setSearchTerm={setSearchTerm}
             user={user}
             departments={departments}
-
             docClasses={docClasses}
             allrequisitions={allrequisitions}
             logoutUser={logoutUser}
             selectedVault={selectedVault}
             viewableobjects={viewableobjects}
-         
-
-
           />
         </div>
       </div>

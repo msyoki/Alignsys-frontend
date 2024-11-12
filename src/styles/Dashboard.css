@@ -5,7 +5,7 @@
   
   .sidebar {
     width: 120px;
-    background-color: #212529;
+    background-color: #282c34;
     color: #fff;
     transition: width 0.5s;
   }

@@ -3,9 +3,7 @@
     position: relative;
 }
 
-::-webkit-scrollbar-track {
-    background: #1d3557; /* Background color of the scrollbar track */
-}
+
 
 #chat-circle {
     position: fixed;

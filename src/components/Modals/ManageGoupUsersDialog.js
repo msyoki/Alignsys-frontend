@@ -120,7 +120,7 @@ function GroupUsersDialog(props) {
     return (
         <div>
             <Dialog open={props.open} maxWidth="md">
-                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#2a68af', color: '#fff' }}>
+                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#1d3557', color: '#fff' }}>
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                     <span className='mx-2'> Edit: <b>{props.selectedGroup.title}</b>  </span>
                 </DialogTitle>

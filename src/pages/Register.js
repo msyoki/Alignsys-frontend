@@ -15,8 +15,9 @@ import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import EmailIcon from '@mui/icons-material/Email';
 import Alerts from '../components/Alert';
 import image from '../images/logo2.png';
-import MiniLoader from '../components/Modals/MiniLoader';
+import MiniLoader from '../components/Modals/MiniLoaderDialog';
 import * as constants from '../components/Auth/configs';
+import logo2 from '../images/ZF2.png';
 
 const Register = () => {
   const [companyName, setCompanyName] = useState('');
@@ -26,15 +27,10 @@ const Register = () => {
 
   let { alertmsg, alertseverity, openalert, setOpenAlert } = useContext(Authcontext);
 
-  let togglep = () => {
-    let input_type = document.getElementById('password').type;
-    if (input_type === 'password') {
-      document.getElementById('password').type = 'text';
-      document.getElementById('togglePassword').className = 'fas fa-eye ml-2';
-    } else {
-      document.getElementById('password').type = 'password';
-      document.getElementById('togglePassword').className = 'fas fa-eye-slash ml-2';
-    }
+  const togglePasswordVisibility = () => {
+    let passwordField = document.getElementById('password');
+    passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    document.getElementById('togglePassword').className = passwordField.type === 'password' ? 'fas fa-eye-slash ml-2' : 'fas fa-eye ml-2';
   };
 
   const handleRegister = (e) => {
@@ -48,11 +44,11 @@ const Register = () => {
     axios.post(`${constants.auth_api}/api/organization/signup/`, userData)
       .then(response => {
         setMiniLoader(false);
-        alert('Registration was received !!!');
+        alert('Registration was received!');
       })
       .catch(error => {
         setMiniLoader(false);
-        alert('Account with similar credentials already exists !!!');
+        alert('Account with similar credentials already exists!');
       });
   };
 
@@ -63,10 +59,10 @@ const Register = () => {
         <form onSubmit={handleRegister} className="text-center text-dark p-3">
           <div>
             <img src={image} alt="Sample image" style={{ width: '100px' }} />
-            <h6 className="my-2 p-2 shadow-lg">REGISTER</h6>
-            <p className="text-center responsive-font my-3" style={{ fontSize: '13px' }}>
-              Enter your details to create your <b style={{ color: "#e76f51" }}>ZEN</b>Files account
+            <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
+              Enter your details to create your account
             </p>
+            <h6 className="my-2 p-2 shadow-lg">REGISTER</h6>
             <Alerts alertseverity={alertseverity} alertmsg={alertmsg} openalert={openalert} setOpenAlert={setOpenAlert} />
           </div>
           <div className="form-group my-2">
@@ -114,7 +110,9 @@ const Register = () => {
                 onChange={(e) => setAdminPassword(e.target.value)}
                 required
                 startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
-                endAdornment={<InputAdornment position="end"><i onClick={togglep} className="fas fa-eye-slash" id="togglePassword"></i></InputAdornment>}
+                endAdornment={<InputAdornment position="end">
+                  <i onClick={togglePasswordVisibility} className="fas fa-eye-slash" id="togglePassword"></i>
+                </InputAdornment>}
               />
             </FormControl>
           </div>
@@ -132,17 +130,23 @@ const Register = () => {
             </div>
           </div>
           <div className="text-center">
-            <small className="small mb-0">Already have an account?<br /> <Link to={'/login'} style={{ textDecoration: 'none', color: '#2364aa' }}>Login here</Link> </small>
+            <small className="small mb-0">Already have an account?<br />
+              <Link to={'/login'} style={{ textDecoration: 'none', color: '#2364aa' }}>Login here</Link>
+            </small>
           </div>
         </form>
       </div>
       <div className="right-side">
         <div className='text-center'>
-          <h3 className="text-center mt-2"><b style={{ color: "#ee6c4d" }}>ZEN</b>Files</h3>
+          <img className="my-3" src={logo2} alt="Loading" width="200px" />
           <p className="text-center responsive-font"><span style={{ color: "#e0fbfc" }}>The Smart way to work.</span></p>
           <img src={logo} width='350px' alt="Login Image" />
-          <h5 className="text-center font-weight-italic responsive-font mb-2"><b>EMDS </b> Software Solution</h5>
-          <p className="text-center font-weight-italic responsive-font mb-4">Manage Document-Centric Processes More Productively and Securely</p>
+          <h5 className="text-center font-weight-italic responsive-font mb-2">
+            <b>EMDS</b> Software Solution
+          </h5>
+          <p className="text-center font-weight-italic responsive-font mb-4">
+            Manage Document-Centric Processes More Productively and Securely
+          </p>
         </div>
       </div>
     </div>

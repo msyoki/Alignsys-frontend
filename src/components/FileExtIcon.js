@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 
-const FileExt = (props) => {
+const FileExtIcon = (props) => {
   const [extension, setExtension] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +14,8 @@ const FileExt = (props) => {
       try {
         const response = await axios.get(url);
         const data = response.data;
-        const extension = data[0]?.extension.toLowerCase();
+    
+        const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
         setExtension(extension);
       } catch (error) {
         console.error('Error fetching the extension:', error);
@@ -39,24 +40,23 @@ const FileExt = (props) => {
 
   switch (extension) {
     case 'pdf' :
-      return <i className="fas fa-file-pdf mx-1" style={{ fontSize: '15px', color: '#f21b3f' }}></i>;
+      return <i className="fas fa-file-pdf mx-1" style={{ fontSize: '20px', color: '#f21b3f' }}></i>;
     case 'csv' :
-      return <i className="fas fa-file-csv mx-1" style={{ fontSize: '15px', color: '#3e8914' }}></i>;
+      return <i className="fas fa-file-csv mx-1" style={{ fontSize: '20px', color: '#7cb518' }}></i>;
     case 'txt' :
-      return <i className="fas fa-file-alt mx-1 text-secondary" style={{ fontSize: '15px' }}></i>;
+      return <i className="fas fa-file-alt mx-1 text-secondary" style={{ fontSize: '20px' }}></i>;
     case 'xlsx':
-      return <i className="fas fa-file-excel mx-1" style={{ fontSize: '15px', color: '#3e8914' }}></i>;
+      return <i className="far fa-file-excel mx-1" style={{ fontSize: '20px', color: '#3e8914' }}></i>;
     case 'docx':
-      return <i className="fas fa-file-word mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>;
+      return <i className="fas fa-file-word mx-1" style={{ fontSize: '20px', color: '#0077b6' }}></i>;
     case 'png':
-      return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
+      return <i className="fas fa-image mx-1" style={{ fontSize: '20px', color: '#2a68af' }}></i>;
     case 'jpeg':
-      return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
     case 'jpg':
-      return <i className="fas fa-file-image mx-1" style={{ fontSize: '15px', color: '#2a68af' }}></i>;
+      return <i className="fas fa-file-image mx-1" style={{ fontSize: '20px', color: '#2a68af' }}></i>;
     default:
-      return <i className="fas fa-image mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>;
+      return <i className="fas fa-image mx-1" style={{ fontSize: '20px', color: '#0077b6' }}></i>;
   }
 };
 
-export default FileExt;
+export default FileExtIcon;

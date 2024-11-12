@@ -8,6 +8,7 @@ const SignButton = (props) => {
     const postData = async () => {
         try {
             const url = 'http://192.236.194.251:240/api/objectinstance/DSSPostObjectFile';
+            alert(props.objectid)
 
             const data = {
                 "objectid": props.objectid,

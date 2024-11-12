@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem, Dialog, DialogContent, DialogTitle, Button, DialogActions } from '@mui/material';
 import logo from '../../images/ZF.png';
-import Authcontext from '../../components/Auth/Authprovider';
+import Authcontext from '../Auth/Authprovider';
 import { TroubleshootSharp } from '@mui/icons-material';
 
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
@@ -39,7 +39,7 @@ const NewObjectInstance = (props) => {
     const [unGrouped, setUnGrouped] = useState([]);
 
     const handleItemClick = async (objectid) => {
-        console.log(objectid);
+    
         setLoading(true);
         try {
             const response = await axios.get(`http://192.236.194.251:240/api/MfilesObjects/%7BE19BECA0-7542-451B-81E5-4CADB636FCD5%7D/${objectid}`);
@@ -57,7 +57,7 @@ const NewObjectInstance = (props) => {
         <div>
 
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle style={{backgroundColor: '#2a68af',color:'#fff'}}>Select an Item</DialogTitle>
+                <DialogTitle style={{backgroundColor: '#1d3557',color:'#fff'}}>Select an Item</DialogTitle>
                 <DialogContent>
                     <List>
                         {items.map((item) => (
@@ -91,7 +91,7 @@ const NewObjectInstance = (props) => {
                                     <h4>{group.classGroupName}</h4>
                                     <List>
                                         {group.members.map((member) => (
-                                            <ListItem button key={member.classId} onClick={() => console.log(member.classId)}>
+                                            <ListItem button key={member.classId} >
                                                 <ListItemText primary={member.className} />
                                             </ListItem>
                                         ))}
@@ -101,7 +101,7 @@ const NewObjectInstance = (props) => {
                             <h4>Ungrouped</h4>
                             <List>
                                 {unGrouped.map((item) => (
-                                    <ListItem button key={item.classId} onClick={() => console.log(item.classId)}>
+                                    <ListItem button key={item.classId} >
                                         <ListItemText primary={item.className} />
                                     </ListItem>
                                 ))}

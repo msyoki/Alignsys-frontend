@@ -1,0 +1,131 @@
+/* Container for the PDF annotation viewer */
+.pdf-annotate-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden; /* Keep this hidden to avoid scrollbars on the container */
+  }
+  
+  /* Controls section at the top of the viewer */
+
+  
+  /* Wrapper to center the PDF page and allow scrolling */
+  .page-wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align pages to the top */
+    width: 100%;
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 10px;
+    /* Set a height to allow scrolling */
+    max-height: calc(100% - 50px); /* Adjust this value based on your controls height */
+  }
+  
+  /* Each PDF page styling */
+  .pdf-page {
+    border: 1px solid #ccc; /* Add a light gray border */
+    margin: 10px 0; /* Space between pages */
+    padding: 10px; /* Space inside the page */
+    background-color: #f9f9f9; /* Light background color for contrast */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for a raised effect */
+    width: 100%; /* Ensure each page takes full width */
+    max-width: 800px; /* Set a max width for pages */
+  }
+  
+  /* Page container for rendering the PDF page and annotations */
+  .page-container {
+    position: relative;
+    background: #f0f0f0;
+    padding: 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Full width to allow for responsiveness */
+  }
+  
+  /* Overlay canvas for annotations */
+  .annotation-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  
+  /* Individual annotation styling */
+  .annotation {
+    position: absolute;
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    cursor: move;
+    pointer-events: all;
+  }
+  
+  .annotation.selected {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Styling for text annotations */
+  .annotation textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    outline: none;
+    font-family: Arial, sans-serif;
+    font-size: inherit;
+    color: inherit;
+  }
+  
+  /* Styling for image annotations */
+  .annotation img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  /* Delete icon styling */
+  .delete-icon {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff4d4f;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 1;
+  }
+  
+  .delete-icon:hover {
+    background: #ff1a1c;
+  }
+  
+  /* Resize corner for resizing annotations */
+  .resize-corner {
+    width: 16px;
+    height: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: nwse-resize;
+    z-index: 10;
+  }
+  
+ 
+
+  

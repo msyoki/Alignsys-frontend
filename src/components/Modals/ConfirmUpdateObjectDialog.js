@@ -12,7 +12,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 const ConfirmUpdateDialog = (props) => {
     return (
         <Dialog open={props.open} aria-labelledby="confirm-dialog-title">
-            <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
+            <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
                 <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                 <span className='mx-3'> Apply Changes  <i className='fas fa-pen-nib mx-2'  style={{fontSize:'15px'}}></i></span>
             </DialogTitle>

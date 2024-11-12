@@ -4,37 +4,33 @@ import '../styles/Dashboard.css'
 import '../styles/Custombuttons.css'
 import '../styles/Navbar.css'
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import { Link, useNavigate } from "react-router-dom";
-import Navbar from '../components/Navbar';
-import ImageAvatars from '../components/Avatar';
+import { useNavigate } from "react-router-dom";
+
 import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import AccordionUsage from '../components/Accordion';
+
 import logo from "../images/ZF.png";
 import axios from 'axios'
 import ObjComponent from '../components/Admin/ObjStructureComponent';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 import { Grid, MenuItem, Select, Input, TextField, FormControl, Button } from '@mui/material';
-import NestedModal from '../components/Modals/NewObjectModal';
-import DownloadCSV from '../components/DownloadCSV';
-import MiniLoader from '../components/Modals/MiniLoader';
-import LoadingMini from '../components/Loaders/LoaderMini';
+
+import MiniLoader from '../components/Modals/MiniLoaderDialog';
+
 import OrganizationVaultList from '../components/MainComponents/OrganizationVaultList';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
-import AddUserToVault from '../components/AddUserToVault';
+
 import UserRegistrationModal from '../components/RegisterUser';
 import BulkUserRegistrationDialog from '../components/RegisterBulkUsers';
 import * as constants from '../components/Auth/configs'
 import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
 import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
-import { ConstructionOutlined } from '@mui/icons-material';
 import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
-import CreateNewUserGroupDialog from '../components/Modals/CreateNewUserGroupDialog';
+
 
 
 function CustomTabPanel(props) {
@@ -189,6 +185,7 @@ function AdminDashboard() {
             },
             data: data
         };
+        console.log(data)
 
         axios.request(config)
             .then((response) => {
@@ -611,7 +608,7 @@ function AdminDashboard() {
                 <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid}  open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
                 <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
                <div className="row  content-container " >
-                    <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#2a68af" }}>
+                    <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#457b9d" }}>
                         <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
 
                         <OrganizationVaultList VaultUsergroups={VaultUsergroups} fetchVaultObjects={fetchVaultObjects} fetchOrgUsers={fetchOrgUsers} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject} showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewvaultgroups={viewvaultgroups} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts} />

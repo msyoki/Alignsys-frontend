@@ -5,7 +5,7 @@ import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faHandPointer, fa
 import axios from 'axios';
 import LookupSelect from '../NewObjectFormLookup';
 import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
-import MiniLoader from './MiniLoader';
+import MiniLoader from './MiniLoaderDialog';
 import logo from '../../images/ZF.png'
 import FileUploadComponent from '../FileUpload';
 import * as constants from '../Auth/configs'
@@ -192,7 +192,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                             }
                         }
                     );
-                    console.log(response.data.uploadID);
+                   
                     payload = {
                         objectID: selectedObjectId,
                         classID: selectedClassId,
@@ -200,7 +200,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         vaultGuid: selectedVault.guid,
                         uploadId: response.data.uploadID
                     };
-                    console.log('Upload successful:', response.data);
+                
                 } catch (error) {
                     console.error('Error uploading file:', error);
                 }
@@ -213,7 +213,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 };
             }
 
-            console.log(payload);
+   
             try {
                 const response = await axios.post(`${constants.mfiles_api}/api/objectinstance/ObjectCreation`, payload, {
                     headers: {
@@ -222,7 +222,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     }
                 });
                 setMiniLoader(false);
-                console.log('Form submission successful:', response.data);
+              
                 alert('Object was created successfully');
                 setUploadedFile(null)
                 closeFormDialog();
@@ -238,7 +238,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         <>
             <MiniLoader loading={miniLoader} loaderMsg={'Creating new object...'} setLoading={setMiniLoader} />
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
-                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#2a68af', color: '#fff', fontSize: '15px' }}>
+                <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
                     <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
                     <span>Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' /></span>
                 </DialogTitle>
