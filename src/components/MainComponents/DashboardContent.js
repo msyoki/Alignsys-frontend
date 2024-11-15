@@ -610,14 +610,14 @@ const DocumentList = (props) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px',
+              padding: '5px',
               fontSize: '12px !important',
               backgroundColor: '#1d3557',
               color: '#ffffff',
             }}
           >
             <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-1 p-1">
-              <i className="fas fa-hdd mx-4" style={{ fontSize: '30px' }}></i>
+              <i className="fas fa-hdd mx-4" style={{ fontSize: '25px' }}></i>
               <VaultSelectForm activeVault={props.selectedVault} />
             </Box>
 
@@ -640,19 +640,19 @@ const DocumentList = (props) => {
           </Box>
 
           <div>
-            <div className="shadow-lg p-3 d-flex justify-content-center" style={{ backgroundColor: '#457b9d' }}>
+            <div className="shadow-lg p-2 d-flex justify-content-center" style={{ backgroundColor: '#457b9d' }}>
               <form onSubmit={handleSearch} className="input-group" style={{ maxWidth: '600px', width: '100%' }}>
                 <div className='mx-3'>
                   <i
                     onClick={reloadPage}
                     className="fas fa-home mx-2"
-                    style={{ fontSize: '30px', cursor: 'pointer', color: '#fff' }}
+                    style={{ fontSize: '25px', cursor: 'pointer', color: '#fff' }}
                   ></i>
 
                   <i
                     onClick={props.getVaultObjects}
                     className="fas fa-plus mx-2"
-                    style={{ fontSize: '30px', cursor: 'pointer', color: '#fff' }}
+                    style={{ fontSize: '25px', cursor: 'pointer', color: '#fff' }}
                   ></i>
                 </div>
 
@@ -761,7 +761,9 @@ const DocumentList = (props) => {
                                               <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1d3557' }} className="p-1">
                                                 Related Objects ({relatedObjects.length})
                                               </Typography>
-                                              <table id="createdByMe" className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+                                              <table id="
+                                              
+                                              dByMe" className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
                                                 <tbody>
                                                   {relatedObjects.map((relatedItem, relatedIndex) => (
                                                     <tr key={relatedIndex} onClick={() => previewObject(relatedItem)} style={{ cursor: 'pointer' }}>

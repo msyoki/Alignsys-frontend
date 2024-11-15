@@ -48,7 +48,7 @@ const VaultSelectForm = () => {
     }, []);
 
     return (
-        <FormControl style={{width:'100%',height:'30px'}} >
+        <FormControl style={{width:'100%'}} >
             <InputLabel id="vault-select-label" ><span className='text-white'>Vault</span></InputLabel>
             <Select
                 labelId="vault-select-label"
