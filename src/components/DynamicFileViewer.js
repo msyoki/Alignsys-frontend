@@ -13,6 +13,7 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
+import * as constants from './Auth/configs'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -479,7 +480,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     if (ext === 'docx' || ext === 'xlsx') {
       return (
         <iframe
-          src={`https://view.officeapps.live.com/op/embed.aspx?src=https://fastapitempfile.techedge.dev${tempUrl}`}
+          src={`https://view.officeapps.live.com/op/embed.aspx?src=${constants.tempfilesurl}${tempUrl}`}
           width="100%"
           height="500px"
           frameBorder="0"
@@ -498,7 +499,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     const uploadData = async () => {
       try {
         const response = await axios.post(
-          'https://fastapitempfile.techedge.dev/upload',
+          `${constants.tempfilesurl}`,
           {
             base64_content: base64Content,
             file_extension: fileExtension

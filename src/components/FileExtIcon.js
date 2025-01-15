@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
+import * as constants from './Auth/configs'
 
 const FileExtIcon = (props) => {
   const [extension, setExtension] = useState(null);
@@ -9,7 +10,7 @@ const FileExtIcon = (props) => {
 
   useEffect(() => {
     const fetchExtension = async () => {
-      const url = `http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
    
       try {
         const response = await axios.get(url);

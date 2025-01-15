@@ -96,7 +96,7 @@ export default function ObjectData(props) {
         delete newFormValues[id];
       }
 
- 
+
 
       // Return null if newFormValues is empty, otherwise return the updated object
       return Object.keys(newFormValues).length === 0 ? null : newFormValues;
@@ -158,24 +158,24 @@ export default function ObjectData(props) {
           variant="scrollable"
           value={value}
           onChange={handleChange}
-          aria-label="Horizontal tabs example" 
+          aria-label="Horizontal tabs example"
           sx={{ borderColor: 'divider' }}
           className='bg-white'
         >
-          <Tab 
-            style={{ textTransform: 'none' }} 
-            label="Metadata" 
-            {...a11yProps(0)} 
+          <Tab
+            style={{ textTransform: 'none' }}
+            label="Metadata"
+            {...a11yProps(0)}
           />
-          <Tab 
-            style={{ textTransform: 'none' }} 
-            label="Preview" 
-            {...a11yProps(1)} 
+          <Tab
+            style={{ textTransform: 'none' }}
+            label="Preview"
+            {...a11yProps(1)}
           />
-          <Tab 
-            style={{ textTransform: 'none' }} 
-            label="AI Chatbot" 
-            {...a11yProps(2)} 
+          <Tab
+            style={{ textTransform: 'none' }}
+            label="AI Chatbot"
+            {...a11yProps(2)}
           />
           <Tab
             style={{ textTransform: 'none' }}
@@ -186,28 +186,28 @@ export default function ObjectData(props) {
       </Box>
 
       <Box sx={{ flexGrow: 1, margin: 0 }}>
-        <CustomTabPanel 
-          value={value} 
-          index={0} 
-          style={{ 
-            backgroundColor: '#e5e5e5', 
-            height: '90vh', 
-            padding: '0%', 
-            width: '100%' 
+        <CustomTabPanel
+          value={value}
+          index={0}
+          style={{
+            backgroundColor: '#e5e5e5',
+            height: '90vh',
+            padding: '0%',
+            width: '100%'
           }}
         >
           {props.previewObjectProps.length < 1 && (
-            <Box sx={{ 
-              width: '100%', 
-              marginTop: '20%', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              mx: 'auto' 
+            <Box sx={{
+              width: '100%',
+              marginTop: '20%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto'
             }}>
-              <i 
-                className="fas fa-info-circle my-2" 
+              <i
+                className="fas fa-info-circle my-2"
                 style={{ fontSize: '120px', color: '#1d3557' }}
               />
               {props.loadingobject ? (
@@ -215,9 +215,9 @@ export default function ObjectData(props) {
                   <Box sx={{ width: '50%' }} className="my-2">
                     <LinearProgress />
                   </Box>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     Loading metadata...
@@ -225,9 +225,9 @@ export default function ObjectData(props) {
                 </>
               ) : (
                 <>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     Metadata Card
@@ -235,8 +235,8 @@ export default function ObjectData(props) {
                 </>
               )}
 
-              <Typography 
-                variant="body2" 
+              <Typography
+                variant="body2"
                 sx={{ textAlign: 'center', fontSize: '12px' }}
               >
                 Please select an object to view its metadata
@@ -246,18 +246,18 @@ export default function ObjectData(props) {
 
           {props.previewObjectProps.length > 0 && (
             <Box>
-              <Box 
-                className="p-2 bg-white shadow-lg" 
-                display="flex" 
+              <Box
+                className="p-2 bg-white shadow-lg"
+                display="flex"
                 justifyContent="space-between"
               >
-                <Box 
-                  className="input-group" 
-                  sx={{ 
-                    width: '40%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    fontSize: '14px' 
+                <Box
+                  className="input-group"
+                  sx={{
+                    width: '40%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: '14px'
                   }}
                 >
                   <span className='text-center mx-2'>
@@ -265,17 +265,17 @@ export default function ObjectData(props) {
                     {getPropValue('Class')}
 
                     {props.comments.length > 0 && (
-                      <div 
-                        style={{ 
-                          position: 'relative', 
-                          display: 'inline-block' 
-                        }} 
+                      <div
+                        style={{
+                          position: 'relative',
+                          display: 'inline-block'
+                        }}
                         className='mx-4'
                       >
-                        <span 
-                          className="fas fa-comment-alt mx-1 go-to-comments" 
-                          style={{ 
-                            color: '#1d3557', 
+                        <span
+                          className="fas fa-comment-alt mx-1 go-to-comments"
+                          style={{
+                            color: '#1d3557',
                             fontSize: '20px',
                             cursor: 'pointer'
                           }}
@@ -304,12 +304,12 @@ export default function ObjectData(props) {
                   </span>
                 </Box>
 
-                <Box 
-                  className='input-group' 
-                  sx={{ 
-                    textAlign: 'end', 
-                    width: '60%', 
-                    fontSize: '10px' 
+                <Box
+                  className='input-group'
+                  sx={{
+                    textAlign: 'end',
+                    width: '60%',
+                    fontSize: '10px'
                   }}
                 >
                   {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
@@ -319,15 +319,15 @@ export default function ObjectData(props) {
                           size="small"
                           variant="contained"
                           color="primary"
-                          onClick={() => props.openDialog()}
+                          onClick={() => props.updateObjectMetadata()}
                           sx={{ textTransform: 'none', mr: 1 }}
                         >
-                          <i 
-                            className="fas fa-save" 
-                            style={{ 
-                              fontSize: '11px', 
-                              cursor: 'pointer', 
-                              marginRight: '4px' 
+                          <i
+                            className="fas fa-save"
+                            style={{
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              marginRight: '4px'
                             }}
                           />
                           <small>Save</small>
@@ -341,12 +341,12 @@ export default function ObjectData(props) {
                           onClick={() => props.discardChange()}
                           sx={{ textTransform: 'none', mr: 1 }}
                         >
-                          <i 
-                            className="fas fa-trash" 
-                            style={{ 
-                              fontSize: '11px', 
-                              cursor: 'pointer', 
-                              marginRight: '4px' 
+                          <i
+                            className="fas fa-trash"
+                            style={{
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              marginRight: '4px'
                             }}
                           />
                           <small>Discard</small>
@@ -364,12 +364,12 @@ export default function ObjectData(props) {
                         onClick={downloadFile}
                         sx={{ textTransform: 'none', ml: 1 }}
                       >
-                        <i 
-                          className="fas fa-download" 
-                          style={{ 
-                            fontSize: '11px', 
-                            cursor: 'pointer', 
-                            marginRight: '4px' 
+                        <i
+                          className="fas fa-download"
+                          style={{
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            marginRight: '4px'
                           }}
                         />
                         <small>Download</small>
@@ -379,13 +379,13 @@ export default function ObjectData(props) {
                 </Box>
               </Box>
 
-              <Box 
-                className='shadow-lg p-4 shadow-sm' 
-                sx={{ 
-                  width: '100%', 
-                  height: '65vh', 
-                  overflowY: 'scroll', 
-                  backgroundColor: '#e8f9fa' 
+              <Box
+                className='shadow-lg p-4 shadow-sm'
+                sx={{
+                  width: '100%',
+                  height: '65vh',
+                  overflowY: 'scroll',
+                  backgroundColor: '#e8f9fa'
                 }}
               >
                 <List sx={{ p: 0 }}>
@@ -393,52 +393,45 @@ export default function ObjectData(props) {
                     {filteredProps.map((item, index) => (
                       <ListItem key={index} sx={{ p: 0 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                          <Typography 
-                            className='my-2' 
-                            variant="body2" 
-                            sx={{ 
-                              color: '#1d3557', 
-                              fontWeight: 'bold', 
-                              flexBasis: '30%', 
-                              fontSize: '12px', 
-                              textAlign: 'end' 
+                          <Typography
+                            className='my-2'
+                            variant="body2"
+                            sx={{
+                              color: '#1d3557',
+                              fontWeight: 'bold',
+                              flexBasis: '30%',
+                              fontSize: '12px',
+                              textAlign: 'end'
                             }}
                           >
-                            {item.propName === "Comment" ? 'Latest Comment' : item.propName}:
+                            {item.propName} :
                           </Typography>
 
                           <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                            {item.propName === 'Class' && <>{item.value}</>}
-                            
+                            {item.propName === 'Class' && <>{item.value} </>}
+
                             {item.datatype === 'MFDatatypeText' && (
                               <input
                                 value={props.formValues?.[item.id]?.value || ''}
                                 placeholder={item.value}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 className='form-control form-control-sm my-1'
+                                disabled={item.editable?false :true}
                               />
                             )}
 
-                            {(item.propName === "Assignment description" || item.propName === "Comment") && (
+                         
+                            {item.datatype === "MFDatatypeMultiLineText" && (
                               <textarea
                                 placeholder={item.value}
                                 value={props.formValues?.[item.id]?.value || ''}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 rows={2}
-                                disabled
-                                className='form-control form-control-sm my-1'
+                                className="form-control form-control-sm my-1"
+                                disabled={item.editable?false :true}
                               />
                             )}
 
-                            {item.propName !== "Comment" && item.datatype === 'MFDatatypeMultiLineText' && (
-                              <textarea
-                                placeholder={item.value}
-                                value={props.formValues?.[item.id]?.value || ''}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                rows={2}
-                                className='form-control form-control-sm my-1'
-                              />
-                            )}
 
                             {item.datatype === 'MFDatatypeDate' && (
                               <input
@@ -447,6 +440,7 @@ export default function ObjectData(props) {
                                 value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 className='form-control form-control-sm my-1'
+                                disabled={item.editable?false :true}
                               />
                             )}
 
@@ -457,6 +451,7 @@ export default function ObjectData(props) {
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 displayEmpty
                                 fullWidth
+                                disabled={item.editable?false :true}
                                 className='form-control form-control-sm bg-white my-1'
                               >
                                 <MenuItem value=""><em>None</em></MenuItem>
@@ -494,26 +489,26 @@ export default function ObjectData(props) {
                     {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
                       <ListItem sx={{ p: 0 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                          <Typography 
-                            className='my-2' 
-                            variant="body2" 
-                            sx={{ 
-                              color: '#1d3557', 
-                              fontWeight: 'bold', 
-                              flexBasis: '30%', 
-                              fontSize: '12px', 
-                              textAlign: 'end' 
+                          <Typography
+                            className='my-2'
+                            variant="body2"
+                            sx={{
+                              color: '#1d3557',
+                              fontWeight: 'bold',
+                              flexBasis: '30%',
+                              fontSize: '12px',
+                              textAlign: 'end'
                             }}
                           >
                             Sign Document:
                           </Typography>
 
                           <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                            <SignButton 
-                              objectid={props.selectedObject.id} 
-                              fileId={props.selectedFileId} 
-                              vault={props.vault.guid} 
-                              email={props.email} 
+                            <SignButton
+                              objectid={props.selectedObject.id}
+                              fileId={props.selectedFileId}
+                              vault={props.vault.guid}
+                              email={props.email}
                             />
                           </Box>
                         </Box>
@@ -523,9 +518,9 @@ export default function ObjectData(props) {
                 </List>
               </Box>
 
-              <Box 
-                className="bg-white p-2 shadow-sm my-1" 
-                display="flex" 
+              <Box
+                className="bg-white p-2 shadow-sm my-1"
+                display="flex"
                 justifyContent="space-between"
               >
                 <Box sx={{ textAlign: 'start', fontSize: '12px', width: '80%' }}>
@@ -580,15 +575,15 @@ export default function ObjectData(props) {
           )}
         </CustomTabPanel>
 
-        <CustomTabPanel 
-          value={value} 
-          index={1} 
-          style={{ 
-            backgroundColor: '#e5e5e5', 
-            height: '100%', 
-            padding: '0%', 
-            overflowY: 'clip', 
-            width: '100%' 
+        <CustomTabPanel
+          value={value}
+          index={1}
+          style={{
+            backgroundColor: '#e5e5e5',
+            height: '100%',
+            padding: '0%',
+            overflowY: 'clip',
+            width: '100%'
           }}
         >
           {props.base64 ? (
@@ -602,18 +597,18 @@ export default function ObjectData(props) {
             />
           ) : (
             <Box
-              sx={{ 
-                width: '100%', 
-                marginTop: '20%', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                mx: 'auto' 
+              sx={{
+                width: '100%',
+                marginTop: '20%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto'
               }}
             >
-              <i 
-                className="fas fa-tv my-2" 
+              <i
+                className="fas fa-tv my-2"
                 style={{ fontSize: '120px', color: '#1d3557' }}
               />
 
@@ -622,15 +617,15 @@ export default function ObjectData(props) {
                   <Box sx={{ width: '50%' }} className="my-2">
                     <LinearProgress />
                   </Box>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     Loading file...
                   </Typography>
-                  <Typography 
-                    variant="body2" 
+                  <Typography
+                    variant="body2"
                     sx={{ textAlign: 'center', fontSize: '12px' }}
                   >
                     Please wait as we load the document
@@ -638,15 +633,15 @@ export default function ObjectData(props) {
                 </>
               ) : (
                 <>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     Nothing to Preview
                   </Typography>
-                  <Typography 
-                    variant="body2" 
+                  <Typography
+                    variant="body2"
                     sx={{ textAlign: 'center', fontSize: '12px' }}
                   >
                     Please select a document to view its content
@@ -657,32 +652,32 @@ export default function ObjectData(props) {
           )}
         </CustomTabPanel>
 
-        <CustomTabPanel 
-          value={value} 
-          index={2} 
-          style={{ 
-            backgroundColor: '#e5e5e5', 
-            height: '90vh', 
-            padding: '0%', 
-            width: '100%' 
+        <CustomTabPanel
+          value={value}
+          index={2}
+          style={{
+            backgroundColor: '#e5e5e5',
+            height: '90vh',
+            padding: '0%',
+            width: '100%'
           }}
         >
           {props.base64 && props.extension === 'pdf' ? (
             <Bot base64={props.base64} objectTitle={props.selectedObject.title} />
           ) : (
             <Box
-              sx={{ 
-                width: '100%', 
-                marginTop: '20%', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                mx: 'auto' 
+              sx={{
+                width: '100%',
+                marginTop: '20%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto'
               }}
             >
-              <i 
-                className="fas fa-robot my-2" 
+              <i
+                className="fas fa-robot my-2"
                 style={{ fontSize: '120px', color: '#1d3557' }}
               />
 
@@ -691,15 +686,15 @@ export default function ObjectData(props) {
                   <Box sx={{ width: '50%' }} className="my-2">
                     <LinearProgress />
                   </Box>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     Starting chat...
                   </Typography>
-                  <Typography 
-                    variant="body2" 
+                  <Typography
+                    variant="body2"
                     sx={{ textAlign: 'center', fontSize: '12px' }}
                   >
                     Please wait as we load the resources
@@ -707,15 +702,15 @@ export default function ObjectData(props) {
                 </>
               ) : (
                 <>
-                  <Typography 
-                    variant="body2" 
-                    className='my-2' 
+                  <Typography
+                    variant="body2"
+                    className='my-2'
                     sx={{ textAlign: 'center' }}
                   >
                     No PDF Selected
                   </Typography>
-                  <Typography 
-                    variant="body2" 
+                  <Typography
+                    variant="body2"
                     sx={{ textAlign: 'center', fontSize: '12px' }}
                   >
                     Please select a PDF to interact with the chatbot
@@ -726,17 +721,17 @@ export default function ObjectData(props) {
           )}
         </CustomTabPanel>
 
-        <CustomTabPanel 
-          value={value} 
-          index={3} 
-          style={{ 
-            backgroundColor: '#e5e5e5', 
-            height: '90vh', 
-            padding: '0%', 
-            width: '100%' 
+        <CustomTabPanel
+          value={value}
+          index={3}
+          style={{
+            backgroundColor: '#e5e5e5',
+            height: '90vh',
+            padding: '0%',
+            width: '100%'
           }}
         >
-          <CommentsCompoenent 
+          <CommentsCompoenent
             selectedObject={props.selectedObject}
             guid={props.vault ? props.vault.guid : ""}
             loadingcomments={props.loadingcomments}

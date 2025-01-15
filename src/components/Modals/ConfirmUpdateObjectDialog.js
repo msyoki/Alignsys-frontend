@@ -8,18 +8,20 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
+import logo from '../../images/ZF.png'
 
 const ConfirmUpdateDialog = (props) => {
     return (
         <Dialog open={props.open} aria-labelledby="confirm-dialog-title">
             <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
-                <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
-                <span className='mx-3'> Apply Changes  <i className='fas fa-pen-nib mx-2'  style={{fontSize:'15px'}}></i></span>
+            <span className='mx-3' style={{fontSize:'12px'}}> Unsaved Changes</span>
+            <img className=" bg-white p-2 mx-3"  src={logo} alt="Loading" width="130px" />
+               
             </DialogTitle>
             <DialogContent style={{ width: '400px' }}>
                 {props.uptatingObject ?
                     <>
-                        <Typography variant="body1" className='p-3'>Updating object ...</Typography>
+                        <Typography variant="body1" className='p-3' style={{fontSize:'12px'}}>Updating object ...</Typography>
 
                         <Box sx={{ width: '100%' }}>
                             <LinearProgress />
@@ -27,7 +29,7 @@ const ConfirmUpdateDialog = (props) => {
                         </Box>
                     </>
                     :
-                    <Typography variant="body1" className='p-3'>{props.message}</Typography>
+                    <Typography variant="body1" className='p-2'> <i className='fas fa-exclamation-triangle mx-2 text-warning'  style={{fontSize:'40px'}}></i><span style={{fontSize:'11.5px'}}>You have unsaved changes to:   <br/><span style={{color:'#2a68af'}}>{props.message}</span></span></Typography>
                 }
 
 
@@ -41,18 +43,19 @@ const ConfirmUpdateDialog = (props) => {
                 :
                 <>
                     <DialogActions>
-                        <Button onClick={
-                            props.discardChange
-                        }>
-                            Discard
-                        </Button>
+                      
                         <Button
                             onClick={
                                 props.onConfirm
                             }
                             color="primary"
                         >
-                            Confirm
+                            Save
+                        </Button>
+                        <Button onClick={
+                            props.discardChange
+                        }>
+                            Discard
                         </Button>
                     </DialogActions>
                 </>

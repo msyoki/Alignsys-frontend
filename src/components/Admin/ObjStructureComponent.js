@@ -85,7 +85,7 @@ const ObjComponent = ({ selectedObjectStructure, setSelectedObjectStructure, aut
     };
 
     return (
-        <Box className='shadow-lg p-3'>
+        <Box className='shadow-lg p-3' style={{height:'80%' ,overflowY:'scroll' }}>
             {selectedObjectStructure ?
                 <>
                     <div className='card-body my-4'>

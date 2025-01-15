@@ -16,6 +16,7 @@ import FileExt from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 
 import OfficeApp from '../Modals/OfficeAppDialog';
+import LoadingDialog from '../Loaders/LoaderDialog';
 
 
 const ViewsList = (props) => {
@@ -24,14 +25,15 @@ const ViewsList = (props) => {
     const [selectedViewObjects, setSelectedViewObjects] = useState([]);
     const [selectedViewName, setSelectedViewName] = useState('');
     const [selectedViewCategory, setSelectedViewCategory] = useState([]);
-    const [showOtherViewSublist, setshowOtherViewSublist] = useState(false);
-    const [showCommonViewSublist, setshowCommonViewSublist] = useState(false);
+    const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
+    const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
     const [selectedIndex, setSelectedIndex] = useState(null);
-    const [viewNavigation, setViewNavigation] = useState([])
-    const [openOfficeApp, setOpenOfficeApp] = useState(false)
-    const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
-    
-    
+    const [viewNavigation, setViewNavigation] = useState([]);
+    const [openOfficeApp, setOpenOfficeApp] = useState(false);
+    const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({});
+    const [loading, setLoading] = useState(false);
+
+
 
     const relatedObjects = props.linkedObjects.filter(item => item.objectID !== 0);
     const relatedDocuments = props.linkedObjects.filter(item => item.objectID === 0);
@@ -62,6 +64,7 @@ const ViewsList = (props) => {
 
     const fetchViewData = async (item) => {
         // Add item to navigation if not already present
+        setLoading(true)
         setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
             if (!exists) {
@@ -73,6 +76,8 @@ const ViewsList = (props) => {
             return prevItems;
         });
 
+
+        // Pending testing added filterprops as a list 
         try {
             const response = await axios.post(
                 `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
@@ -89,16 +94,23 @@ const ViewsList = (props) => {
                     }
                 }
             );
-        
+            console.log(response.data)
+            setLoading(false)
+
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
 
         } catch (error) {
+            setLoading(false)
+            props.setAlertPopOpen(true);
+            props.setAlertPopSeverity("error");
+            props.setAlertPopMessage("something went wrong, please try again later!");
             console.error('Error fetching view objects:', error);
         }
     }
 
     const fetchMainViewObjects = async (item, viewType) => {
+        setLoading(true)
         // Add item to navigation with view type
         setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
@@ -121,17 +133,23 @@ const ViewsList = (props) => {
                     }
                 }
             );
-       
+            setLoading(false)
+            console.log(response.data)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
 
         } catch (error) {
+            setLoading(false)
+            props.setAlertPopOpen(true);
+            props.setAlertPopSeverity("error");
+            props.setAlertPopMessage("something went wrong, please try again later!");
             console.error('Error fetching view objects:', error);
         }
     }
 
     const fetchMainViewObjects2 = async (item) => {
         // Add item to navigation with ViewFolder type
+        setLoading(true)
         setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
             if (!exists) {
@@ -152,11 +170,17 @@ const ViewsList = (props) => {
                     }
                 }
             );
-
+            console.log(response.data)
+            setLoading(false)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
 
         } catch (error) {
+
+            setLoading(false)
+            props.setAlertPopOpen(true);
+            props.setAlertPopSeverity("error");
+            props.setAlertPopMessage("something went wrong, please try again later!");
             console.error('Error fetching view objects:', error);
         }
     }
@@ -187,7 +211,7 @@ const ViewsList = (props) => {
             const updatedItems = viewNavigation.slice(0, itemIndex + 1);
             setViewNavigation(updatedItems);
         }
-     
+
         // Handle navigation based on item type
         switch (item.type) {
             case 'Common Views':
@@ -207,206 +231,226 @@ const ViewsList = (props) => {
 
     function openApp(item) {
         const fetchExtension = async () => {
-          const url = `http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
-          try {
-            const response = await axios.get(url);
-            const data = response.data;
-            const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-       
-            if (extension === 'csv' || extension === 'xlsx' || extension === 'docx' || extension === 'txt') {
-              const updatedItem = {
-                ...item,
-                guid: props.selectedVault.guid,
-                extension: extension,
-                type: item.objectTypeId ?? item.objectID 
-              };
-              
-              setObjectToEditOnOfficeApp(updatedItem);
-              setOpenOfficeApp(true);
+            const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+            try {
+                const response = await axios.get(url);
+                const data = response.data;
+                const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
+
+                if (extension === 'csv' || extension === 'xlsx' || extension === 'docx' || extension === 'txt') {
+                    const updatedItem = {
+                        ...item,
+                        guid: props.selectedVault.guid,
+                        extension: extension,
+                        type: item.objectTypeId ?? item.objectID
+                    };
+
+                    setObjectToEditOnOfficeApp(updatedItem);
+                    setOpenOfficeApp(true);
+                }
+            } catch (error) {
+                console.error('Error fetching the extension:', error);
+                alert('Failed to retrieve file extension.');
             }
-          } catch (error) {
-            console.error('Error fetching the extension:', error);
-            alert('Failed to retrieve file extension.');
-          }
         };
-      
+
         fetchExtension();
-      }
+    }
 
     return (
         <div style={{ height: '100%' }}>
-        <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
-        {selectedViewObjects.length > 0 ? (
-            <>
-                <h6 className='p-3 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                    <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1d3557', fontSize: '20px' }} />
-                    {viewNavigation.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <span onClick={() => handleViewNavClick(item)} style={{ cursor: 'pointer' }}>
-                                {item.title}{item.index}
-                            </span>
-                            <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
-                        </React.Fragment>
-                    ))}
-                </h6>
-                <div style={{ height: '65vh', overflowY: 'scroll' }} className='shadow-lg p-3'>
-                    {selectedViewObjects.map((item, index) => (
-                        <React.Fragment key={index}>
-                            {item.type === "MFFolderContentItemTypeObjectVersion" && (
-                                <Accordion
-                                    expanded={selectedIndex === index}
-                                    onChange={handleAccordionChange(index)}
-                                    sx={{
-                                        border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                                        '&:not(:last-child)': { borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)' },
-                                        '&::before': { display: 'none' },
-                                    }}
-                                >
-                                    <AccordionSummary
-                                        onClick={() => {props.previewSublistObject(item);props.previewObject(item)}}
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls={`panel${index}a-content`}
-                                        id={`panel${index}a-header`}
-                                        sx={{ bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit' }}
-                                        className='shadow-sm'
+            <LoadingDialog opendialogloading={loading} />
+            <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
+            {selectedViewObjects.length > 0 ? (
+                <>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
+                        <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1d3557', fontSize: '20px' }} />
+                        {viewNavigation.map((item, index) => (
+                            <React.Fragment key={index}>
+                                <span onClick={() => handleViewNavClick(item)} style={{ cursor: 'pointer' }}>
+                                    {item.title}{item.index}
+                                </span>
+                                <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
+                            </React.Fragment>
+                        ))}
+                    </h6>
+                    <div style={{ height: '65vh', overflowY: 'scroll' }} className='shadow-lg p-2'>
+                        {selectedViewObjects.map((item, index) => (
+                            <React.Fragment key={index}>
+                                {item.type === "MFFolderContentItemTypeObjectVersion" && (
+                                    <Accordion
+                                        expanded={selectedIndex === index}
+                                        onChange={handleAccordionChange(index)}
+                                        sx={{
+                                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                                            '&:not(:last-child)': { borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)' },
+                                            '&::before': { display: 'none' },
+                                        }}
                                     >
-                                        <Typography variant="body1" style={{ fontSize: '12px' }}>
-                                            {item.objectID === 0 || item.objectTypeId === 0 ? (
-                                                <>
-                                                    <FileExt guid={props.selectedVault.guid} objectId={item.id} classId={(item.classId !== undefined ? item.classId : item.classID)} />
-                                                    {item.title}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>
-                                                    {item.title}
-                                                </>
-                                            )}
-                                        </Typography>
-                                    </AccordionSummary>
-                                    {props.linkedObjects && props.linkedObjects.requisitionID === item.internalID && (
-                                        <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
-                                            {props.loadingobjects ? (
-                                                <div className='text-center'>
-                                                    <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                                    <p className='text-dark' style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {props.linkedObjects.length > 0 ? (
-                                                        <>
-                                                            {relatedObjects.length > 0 && (
-                                                                <>
-                                                                    <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
-                                                                        Related Objects ({relatedObjects.length})
-                                                                    </Typography>
-                                                                    <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                                                        <tbody>
-                                                                            {relatedObjects.map((relatedItem, relatedIndex) => (
-                                                                                <tr key={relatedIndex} onClick={() => props.previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
-                                                                                    <td>
-                                                                                        <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1d3557' }}></i>
-                                                                                        {relatedItem.title}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </>
-                                                            )}
-                                                            {relatedDocuments.length > 0 && (
-                                                                <>
-                                                                    <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
-                                                                        Attached Documents ({relatedDocuments.length})
-                                                                    </Typography>
-                                                                    <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                                                        <tbody>
-                                                                            {relatedDocuments.map((doc, docIndex) => (
-                                                                                <tr key={docIndex} onClick={() => props.previewSublistObject(doc)} onDoubleClick={() => openApp(doc)} style={{ cursor: 'pointer' }}>
-                                                                                    <td>
-                                                                                        <FileExt guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
-                                                                                        {doc.title}.<FileExtText guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
-                                                    )}
-                                                </>
-                                            )}
-                                        </AccordionDetails>
-                                    )}
-                                </Accordion>
-                            )}
-                            {item.type === "MFFolderContentItemTypePropertyFolder" && (
-                                <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-                                    <li className='mx-4'  onClick={() => fetchViewData(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                        <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
-                                        <span className='list-text'>{item.title}</span>
-                                    </li>
-                                </ul>
-                            )}
-                            {item.type === "MFFolderContentItemTypeViewFolder" && (
-                                <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-                                    <li className='mx-4'  onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
-                                        <span className='list-text'>{item.title}</span>
-                                    </li>
-                                </ul>
-                            )}
-                        </React.Fragment>
-                    ))}
-                </div>
-            </>
-        ) : (
-            <>
-                {commonviews.length > 0 && (
-                    <>
-                        <h6 onClick={toggleCommonViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small style={{ color: '#2a68af' }}>({commonviews.length})</small>
-                        </h6>
-                        {showCommonViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
-                                {commonviews.map((view) => (
-                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
-                                        <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                            <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
-                                            <span className='list-text'>{view.viewName}</span>
+                                        <AccordionSummary
+                                            onClick={() => { props.previewSublistObject(item); props.previewObject(item) }}
+                                            expandIcon={<ExpandMoreIcon />}
+                                            aria-controls={`panel${index}a-content`}
+                                            id={`panel${index}a-header`}
+                                            sx={{
+                                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                                height: 'auto',  // Set to auto to let the content define the height
+                                                minHeight: 0,  // Optional, set minimum height to zero
+                                                '&.Mui-expanded': {
+                                                    minHeight: 0  // Reduce height when expanded
+                                                },
+                                                padding: '0px 8px'  // Adjust padding to reduce height
+                                            }}
+                                            className='shadow-sm'
+                                        >
+                                            <Typography
+                                                variant="body1"
+                                                style={{ fontSize: '12px', lineHeight: '1.2', padding: '4px 0' }}  // Reduce padding and line height
+                                            >
+                                                {item.objectID === 0 || item.objectTypeId === 0 ? (
+                                                    <>
+                                                        <FileExt
+                                                            guid={props.selectedVault.guid}
+                                                            objectId={item.id}
+                                                            classId={(item.classId !== undefined ? item.classId : item.classID)}
+                                                        />
+                                                        {item.title}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i
+                                                            className="fas fa-layer-group mx-1"
+                                                            style={{ fontSize: '15px', color: '#0077b6' }}
+                                                        ></i>
+                                                        {item.title}
+                                                    </>
+                                                )}
+                                            </Typography>
+                                        </AccordionSummary>
+
+                                        {props.linkedObjects && props.linkedObjects.requisitionID === item.internalID && (
+                                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
+                                                {props.loadingobjects ? (
+                                                    <div className='text-center'>
+                                                        <CircularProgress style={{ width: '20px', height: '20px' }} />
+                                                        <p className='text-dark' style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {props.linkedObjects.length > 0 ? (
+                                                            <>
+                                                                {relatedObjects.length > 0 && (
+                                                                    <>
+                                                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
+                                                                            Related Objects ({relatedObjects.length})
+                                                                        </Typography>
+                                                                        <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+                                                                            <tbody>
+                                                                                {relatedObjects.map((relatedItem, relatedIndex) => (
+                                                                                    <tr key={relatedIndex} onClick={() => props.previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
+                                                                                        <td>
+                                                                                            <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1d3557' }}></i>
+                                                                                            {relatedItem.title}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </>
+                                                                )}
+                                                                {relatedDocuments.length > 0 && (
+                                                                    <>
+                                                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
+                                                                            Attached Documents ({relatedDocuments.length})
+                                                                        </Typography>
+                                                                        <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+                                                                            <tbody>
+                                                                                {relatedDocuments.map((doc, docIndex) => (
+                                                                                    <tr key={docIndex} onClick={() => props.previewSublistObject(doc)} onDoubleClick={() => openApp(doc)} style={{ cursor: 'pointer' }}>
+                                                                                        <td>
+                                                                                            <FileExt guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
+                                                                                            {doc.title}.<FileExtText guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </AccordionDetails>
+                                        )}
+                                    </Accordion>
+                                )}
+                                {item.type === "MFFolderContentItemTypePropertyFolder" && (
+                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
+                                        <li className='mx-4' onClick={() => fetchViewData(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                            <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
+                                            <span className='list-text'>{item.title}</span>
                                         </li>
                                     </ul>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                )}
-                {otherviews.length > 0 && (
-                    <>
-                        <h6 onClick={toggleOtherViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
-                        </h6>
-                        {showOtherViewSublist && (
-                            <div style={{ height: '30vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
-                                {otherviews.map((view) => (
-                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
-                                        <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                )}
+                                {item.type === "MFFolderContentItemTypeViewFolder" && (
+                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
+                                        <li className='mx-4' onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                                             <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
-                                            <span className='list-text'>{view.viewName}</span>
+                                            <span className='list-text'>{item.title}</span>
                                         </li>
                                     </ul>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                )}
-            </>
-        )}
-    </div>
-    
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <>
+                    {commonviews.length > 0 && (
+                        <>
+                            <h6 onClick={toggleCommonViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small style={{ color: '#2a68af' }}>({commonviews.length})</small>
+                            </h6>
+                            {showCommonViewSublist && (
+                                <div style={{ height: '40vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
+                                    {commonviews.map((view) => (
+                                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
+                                            <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
+                                                <span className='list-text'>{view.viewName}</span>
+                                            </li>
+                                        </ul>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                    {otherviews.length > 0 && (
+                        <>
+                            <h6 onClick={toggleOtherViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
+                            </h6>
+                            {showOtherViewSublist && (
+                                <div style={{ height: '40vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
+                                    {otherviews.map((view) => (
+                                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
+                                            <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
+                                                <span className='list-text'>{view.viewName}</span>
+                                            </li>
+                                        </ul>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+
     );
 };
 

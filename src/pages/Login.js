@@ -132,11 +132,11 @@ const Login = () => {
 
       <div className="right-side">
         <div className="text-center">
-          <img className="my-3" src={logo2} alt="Loading" width="200px" />
+          <img className="my-3 bg-white p-3"  src={logo2} alt="Loading" width="200px" />
           <p className="text-center responsive-font">
             <span style={{ color: "#e0fbfc" }}>The Smart way to work. </span>
           </p>
-          <img src={logo} width="350px" alt="Login Image" />
+          <img src={logo} width="350px" alt="Login Image"  />
           <h5 className="text-center font-weight-italic responsive-font mb-2">
             <b>EMDS</b> Software Solution
           </h5>

@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import Loader from './Loaders/LoaderMini';
+import * as constants from './Auth/configs'
 
 const FileInputModal = (props) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,9 +37,9 @@ const FileInputModal = (props) => {
  
     let url=''
     if(props.document.docClass === 'Procurement Documents'){
-      url= `http://192.236.154.69:320/api/ProcurementDocs/${props.document.objectID}/${props.document.fileID}`
+      url= `${constants.mfiles_api}/api/ProcurementDocs/${props.document.objectID}/${props.document.fileID}`
     }else{
-      url= `http://192.236.154.69:320/api/SupplierDocs/${props.document.objectID}/${props.document.fileID}`
+      url= `${constants.mfiles_api}/api/SupplierDocs/${props.document.objectID}/${props.document.fileID}`
     }
     console.log(props.document.objectID)
     console.log(props.document.fileID)

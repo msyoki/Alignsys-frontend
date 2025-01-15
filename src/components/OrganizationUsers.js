@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 function OrganizationUsersTable(props) {
 
   return (
-    <TableContainer component={Paper} className='p-2'>
+    <TableContainer component={Paper} className='p-2' style={{height:'80%' ,overflowY:'scroll' }}>
       <Table className='table table-sm'>
         <TableHead>
           <TableRow>

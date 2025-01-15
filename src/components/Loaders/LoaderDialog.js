@@ -12,14 +12,13 @@ const LoadingDialog = ({ opendialogloading }) => {
     <div>
       <Dialog
         open={opendialogloading}
-        fullWidth={fullWidth}
-        maxWidth={maxWidth}
+      
         keepMounted
         aria-describedby="alert-dialog-slide-description"
       >
-        <div className="text-center p-3">
-          <img className="my-3" src={logo} alt="logo" width="100px" />
-          <Box className="my-3" sx={{ width: '60%', margin: 'auto' }}>
+        <div className="text-center m-4 p-5">
+          <img className="my-3" src={logo} alt="logo" width="200px" />
+          <Box className="my-3" sx={{ width: '100%', margin: 'auto' }}>
             <LinearProgress />
           </Box>
           <p className="mt-2" style={{ fontSize: '12.5px' }}>

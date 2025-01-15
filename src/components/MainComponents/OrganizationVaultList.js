@@ -89,7 +89,7 @@ function OrganizationVaultList(props) {
   }
 
   return (
-    <ul style={{ listStyleType: 'none', padding: 0 }} className='shadow-lg p-2'>
+    <ul style={{ listStyleType: 'none', padding: 0,height:'80%' ,overflowY:'scroll' }} className='shadow-lg p-2'>
       {vaults.map((vault) => (
         <li key={vault.guid} className='my-3'>
           <div

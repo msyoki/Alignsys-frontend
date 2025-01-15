@@ -10,7 +10,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Box from '@mui/material/Box';
 import ObjectPropValue from '../ObjectPropValue';
-import * as constants from '../Auth/configs'
 import { faTable } from '@fortawesome/free-solid-svg-icons';
 
 import GetIcon from '../GetIcon'
@@ -39,11 +38,12 @@ import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObjectDialog';
 import TimedAlert from '../TimedAlert';
 import { UTurnLeft } from '@mui/icons-material';
 import OfficeApp from '../Modals/OfficeAppDialog';
+import * as constants from '../Auth/configs'
+import LoadingDialog from '../Loaders/LoaderDialog';
 
 
-const baseurl = "http://41.89.92.225:5006"
-const baseurldata = "http://41.92.225.149:240"
-const baseurldss = "http://41.92.225.149"
+
+const baseurldata=constants.mfiles_api
 
 
 const DocumentList = (props) => {
@@ -81,7 +81,8 @@ const DocumentList = (props) => {
   const [loadingcomments, setLoadingComments] = useState(false);
   const [openOfficeApp, setOpenOfficeApp] = useState(false)
   const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
-
+  const [loadingClick,setLoadingClick]=useState(false);
+  
 
 
   const handleOpenDialog = () => setDialogOpen(true);
@@ -134,10 +135,15 @@ const DocumentList = (props) => {
       if (!selectedState) {
         await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
       }
-
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
       setFormValues({});
     } catch (error) {
       console.error('Error updating object props:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("something went wrong, please try again later!");
     }
   };
 
@@ -160,9 +166,15 @@ const DocumentList = (props) => {
       if (!formValues) {
         await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
       }
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully!");
 
     } catch (error) {
       console.error('Error transitioning state:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("something went wrong, please try again later!");
     }
   };
 
@@ -188,10 +200,6 @@ const DocumentList = (props) => {
 
     // Set updating object to false after the dialog is closed
     setUpdatingObject(false);
-
-    setAlertPopOpen(true);
-    setAlertPopSeverity("success");
-    setAlertPopMessage("Updated successfully!");
 
 
   };
@@ -244,15 +252,18 @@ const DocumentList = (props) => {
 
 
   const previewObject = async (item) => {
+    
 
     setComments([])
 
     if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
       handleOpenDialog();
+      return;
     }
     else {
       setSelectedState({})
       setLoadingObject(true)
+      setLoadingClick(true)
       // console.log(formValues)
       setFormValues({})
       getLinkedObjects(item.id, (item.classId !== undefined ? item.classId : item.classID), (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
@@ -261,10 +272,15 @@ const DocumentList = (props) => {
 
       try {
         const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}`);
-
+        console.log(propsResponse.data)
         setPreviewObjectProps(propsResponse.data);
         setLoadingObject(false)
+        setLoadingClick(false)
       } catch (error) {
+        setLoadingClick(false)
+        setAlertPopOpen(true);
+        setAlertPopSeverity("error");
+        setAlertPopMessage("something went wrong, please try again later!");
         console.error('Error fetching view objects:', error);
         setLoadingObject(false)
       }
@@ -290,6 +306,7 @@ const DocumentList = (props) => {
     // Set loading states and clear selected state/form
     setSelectedState({});
     setLoadingObject(true);
+    setLoadingClick(true)
     setFormValues({});
     setSelectedObject(item);
 
@@ -303,9 +320,14 @@ const DocumentList = (props) => {
       );
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
+      setLoadingClick(false)
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("something went wrong, please try again later!");
       console.error('Error fetching view objects:', error);
     } finally {
       setLoadingObject(false);
+      setLoadingClick(false)
     }
 
     // Handle document fetching if item is a document
@@ -332,17 +354,23 @@ const DocumentList = (props) => {
             { headers: { Accept: '*/*' } }
           );
 
-
+          setLoadingClick(false)
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
         } catch (downloadError) {
           console.error('Error downloading file:', downloadError);
         } finally {
           setLoadingFile(false);
+          setLoadingClick(false)
         }
       } catch (filesError) {
+        setLoadingClick(false)
+        setAlertPopOpen(true);
+        setAlertPopSeverity("error");
+        setAlertPopMessage("something went wrong, please try again later!");
         console.error('Error fetching object files:', filesError);
         setLoadingFile(false);
+        setLoadingClick(false)
       }
     } else {
       setBase64('');
@@ -362,16 +390,17 @@ const DocumentList = (props) => {
 
 
 
-
+  // Get current worflow state 
   const getSelectedObjWorkflow = async (dataType, objectsId) => {
     const data = {
       vaultGuid: props.selectedVault.guid,
       objectTypeId: dataType,
-      objectId: objectsId
+      objectId: objectsId,
+      userEmail: props.user.email
     };
 
 
-    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/GetObjectworkflowstates`, data, {
+    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/GetObjectworkflowstate`, data, {
       headers: {
         'accept': '*/*',
         'Content-Type': 'application/json'
@@ -456,22 +485,22 @@ const DocumentList = (props) => {
     window.location.reload();
   };
 
-  const signDocument = async () => {
-    setPreparingForSigning(true)
-    try {
-      const response = await axios.get(`${baseurldss}/api/SelfSign/${selectedFileId}/${props.user.staffNumber}`);
-      const { filelink } = response.data;
-      window.open(filelink, '_blank'); // Open link in new tab
-      setPreparingForSigning(false)
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setPreparingForSigning(false)
-      alert('Please try later, the document is currently checked out !!!')
-      // Handle error
-    }
+  // const signDocument = async () => {
+  //   setPreparingForSigning(true)
+  //   try {
+  //     const response = await axios.get(`${baseurldss}/api/SelfSign/${selectedFileId}/${props.user.staffNumber}`);
+  //     const { filelink } = response.data;
+  //     window.open(filelink, '_blank'); // Open link in new tab
+  //     setPreparingForSigning(false)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //     setPreparingForSigning(false)
+  //     alert('Please try later, the document is currently checked out !!!')
+  //     // Handle error
+  //   }
 
 
-  };
+  // };
   let openObjectModal = () => {
     props.setOpenObjectModal(true)
   }
@@ -540,7 +569,7 @@ const DocumentList = (props) => {
 
   function openApp(item) {
     const fetchExtension = async () => {
-      const url = `http://192.236.194.251:240/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
       //   console.log(url)
       try {
         const response = await axios.get(url);
@@ -583,8 +612,9 @@ const DocumentList = (props) => {
         onClose={handleCloseDialog}
         onConfirm={updateObjectMetadata}
         uptatingObject={uptatingObject}
-        message="Confirm to save staged changes!"
+        message={selectedObject.title}
         discardChange={discardChange}
+    
       />
 
       <TimedAlert
@@ -601,6 +631,7 @@ const DocumentList = (props) => {
         close={() => setOpenOfficeApp(false)} 
         object={objectToEditOnOffice} 
       />
+      <LoadingDialog opendialogloading={loadingClick}/>
 
       <div className="row bg">
         {/* Object List */}
@@ -830,6 +861,9 @@ const DocumentList = (props) => {
                           setPreviewObjectProps={setPreviewObjectProps}
                           setLoadingPreviewObject={setLoadingPreviewObject}
                           previewObject={previewObject}
+                          setAlertPopOpen={setAlertPopOpen}
+                          setAlertPopSeverity={setAlertPopSeverity}
+                          setAlertPopMessage={setAlertPopMessage}
                         />
                       ) : (
                         <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>

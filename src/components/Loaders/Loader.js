@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 const Loading = () => (
   <div className='loading d-flex justify-content-center main-loader' style={{ margin: '15%' }} >
 
-    <img src={logo} alt="logo" width='50px' />
+    <img src={logo} alt="logo" width='200px' />
     <br />
 
     <Box sx={{ width: '45%' }}>

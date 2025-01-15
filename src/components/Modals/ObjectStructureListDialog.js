@@ -59,13 +59,13 @@ const findBestIconMatch = (name) => {
             if (iconName.toLowerCase().includes(word)) {
                 return allIcons[iconName];
             }
-            if (word.toLowerCase().includes('document') || 
-                word.toLowerCase().includes('invoice') || 
+            if (word.toLowerCase().includes('document') ||
+                word.toLowerCase().includes('invoice') ||
                 word.toLowerCase().includes('Petty Cash')) {
                 return faFile;
             }
 
-            if (word.toLowerCase().includes('staff') || 
+            if (word.toLowerCase().includes('staff') ||
                 word.toLowerCase().includes('employee')) {
                 return faUser;
             }
@@ -113,12 +113,13 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             );
             setSelectedObjectId(objectid);
             setGroupedItems(response.data.grouped);
+            console.log(response.data.grouped)
             setUngroupedItems(response.data.unGrouped);
             setIsLoading(false);
 
-            const totalClasses = response.data.grouped.reduce((acc, group) => acc + group.members.length, 0) + 
-                               response.data.unGrouped.length;
-                               
+            const totalClasses = response.data.grouped.reduce((acc, group) => acc + group.members.length, 0) +
+                response.data.unGrouped.length;
+
             if (totalClasses === 1) {
                 if (response.data.grouped.length > 0) {
                     handleClassSelection(
@@ -146,10 +147,13 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         setSelectedClassName(className);
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${classId}`
+                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
             );
+            console.log(selectedVault.guid)
+            console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
             setSelectedClassId(classId);
             setFormProperties(response.data);
+            console.log(response.data)
             setFormValues(response.data.reduce((acc, prop) => {
                 acc[prop.propId] = '';
                 return acc;
@@ -169,8 +173,8 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
         const property = formProperties.find(prop => prop.propId === propId);
         const newFormErrors = { ...formErrors };
-        
-        if (!value && property.isRequired) {
+
+        if (!value && property.isRequired && !property.isAutomatic) {
             newFormErrors[propId] = `${property.title} is required`;
         } else {
             delete newFormErrors[propId];
@@ -188,15 +192,23 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
     const handleSubmit = async () => {
         const newFormErrors = {};
+        // const propertiesPayload = formProperties
+        //     .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '')
+        //     .map(prop => ({
+        //         value: `${formValues[prop.propId]}`,
+        //         propId: prop.propId,
+        //         propertytype: prop.propertytype
+        //     }));
         const propertiesPayload = formProperties
-            .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '')
+            .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '' && !prop.isAutomatic)
             .map(prop => ({
                 value: `${formValues[prop.propId]}`,
                 propId: prop.propId,
                 propertytype: prop.propertytype
             }));
 
-        formProperties.forEach((prop) => {
+
+        propertiesPayload.forEach((prop) => {
             if (prop.isRequired && !formValues[prop.propId]) {
                 newFormErrors[prop.propId] = `${prop.title} is required`;
             }
@@ -211,7 +223,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         } else {
             setMiniLoader(true);
             let payload = {};
-            
+
             if (selectedObjectId === 0 && uploadedFile) {
                 try {
                     const formData = new FormData();
@@ -227,7 +239,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                             }
                         }
                     );
-                   
+
                     payload = {
                         objectID: selectedObjectId,
                         classID: selectedClassId,
@@ -235,7 +247,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         vaultGuid: selectedVault.guid,
                         uploadId: response.data.uploadID
                     };
-                
+
                 } catch (error) {
                     console.error('Error uploading file:', error);
                 }
@@ -273,25 +285,26 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
     return (
         <>
-            <MiniLoader 
-                loading={miniLoader} 
-                loaderMsg={'Creating new object...'} 
-                setLoading={setMiniLoader} 
+            <MiniLoader
+                loading={miniLoader}
+                loaderMsg={'Creating new object...'}
+                setLoading={setMiniLoader}
             />
-            
+
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
-                <DialogTitle 
-                    className='p-2 d-flex content-align' 
+                <DialogTitle
+                    className='p-2 d-flex content-align'
                     style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
                 >
-                    <h5 className="text-center mx-2">
+                    {/* <h5 className="text-center mx-2">
                         <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5>
+                    </h5> */}
+                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
                     <span>
                         Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' />
                     </span>
                 </DialogTitle>
-                
+
                 <DialogContent>
                     <p className='my-4' style={{ fontSize: '13px' }}>
                         Please select from Item types below
@@ -300,17 +313,17 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         {vaultObjectsList ? (
                             <>
                                 {vaultObjectsList.map((item) => (
-                                    <ListItem 
-                                        className='p-0 mx-2' 
-                                        button 
-                                        key={item.objectid} 
+                                    <ListItem
+                                        className='p-0 mx-2'
+                                        button
+                                        key={item.objectid}
                                         onClick={() => fetchItemData(item.objectid, item.namesingular)}
                                     >
                                         <ListItemIcon>
-                                            <FontAwesomeIcon 
-                                                icon={findBestIconMatch(item.namesingular)} 
-                                                className='mx-1' 
-                                                style={{ color: '#2a68af' }} 
+                                            <FontAwesomeIcon
+                                                icon={findBestIconMatch(item.namesingular)}
+                                                className='mx-1'
+                                                style={{ color: '#2a68af' }}
                                             />
                                         </ListItemIcon>
                                         <ListItemText primary={item.namesingular} />
@@ -322,29 +335,30 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         )}
                     </List>
                 </DialogContent>
-                
+
                 <DialogActions>
                     <Button onClick={closeModal}>Close</Button>
                 </DialogActions>
             </Dialog>
 
             <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
-                <DialogTitle 
-                    className='p-2 d-flex content-align' 
+                <DialogTitle
+                    className='p-2 d-flex content-align'
                     style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
                 >
-                    <h5 className="text-center mx-2">
+                    {/* <h5 className="text-center mx-2">
                         <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5>
+                    </h5> */}
+                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
                     <span>
-                        Select {selectedObjectName} Class 
-                        <FontAwesomeIcon 
-                            icon={findBestIconMatch(selectedObjectName)} 
-                            className='mx-3' 
+                        Select {selectedObjectName} Class
+                        <FontAwesomeIcon
+                            icon={findBestIconMatch(selectedObjectName)}
+                            className='mx-3'
                         />
                     </span>
                 </DialogTitle>
-                
+
                 <DialogContent className=''>
                     {isLoading ? (
                         <div className="d-flex justify-content-center align-items-center w-100">
@@ -355,27 +369,27 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                             {groupedItems.map((group) => (
                                 <div key={group.classGroupId}>
                                     <ListItem>
-                                        <ListItemText 
-                                            primary={group.classGroupName} 
-                                            className='shadow-lg p-2 mx-0' 
+                                        <ListItemText
+                                            primary={group.classGroupName}
+                                            className='shadow-lg p-2 mx-0'
                                         />
                                     </ListItem>
                                     <List component="div" disablePadding className='mx-4'>
                                         {group.members.map((member) => (
-                                            <ListItem 
-                                                key={member.classId} 
-                                                className='mx-4 p-0' 
-                                                button 
+                                            <ListItem
+                                                key={member.classId}
+                                                className='mx-4 p-0'
+                                                button
                                                 onClick={() => handleClassSelection(
-                                                    member.classId, 
-                                                    member.className, 
+                                                    member.classId,
+                                                    member.className,
                                                     group.classGroupId
                                                 )}
                                             >
                                                 <ListItemIcon>
-                                                    <FontAwesomeIcon 
-                                                        icon={findBestIconMatch(member.className)} 
-                                                        style={{ color: '#2a68af' }} 
+                                                    <FontAwesomeIcon
+                                                        icon={findBestIconMatch(member.className)}
+                                                        style={{ color: '#2a68af' }}
                                                     />
                                                 </ListItemIcon>
                                                 <ListItemText primary={member.className} />
@@ -387,26 +401,26 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
                             <>
                                 <ListItem>
-                                    <ListItemText 
-                                        primary={'Ungrouped'} 
-                                        className='shadow-lg p-2 mx-0' 
+                                    <ListItemText
+                                        primary={'Ungrouped'}
+                                        className='shadow-lg p-2 mx-0'
                                     />
                                 </ListItem>
                                 <List component="div" disablePadding className='mx-4'>
                                     {ungroupedItems.map((item) => (
-                                        <ListItem 
-                                            key={item.classId} 
-                                            className='mx-4 p-0' 
-                                            button 
+                                        <ListItem
+                                            key={item.classId}
+                                            className='mx-4 p-0'
+                                            button
                                             onClick={() => handleClassSelection(
-                                                item.classId, 
+                                                item.classId,
                                                 item.className
                                             )}
                                         >
                                             <ListItemIcon>
-                                                <FontAwesomeIcon 
-                                                    icon={findBestIconMatch(item.className)} 
-                                                    style={{ color: '#2a68af' }} 
+                                                <FontAwesomeIcon
+                                                    icon={findBestIconMatch(item.className)}
+                                                    style={{ color: '#2a68af' }}
                                                 />
                                             </ListItemIcon>
                                             <ListItemText primary={item.className} />
@@ -417,46 +431,53 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         </List>
                     )}
                 </DialogContent>
-                
+
                 <DialogActions>
                     <Button onClick={closeDataDialog}>Close</Button>
                 </DialogActions>
             </Dialog>
 
             <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
-                <DialogTitle 
-                    className='p-2 d-flex content-align' 
+                <DialogTitle
+                    className='p-2 d-flex content-align'
                     style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
                 >
-                    <h5 className="text-center mx-2">
+                    {/* <h5 className="text-center mx-2">
                         <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5>
+                    </h5> */}
+                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
                     <span>
-                        Metadata - Create {selectedClassName}  
-                        <FontAwesomeIcon 
-                            icon={findBestIconMatch(selectedClassName)} 
-                            className='mx-3' 
+                        Metadata - Create {selectedClassName}
+                        <FontAwesomeIcon
+                            icon={findBestIconMatch(selectedClassName)}
+                            className='mx-3'
                         />
                     </span>
                 </DialogTitle>
-                
-                <DialogContent className='form-group'>
+
+                <DialogContent className='form-group my-4'>
                     {formProperties.map((prop) => (
                         <div key={prop.propId} className="my-3">
-                            {prop.propertytype === 'MFDatatypeText' && (
-                                <TextField
-                                    label={prop.title}
-                                    value={formValues[prop.propId]}
-                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                    fullWidth
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    helperText={formErrors[prop.propId]}
-                                    size='small'
-                                    className='my-1'
-                                />
+
+                            {prop.propertytype === 'MFDatatypeText' && !prop.isHidden && (
+                                <>
+                                    {prop.isAutomatic ? (
+                                        <p >{prop.title} : (automatic) {formErrors[prop.propId]} </p>
+                                    ) : (
+                                        <TextField
+                                            label={prop.title}
+                                            value={formValues[prop.propId]}
+                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                            fullWidth required={prop.isRequired}
+                                            error={!!formErrors[prop.propId]}
+                                            helperText={formErrors[prop.propId]}
+                                            size="small"
+                                            className="my-1" />
+                                    )}
+
+                                </>
                             )}
-                            
+
                             {prop.propertytype === 'MFDatatypeMultiLineText' && (
                                 <TextField
                                     label={prop.title}
@@ -472,7 +493,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     className='my-1'
                                 />
                             )}
-                            
+
                             {prop.propertytype === 'MFDatatypeLookup' && (
                                 <LookupSelect
                                     propId={prop.propId}
@@ -487,7 +508,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     className='my-1'
                                 />
                             )}
-                            
+
                             {prop.propertytype === 'MFDatatypeMultiSelectLookup' && (
                                 <LookupMultiSelect
                                     propId={prop.propId}
@@ -526,7 +547,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     )}
                                 </div>
                             )}
-                            
+
                             {prop.propertytype === 'MFDatatypeDate' && (
                                 <TextField
                                     label={prop.title}
@@ -546,12 +567,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                             )}
                         </div>
                     ))}
-                    
+
                     {selectedObjectId === 0 && (
                         <div>
-                            <FileUploadComponent 
-                                handleFileChange={handleFileChange} 
-                                uploadedFile={uploadedFile} 
+                            <FileUploadComponent
+                                handleFileChange={handleFileChange}
+                                uploadedFile={uploadedFile}
                             />
                             {fileUploadError && (
                                 <div style={{ color: '#CC3333', fontSize: '12px' }}>
@@ -561,7 +582,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         </div>
                     )}
                 </DialogContent>
-                
+
                 <DialogActions>
                     <Button onClick={closeFormDialog}>Cancel</Button>
                     <Button onClick={handleSubmit} variant="contained" color="primary">

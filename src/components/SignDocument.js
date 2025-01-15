@@ -1,14 +1,13 @@
 // PostDataButton.js
 import React from 'react';
 import axios from 'axios';
-
+import * as constants from './Auth/configs'
 import { Button } from '@mui/material';
 
 const SignButton = (props) => {
     const postData = async () => {
         try {
-            const url = 'http://192.236.194.251:240/api/objectinstance/DSSPostObjectFile';
-            alert(props.objectid)
+            const url = `${constants.mfiles_api}/api/objectinstance/DSSPostObjectFile`;
 
             const data = {
                 "objectid": props.objectid,

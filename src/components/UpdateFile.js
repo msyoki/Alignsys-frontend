@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { Modal, ModalOverlay,  ModalFooter, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Button, FormControl, FormLabel, Input } from '@chakra-ui/react';
 import axios from 'axios';
 import Loader from './Loaders/LoaderMini';
+import * as constants from './Auth/configs'
 
 
-const baseurl="http://41.89.92.225:5006" 
-const baseurldata="http://41.92.225.149:240"
-const baseurldss="http://41.92.225.149"
+
+const baseurldata=constants.mfiles_api
+
 
 const FileUploadModal = ({ isOpen, onClose ,selectedFile,refreshUpdate,setOpenAlert,setAlertSeverity,setAlertMsg}) => {
   const [file, setFile] = useState(null);

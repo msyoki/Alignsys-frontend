@@ -56,9 +56,9 @@ function a11yProps(index) {
 
 function Dashboard() {
 
-  const { user,authTokens, departments } = useContext(Authcontext);
+  const { user, authTokens, departments } = useContext(Authcontext);
   let [openObjectModal, setOpenObjectModal] = useState(false);
-  const [viewableobjects,setViewableObjects]=useState([]);
+  const [viewableobjects, setViewableObjects] = useState([]);
 
   const [data, setData] = useState([])
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,21 +76,21 @@ function Dashboard() {
     try {
       const array = viewableobjects;
       const formattedString = array.join(',\n    ');
-     
+
       const response = await axios.get(`${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${formattedString}`);
-    
+
       return response.data
     }
     catch (error) {
       console.error('Error fetching requisition data:', error);
       return [];
-  
+
     }
   }
 
 
   const getVaultObjects = () => {
-   
+
     let config = {
       method: 'get',
       url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}`,
@@ -100,8 +100,9 @@ function Dashboard() {
     axios.request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
+        console.log(response.data)
         setOpenObjectModal(true)
-    
+
       })
       .catch((error) => {
         console.log(error);
@@ -142,25 +143,25 @@ function Dashboard() {
 
 
 
-  const getViewableObjects = ()=>{
+  const getViewableObjects = () => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${constants.auth_api}/api/viewable-objects/`,
-      headers: { 
+      headers: {
         'Authorization': `Bearer ${authTokens.access}`
       }
     };
-    
+
     axios.request(config)
-    .then((response) => {
-      setViewableObjects(response.data)
-     
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-    
+      .then((response) => {
+        setViewableObjects(response.data)
+
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
 
   }
 
@@ -190,17 +191,35 @@ function Dashboard() {
 
   return (
     <>
-      <ObjectStructureList 
-        vaultObjectModalsOpen={openObjectModal} 
-        setVaultObjectsModal={() => setOpenObjectModal(false)} 
-        selectedVault={selectedVault} 
-        vaultObjectsList={vaultObjectsList} 
+      <ObjectStructureList
+        vaultObjectModalsOpen={openObjectModal}
+        setVaultObjectsModal={() => setOpenObjectModal(false)}
+        selectedVault={selectedVault}
+        vaultObjectsList={vaultObjectsList}
       />
 
       <div className="dashboard bg-dark">
         <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'} shadow-lg`}>
-          <img src={logo} alt="Loading" width='60px' />
-          
+          {/* <img src={logo} alt="Loading" width='80px' /> */}
+
+          {sidebarOpen ? <img className=" bg-white p-3 " src={logo} alt="Loading" width="100%" /> : <p className="p-1 bg-white " style={{
+            textAlign: 'center',
+            color: '#255290',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 200,
+
+          }}
+
+          >
+
+            <span style={{ fontSize: '10px', fontWeight: '450px' }}>ALIGNSYS</span> <br style={{ margin: '0px', lineHeight: '0.2' }} />
+         
+
+          </p>}
+
+
+
+
           <ul className='text-center' style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
             {sidebarOpen ? (
               <>

@@ -94,8 +94,8 @@ function AdminDashboard() {
     const [selectedObject, setSelectedObject] = useState([])
     const [listwithoughtpermissions, setListWithoughtPermissions] = useState({})
     const [userGroups, setuserGroups] = useState([])
-    const [selecedGroup,setSelectedGroup] =useState({})
-    const [openGroupUsersDialog,setOpenGroupUsersDialog]=useState(false)
+    const [selecedGroup, setSelectedGroup] = useState({})
+    const [openGroupUsersDialog, setOpenGroupUsersDialog] = useState(false)
 
 
 
@@ -147,7 +147,7 @@ function AdminDashboard() {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/vault-groups/`,
-            headers: {  'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             data: data
         };
         axios.request(config)
@@ -161,11 +161,11 @@ function AdminDashboard() {
     }
 
 
-    let selectedGroupUsers= (row)=>{
-        let group= userGroups.find(item=>item.id === row.id)
+    let selectedGroupUsers = (row) => {
+        let group = userGroups.find(item => item.id === row.id)
         setSelectedGroup(group)
         setOpenGroupUsersDialog(true)
-    } 
+    }
 
     const handleAddPermission = (guid, object_id) => {
 
@@ -562,6 +562,21 @@ function AdminDashboard() {
         <div className="dashboard">
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
             <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+                <p className="p-1 bg-white " style={{
+                    textAlign: 'center',
+                    color: '#255290',
+                    fontFamily: 'Arial, Helvetica, sans-serif',
+                    fontWeight: 200,
+
+                }}
+
+                >
+
+                    <span style={{ fontSize: '10px', fontWeight: 'bold' }}>ALIGNSYS</span> <br style={{ margin: '0px', lineHeight: '0.2' }} />
+                    <span style={{ fontSize: '5px' }}>Aligned Systems</span>
+
+                </p>
+
 
                 <ul className='text-center' style={{ listStyleType: 'none', fontSize: '13px' }}>
 
@@ -603,12 +618,12 @@ function AdminDashboard() {
                 </ul>
 
             </div>
-            <div className="content " style={{ height: '100vh', overflowY: 'scroll' }}>
+            <div className="content " style={{ height: '100vh', overflowY: 'scroll' ,backgroundColor: "#457b9d"}}>
                 <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
-                <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid}  open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
+                <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid} open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
                 <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
-               <div className="row  content-container " >
-                    <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh', backgroundColor: "#457b9d" }}>
+                <div className="row  content-container " >
+                    <div className="col-lg-4 col-md-4 col-sm-12 text-white" style={{ fontSize: '12px', height: '100vh' }}>
                         <h6 className='shadow-lg p-3'><i className="fas fa-cog  mx-2" style={{ fontSize: '1.5em' }}></i> VAULTS</h6>
 
                         <OrganizationVaultList VaultUsergroups={VaultUsergroups} fetchVaultObjects={fetchVaultObjects} fetchOrgUsers={fetchOrgUsers} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} setSelectedVault={setSelectedVault} viewvaultusers={viewvaultusers} getObjectStructureById={getObjectStructureById} viewnewobject={viewnewobject} showSublist={showSublist} showSublist1={showSublist1} toggleSublist={toggleSublist} toggleSublist1={toggleSublist1} viewvaultobjects={viewvaultobjects} viewLoginAccounts={viewLoginAccounts} viewvaultgroups={viewvaultgroups} vaultObjects={vaultObjects} viewloginaccounts={viewloginaccounts} />
@@ -625,7 +640,7 @@ function AdminDashboard() {
                                         </h6>
                                         <p className='my-3' style={{ fontSize: '0.8em' }}>Please create your new object type below with the respective properties</p>
                                     </div>
-                                    <div className='card-body my-4'>
+                                    <div className='card-body my-4' style={{height:'80%' ,overflowY:'scroll' }}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12}>
                                                 <FormControl variant='standard' fullWidth>
@@ -662,7 +677,7 @@ function AdminDashboard() {
                                             </Grid>
                                         </Grid>
                                     </div>
-                                    <div className='container-fluid'>
+                                    <div className='container-fluid' style={{height:'80%' ,overflowY:'scroll' }}>
                                         {properties.map((property, index) => (
                                             <Grid container spacing={2} alignItems="center" key={index} style={{ fontSize: '9px', marginBottom: '10px' }}>
                                                 <Grid item xs={12} sm={4}>
@@ -736,11 +751,11 @@ function AdminDashboard() {
                         }
 
                         {viewObjects ?
-                            <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                            <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px'  }}>
 
 
                                 <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( Vault Objects )</h6>
-                                <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
+                                <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{height:'80%' ,overflowY:'scroll' }}>
                                     <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                         <TableHead>
                                             <TableRow className='my-3'>
@@ -794,7 +809,7 @@ function AdminDashboard() {
 
                         }
                         {viewObjectStructure ?
-                            <div id='updateobjstructure' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                            <div id='updateobjstructure' style={{ fontSize: '12px', marginBottom: '20px'  }}>
                                 <div>
                                     <div>
                                         <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
@@ -821,7 +836,7 @@ function AdminDashboard() {
 
                                     <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
 
-                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3'>
+                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{height:'80%' ,overflowY:'scroll' }}>
                                         <Button
                                             size="small"
                                             variant="contained"
@@ -907,10 +922,10 @@ function AdminDashboard() {
                         }
 
                         {!viewLoginAccounts && !viewLoginAccounts && !viewvaultgroups && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
-                            <div style={{ fontSize: '12px', marginBottom: '20px' }}>
+                            <div style={{ fontSize: '12px', marginBottom: '20px'  }}>
 
                                 <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
-                                <ul className=' p-3' >
+                                <ul className=' p-3' style={{height:'80%' ,overflowY:'scroll' }}>
                                     <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
                                         <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
                                         <span className='list-text'>Organization Name: <b>{user.organization}</b></span>

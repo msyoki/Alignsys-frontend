@@ -6,7 +6,7 @@ import { Snackbar, Alert } from '@mui/material';
 const TimedAlert = ({ open, onClose, severity = "info", message = "", setSeverity, setMessage }) => {
   useEffect(() => {
     if (open) {
-      const timer = setTimeout(onClose, 3000); // Close the alert after 3 seconds
+      const timer = setTimeout(onClose, 5000); // Close the alert after 3 seconds
       return () => clearTimeout(timer);        // Cleanup the timeout
     }else{
         setSeverity('');

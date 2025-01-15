@@ -49,7 +49,7 @@ const VaultSelectForm = () => {
                     className='shadow-lg bg-white text-dark'
                     component="form"
                     sx={{
-                        width: 300,
+                        width: 350,
                         height: 250,
                         display: 'flex',
                         flexDirection: 'column',
@@ -60,15 +60,15 @@ const VaultSelectForm = () => {
                         padding: '16px'
                     }}
                 >
-                    <img className="my-3" src={logo} alt="Logo" width='60px' />
+                    <img className="my-3" src={logo} alt="Logo" width='100px' />
                     <p className="text-dark text-center" style={{ fontSize: '13px' }}>
                         The Smart way to work.
                     </p>
-                    <p className="text-dark text-center" style={{ fontSize: '13px' }}>
+                    <p className="text-dark text-center " style={{ fontSize: '10px' }}>
                         To proceed, please select a vault from your organization below.
                     </p>
 
-                    <FormControl fullWidth>
+                    <FormControl fullWidth className='my-3'>
                         <InputLabel className='text-dark' id="vault-select-label">Select Vault</InputLabel>
                         <Select
                             labelId="vault-select-label"
