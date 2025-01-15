@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import axios from 'axios';
+import * as constants from '../Auth/configs'
 
 function AddPermissionDialog(props) {
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -44,7 +45,7 @@ function AddPermissionDialog(props) {
         console.log(payload)
 
         // Make POST request to API endpoint
-        axios.post('http://192.236.194.251:8000/api/create-vault-object-permissions/', payload)
+        axios.post(`${constants.auth_api}/api/create-vault-object-permissions/`, payload)
             .then(response => {
                 // Handle success
                 props.fetchObjectPermisions(props.selectedObject);

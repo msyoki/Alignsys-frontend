@@ -61,7 +61,7 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
 
   return (
     <div>
-      <label ><small>{`${label}`}</small></label>
+      {/* <label ><small>{`${label}`}</small></label> */}
       <Select
         isMulti
         value={options.filter(option => value.includes(option.value))}

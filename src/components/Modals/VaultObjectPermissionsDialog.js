@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Checkbox, FormControlLabel, Button } from '@mui/material';
 import axios from 'axios';
+import * as constants from '../Auth/configs'
 
 function PermissionDialog(props) {
     const [selectedPermission, setSelectedPermission] = useState(null);
@@ -20,7 +21,7 @@ function PermissionDialog(props) {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://192.236.194.251:8000/api/permissions-delete/',
+            url: `${constants.auth_api}/api/permissions-delete/`,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -62,7 +63,7 @@ function PermissionDialog(props) {
         let config = {
           method: 'post',
           maxBodyLength: Infinity,
-          url: 'http://192.236.194.251:8000/api/update-permission/',
+          url: `${constants.auth_api}/api/update-permission/`,
           headers: { 
             'Content-Type': 'application/json'
           },

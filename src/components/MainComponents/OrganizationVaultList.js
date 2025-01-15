@@ -69,7 +69,7 @@ function OrganizationVaultList(props) {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: 'http://192.236.194.251:8000/api/update-specific-vault-objects/',
+      url: `${constants.auth_api}/api/update-specific-vault-objects/`,
       headers: {
         'Content-Type': 'application/json'
       },

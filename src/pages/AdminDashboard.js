@@ -179,7 +179,7 @@ function AdminDashboard() {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://192.236.194.251:8000/api/list-users-without-permissions/',
+            url: `${constants.auth_api}/api/list-users-without-permissions/`,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -321,7 +321,7 @@ function AdminDashboard() {
                 let config = {
                     method: 'post',
                     maxBodyLength: Infinity,
-                    url: 'http://192.236.194.251:240/api/objectstracture/CreateObjectAdmin',
+                    url: `${constants.mfiles_api}/api/objectstracture/CreateObjectAdmin`,
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -486,7 +486,7 @@ function AdminDashboard() {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://192.236.194.251:8000/api/get-vault-object-permissions/',
+            url: `${constants.auth_api}/api/get-vault-object-permissions/`,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -618,7 +618,7 @@ function AdminDashboard() {
                 </ul>
 
             </div>
-            <div className="content " style={{ height: '100vh', overflowY: 'scroll' ,backgroundColor: "#457b9d"}}>
+            <div className="content " style={{ height: '100vh', overflowY: 'scroll', backgroundColor: "#457b9d" }}>
                 <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
                 <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid} open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
                 <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
@@ -640,7 +640,7 @@ function AdminDashboard() {
                                         </h6>
                                         <p className='my-3' style={{ fontSize: '0.8em' }}>Please create your new object type below with the respective properties</p>
                                     </div>
-                                    <div className='card-body my-4' style={{height:'80%' ,overflowY:'scroll' }}>
+                                    <div className='card-body my-4' style={{ height: '80%', overflowY: 'scroll' }}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12}>
                                                 <FormControl variant='standard' fullWidth>
@@ -677,7 +677,7 @@ function AdminDashboard() {
                                             </Grid>
                                         </Grid>
                                     </div>
-                                    <div className='container-fluid' style={{height:'80%' ,overflowY:'scroll' }}>
+                                    <div className='container-fluid' style={{ height: '80%', overflowY: 'scroll' }}>
                                         {properties.map((property, index) => (
                                             <Grid container spacing={2} alignItems="center" key={index} style={{ fontSize: '9px', marginBottom: '10px' }}>
                                                 <Grid item xs={12} sm={4}>
@@ -751,65 +751,60 @@ function AdminDashboard() {
                         }
 
                         {viewObjects ?
-                            <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px'  }}>
-
-
+                            <>
                                 <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( Vault Objects )</h6>
-                                <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{height:'80%' ,overflowY:'scroll' }}>
-                                    <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
-                                        <TableHead>
-                                            <TableRow className='my-3'>
 
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
-                                                <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {vaultObjects.map((row) => (
-                                                <TableRow key={row.object_id}>
-
-                                                    <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.name_singular}
-                                                    </TableCell>
-                                                    <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            size="small"
-                                                            variant="contained"
-                                                            color="warning"
-                                                            onClick={() => fetchObjectPermisions(row)}
-                                                            style={{ textTransform: 'none' }}
-
-                                                        >
-                                                            <small>  <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions </small>
-                                                        </Button>
-                                                        {/* <Button
-                                                            size="small"
-                                                            variant="contained"
-                                                            color="primary"
-                                                            className='mx-2'
-                                                            onClick={handleAddPermission}
+                                <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
 
 
-                                                        >
-                                                            <small>Add </small>
-                                                        </Button> */}
-                                                    </TableCell>
-
-
+                                    <div style={{ boxShadow: 'none', height: '455px' }} className='shadow-lg p-3'>
+                                        <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
+                                            <TableHead className='my-3 p-3'>
+                                                <TableRow >
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
+                                                    <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
+                                            </TableHead>
+                                        </Table>
+                                        <div style={{ height: '400px', overflowY: 'scroll' }}>
+                                            <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
+                                                <TableBody>
+                                                    {vaultObjects.map((row) => (
+                                                        <TableRow key={row.object_id}>
+                                                            <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
+                                                                <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.name_singular}
+                                                            </TableCell>
+                                                            <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
+                                                            <TableCell>
+                                                                <Button
+                                                                    size="small"
+                                                                    variant="contained"
+                                                                    color="warning"
+                                                                    onClick={() => fetchObjectPermisions(row)}
+                                                                    style={{ textTransform: 'none' }}
+                                                                >
+                                                                    <small>
+                                                                        <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions
+                                                                    </small>
+                                                                </Button>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
 
-                            </div>
+
+
+                                </div>
+                            </>
                             : <></>
 
                         }
                         {viewObjectStructure ?
-                            <div id='updateobjstructure' style={{ fontSize: '12px', marginBottom: '20px'  }}>
+                            <div id='updateobjstructure' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                 <div>
                                     <div>
                                         <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
@@ -836,7 +831,7 @@ function AdminDashboard() {
 
                                     <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
 
-                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{height:'80%' ,overflowY:'scroll' }}>
+                                    <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ height: '80%', overflowY: 'scroll' }}>
                                         <Button
                                             size="small"
                                             variant="contained"
@@ -922,10 +917,10 @@ function AdminDashboard() {
                         }
 
                         {!viewLoginAccounts && !viewLoginAccounts && !viewvaultgroups && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
-                            <div style={{ fontSize: '12px', marginBottom: '20px'  }}>
+                            <div style={{ fontSize: '12px', marginBottom: '20px' }}>
 
                                 <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
-                                <ul className=' p-3' style={{height:'80%' ,overflowY:'scroll' }}>
+                                <ul className=' p-3' style={{ height: '80%', overflowY: 'scroll' }}>
                                     <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
                                         <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
                                         <span className='list-text'>Organization Name: <b>{user.organization}</b></span>

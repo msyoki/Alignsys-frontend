@@ -410,7 +410,7 @@ export default function ObjectData(props) {
                           <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
                             {item.propName === 'Class' && <>{item.value} </>}
 
-                            {item.datatype === 'MFDatatypeText' && (
+                            {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating') && (
                               <input
                                 value={props.formValues?.[item.id]?.value || ''}
                                 placeholder={item.value}
@@ -419,7 +419,6 @@ export default function ObjectData(props) {
                                 disabled={item.editable?false :true}
                               />
                             )}
-
                          
                             {item.datatype === "MFDatatypeMultiLineText" && (
                               <textarea
@@ -431,7 +430,6 @@ export default function ObjectData(props) {
                                 disabled={item.editable?false :true}
                               />
                             )}
-
 
                             {item.datatype === 'MFDatatypeDate' && (
                               <input

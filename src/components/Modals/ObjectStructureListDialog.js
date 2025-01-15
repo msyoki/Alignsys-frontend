@@ -14,7 +14,8 @@ import {
     CircularProgress,
     TextField,
     Checkbox,
-    FormControlLabel
+    FormControlLabel,
+    Box, Typography
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -456,27 +457,29 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 </DialogTitle>
 
                 <DialogContent className='form-group my-4'>
-                    {formProperties.map((prop) => (
+                    {/* {formProperties.map((prop) => (
                         <div key={prop.propId} className="my-3">
 
-                            {prop.propertytype === 'MFDatatypeText' && !prop.isHidden && (
+                            {(prop.propertytype === 'MFDatatypeText' || prop.propertytype === 'MFDatatypeFloating') && !prop.isHidden && (
                                 <>
                                     {prop.isAutomatic ? (
-                                        <p >{prop.title} : (automatic) {formErrors[prop.propId]} </p>
+                                        <p>{prop.title} : (automatic) {formErrors[prop.propId]}</p>
                                     ) : (
                                         <TextField
                                             label={prop.title}
                                             value={formValues[prop.propId]}
                                             onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                            fullWidth required={prop.isRequired}
+                                            fullWidth
+                                            required={prop.isRequired}
                                             error={!!formErrors[prop.propId]}
                                             helperText={formErrors[prop.propId]}
                                             size="small"
-                                            className="my-1" />
+                                            className="my-1"
+                                        />
                                     )}
-
                                 </>
                             )}
+
 
                             {prop.propertytype === 'MFDatatypeMultiLineText' && (
                                 <TextField
@@ -565,8 +568,193 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                     className='my-1'
                                 />
                             )}
+
+
+
                         </div>
-                    ))}
+                    ))} */}
+                    <Box
+                        className='shadow-lg p-4 shadow-sm'
+                        sx={{
+                            width: '100%',
+                            // height: '65vh',
+                            // overflowY: 'scroll',
+                            backgroundColor: '#e8f9fa'
+                        }}
+                    >
+                        <List sx={{ p: 0 }}>
+                            <>
+                                {formProperties.map((prop) => (
+                                    <ListItem key={prop.propId} sx={{ p: 0 }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginY: '2px' }}>
+                                            <Typography
+                                                className='my-2'
+                                                variant="body2"
+                                                sx={{
+                                                    color: '#1d3557',
+                                                    fontWeight: 'bold',
+                                                    flexBasis: '45%',
+                                                    fontSize: '12px',
+                                                    textAlign: 'end'
+                                                }}
+                                            >
+                                                {prop.title} {prop.isRequired ? <span className='text-danger'> *</span> : <></>} :
+                                            </Typography>
+
+                                            <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
+                                                {(prop.propertytype === 'MFDatatypeText' || prop.propertytype === 'MFDatatypeFloating') && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <TextField
+                                                                // label={prop.title}
+                                                                value={formValues[prop.propId]}
+                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                fullWidth
+                                                                required={prop.isRequired}
+                                                                error={!!formErrors[prop.propId]}
+                                                                helperText={formErrors[prop.propId]}
+                                                                size="small"
+                                                                className="my-1"
+                                                            />
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <TextField
+                                                                label={prop.title}
+                                                                value={formValues[prop.propId]}
+                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                fullWidth
+                                                                required={prop.isRequired}
+                                                                error={!!formErrors[prop.propId]}
+                                                                helperText={formErrors[prop.propId]}
+                                                                multiline
+                                                                rows={4}
+                                                                size='small'
+                                                                className='my-1'
+                                                            />
+                                                        )}
+                                                    </>
+
+
+                                                )}
+
+                                                {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <LookupSelect
+                                                                propId={prop.propId}
+                                                                label={prop.title}
+                                                                onChange={handleInputChange}
+                                                                value={formValues[prop.propId]}
+                                                                required={prop.isRequired}
+                                                                error={!!formErrors[prop.propId]}
+                                                                helperText={formErrors[prop.propId]}
+                                                                selectedVault={selectedVault}
+                                                                size='small'
+                                                                className='my-1'
+                                                            />
+                                                        )}
+                                                    </>
+
+                                                )}
+
+                                                {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <LookupMultiSelect
+                                                                propId={prop.propId}
+                                                                label={prop.title}
+                                                                onChange={handleInputChange}
+                                                                value={formValues[prop.propId] || []}
+                                                                required={prop.isRequired}
+                                                                error={!!formErrors[prop.propId]}
+                                                                helperText={formErrors[prop.propId]}
+                                                                selectedVault={selectedVault}
+                                                                size='small'
+                                                                className='my-1'
+                                                            />
+                                                        )}
+                                                    </>
+
+                                                )}
+
+                                                {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <div>
+                                                                {/* <label>{prop.title} :</label> */}
+                                                                <Select
+                                                                    size='small'
+                                                                    value={formValues[prop.propId] ?? (
+                                                                        prop.value === "Yes" ? true : (prop.value === "No" ? false : '')
+                                                                    )}
+                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                    displayEmpty
+                                                                    fullWidth
+                                                                >
+                                                                    <MenuItem value=""><em>None</em></MenuItem>
+                                                                    <MenuItem value={true}>True</MenuItem>
+                                                                    <MenuItem value={false}>False</MenuItem>
+                                                                </Select>
+                                                                {prop.isRequired && !!formErrors[prop.propId] && (
+                                                                    <div style={{ color: '#f44336', fontSize: '0.75rem', marginTop: '8px' }}>
+                                                                        {formErrors[prop.propId]}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </>
+
+                                                )}
+
+                                                {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <TextField
+                                                                // label={prop.title}
+                                                                type="date"
+                                                                value={formValues[prop.propId]}
+                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                fullWidth
+                                                                required={prop.isRequired}
+                                                                error={!!formErrors[prop.propId]}
+                                                                helperText={formErrors[prop.propId]}
+                                                                InputLabelProps={{
+                                                                    shrink: true,
+                                                                }}
+                                                                size='small'
+                                                                className='my-1'
+                                                            />
+                                                        )}
+                                                    </>
+
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </ListItem>
+                                ))}
+
+
+                            </>
+                        </List>
+                    </Box>
+
 
                     {selectedObjectId === 0 && (
                         <div>

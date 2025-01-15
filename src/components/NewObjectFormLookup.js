@@ -72,7 +72,7 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
 
   return (
     <div>
-      <label><small>{label}</small></label>
+      {/* <label><small>{label}</small></label> */}
       <Select
         label={`Select ${label}`}
         value={lookupOptions.find(option => option.value === value)}
