@@ -14,7 +14,7 @@ import ObjectPropValue from '../ObjectPropValue'
 import * as constants from '../Auth/configs'
 import FileExt from '../FileExtIcon';
 import FileExtText from '../FileExtText';
-
+import { Tooltip } from '@mui/material';
 import OfficeApp from '../Modals/OfficeAppDialog';
 import LoadingDialog from '../Loaders/LoaderDialog';
 
@@ -25,14 +25,13 @@ const ViewsList = (props) => {
     const [selectedViewObjects, setSelectedViewObjects] = useState([]);
     const [selectedViewName, setSelectedViewName] = useState('');
     const [selectedViewCategory, setSelectedViewCategory] = useState([]);
-    const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
+    const [showOtherViewSublist, setshowOtherViewSublist] = useState(false);
     const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [viewNavigation, setViewNavigation] = useState([]);
     const [openOfficeApp, setOpenOfficeApp] = useState(false);
     const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({});
     const [loading, setLoading] = useState(false);
-
 
 
     const relatedObjects = props.linkedObjects.filter(item => item.objectID !== 0);
@@ -64,48 +63,97 @@ const ViewsList = (props) => {
 
     const fetchViewData = async (item) => {
         // Add item to navigation if not already present
+        console.log(item)
         setLoading(true)
+
         setViewNavigation(prevItems => {
-            const exists = prevItems.some(navItem => navItem.id === item.id);
-            if (!exists) {
-                return [...prevItems, {
-                    ...item,
-                    type: 'MFFolderContentItemTypePropertyFolder'
-                }];
-            }
-            return prevItems;
+            const exists = prevItems.some(navItem => navItem.propId === item.propId);
+            const updatedItems = exists ? prevItems : [...prevItems, { ...item, type: item.type, title: item.title }];
+
+            // Process further within the updater function context
+            processNavigation(updatedItems);
+
+            return updatedItems;
         });
 
 
-        // Pending testing added filterprops as a list 
-        try {
-            const response = await axios.post(
-                `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
-                {
-                    viewId: item.viewId,
-                    propId: `${item.propId}`,
-                    propDatatype: `${item.propDatatype}`,
-                    vaultGuid: `${props.selectedVault.guid}`
-                },
-                {
-                    headers: {
-                        accept: '*/*',
-                        'Content-Type': 'application/json'
+
+        const processNavigation = (updatedItems) => {
+            const newItem = {
+                "propId": `${item.propId}`,
+                "propDatatype": `${item.propDatatype}`
+            };
+
+
+            const itemList = updatedItems.filter(item => item.type && item.type === "MFFolderContentItemTypePropertyFolder");
+
+            // Transform the list to keep only propId and propDatatype
+            const transformedList = itemList.map(i => ({
+                "propId": i.propId,
+                "propDatatype": i.propDatatype
+            }));
+
+            console.log(transformedList);
+            console.log(updatedItems);
+
+
+
+            // Function to check if the new item exists
+            function itemExists(list, item) {
+                return list.some(existingItem =>
+                    existingItem.propId === item.propId &&
+                    existingItem.propDatatype === item.propDatatype
+                );
+            }
+
+            // Add the new item if it doesn't exist
+            if (!itemExists(transformedList, newItem)) {
+                transformedList.push(newItem);
+            }
+
+            // Log the updated item list
+            console.log({
+                viewId: item.viewId,
+                properties: transformedList,
+                vaultGuid: `${props.selectedVault.guid}`
+            });
+
+            apiRequest(transformedList)
+
+        };
+
+
+        const apiRequest = async (newPropList) => {
+            // Pending testing added filterprops as a list 
+            try {
+                const response = await axios.post(
+                    `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
+                    {
+                        viewId: item.viewId,
+                        properties: newPropList,
+                        vaultGuid: `${props.selectedVault.guid}`
+                    },
+                    {
+                        headers: {
+                            accept: '*/*',
+                            'Content-Type': 'application/json'
+                        }
                     }
-                }
-            );
-            console.log(response.data)
-            setLoading(false)
+                );
+                console.log(response.data)
+                setLoading(false)
 
-            setSelectedViewObjects(response.data);
-            setSelectedViewName(item.title);
 
-        } catch (error) {
-            setLoading(false)
-            props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("error");
-            props.setAlertPopMessage("something went wrong, please try again later!");
-            console.error('Error fetching view objects:', error);
+                setSelectedViewObjects(response.data);
+                setSelectedViewName(item.title);
+
+            } catch (error) {
+                setLoading(false)
+                props.setAlertPopOpen(true);
+                props.setAlertPopSeverity("info");
+                props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request.!");
+                console.error('Error fetching view objects:', error);
+            }
         }
     }
 
@@ -141,14 +189,15 @@ const ViewsList = (props) => {
         } catch (error) {
             setLoading(false)
             props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("error");
-            props.setAlertPopMessage("something went wrong, please try again later!");
+            props.setAlertPopSeverity("info");
+            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request.!");
             console.error('Error fetching view objects:', error);
         }
     }
 
     const fetchMainViewObjects2 = async (item) => {
         // Add item to navigation with ViewFolder type
+
         setLoading(true)
         setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
@@ -179,8 +228,8 @@ const ViewsList = (props) => {
 
             setLoading(false)
             props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("error");
-            props.setAlertPopMessage("something went wrong, please try again later!");
+            props.setAlertPopSeverity("info");
+            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
             console.error('Error fetching view objects:', error);
         }
     }
@@ -257,24 +306,44 @@ const ViewsList = (props) => {
         fetchExtension();
     }
 
+    const trimTitle = (title) => {
+        const maxLength = 12; // Set your desired max length
+        if (title.length > maxLength) {
+            return title.substring(0, maxLength) + '...';
+        }
+        return title;
+    };
+
+    const backToViews=()=>{
+        setSelectedViewObjects([])
+        setViewNavigation([])
+        setSelectedViewCategory([])
+    }
+
+
     return (
-        <div style={{ height: '100%' }}>
+        <>
             <LoadingDialog opendialogloading={loading} />
             <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
             {selectedViewObjects.length > 0 ? (
                 <>
                     <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                        <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1d3557', fontSize: '20px' }} />
+
+                        <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1C4690', fontSize: '20px' }} /> 
+                        <span onClick={backToViews} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
+                        <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
                         {viewNavigation.map((item, index) => (
                             <React.Fragment key={index}>
-                                <span onClick={() => handleViewNavClick(item)} style={{ cursor: 'pointer' }}>
-                                    {item.title}{item.index}
-                                </span>
+                                <Tooltip title={item.title}>
+                                    <span onClick={() => handleViewNavClick(item)} style={{ cursor: 'pointer', width: '0.05px', overflowX: 'hidden' }}>
+                                        {trimTitle(item.title)}
+                                    </span>
+                                </Tooltip>
                                 <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
                             </React.Fragment>
                         ))}
                     </h6>
-                    <div style={{ height: '65vh', overflowY: 'scroll' }} className='shadow-lg p-2'>
+                    <div style={{ height: '65vh',  overflowY: 'auto' ,marginLeft:'30px'}} className='shadow-lg p-2 text-dark'>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -305,7 +374,7 @@ const ViewsList = (props) => {
                                         >
                                             <Typography
                                                 variant="body1"
-                                                style={{ fontSize: '12px', lineHeight: '1.2', padding: '4px 0' }}  // Reduce padding and line height
+                                                style={{ fontSize: '11px', lineHeight: '1.2', padding: '4px 0' }}  // Reduce padding and line height
                                             >
                                                 {item.objectID === 0 || item.objectTypeId === 0 ? (
                                                     <>
@@ -319,8 +388,8 @@ const ViewsList = (props) => {
                                                 ) : (
                                                     <>
                                                         <i
-                                                            className="fas fa-layer-group mx-1"
-                                                            style={{ fontSize: '15px', color: '#0077b6' }}
+                                                            className="fas fa-layer-group mx-2"
+                                                            style={{ fontSize: '14px', color: '#0077b6' }}
                                                         ></i>
                                                         {item.title}
                                                     </>
@@ -341,7 +410,7 @@ const ViewsList = (props) => {
                                                             <>
                                                                 {relatedObjects.length > 0 && (
                                                                     <>
-                                                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
+                                                                        <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
                                                                             Related Objects ({relatedObjects.length})
                                                                         </Typography>
                                                                         <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
@@ -349,7 +418,7 @@ const ViewsList = (props) => {
                                                                                 {relatedObjects.map((relatedItem, relatedIndex) => (
                                                                                     <tr key={relatedIndex} onClick={() => props.previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
                                                                                         <td>
-                                                                                            <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1d3557' }}></i>
+                                                                                            <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
                                                                                             {relatedItem.title}
                                                                                         </td>
                                                                                     </tr>
@@ -360,7 +429,7 @@ const ViewsList = (props) => {
                                                                 )}
                                                                 {relatedDocuments.length > 0 && (
                                                                     <>
-                                                                        <Typography variant="body2" style={{ fontSize: '11px', color: "#fff", backgroundColor: '#1d3557' }} className='p-1'>
+                                                                        <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
                                                                             Attached Documents ({relatedDocuments.length})
                                                                         </Typography>
                                                                         <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
@@ -398,7 +467,7 @@ const ViewsList = (props) => {
                                 {item.type === "MFFolderContentItemTypeViewFolder" && (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
                                         <li className='mx-4' onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                            <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
+                                            <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                                             <span className='list-text'>{item.title}</span>
                                         </li>
                                     </ul>
@@ -412,14 +481,14 @@ const ViewsList = (props) => {
                     {commonviews.length > 0 && (
                         <>
                             <h6 onClick={toggleCommonViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Common Views <small style={{ color: '#2a68af' }}>({commonviews.length})</small>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i> Common Views <small style={{ color: '#2a68af' }}>({commonviews.length})</small>
                             </h6>
                             {showCommonViewSublist && (
-                                <div style={{ height: '40vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
+                                <div style={{ height: '30vh',  overflowY: 'auto',marginLeft:'30px' }} className='p-3 shadow-lg text-dark'>
                                     {commonviews.map((view) => (
                                         <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
                                             <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                                                 <span className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
@@ -431,14 +500,14 @@ const ViewsList = (props) => {
                     {otherviews.length > 0 && (
                         <>
                             <h6 onClick={toggleOtherViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
                             </h6>
                             {showOtherViewSublist && (
-                                <div style={{ height: '40vh', overflowY: 'scroll' }} className='p-2 shadow-lg'>
+                                <div style={{ height: '30vh',  overflowY: 'auto',marginLeft:'30px' }} className='p-3 shadow-lg text-dark'>
                                     {otherviews.map((view) => (
                                         <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
                                             <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1d3557', fontSize: '20px' }} />
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                                                 <span className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
@@ -449,7 +518,7 @@ const ViewsList = (props) => {
                     )}
                 </>
             )}
-        </div>
+        </>
 
     );
 };

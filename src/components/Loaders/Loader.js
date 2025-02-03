@@ -1,6 +1,6 @@
 import React from "react";
 import loading from "../../images/loading.svg";
-import logo from "../../images/ZF.png";
+import logo from "../../images/ZFBLU.webp";
 import '../../styles/Loader.css'
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';

@@ -8,12 +8,12 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
-import logo from '../../images/ZF.png'
+import logo from '../../images/ZFBLU.webp'
 
 const ConfirmUpdateDialog = (props) => {
     return (
         <Dialog open={props.open} aria-labelledby="confirm-dialog-title">
-            <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+            <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1C4690', color: '#fff', fontSize: '15px' }}>
             <span className='mx-3' style={{fontSize:'12px'}}> Unsaved Changes</span>
             <img className=" bg-white p-2 mx-3"  src={logo} alt="Loading" width="130px" />
                

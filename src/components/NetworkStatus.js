@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { SignalWifi1BarIcon } from '@mui/icons-material/SignalWifi1Bar';
+import SignalWifi1BarIcon from '@mui/icons-material/SignalWifi1Bar';
+import SignalWifi2BarIcon from '@mui/icons-material/SignalWifi2Bar';
+import SignalWifi3BarIcon from '@mui/icons-material/SignalWifi3Bar';
+import SignalWifi4BarIcon from '@mui/icons-material/SignalWifi4Bar';
+import SignalWifiOffIcon from '@mui/icons-material/SignalWifiOff';
+import { Tooltip } from '@mui/material';
 
 function getNetworkStatus() {
   if (navigator.connection) {
@@ -48,39 +53,38 @@ const NetworkIcon = () => {
   }, []);
 
   const getSignalIcon = () => {
-    const { downlink, online } = networkStatus;
+    const { downlink, online, effectiveType } = networkStatus;
+
+    let tooltipText = '';
+    let Icon = null;
+    let color = '';
 
     if (!online) {
-      return (
-        <span style={{ fontSize: '9px' }}>
-          {Array(4).fill(<i className="fas fa-circle" style={{ color: 'red' }} />)}
-          <i className="fas fa-signal-alt-1" />
-        </span>
-      );
-    }
-
-    let circles = 0;
-    if (downlink >= 10) {
-      circles = 4;
+      tooltipText = 'No connection';
+      Icon = SignalWifiOffIcon;
+      // color = 'red';
+    } else if (downlink >= 10) {
+      tooltipText = `Strong connection (${downlink} Mbps, ${effectiveType})`;
+      Icon = SignalWifi4BarIcon;
+      // color = 'green';
     } else if (downlink >= 5) {
-      circles = 3;
+      tooltipText = `Moderate connection (${downlink} Mbps, ${effectiveType})`;
+      Icon = SignalWifi3BarIcon;
+      // color = 'orange';
     } else if (downlink >= 1) {
-      circles = 2;
+      tooltipText = `Weak connection (${downlink} Mbps, ${effectiveType})`;
+      Icon = SignalWifi2BarIcon;
+      // color = 'yellow';
     } else {
-      circles = 0;
+      tooltipText = `Very weak connection (${downlink} Mbps, ${effectiveType})`;
+      Icon = SignalWifi1BarIcon;
+      // color = 'red';
     }
 
     return (
-      <span style={{ fontSize: '9px' }}>
-        {Array(4).fill(0).map((_, index) => (
-          <i
-            key={index}
-            className="fas fa-circle"
-            style={{ color: index < circles ? 'green' : 'white' }}
-          />
-        ))}
-        <i className="fas fa-signal-alt-1" />
-      </span>
+      <Tooltip title={tooltipText}>
+        <Icon style={{ color, fontSize: '25px' }} />
+      </Tooltip>
     );
   };
 

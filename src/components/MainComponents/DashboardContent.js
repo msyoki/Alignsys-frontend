@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
 import { Button } from '@chakra-ui/react';
@@ -40,10 +40,13 @@ import { UTurnLeft } from '@mui/icons-material';
 import OfficeApp from '../Modals/OfficeAppDialog';
 import * as constants from '../Auth/configs'
 import LoadingDialog from '../Loaders/LoaderDialog';
+import FileExtText from '../FileExtText';
+import logo from '../../images/ZFBLU.webp';
+
+import { Tooltip } from '@mui/material';
 
 
-
-const baseurldata=constants.mfiles_api
+const baseurldata = constants.mfiles_api
 
 
 const DocumentList = (props) => {
@@ -81,8 +84,8 @@ const DocumentList = (props) => {
   const [loadingcomments, setLoadingComments] = useState(false);
   const [openOfficeApp, setOpenOfficeApp] = useState(false)
   const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
-  const [loadingClick,setLoadingClick]=useState(false);
-  
+  const [loadingClick, setLoadingClick] = useState(false);
+
 
 
   const handleOpenDialog = () => setDialogOpen(true);
@@ -252,7 +255,7 @@ const DocumentList = (props) => {
 
 
   const previewObject = async (item) => {
-    
+
 
     setComments([])
 
@@ -268,6 +271,7 @@ const DocumentList = (props) => {
       setFormValues({})
       getLinkedObjects(item.id, (item.classId !== undefined ? item.classId : item.classID), (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
       setSelectedObject(item)
+      console.log(item)
       getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID), item.id)
 
       try {
@@ -309,6 +313,7 @@ const DocumentList = (props) => {
     setLoadingClick(true)
     setFormValues({});
     setSelectedObject(item);
+    console.log(item)
 
     // Fetch the object workflow asynchronously
     getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID, item.id));
@@ -386,6 +391,9 @@ const DocumentList = (props) => {
     setDialogOpen(false)
     setSelectedState({})
     setFormValues({})
+    console.log(currentState)
+    setSelectedState(currentState)
+
   }
 
 
@@ -603,8 +611,48 @@ const DocumentList = (props) => {
     fetchExtension();
   }
 
+  const col1Ref = useRef(null);
+  const col2Ref = useRef(null);
+  const dividerRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
 
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      const containerWidth = containerRef.current.getBoundingClientRect().width;
+      let newCol1Width = (e.clientX / containerWidth) * 100;
+      if (newCol1Width < 10) newCol1Width = 10;
+      if (newCol1Width > 90) newCol1Width = 90;
+      col1Ref.current.style.width = `${newCol1Width}%`;
+      col2Ref.current.style.width = `${100 - newCol1Width}%`;
+    };
+
+    const handleMouseUp = () => setIsDragging(false);
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isMobile]);
+
+  const handleMouseDown = () => {
+    if (!isMobile) setIsDragging(true);
+  };
   return (
     <>
       <ConfirmUpdateDialog
@@ -614,7 +662,7 @@ const DocumentList = (props) => {
         uptatingObject={uptatingObject}
         message={selectedObject.title}
         discardChange={discardChange}
-    
+
       />
 
       <TimedAlert
@@ -626,16 +674,16 @@ const DocumentList = (props) => {
         setMessage={setAlertPopMessage}
       />
 
-      <OfficeApp 
-        open={openOfficeApp} 
-        close={() => setOpenOfficeApp(false)} 
-        object={objectToEditOnOffice} 
+      <OfficeApp
+        open={openOfficeApp}
+        close={() => setOpenOfficeApp(false)}
+        object={objectToEditOnOffice}
       />
-      <LoadingDialog opendialogloading={loadingClick}/>
+      <LoadingDialog opendialogloading={loadingClick} />
 
-      <div className="row bg">
+      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100vh', backgroundColor: '#fff',  overflowY: 'auto'}}>
         {/* Object List */}
-        <div className="col-md-5 col-sm-12 bg-white p-0" style={{ height: '100vh', overflow: 'clip' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', height: '100vh', backgroundColor: 'white', minWidth: '38%' }}>
           <Box
             style={{
               display: 'flex',
@@ -643,14 +691,40 @@ const DocumentList = (props) => {
               justifyContent: 'space-between',
               padding: '5px',
               fontSize: '12px !important',
-              backgroundColor: '#1d3557',
-              color: '#ffffff',
+              backgroundColor: '#ffff',
+              color: '#1C4690',
+            
             }}
+
           >
             <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-1 p-1">
-              <i className="fas fa-hdd mx-4" style={{ fontSize: '25px' }}></i>
-              <VaultSelectForm activeVault={props.selectedVault} />
+              <img style={{
+                fontSize: '25px',
+                cursor: 'pointer',
+                color: '#fff',
+                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                transform: 'translateZ(0)',
+                transition: 'transform 0.2s'
+              }} onClick={reloadPage} src={logo} width='150px' />
+
+
+
+              {/* <span onClick={props.toggleSidebar} aria-label={props.sidebarOpen ? "Close Sidebar" : "Open Sidebar"} className="p-2 mx-2">
+                  {!props.sidebarOpen ? (
+                    <Tooltip title='Expand sidebar'>
+                      <i className="fas fa-bars" style={{ fontSize: '25px' }}></i>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title='Minimize sidebar'>
+                      <i className="fas fa-hand-point-left" style={{ fontSize: '25px' }}></i>
+                     
+                    </Tooltip>
+                  )}
+                </span> */}
+              {/* {props.sidebarOpen ? "Close" : "Open"} Sidebar */}
+
             </Box>
+
 
             <Box style={{ display: 'flex', alignItems: 'center' }}>
               <Box
@@ -658,138 +732,181 @@ const DocumentList = (props) => {
                 justifyContent="flex-end"
                 alignItems="center"
                 color="text.white"
-                fontSize="12.5px"
+                fontSize="11.5px"
               >
-                <Box mr={1}>
+                {/* <Box mr={2}>
                   {props.user.first_name} {props.user.last_name}
                 </Box>
-                <Box mr={3}>
+                <Box mr={2}>
+                  <NetworkIcon />
+                </Box> */}
+                <i
+                  onClick={reloadPage}
+                  className="fas fa-home mx-2"
+                  style={{
+                    fontSize: '25px',
+                    cursor: 'pointer',
+                    color: '#1C4690',
+                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                    transform: 'translateZ(0)',
+                    transition: 'transform 0.2s'
+                  }}
+                ></i>
+                <i
+                  onClick={props.getVaultObjects}
+                  className="fas fa-plus mx-3"
+                  style={{
+                    fontSize: '25px',
+                    cursor: 'pointer',
+                    color: '#1C4690',
+                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                    transform: 'translateZ(0)',
+                    transition: 'transform 0.2s'
+                  }}
+
+                // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                ></i>
+                <Box style={{
+
+                  cursor: 'pointer',
+                  color: '#1C4690',
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                  transform: 'translateZ(0)',
+                  transition: 'transform 0.2s'
+                }}
+                  className='mx-2'
+                >
                   <NetworkIcon />
                 </Box>
               </Box>
             </Box>
           </Box>
 
-          <div>
-            <div className="shadow-lg p-2 d-flex justify-content-center" style={{ backgroundColor: '#457b9d' }}>
-              <form onSubmit={handleSearch} className="input-group" style={{ maxWidth: '600px', width: '100%' }}>
-                <div className='mx-3'>
-                  <i
-                    onClick={reloadPage}
-                    className="fas fa-home mx-2"
-                    style={{ fontSize: '25px', cursor: 'pointer', color: '#fff' }}
-                  ></i>
 
-                  <i
-                    onClick={props.getVaultObjects}
-                    className="fas fa-plus mx-2"
-                    style={{ fontSize: '25px', cursor: 'pointer', color: '#fff' }}
-                  ></i>
-                </div>
+          <div className="shadow-lg p-2 d-flex justify-content-center" style={{ backgroundColor: '#dedddd' }}>
+            <form onSubmit={handleSearch} className="input-group" style={{ maxWidth: '600px', width: '100%' }}>
+              <div className='p-1' style={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title='Switch to a different vault'>
+                  <VaultSelectForm activeVault={props.selectedVault} />
+                </Tooltip>
+                {/* <i
+            onClick={props.getVaultObjects}
+            className="fas fa-plus mx-3"
+            style={{ fontSize: '25px', cursor: 'pointer', color: '#1C4690' }}
+        ></i> */}
+              </div>
 
-                <input
-                  className="form-control form-control-sm"
-                  type="text"
-                  required
-                  placeholder="Search term ..."
-                  value={props.searchTerm}
-                  onChange={(e) => props.setSearchTerm(e.target.value)}
-                />
+              <input
+                className="form-control form-control-md rounded mx-2"
+                type="text"
+                required
+                placeholder="Quick search ..."
+                value={props.searchTerm}
+                onChange={(e) => props.setSearchTerm(e.target.value)}
+              />
 
-                <button
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  style={{ backgroundColor: '#fff', fontSize: '13px', borderColor: '#fff', color: '#1d3557' }}
-                  type="submit"
-                  className="shadow-lg mx-1 p-1"
-                >
-                  <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
-                  <span className="mx-1">Search</span>
-                </button>
+              <button
+                type="submit"
+                className="btn btn-md rounded mx-2 shadow"
+                style={{
+                  fontSize: '13px',
+                  color: '#fff',
+                  backgroundColor: '#1C4690',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19)',
+                  transition: 'transform 0.2s',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
+                <span className="mx-2">Search</span>
+              </button>
 
-                <TransitionAlerts
-                  setOpen={setOpenAlert}
-                  open={openAlert}
-                  alertSeverity={alertSeverity}
-                  alertmsg={alertMsg}
-                />
-              </form>
-            </div>
+              <TransitionAlerts
+                setOpen={setOpenAlert}
+                open={openAlert}
+                alertSeverity={alertSeverity}
+                alertmsg={alertMsg}
+              />
+            </form>
 
-            <div className="table-responsive-sm bg-white">
-              {loading ? (
-                <Loader />
-              ) : (
-                <>
-                  {props.data.length > 0 ? (
-                    <>
-                      <h6 className='p-3 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa' }}>
-                        <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1d3557' }}></i>
-                        Search Results
-                      </h6>
+          </div>
 
-                      <div style={{ height: '65vh', overflowY: 'scroll' }} className='shadow-lg p-3'>
-                        {props.data.map((item, index) => (
-                          <Accordion
-                            key={index}
-                            expanded={selectedIndex === index}
-                            onChange={handleAccordionChange(index)}
-                            sx={{
-                              border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                              '&:not(:last-child)': {
-                                borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                              },
-                              '&::before': { display: 'none' },
-                            }}
-                          >
-                            {(item.objectID !== undefined ? item.objectID : item.objectTypeId) === 0 ? (
-                              <AccordionSummary
-                                onClick={() => previewSublistObject(item)}
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls={`panel${index}a-content`}
-                                id={`panel${index}a-header`}
-                                sx={{ bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit' }}
-                                className="shadow-sm"
-                              >
-                                <Typography variant="body1" style={{ fontSize: '12px' }}>
-                                  <FileExt 
-                                    guid={props.selectedVault.guid} 
-                                    objectId={item.id} 
-                                    classId={item.classId !== undefined ? item.classId : item.classID} 
-                                  />
-                                  {item.title}
-                                </Typography>
-                              </AccordionSummary>
-                            ) : (
-                              <AccordionSummary
-                                onClick={() => previewObject(item)}
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls={`panel${index}a-content`}
-                                id={`panel${index}a-header`}
-                                className="shadow-sm"
-                              >
-                                <Typography variant="body1" style={{ fontSize: '12px' }}>
-                                  <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>
-                                  {item.title}
-                                </Typography>
-                              </AccordionSummary>
-                            )}
-                            {linkedObjects ? (
-                              <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className="p-2 shadow-sm mx-3">
-                                {linkedObjects.requisitionID === item.internalID ? (
-                                  props.loadingobjects ? (
-                                    <div className="text-center">
-                                      <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                      <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      {linkedObjects.length > 0 ? (
-                                        <>
-                                          {relatedObjects.length > 0 && (
-                                            <>
-                                              <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1d3557' }} className="p-1">
+          <div className="table-responsive-sm " >
+            {loading ? (
+              <Loader />
+            ) : (
+              <>
+                {props.data.length > 0 ? (
+                  <>
+                    <h6 className='p-3 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                      Search Results
+                    </h6>
+
+                    <div style={{ height: '65vh',  overflowY: 'auto' }} className='shadow-lg p-3'>
+                      {props.data.map((item, index) => (
+                        <Accordion
+                          key={index}
+                          expanded={selectedIndex === index}
+                          onChange={handleAccordionChange(index)}
+                          sx={{
+                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            '&:not(:last-child)': {
+                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            },
+                            '&::before': { display: 'none' },
+                          }}
+                        >
+                          {(item.objectID !== undefined ? item.objectID : item.objectTypeId) === 0 ? (
+                            <AccordionSummary
+                              onClick={() => previewSublistObject(item)}
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{ bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit' }}
+                              className="shadow-sm"
+                            >
+                              <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                <FileExt
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classId !== undefined ? item.classId : item.classID}
+                                />
+                                {item.title}
+                              </Typography>
+                            </AccordionSummary>
+                          ) : (
+                            <AccordionSummary
+                              onClick={() => previewObject(item)}
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              className="shadow-sm"
+                            >
+                              <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>
+                                {item.title}
+                              </Typography>
+                            </AccordionSummary>
+                          )}
+                          {linkedObjects ? (
+                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className="p-2 shadow-sm mx-3">
+                              {linkedObjects.requisitionID === item.internalID ? (
+                                props.loadingobjects ? (
+                                  <div className="text-center">
+                                    <CircularProgress style={{ width: '20px', height: '20px' }} />
+                                    <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {linkedObjects.length > 0 ? (
+                                      <>
+                                        {relatedObjects.length > 0 && (
+                                          <>
+                                            {/* <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1C4690' }} className="p-1">
                                                 Related Objects ({relatedObjects.length})
                                               </Typography>
                                               <table id="
@@ -799,18 +916,34 @@ const DocumentList = (props) => {
                                                   {relatedObjects.map((relatedItem, relatedIndex) => (
                                                     <tr key={relatedIndex} onClick={() => previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
                                                       <td>
-                                                        <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1d3557' }}></i>
+                                                        <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
                                                         {relatedItem.title}
                                                       </td>
                                                     </tr>
                                                   ))}
                                                 </tbody>
-                                              </table>
-                                            </>
-                                          )}
-                                          {relatedDocuments.length > 0 && (
-                                            <>
-                                              <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1d3557' }} className="p-1">
+                                              </table> */}
+
+                                            <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
+                                              Related Objects ({relatedObjects.length})
+                                            </Typography>
+                                            <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+                                              <tbody>
+                                                {relatedObjects.map((relatedItem, relatedIndex) => (
+                                                  <tr key={relatedIndex} onClick={() => previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
+                                                    <td>
+                                                      <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
+                                                      {relatedItem.title}
+                                                    </td>
+                                                  </tr>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          </>
+                                        )}
+                                        {relatedDocuments.length > 0 && (
+                                          <>
+                                            {/* <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1C4690' }} className="p-1">
                                                 Attached Documents ({relatedDocuments.length})
                                               </Typography>
                                               <table id="createdByMe" className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
@@ -829,61 +962,82 @@ const DocumentList = (props) => {
                                                     </tr>
                                                   ))}
                                                 </tbody>
-                                              </table>
-                                            </>
-                                          )}
-                                        </>
-                                      ) : (
-                                        <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
-                                          No Relationships Found
-                                        </p>
-                                      )}
-                                    </>
-                                  )
-                                ) : null}
-                              </AccordionDetails>
-                            ) : null}
-                          </Accordion>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {props.viewableobjects.length > 0 ? (
-                        <ViewsList
-                          selectedFileId={selectedFileId}
-                          viewableobjects={props.viewableobjects}
-                          previewSublistObject={previewSublistObject}
-                          selectedObject={selectedObject}
-                          linkedObjects={linkedObjects}
-                          loadingobjects={loadingobjects}
-                          selectedVault={props.selectedVault}
-                          setPreviewObjectProps={setPreviewObjectProps}
-                          setLoadingPreviewObject={setLoadingPreviewObject}
-                          previewObject={previewObject}
-                          setAlertPopOpen={setAlertPopOpen}
-                          setAlertPopSeverity={setAlertPopSeverity}
-                          setAlertPopMessage={setAlertPopMessage}
-                        />
-                      ) : (
-                        <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                          <FontAwesomeIcon icon={faTable} className="my-2" style={{ color: '#1d3557', fontSize: '120px' }} />
-                          <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>Loading Views...</Typography>
-                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>No Views</Typography>
-                        </Box>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+                                              </table> */}
+                                            <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
+                                              Attached Documents ({relatedDocuments.length})
+                                            </Typography>
+                                            <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+                                              <tbody>
+                                                {relatedDocuments.map((doc, docIndex) => (
+                                                  <tr key={docIndex} onClick={() => previewSublistObject(doc)} onDoubleClick={() => openApp(doc)} style={{ cursor: 'pointer' }}>
+                                                    <td>
+                                                      <FileExt guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
+                                                      {doc.title}.<FileExtText guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
+                                                    </td>
+                                                  </tr>
+                                                ))}
+                                              </tbody>
+                                            </table>
 
-
+                                          </>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                        No Relationships Found
+                                      </p>
+                                    )}
+                                  </>
+                                )
+                              ) : null}
+                            </AccordionDetails>
+                          ) : null}
+                        </Accordion>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {props.viewableobjects.length > 0 ? (
+                      <ViewsList
+                        selectedFileId={selectedFileId}
+                        viewableobjects={props.viewableobjects}
+                        previewSublistObject={previewSublistObject}
+                        selectedObject={selectedObject}
+                        linkedObjects={linkedObjects}
+                        loadingobjects={loadingobjects}
+                        selectedVault={props.selectedVault}
+                        setPreviewObjectProps={setPreviewObjectProps}
+                        setLoadingPreviewObject={setLoadingPreviewObject}
+                        previewObject={previewObject}
+                        setAlertPopOpen={setAlertPopOpen}
+                        setAlertPopSeverity={setAlertPopSeverity}
+                        setAlertPopMessage={setAlertPopMessage}
+                      />
+                    ) : (
+                      <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                        <FontAwesomeIcon icon={faTable} className="my-2" style={{ color: '#1C4690', fontSize: '120px' }} />
+                        {/* <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>Loading Views...</Typography> */}
+                        <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}> Views</Typography>
+                      </Box>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </div>
+
+
+
         </div>
 
+        {!isMobile && (
+          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
+        )}
+
+
         {/* Object View List */}
-        <div className="col-md-7 col-sm-12 p-0 shadow-sm" style={{ height: '100vh', overflow: 'clip', backgroundColor: "#e5e5e5" }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', height: '100vh', backgroundColor: '#e5e5e5', minWidth: '55%' }}>
           <ObjectData user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>

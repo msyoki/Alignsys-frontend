@@ -36,9 +36,13 @@ import axios from 'axios';
 import LookupSelect from '../NewObjectFormLookup';
 import LookupMultiSelect from '../NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoaderDialog';
-import logo from '../../images/ZF.png';
+import logo from '../../images/ZFWHITE.webp'
 import FileUploadComponent from '../FileUpload';
 import * as constants from '../Auth/configs';
+
+
+
+
 
 const allIcons = {
     faFileAlt,
@@ -75,31 +79,27 @@ const findBestIconMatch = (name) => {
     return faFolder;
 };
 
-const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, selectedVault, vaultObjectsList }) => {
-    const [isDataOpen, setIsDataOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [miniLoader, setMiniLoader] = useState(false);
-    const [selectedObjectId, setSelectedObjectId] = useState(null);
-    const [selectedObjectName, setSelectedObjectName] = useState('');
-    const [selectedClassName, setSelectedClassName] = useState('');
-    const [selectedClassId, setSelectedClassId] = useState(null);
-    const [groupedItems, setGroupedItems] = useState([]);
-    const [ungroupedItems, setUngroupedItems] = useState([]);
+const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selectedVault,vaultObjectsList,setIsDataOpen,setSelectedObjectName,setIsLoading,setGroupedItems,setUngroupedItems,closeModal,setSelectedObjectId,selectedObjectId,setSelectedClassId,selectedClassId,isDataOpen,selectedObjectName,isLoading,groupedItems,ungroupedItems,handleClassSelection,setFormProperties,formProperties,setTemplateModalOpen,templateModalOpen,setFormValues,formValues,closeDataDialog,selectedClassName,setIsFormOpen,isFormOpen,setTemplateIsTrue,templateIsTrue,templates,setTemplates}) => {
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [formProperties, setFormProperties] = useState([]);
-    const [formValues, setFormValues] = useState({});
+   
+    const [miniLoader, setMiniLoader] = useState(false);
+ 
+    
+
+
+
+
+
     const [formErrors, setFormErrors] = useState({});
     const [fileUploadError, setFileUploadError] = useState('');
     const [uploadedFile, setUploadedFile] = useState(null);
 
-    const closeModal = () => {
-        setVaultObjectsModal();
-    };
 
-    const closeDataDialog = () => {
-        setIsDataOpen(false);
-    };
+    const [selectedTemplate, setSelectedTemplate] = useState({})
+
+
+
+
 
     const closeFormDialog = () => {
         setIsFormOpen(false);
@@ -144,17 +144,105 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         }
     };
 
-    const handleClassSelection = async (classId, className, classGroupId = null) => {
-        setSelectedClassName(className);
+    // const handleClassSelection = async (classId, className, classGroupId = null) => {
+    //     setSelectedClassName(className);
+
+    //     try {
+    //         const response = await axios.get(
+    //             `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
+    //         );
+    //         console.log(selectedVault.guid)
+    //         console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
+    //         setSelectedClassId(classId);
+    //         setFormProperties(response.data);
+    //         console.log(response.data)
+    //         setFormValues(response.data.reduce((acc, prop) => {
+    //             acc[prop.propId] = '';
+    //             return acc;
+    //         }, {}));
+    //         setIsFormOpen(true);
+    //     } catch (error) {
+    //         console.error("Error fetching class properties:", error);
+    //     }
+    //     closeDataDialog();
+    // };
+
+    // const handleClassSelection = async (classId, className, classGroupId = null) => {
+    //     alert("called")
+    //     setSelectedClassName(className);
+
+    //     if (selectedObjectId === 0) {
+    //         axios.get(`${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`, {
+    //             headers: {
+    //                 'accept': '*/*'
+    //             }
+    //         })
+    //             .then(response => {
+    //                 setTemplates(response.data);
+    //                 setTemplateModalOpen(true)
+    //                 // alert("show templates available")
+
+
+    //             })
+    //             .catch(error => {
+    //                 console.error(error);
+    //                 proceedNoneTemplate();
+    //             });
+    //     }
+
+    //     const proceedNoneTemplate = async () => {
+    //         try {
+    //             const response = await axios.get(
+    //                 `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
+    //             );
+    //             console.log(selectedVault.guid)
+    //             console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
+    //             setSelectedClassId(classId);
+    //             setFormProperties(response.data);
+    //             console.log(response.data)
+    //             setFormValues(response.data.reduce((acc, prop) => {
+    //                 acc[prop.propId] = '';
+    //                 return acc;
+    //             }, {}));
+    //             setIsFormOpen(true);
+    //         } catch (error) {
+    //             console.error("Error fetching class properties:", error);
+    //         }
+    //         closeDataDialog();
+    //     }
+
+    //     const proceedTemplate = async () => {
+    //         try {
+    //             const response = await axios.get(
+    //                 `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${classId}/${selectedObjectId}`
+    //             );
+    //             setSelectedClassId(classId);
+    //             setFormProperties(response.data);
+    //             console.log(response.data)
+    //             setFormValues(response.data.reduce((acc, prop) => {
+    //                 acc[prop.propId] = '';
+    //                 return acc;
+    //             }, {}));
+    //             setIsFormOpen(true);
+    //         } catch (error) {
+    //             console.error("Error fetching class properties:", error);
+    //         }
+    //         closeDataDialog();
+    //     }
+    // };
+ 
+    const UseTemplate = async (item) => {
+        setTemplateIsTrue(true)
+        setSelectedTemplate(item)
+
+        console.log(selectedVault.guid)
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
+                `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${item.classID}/${item.id}`
             );
-            console.log(selectedVault.guid)
-            console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
-            setSelectedClassId(classId);
+            setSelectedClassId(selectedClassId);
             setFormProperties(response.data);
-            console.log(response.data)
+            console.log(response.data);
             setFormValues(response.data.reduce((acc, prop) => {
                 acc[prop.propId] = '';
                 return acc;
@@ -162,9 +250,38 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
             setIsFormOpen(true);
         } catch (error) {
             console.error("Error fetching class properties:", error);
+        } finally {
+            closeDataDialog();
         }
-        closeDataDialog();
     };
+
+
+    const dontUseTemplates = async () => {
+        setTemplateIsTrue(false)
+        setSelectedTemplate({})
+        console.log(selectedClassId)
+        console.log(selectedClassName)
+        setTemplateModalOpen(false)
+        try {
+            const response = await axios.get(
+                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}`
+            );
+
+            setSelectedClassId(selectedClassId);
+            setFormProperties(response.data);
+            console.log(response.data);
+            setFormValues(response.data.reduce((acc, prop) => {
+                acc[prop.propId] = '';
+                return acc;
+            }, {}));
+            setIsFormOpen(true);
+        } catch (error) {
+            console.error("Error fetching class properties:", error);
+        } finally {
+            closeDataDialog();
+        }
+    };
+
 
     const handleInputChange = (propId, value) => {
         setFormValues({
@@ -191,16 +308,14 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
         setUploadedFile(file);
     };
 
+    const filteredProperties = formProperties.filter(
+        prop => prop.propId > 101
+    );
+
     const handleSubmit = async () => {
+      
         const newFormErrors = {};
-        // const propertiesPayload = formProperties
-        //     .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '')
-        //     .map(prop => ({
-        //         value: `${formValues[prop.propId]}`,
-        //         propId: prop.propId,
-        //         propertytype: prop.propertytype
-        //     }));
-        const propertiesPayload = formProperties
+        const propertiesPayload = filteredProperties
             .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '' && !prop.isAutomatic)
             .map(prop => ({
                 value: `${formValues[prop.propId]}`,
@@ -208,81 +323,116 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 propertytype: prop.propertytype
             }));
 
+        alert("called ")
+        console.log(propertiesPayload)
 
         propertiesPayload.forEach((prop) => {
             if (prop.isRequired && !formValues[prop.propId]) {
+                alert("error was set")
                 newFormErrors[prop.propId] = `${prop.title} is required`;
             }
         });
 
-        if (selectedObjectId === 0 && !uploadedFile) {
+        if (selectedObjectId === 0 && !templateIsTrue && !uploadedFile) {
             setFileUploadError('File upload is required.');
         }
 
-        if (Object.keys(newFormErrors).length > 0 || (selectedObjectId === 0 && !uploadedFile)) {
+        if (Object.keys(newFormErrors).length > 0 || (selectedObjectId === 0 && !uploadedFile && !templateIsTrue )) {
+            console.log(newFormErrors)
             setFormErrors(newFormErrors);
         } else {
             setMiniLoader(true);
             let payload = {};
 
-            if (selectedObjectId === 0 && uploadedFile) {
-                try {
-                    const formData = new FormData();
-                    formData.append('formFiles', uploadedFile);
+            try {
 
-                    const response = await axios.post(
-                        `${constants.mfiles_api}/api/objectinstance/FilesUploadAsync`,
-                        formData,
+                if (!templateIsTrue) {
+                    alert("called  template")
+                    if (selectedObjectId === 0 && uploadedFile) {
+                        const formData = new FormData();
+                        formData.append('formFiles', uploadedFile);
+
+                        const uploadResponse = await axios.post(
+                            `${constants.mfiles_api}/api/objectinstance/FilesUploadAsync`,
+                            formData,
+                            {
+                                headers: {
+                                    'Content-Type': 'multipart/form-data',
+                                    'accept': '*/*'
+                                }
+                            }
+                        );
+
+                        payload = {
+                            objectID: selectedObjectId,
+                            classID: selectedClassId,
+                            properties: propertiesPayload,
+                            vaultGuid: selectedVault.guid,
+                            uploadId: uploadResponse.data.uploadID
+                        };
+                    } else {
+                        payload = {
+                            objectID: selectedObjectId,
+                            classID: selectedClassId,
+                            properties: propertiesPayload,
+                            vaultGuid: selectedVault.guid
+                        };
+                    }
+
+                    await axios.post(
+                        `${constants.mfiles_api}/api/objectinstance/ObjectCreation`,
+                        payload,
                         {
                             headers: {
-                                'Content-Type': 'multipart/form-data',
+                                'Content-Type': 'application/json',
                                 'accept': '*/*'
                             }
                         }
                     );
 
+                    setMiniLoader(false);
+                    alert('Object was created successfully');
+                    setUploadedFile(null);
+                    closeFormDialog();
+                } else {
+                    alert("called  template")
                     payload = {
-                        objectID: selectedObjectId,
+                        objectTypeID: selectedObjectId,
                         classID: selectedClassId,
                         properties: propertiesPayload,
                         vaultGuid: selectedVault.guid,
-                        uploadId: response.data.uploadID
+                        objectID: selectedTemplate.id
                     };
-
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                }
-            } else {
-                payload = {
-                    objectID: selectedObjectId,
-                    classID: selectedClassId,
-                    properties: propertiesPayload,
-                    vaultGuid: selectedVault.guid
-                };
-            }
-
-            try {
-                const response = await axios.post(
-                    `${constants.mfiles_api}/api/objectinstance/ObjectCreation`,
-                    payload,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'accept': '*/*'
+                    console.log(payload)
+                    await axios.post(
+                        `${constants.mfiles_api}/api/Templates/ObjectCreation`,
+                        payload,
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'accept': '*/*'
+                            }
                         }
-                    }
-                );
-                setMiniLoader(false);
-                alert('Object was created successfully');
-                setUploadedFile(null);
-                closeFormDialog();
+                    );
+
+                    setMiniLoader(false);
+                    alert('Object was created successfully');
+                    closeFormDialog();
+                    setTemplateModalOpen(false)
+                    setVaultObjectsModal(false)
+
+                }
+
             } catch (error) {
                 setMiniLoader(false);
                 console.error('Error submitting form:', error);
-                alert(`${error}`);
+                alert('Error submitting form. Please try again.');
             }
         }
     };
+
+  
+
 
     return (
         <>
@@ -294,17 +444,16 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
             <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
                 <DialogTitle
-                    className='p-2 d-flex content-align'
-                    style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
+                    className='p-2 d-flex justify-content-between align-items-center'
+                    style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
                 >
-                    {/* <h5 className="text-center mx-2">
-                        <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5> */}
-                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
-                    <span>
-                        Create Item <FontAwesomeIcon icon={faPlus} className='mx-3' />
+
+                    <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto mx-3">
+                        <FontAwesomeIcon icon={faPlus} className='mx-2' /> Create
                     </span>
                 </DialogTitle>
+
 
                 <DialogContent>
                     <p className='my-4' style={{ fontSize: '13px' }}>
@@ -341,17 +490,65 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     <Button onClick={closeModal}>Close</Button>
                 </DialogActions>
             </Dialog>
+            <Dialog open={templateModalOpen} onClose={() => setTemplateModalOpen(false)} fullWidth>
+                <DialogTitle
+                    className='p-2 d-flex justify-content-between align-items-center'
+                    style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                >
+
+                    <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto mx-3">
+                        <FontAwesomeIcon icon={faPlus} className='mx-2' /> Templates for <span className='mx-2' style={{ fontWeight: "bold" }}>{selectedClassName}</span>
+                    </span>
+                </DialogTitle>
+
+
+                <DialogContent>
+                    <p className='my-4' style={{ fontSize: '13px' }}>
+                        Please select a template
+                    </p>
+                    <List className='p-0 list-group'>
+                        {templates ? (
+                            <>
+                                {templates.map((item) => (
+                                    <ListItem
+                                        className='p-0 mx-2'
+                                        button
+                                        key={item.id}
+                                        onClick={() => UseTemplate(item)}
+                                    >
+                                        <ListItemIcon>
+                                            <FontAwesomeIcon
+                                                icon={findBestIconMatch(item.title)}
+                                                className='mx-1'
+                                                style={{ color: '#2a68af' }}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText primary={item.title} />
+                                    </ListItem>
+                                ))}
+                            </>
+                        ) : (
+                            <></>
+                        )}
+
+                    </List>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={dontUseTemplates}>Don't use template</Button>
+                    <Button onClick={() => setTemplateModalOpen(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
                 <DialogTitle
-                    className='p-2 d-flex content-align'
-                    style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
+                    className='p-2 d-flex justify-content-between align-items-center'
+                    style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
                 >
-                    {/* <h5 className="text-center mx-2">
-                        <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5> */}
-                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
-                    <span>
+
+                    <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto">
                         Select {selectedObjectName} Class
                         <FontAwesomeIcon
                             icon={findBestIconMatch(selectedObjectName)}
@@ -359,6 +556,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                         />
                     </span>
                 </DialogTitle>
+
 
                 <DialogContent className=''>
                     {isLoading ? (
@@ -440,139 +638,19 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
             <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
                 <DialogTitle
-                    className='p-2 d-flex content-align'
-                    style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}
+                    className='p-2 d-flex justify-content-between align-items-center'
+                    style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
                 >
-                    {/* <h5 className="text-center mx-2">
-                        <b style={{ color: "#ee6c4d" }}>Z</b>F
-                    </h5> */}
-                    <img className=" bg-white p-2 mx-3" src={logo} alt="Loading" width="130px" />
-                    <span>
-                        Metadata - Create {selectedClassName}
-                        <FontAwesomeIcon
-                            icon={findBestIconMatch(selectedClassName)}
-                            className='mx-3'
-                        />
+
+                    <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto mx-3">
+                        Create:  <small style={{ fontWeight: 'bold' }}>{selectedClassName} </small>
                     </span>
                 </DialogTitle>
 
+
                 <DialogContent className='form-group my-4'>
-                    {/* {formProperties.map((prop) => (
-                        <div key={prop.propId} className="my-3">
 
-                            {(prop.propertytype === 'MFDatatypeText' || prop.propertytype === 'MFDatatypeFloating') && !prop.isHidden && (
-                                <>
-                                    {prop.isAutomatic ? (
-                                        <p>{prop.title} : (automatic) {formErrors[prop.propId]}</p>
-                                    ) : (
-                                        <TextField
-                                            label={prop.title}
-                                            value={formValues[prop.propId]}
-                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                            fullWidth
-                                            required={prop.isRequired}
-                                            error={!!formErrors[prop.propId]}
-                                            helperText={formErrors[prop.propId]}
-                                            size="small"
-                                            className="my-1"
-                                        />
-                                    )}
-                                </>
-                            )}
-
-
-                            {prop.propertytype === 'MFDatatypeMultiLineText' && (
-                                <TextField
-                                    label={prop.title}
-                                    value={formValues[prop.propId]}
-                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                    fullWidth
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    helperText={formErrors[prop.propId]}
-                                    multiline
-                                    rows={4}
-                                    size='small'
-                                    className='my-1'
-                                />
-                            )}
-
-                            {prop.propertytype === 'MFDatatypeLookup' && (
-                                <LookupSelect
-                                    propId={prop.propId}
-                                    label={prop.title}
-                                    onChange={handleInputChange}
-                                    value={formValues[prop.propId]}
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    helperText={formErrors[prop.propId]}
-                                    selectedVault={selectedVault}
-                                    size='small'
-                                    className='my-1'
-                                />
-                            )}
-
-                            {prop.propertytype === 'MFDatatypeMultiSelectLookup' && (
-                                <LookupMultiSelect
-                                    propId={prop.propId}
-                                    label={prop.title}
-                                    onChange={handleInputChange}
-                                    value={formValues[prop.propId] || []}
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    helperText={formErrors[prop.propId]}
-                                    selectedVault={selectedVault}
-                                    size='small'
-                                    className='my-1'
-                                />
-                            )}
-
-                            {prop.propertytype === 'MFDatatypeBoolean' && (
-                                <div>
-                                    <label>{prop.title} :</label>
-                                    <Select
-                                        size='small'
-                                        value={formValues[prop.propId] ?? (
-                                            prop.value === "Yes" ? true : (prop.value === "No" ? false : '')
-                                        )}
-                                        onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                        displayEmpty
-                                        fullWidth
-                                    >
-                                        <MenuItem value=""><em>None</em></MenuItem>
-                                        <MenuItem value={true}>True</MenuItem>
-                                        <MenuItem value={false}>False</MenuItem>
-                                    </Select>
-                                    {prop.isRequired && !!formErrors[prop.propId] && (
-                                        <div style={{ color: '#f44336', fontSize: '0.75rem', marginTop: '8px' }}>
-                                            {formErrors[prop.propId]}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {prop.propertytype === 'MFDatatypeDate' && (
-                                <TextField
-                                    label={prop.title}
-                                    type="date"
-                                    value={formValues[prop.propId]}
-                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                    fullWidth
-                                    required={prop.isRequired}
-                                    error={!!formErrors[prop.propId]}
-                                    helperText={formErrors[prop.propId]}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    size='small'
-                                    className='my-1'
-                                />
-                            )}
-
-
-
-                        </div>
-                    ))} */}
                     <Box
                         className='shadow-lg p-4 shadow-sm'
                         sx={{
@@ -584,14 +662,36 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     >
                         <List sx={{ p: 0 }}>
                             <>
-                                {formProperties.map((prop) => (
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginY: '2px' }}>
+                                    <Typography
+                                        className='my-2'
+                                        variant="body2"
+                                        sx={{
+                                            color: '#1C4690',
+                                            fontWeight: 'bold',
+                                            flexBasis: '45%',
+                                            fontSize: '12px',
+                                            textAlign: 'end'
+                                        }}
+                                    >
+                                        Class :
+                                    </Typography>
+                                    <Box className='my-1' sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
+
+                                        {selectedClassName}
+                                    </Box>
+
+                                </Box>
+
+
+                                {filteredProperties.map((prop) => (
                                     <ListItem key={prop.propId} sx={{ p: 0 }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginY: '2px' }}>
                                             <Typography
                                                 className='my-2'
                                                 variant="body2"
                                                 sx={{
-                                                    color: '#1d3557',
+                                                    color: '#1C4690',
                                                     fontWeight: 'bold',
                                                     flexBasis: '45%',
                                                     fontSize: '12px',
@@ -604,12 +704,14 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                             <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
                                                 {(prop.propertytype === 'MFDatatypeText' || prop.propertytype === 'MFDatatypeFloating') && !prop.isHidden && (
                                                     <>
-                                                        {prop.isAutomatic ? (
+                                                        {prop.isAutomatic && !prop.value ? (
                                                             <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
                                                         ) : (
+
+
                                                             <TextField
                                                                 // label={prop.title}
-                                                                value={formValues[prop.propId]}
+                                                                value={prop.value ? prop.value : formValues[prop.propId]}
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 fullWidth
                                                                 required={prop.isRequired}
@@ -617,6 +719,13 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                                                 helperText={formErrors[prop.propId]}
                                                                 size="small"
                                                                 className="my-1"
+                                                                disabled={prop.value ? true : false}
+                                                                InputProps={{
+                                                                    style: { fontSize: '12px' }, // Adjust the font size here
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    style: { fontSize: '12px' }, // Adjust the label font size if needed
+                                                                }}
                                                             />
                                                         )}
                                                     </>
@@ -639,6 +748,12 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                                                 rows={4}
                                                                 size='small'
                                                                 className='my-1'
+                                                                InputProps={{
+                                                                    style: { fontSize: '12px' }, // Adjust the font size here
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    style: { fontSize: '12px' }, // Adjust the label font size if needed
+                                                                }}
                                                             />
                                                         )}
                                                     </>
@@ -667,6 +782,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                                     </>
 
                                                 )}
+                                                
 
                                                 {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
                                                     <>
@@ -721,6 +837,28 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
 
                                                 )}
 
+
+                                                {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
+                                                    <>
+                                                        {prop.isAutomatic ? (
+                                                            <p className='p-1'> (automatic) {formErrors[prop.propId]}</p>
+                                                        ) : (
+                                                            <div className="cs-form">
+                                                                <input
+                                                                    type="time"
+                                                                    className="form-control"
+                                                                    value={formValues[prop.propId]} // Ensure default value is shown
+                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                />
+                                                                {formErrors[prop.propId] && <div className="text-danger">{formErrors[prop.propId]}</div>}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+
+
+
                                                 {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
                                                     <>
                                                         {prop.isAutomatic ? (
@@ -740,6 +878,8 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                                                                 }}
                                                                 size='small'
                                                                 className='my-1'
+
+
                                                             />
                                                         )}
                                                     </>
@@ -756,7 +896,7 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                     </Box>
 
 
-                    {selectedObjectId === 0 && (
+                    {(selectedObjectId === 0 && !templateIsTrue) && (
                         <div>
                             <FileUploadComponent
                                 handleFileChange={handleFileChange}
@@ -772,8 +912,8 @@ const ObjectStructureList = ({ vaultObjectModalsOpen, setVaultObjectsModal, sele
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={closeFormDialog}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" color="primary">
+                    <Button size='small' onClick={closeFormDialog}>Cancel</Button>
+                    <Button size='small' onClick={handleSubmit} variant="contained" color="primary">
                         Create
                     </Button>
                 </DialogActions>

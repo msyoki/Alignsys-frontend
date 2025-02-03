@@ -70,7 +70,7 @@ function OfficeApp(props) {
   return (
     <Dialog open={props.open} onClose={handleCancel}>
 
-      <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1d3557', color: '#fff', fontSize: '15px' }}>
+      <DialogTitle className='p-2 d-flex content-align' style={{ backgroundColor: '#1C4690', color: '#fff', fontSize: '15px' }}>
         <span className='mx-3'><i className="fas fa-edit" style={{ fontSize: '20px', marginRight: '10px' }}></i> Check Out & Edit Document</span>
       </DialogTitle>
       <DialogContent className='p-3'>

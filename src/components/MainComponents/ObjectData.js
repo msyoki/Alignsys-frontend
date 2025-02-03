@@ -16,6 +16,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CommentsCompoenent from '../ObjectComments'
+import FileExtIcon from '../FileExtIcon';
+import FileExtText from '../FileExtText';
 
 
 
@@ -71,7 +73,7 @@ export default function ObjectData(props) {
 
     if (props.selectedState) {
       props.setSelectedState(selectedState);
-
+      
     }
 
   };
@@ -141,7 +143,7 @@ export default function ObjectData(props) {
   };
 
   const filteredProps = props.previewObjectProps.filter(
-    item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class'].includes(item.propName)
+    item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class', 'State', 'Workflow'].includes(item.propName)
   );
 
   const getPropValue = name => {
@@ -185,7 +187,7 @@ export default function ObjectData(props) {
         </Tabs>
       </Box>
 
-      <Box sx={{ flexGrow: 1, margin: 0 }}>
+      <Box sx={{ flexGrow: 1, margin: 0, color:'#555' }} >
         <CustomTabPanel
           value={value}
           index={0}
@@ -193,7 +195,8 @@ export default function ObjectData(props) {
             backgroundColor: '#e5e5e5',
             height: '90vh',
             padding: '0%',
-            width: '100%'
+            width: '100%',
+            overflowY:'auto'
           }}
         >
           {props.previewObjectProps.length < 1 && (
@@ -208,7 +211,7 @@ export default function ObjectData(props) {
             }}>
               <i
                 className="fas fa-info-circle my-2"
-                style={{ fontSize: '120px', color: '#1d3557' }}
+                style={{ fontSize: '120px', color: '#2757aa' }}
               />
               {props.loadingobject ? (
                 <>
@@ -247,59 +250,40 @@ export default function ObjectData(props) {
           {props.previewObjectProps.length > 0 && (
             <Box>
               <Box
-                className="p-2 bg-white shadow-lg"
+                className="p-2 bg-white shadow-lg my-1"
                 display="flex"
-                justifyContent="space-between"
+                flexDirection="column"
               >
                 <Box
                   className="input-group"
                   sx={{
-                    width: '40%',
+                    width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    fontSize: '14px'
+                    fontSize: '13px'
                   }}
                 >
-                  <span className='text-center mx-2'>
-                    <span style={{ color: '#1d3557' }}>Class: </span>
-                    {getPropValue('Class')}
-
-                    {props.comments.length > 0 && (
-                      <div
-                        style={{
-                          position: 'relative',
-                          display: 'inline-block'
-                        }}
-                        className='mx-4'
-                      >
-                        <span
-                          className="fas fa-comment-alt mx-1 go-to-comments"
-                          style={{
-                            color: '#1d3557',
-                            fontSize: '20px',
-                            cursor: 'pointer'
-                          }}
-                          onClick={navigateToComments}
+                  <span className='text-center mx-2' style={{ color: '#1d3557' }}>
+                    {props.selectedObject && (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
+                      <>
+                        <FileExtIcon
+                          guid={props.vault.guid}
+                          objectId={props.selectedObject.id}
+                          classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
                         />
-                        <span
-                          style={{
-                            position: 'absolute',
-                            top: '-5px',
-                            right: '-5px',
-                            backgroundColor: '#e63946',
-                            color: '#fff',
-                            borderRadius: '50%',
-                            padding: '2px 6px',
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            lineHeight: '1',
-                            minWidth: '16px',
-                            textAlign: 'center'
-                          }}
-                        >
-                          {props.comments.length}
+                        <span>{props.selectedObject.title}.
+                          <FileExtText
+                            guid={props.vault.guid}
+                            objectId={props.selectedObject.id}
+                            classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
+                          />
                         </span>
-                      </div>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '15px', color: '#2757aa' }}></i>
+                        <span>{props.selectedObject.title}.</span>
+                      </>
                     )}
                   </span>
                 </Box>
@@ -307,8 +291,9 @@ export default function ObjectData(props) {
                 <Box
                   className='input-group'
                   sx={{
-                    textAlign: 'end',
-                    width: '60%',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
                     fontSize: '10px'
                   }}
                 >
@@ -376,89 +361,156 @@ export default function ObjectData(props) {
                       </Button>
                     </Box>
                   )}
+
+                  {props.comments.length > 0 && (
+                    <div
+                      style={{
+                        position: 'relative',
+                        display: 'inline-block'
+                      }}
+                      className='mx-2'
+                    >
+                      <span
+                        className="fas fa-comment-alt mx-1 go-to-comments"
+                        style={{
+                          color: '#2757aa',
+                          fontSize: '20px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={navigateToComments}
+                      />
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-5px',
+                          right: '-5px',
+                          backgroundColor: '#e63946',
+                          color: '#fff',
+                          borderRadius: '50%',
+                          padding: '2px 6px',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          lineHeight: '1',
+                          minWidth: '16px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        {props.comments.length}
+                      </span>
+                    </div>
+                  )}
                 </Box>
               </Box>
 
+
               <Box
-                className='shadow-lg p-4 shadow-sm'
+                className='shadow-lg shadow-sm p-2'
                 sx={{
                   width: '100%',
-                  height: '65vh',
-                  overflowY: 'scroll',
-                  backgroundColor: '#e8f9fa'
+                  backgroundColor: '#fff',
+                  fontSize: '12px',
+                  height:'55vh',
+                  overflowY:'auto'
                 }}
               >
                 <List sx={{ p: 0 }}>
                   <>
+                    <ListItem sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
+                        <Typography
+                          className='my-2'
+                          variant="body2"
+                          sx={{
+                            color: '#4f5d75',
+                            // fontWeight: 'bold',
+                            flexBasis: '40%',
+                            fontSize: '12px',
+                            textAlign: 'end',
+                            alignSelf: 'center'
+                          }}
+                        >
+                          Class:
+                        </Typography>
+                        <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', color:'#2757aa' }}>
+                          <span>{getPropValue('Class')}</span>
+                        </Box>
+                      </Box>
+                    </ListItem>
+
                     {filteredProps.map((item, index) => (
                       <ListItem key={index} sx={{ p: 0 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
                           <Typography
                             className='my-2'
                             variant="body2"
                             sx={{
-                              color: '#1d3557',
-                              fontWeight: 'bold',
-                              flexBasis: '30%',
+                              color: '#4f5d75',
+                              // fontWeight: 'bold',
+                              flexBasis: '40%',
                               fontSize: '12px',
                               textAlign: 'end'
                             }}
                           >
-                            {item.propName} :
+                            {item.propName} {item.isRequired ? <span className='text-danger mx-1'>*</span>:<></>}:
                           </Typography>
+                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
+                            {item.propName === 'Class' && <>{item.value}</>}
 
-                          <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                            {item.propName === 'Class' && <>{item.value} </>}
-
-                            {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating') && (
+                            {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating') && !item.isHidden && (
                               <input
                                 value={props.formValues?.[item.id]?.value || ''}
                                 placeholder={item.value}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 className='form-control form-control-sm my-1'
-                                disabled={item.editable?false :true}
+                                disabled={item.isAutomatic}
                               />
                             )}
-                         
-                            {item.datatype === "MFDatatypeMultiLineText" && (
+
+                            {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
                               <textarea
                                 placeholder={item.value}
                                 value={props.formValues?.[item.id]?.value || ''}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 rows={2}
                                 className="form-control form-control-sm my-1"
-                                disabled={item.editable?false :true}
+                                disabled={item.isAutomatic}
                               />
                             )}
 
-                            {item.datatype === 'MFDatatypeDate' && (
+                            {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
                               <input
                                 placeholder={item.value}
                                 type="date"
                                 value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 className='form-control form-control-sm my-1'
-                                disabled={item.editable?false :true}
+                                disabled={item.isAutomatic}
                               />
                             )}
 
-                            {item.datatype === 'MFDatatypeBoolean' && (
+                            {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
                               <Select
                                 size='small'
                                 value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
                                 onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                 displayEmpty
                                 fullWidth
-                                disabled={item.editable?false :true}
-                                className='form-control form-control-sm bg-white my-1'
+                                disabled={item.isAutomatic}
+                                sx={{
+                                  fontSize: '12px',
+                                  padding: '4px',
+                                  backgroundColor: 'white',
+                                  marginY: '8px'
+                                }}
+                                className='form-control form-control-sm'
                               >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem value={true}>No</MenuItem>
-                                <MenuItem value={false}>Yes</MenuItem>
+                                <MenuItem value={true}>Yes</MenuItem>
+                                <MenuItem value={false}>No</MenuItem>
                               </Select>
                             )}
 
-                            {item.datatype === 'MFDatatypeMultiSelectLookup' && (
+                            {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
                               <LookupMultiSelect
                                 propId={item.id}
                                 onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
@@ -466,6 +518,7 @@ export default function ObjectData(props) {
                                 selectedVault={props.vault}
                                 label={item.propName}
                                 itemValue={item.value}
+                                disabled={item.isAutomatic}
                               />
                             )}
 
@@ -477,6 +530,7 @@ export default function ObjectData(props) {
                                 value={props.formValues?.[item.id]?.value || ''}
                                 selectedVault={props.vault}
                                 itemValue={item.value}
+                                disabled={item.isAutomatic}
                               />
                             )}
                           </Box>
@@ -486,22 +540,22 @@ export default function ObjectData(props) {
 
                     {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
                       <ListItem sx={{ p: 0 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
                           <Typography
                             className='my-2'
                             variant="body2"
                             sx={{
                               color: '#1d3557',
                               fontWeight: 'bold',
-                              flexBasis: '30%',
+                              flexBasis: '40%',
                               fontSize: '12px',
-                              textAlign: 'end'
+                              textAlign: 'end',
+                              alignSelf: 'center'
                             }}
                           >
                             Sign Document:
                           </Typography>
-
-                          <Box sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
+                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
                             <SignButton
                               objectid={props.selectedObject.id}
                               fileId={props.selectedFileId}
@@ -514,26 +568,27 @@ export default function ObjectData(props) {
                     )}
                   </>
                 </List>
+
               </Box>
 
               <Box
-                className="bg-white p-2 shadow-sm my-1"
+                className="bg-white shadow-sm my-1"
                 display="flex"
                 justifyContent="space-between"
               >
-                <Box sx={{ textAlign: 'start', fontSize: '12px', width: '80%' }}>
+                <Box sx={{ textAlign: 'start', fontSize: '11px', width: '70%' }} className='p-2'>
                   {props.selectedObkjWf ? (
                     <>
                       <p className='my-1'>
                         <i className="fas fa-circle-notch bold text-danger mx-2" />
                         <span>
-                          <small style={{ color: '#1d3557', fontWeight: 'bold' }}>Workflow</small>: {props.selectedObkjWf.workflowTitle}
+                          <small style={{ color: '#2757aa', fontWeight: 'bold' }}>Workflow</small>: {props.selectedObkjWf.workflowTitle}
                         </span>
                       </p>
                       <p className='my-1'>
                         <i className="fas fa-square-full bold text-warning mx-2" />
                         <span>
-                          <small style={{ color: '#1d3557', fontWeight: 'bold' }}>State</small>: {props.currentState.stateTitle}
+                          <small style={{ color: '#2757aa', fontWeight: 'bold' }}>State</small>: {props.currentState.stateTitle}
                         </span>
                         {props.selectedObkjWf.nextStates && (
                           <Select
@@ -564,7 +619,7 @@ export default function ObjectData(props) {
                   )}
                 </Box>
 
-                <Box sx={{ textAlign: 'end', fontSize: '10px', width: '30%' }}>
+                <Box sx={{ textAlign: 'end', fontSize: '10px', width: '30%' }} className='p-2'>
                   <p className='my-0'>Created: {getPropValue('Created')}</p>
                   <p className='my-0'>Last modified: {getPropValue('Last modified')}</p>
                 </Box>
@@ -607,7 +662,7 @@ export default function ObjectData(props) {
             >
               <i
                 className="fas fa-tv my-2"
-                style={{ fontSize: '120px', color: '#1d3557' }}
+                style={{ fontSize: '120px', color: '#2757aa' }}
               />
 
               {props.loadingfile ? (
@@ -676,7 +731,7 @@ export default function ObjectData(props) {
             >
               <i
                 className="fas fa-robot my-2"
-                style={{ fontSize: '120px', color: '#1d3557' }}
+                style={{ fontSize: '120px', color: '#2757aa' }}
               />
 
               {props.loadingfile ? (

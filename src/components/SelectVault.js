@@ -48,27 +48,39 @@ const VaultSelectForm = () => {
     }, []);
 
     return (
-        <FormControl style={{width:'100%'}} >
-            <InputLabel id="vault-select-label" ><span className='text-white'>Vault</span></InputLabel>
-            <Select
-                labelId="vault-select-label"
-                value={selectedVault ? selectedVault.guid : ''}
-                label="Please Select Vault"
-                onChange={handleVaultChange}
-                size='small'
-                autoWidth
-                className='text-white'
-               
-            
-            >
-                {vaults.map((vault, index) => (
-                    <MenuItem key={index} value={vault.guid} className='text-dark'>
-                        {vault.name}
-                    </MenuItem>
-                ))}
-            </Select>
-
-        </FormControl>
+        <FormControl style={{ width: '100%', color: '#1C4690' }} >
+        <InputLabel id="vault-select-label">
+          <span className='text-dark'>Vault</span>
+        </InputLabel>
+        <Select
+          labelId="vault-select-label"
+          value={selectedVault ? selectedVault.guid : ''}
+          label="Please Select Vault"
+          onChange={handleVaultChange}
+          size='small'
+          autoWidth
+          className='text-sm'
+          style={{ color: '#1C4690' }}
+          MenuProps={{
+            MenuListProps: {
+              style: {
+                backgroundColor: '#fff',
+                color: '#1C4690',
+              },
+            },
+          }}
+        >
+          {vaults.map((vault, index) => (
+            <MenuItem key={index} value={vault.guid} className='text-dark' style={{ color: '#1C4690' }}>
+              <small style={{ fontSize: '11.5px', color: '#1C4690' }}>
+                <i className="fas fa-hdd mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
+                <span className='text-dark'>{vault.name}</span>
+              </small>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      
     );
 };
 

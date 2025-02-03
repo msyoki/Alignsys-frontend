@@ -49,10 +49,10 @@ const CommentsComponent = (props) => {
 
   return (
     <div className={props.selectedObject.id ? "bg-white p-4 shadow-lg" : "p-4"} style={{ height: '100%' }}>
-      <h6 className="my-1">
+      <span style={{ fontSize: '14px' }}>
         {props.selectedObject.id && (
           <>
-            Comments
+            Refresh Comments
             <span
               className="fas fa-sync-alt btn-sm mx-2"
               onClick={refreshComments}
@@ -68,11 +68,11 @@ const CommentsComponent = (props) => {
             ></span>
           </>
         )}
-      </h6>
+      </span>
 
       {props.selectedObject.id && props.comments.length > 0 ? (
         <ul
-          style={{ listStyle: 'none', padding: 0, height: '45vh', overflowY: 'scroll' }}
+          style={{ listStyle: 'none', padding: 0, height: '40vh', overflowY: 'scroll' }}
           className="p-3 my-2"
         >
           {props.comments.map((comment, index) => {
@@ -109,7 +109,7 @@ const CommentsComponent = (props) => {
               : { width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }
           }
         >
-          <i className="fas fa-comments my-2" style={{ fontSize: '120px', color: '#1d3557' }}></i>
+          <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: '#2757aa' }}></i>
           {props.loadingcomments ? (
             <>
               <Box sx={{ width: '50%' }} className="my-2">
@@ -120,15 +120,23 @@ const CommentsComponent = (props) => {
               </Typography>
             </>
           ) : (
-            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
-              {props.selectedObject.id ? "No comments found" : "Please select an object to preview comments"}
-            </Typography>
+            <>
+              <Typography variant="body2"
+                className='my-2'
+                sx={{ textAlign: 'center' }}>
+                Comments
+              </Typography>
+              <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                {props.selectedObject.id ? "No comments found" : "Please select an object to preview comments"}
+              </Typography>
+            </>
           )}
         </Box>
       )}
 
+
       {props.selectedObject.id && (
-        <form onSubmit={handleSubmit} className="mt-4">
+        <form onSubmit={handleSubmit} className="mt-3">
           <div className="form-group">
             <textarea
               className="form-control"

@@ -85,7 +85,7 @@ function CreateNewUserGroupDialog(props) {
       });
     return (
         <Dialog open={props.open} maxWidth="md">
-            <DialogTitle style={{backgroundColor:'#1d3557'}}>Create a New Group</DialogTitle>
+            <DialogTitle style={{backgroundColor:'#1C4690'}}>Create a New Group</DialogTitle>
             <DialogContent>
                 <TextField
                     label="Group Title"

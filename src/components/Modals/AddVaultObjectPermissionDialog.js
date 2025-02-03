@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import axios from 'axios';
 import * as constants from '../Auth/configs'
+import logo from '../../images/ZFBLU.webp'
 
 function AddPermissionDialog(props) {
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -63,10 +64,11 @@ function AddPermissionDialog(props) {
     return (
         <div>
             <Dialog open={props.open} maxWidth="md">
-                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#1d3557', color: '#fff' }}>
-                    <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
-                    <span className='mx-2' style={{fontSize:'13px'}}>Select Users or user groups <i className="fas fa-users mx-1" style={{ fontSize: '13px', cursor: 'pointer' }}></i></span>
+                <DialogTitle className="p-2 d-flex justify-content-between align-items-center" style={{ backgroundColor: '#bfc0c0', color: '#1C4690', fontSize: '15px'}}>
+                <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto mx-3" style={{fontSize:'13px'}}>Select Users or user groups <i className="fas fa-users mx-1" style={{ fontSize: '13px', cursor: 'pointer' }}></i></span>
                 </DialogTitle>
+\
                 <DialogContent style={{ width: '500px' }}>
                     <div className="row">
                     <p className="shadow-lg p-2">User and user groups</p>

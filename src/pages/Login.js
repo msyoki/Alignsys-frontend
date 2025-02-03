@@ -14,22 +14,22 @@ import KeyIcon from '@mui/icons-material/Key';
 import PersonIcon from '@mui/icons-material/Person';
 import * as constants from '../components/Auth/configs';
 import Alerts from '../components/Alert';
-import image from '../images/logo2.png';
-import logo2 from '../images/ZF2.png';
+import image from '../images/ZFBLU.webp';
+import logo2 from '../images/ZFWHITE.webp';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  const { 
-    loginUser, alertmsg, alertseverity, openalert, 
-    setOpenAlert, setAlertMsg, setAlertSeverity 
+
+  const {
+    loginUser, alertmsg, alertseverity, openalert,
+    setOpenAlert, setAlertMsg, setAlertSeverity
   } = useContext(Authcontext);
 
   const togglePasswordVisibility = () => {
     const passwordInput = document.getElementById('password');
     const toggleIcon = document.getElementById('togglePassword');
-    
+
     if (passwordInput.type === 'password') {
       passwordInput.type = 'text';
       toggleIcon.className = 'fas fa-eye ml-2';
@@ -44,19 +44,19 @@ const Login = () => {
       <div className="left-side">
         <form onSubmit={loginUser} className="text-center text-dark p-3">
           <div>
-            <img src={image} alt="Sample logo" style={{ width: '100px' }} />
-            <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
+            <img src={image} alt="Sample logo" style={{ width: '200px' }} />
+            {/* <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
               Welcome back
-            </p>
+            </p> */}
             <h6 className="my-3 p-2 shadow-lg">SIGN IN</h6>
-         
+
           </div>
-          
-          <Alerts 
-            alertseverity={alertseverity} 
-            alertmsg={alertmsg} 
-            openalert={openalert} 
-            setOpenAlert={setOpenAlert} 
+
+          <Alerts
+            alertseverity={alertseverity}
+            alertmsg={alertmsg}
+            openalert={openalert}
+            setOpenAlert={setOpenAlert}
           />
 
           <div className="form-group my-2">
@@ -86,9 +86,9 @@ const Login = () => {
                 startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
                 endAdornment={
                   <InputAdornment position="end">
-                    <i 
-                      onClick={togglePasswordVisibility} 
-                      className="fas fa-eye-slash" 
+                    <i
+                      onClick={togglePasswordVisibility}
+                      className="fas fa-eye-slash"
                       id="togglePassword"
                     ></i>
                   </InputAdornment>
@@ -100,8 +100,8 @@ const Login = () => {
 
           <div className="d-flex justify-content-between align-items-center mb-2">
             <p className="small">
-              <a 
-                href={`${constants.auth_api}/api/reset_password/`} 
+              <a
+                href={`${constants.auth_api}/api/reset_password/`}
                 style={{ textDecoration: 'none', color: 'black' }}
               >
                 Forgot password?
@@ -130,21 +130,26 @@ const Login = () => {
         </form>
       </div>
 
-      <div className="right-side">
-        <div className="text-center">
-          <img className="my-3 bg-white p-3"  src={logo2} alt="Loading" width="200px" />
-          <p className="text-center responsive-font">
-            <span style={{ color: "#e0fbfc" }}>The Smart way to work. </span>
+      <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
+        <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <p className="text-center responsive-font mt-5">
+            <span style={{ color: '#fff' }}>TECHEDGE AFRICA</span>
           </p>
-          <img src={logo} width="350px" alt="Login Image"  />
-          <h5 className="text-center font-weight-italic responsive-font mb-2">
+          <img className="" src={logo2} alt="Loading" width="400px" />
+        </div>
+        <div className="text-center" style={{ marginTop: 'auto' }}>
+          {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
             <b>EMDS</b> Software Solution
           </h5>
           <p className="text-center font-weight-italic responsive-font mb-4">
-            Manage Document-Centric Processes More Productively and Securely
-          </p>
+            Streamline Document-Centric Processes with Efficiency and Security
+          </p> */}
+
         </div>
       </div>
+
+
+
     </div>
   );
 };

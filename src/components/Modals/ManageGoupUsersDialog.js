@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as contants from '../Auth/configs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import logo from '../../images/ZFBLU.webp'
 
 function GroupUsersDialog(props) {
     const [usersNotLinkedToGroup, setUsersNotLinkedToGroup] = useState([]);
@@ -120,10 +121,12 @@ function GroupUsersDialog(props) {
     return (
         <div>
             <Dialog open={props.open} maxWidth="md">
-                <DialogTitle className="p-2 d-flex align-items-center" style={{ backgroundColor: '#1d3557', color: '#fff' }}>
-                    <h5 className="text-center mx-2"><b style={{ color: "#ee6c4d" }}>Z</b>F</h5>
-                    <span className='mx-2'> Edit: <b>{props.selectedGroup.title}</b>  </span>
+                <DialogTitle className="p-2 d-flex justify-content-between align-items-center" style={{ backgroundColor: '#bfc0c0', color: '#1C4690', fontSize: '15px'}}>
+                <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                    <span className="ml-auto mx-3"> Edit: <b>{props.selectedGroup.title}</b>  </span>
                 </DialogTitle>
+
+         
                 <DialogContent style={{ width: '500px' }}>
                     <div className="row">
 

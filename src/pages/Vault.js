@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import logo from '../images/ZF.png';
+import logo from '../images/ZFBLU.webp';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
 import axios from 'axios';
 
 const VaultSelectForm = () => {
-    const { authTokens } = useContext(Authcontext);
+    const { authTokens, user } = useContext(Authcontext);
     const [selectedVault, setSelectedVault] = useState({});
     const [vaults, setVaults] = useState([]);
     const navigate = useNavigate();
@@ -40,53 +40,55 @@ const VaultSelectForm = () => {
     };
 
     return (
-        <div style={{ backgroundColor: '#282c34' }}>
-            <Container
-                maxWidth="sm"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}
-            >
-                <Box
-                    className='shadow-lg bg-white text-dark'
-                    component="form"
-                    sx={{
-                        width: 350,
-                        height: 250,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid white',
-                        borderRadius: '8px',
-                        padding: '16px'
-                    }}
-                >
-                    <img className="my-3" src={logo} alt="Logo" width='100px' />
-                    <p className="text-dark text-center" style={{ fontSize: '13px' }}>
-                        The Smart way to work.
-                    </p>
-                    <p className="text-dark text-center " style={{ fontSize: '10px' }}>
-                        To proceed, please select a vault from your organization below.
-                    </p>
+        <div style={{ backgroundColor: '#fff' }}>
+        <Container
+          maxWidth="sm"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}
+          className='p-2'
+        >
+          <Box
+            className='shadow-lg bg-white text-dark'
+            component="form"
+            sx={{
+              width: '100%',
+              height: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid white',
+              borderRadius: '8px',
+              padding: '16px'
+            }}
+          >
+            {/* <p className="text-dark text-center" style={{ fontSize: '13px' }}>
+              TECHEDGE AFRICA
+            </p> */}
+            <img className="my-3" src={logo} alt="Logo" width='350px' />
+            <p className="text-dark text-center" style={{ fontSize: '12px' }}>
+              Welcome back <span style={{ color: '#1C4690' }}>{user.first_name} {user.last_name}</span>, please select a vault below
+            </p>
+            <FormControl fullWidth className='my-3'>
+              <InputLabel className='text-dark' id="vault-select-label">Select Vault</InputLabel>
+              <Select
+                labelId="vault-select-label"
+                value={selectedVault.guid || ''}
+                label="Please Select Vault"
+                onChange={handleVaultChange}
+                size='medium'
+              >
+                {vaults.map((vault) => (
+                  <MenuItem key={vault.guid} value={vault.guid}>
+                    {vault.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </Container>
+      </div>
+      
 
-                    <FormControl fullWidth className='my-3'>
-                        <InputLabel className='text-dark' id="vault-select-label">Select Vault</InputLabel>
-                        <Select
-                            labelId="vault-select-label"
-                            value={selectedVault.guid || ''}
-                            label="Please Select Vault"
-                            onChange={handleVaultChange}
-                            size='medium'
-                        >
-                            {vaults.map((vault) => (
-                                <MenuItem key={vault.guid} value={vault.guid}>
-                                    {vault.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Box>
-            </Container>
-        </div>
     );
 };
 

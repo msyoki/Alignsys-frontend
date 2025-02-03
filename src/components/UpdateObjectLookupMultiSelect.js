@@ -3,7 +3,7 @@ import Select from 'react-select';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
-const LookupMultiSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault, itemValue }) => {
+const LookupMultiSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault, itemValue,disabled }) => {
   const [options, setOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [initialValues, setInitialValues] = useState([]);
@@ -99,6 +99,7 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
         styles={customStyles}
         required={required}
         className='my-2'
+        disabled={disabled}
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

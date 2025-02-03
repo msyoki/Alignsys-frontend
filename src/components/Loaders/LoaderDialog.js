@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
-import logo from "../../images/ZF.png";
+import logo from "../../images/ZFBLU.webp";
 
 const LoadingDialog = ({ opendialogloading }) => {
   const [fullWidth] = useState(true);
@@ -16,7 +16,7 @@ const LoadingDialog = ({ opendialogloading }) => {
         keepMounted
         aria-describedby="alert-dialog-slide-description"
       >
-        <div className="text-center m-4 p-5">
+        <div className="text-center m-4 p-5 ">
           <img className="my-3" src={logo} alt="logo" width="200px" />
           <Box className="my-3" sx={{ width: '100%', margin: 'auto' }}>
             <LinearProgress />
