@@ -63,7 +63,7 @@ const ViewsList = (props) => {
 
     const fetchViewData = async (item) => {
         // Add item to navigation if not already present
-        console.log(item)
+        // console.log(item)
         setLoading(true)
 
         setViewNavigation(prevItems => {
@@ -93,8 +93,8 @@ const ViewsList = (props) => {
                 "propDatatype": i.propDatatype
             }));
 
-            console.log(transformedList);
-            console.log(updatedItems);
+            // console.log(transformedList);
+            // console.log(updatedItems);
 
 
 
@@ -112,11 +112,11 @@ const ViewsList = (props) => {
             }
 
             // Log the updated item list
-            console.log({
-                viewId: item.viewId,
-                properties: transformedList,
-                vaultGuid: `${props.selectedVault.guid}`
-            });
+            // console.log({
+            //     viewId: item.viewId,
+            //     properties: transformedList,
+            //     vaultGuid: `${props.selectedVault.guid}`
+            // });
 
             apiRequest(transformedList)
 
@@ -140,7 +140,7 @@ const ViewsList = (props) => {
                         }
                     }
                 );
-                console.log(response.data)
+                // console.log(response.data)
                 setLoading(false)
 
 
@@ -182,7 +182,7 @@ const ViewsList = (props) => {
                 }
             );
             setLoading(false)
-            console.log(response.data)
+            // console.log(response.data)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
 
@@ -219,7 +219,7 @@ const ViewsList = (props) => {
                     }
                 }
             );
-            console.log(response.data)
+            // console.log(response.data)
             setLoading(false)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
@@ -236,8 +236,11 @@ const ViewsList = (props) => {
 
     useEffect(() => {
         const savedOption = localStorage.getItem('selectedVault');
-
+        
         const fetchData = async () => {
+     
+            const guid=JSON.parse(savedOption).guid
+            // console.log(guid)
             try {
                 const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViews/${JSON.parse(savedOption).guid}`);
 

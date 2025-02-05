@@ -99,7 +99,7 @@ function Dashboard() {
   const [allrequisitions, setRequisitions] = useState([]);
   const [selectedVault, setSelectedVault] = useState(null);
   const [vaultObjectsList, setVaultObjectsList] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [templateIsTrue, setTemplateIsTrue] = useState(false);
@@ -148,7 +148,7 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        console.log(response.data);
+        // console.log(response.data);
         setOpenObjectModal(true);
       })
       .catch((error) => {
@@ -166,7 +166,7 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        console.log(response.data);
+        // console.log(response.data);
         toggleSublist();
       })
       .catch((error) => {
@@ -187,9 +187,12 @@ function Dashboard() {
     axios
       .request(config)
       .then((response) => {
+        // console.log("objects were found")
+        // console.log(response.data)
         setViewableObjects(response.data);
       })
       .catch((error) => {
+        // console.log("no viewable objects")
         console.log(error);
       });
   };
@@ -274,45 +277,49 @@ function Dashboard() {
   };
 
   // 6. More Complex Data Fetching & Handling
-
-  const fetchItemData = async (objectid, objectname) => {
-    setSelectedObjectName(objectname);
+  const fetchItemData = async (objectId, objectName) => {
+    setSelectedObjectName(objectName);
     setIsLoading(true);
+
     try {
+      // Fetch data from the API
       const response = await axios.get(
-        `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectid}`
+        `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}`
       );
-      setSelectedObjectId(objectid);
-      setGroupedItems(response.data.grouped);
-      console.log(response.data.grouped);
-      setUngroupedItems(response.data.unGrouped);
-      setIsLoading(false);
+      const { grouped, unGrouped } = response.data;
 
+      // Update state with fetched data
+      setSelectedObjectId(objectId);
+      setGroupedItems(grouped);
+      setUngroupedItems(unGrouped);
+
+      // console.log('Grouped Items:', grouped);
+
+      // Calculate the total number of classes
       const totalClasses =
-        response.data.grouped.reduce(
-          (acc, group) => acc + group.members.length,
-          0
-        ) + response.data.unGrouped.length;
+        grouped.reduce((acc, group) => acc + group.members.length, 0) +
+        unGrouped.length;
 
+      // Handle cases where there is only one class
       if (totalClasses === 1) {
-        if (response.data.grouped.length > 0) {
-          handleClassSelection(
-            response.data.grouped[0].members[0].classId,
-            response.data.grouped[0].members[0].className,
-            response.data.grouped[0].classGroupId
-          );
-        } else {
-          handleClassSelection(
-            response.data.unGrouped[0].classId,
-            response.data.unGrouped[0].className
-          );
-        }
+        const singleClass = grouped.length > 0
+          ? grouped[0].members[0]
+          : unGrouped[0];
+
+        handleClassSelection(
+          singleClass.classId,
+          singleClass.className,
+          grouped.length > 0 ? grouped[0].classGroupId : null
+        );
         closeModal();
       } else {
+        // Open the data modal if multiple classes are available
         setIsDataOpen(true);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      // Ensure loading state is reset regardless of success or error
       setIsLoading(false);
     }
   };
@@ -327,45 +334,45 @@ function Dashboard() {
           `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
           { headers: { accept: '*/*' } }
         );
-        console.log(response.data);
+        // console.log('Templates response:', response.data);
         setTemplates(response.data);
-        setTemplateModalOpen(true);
+        setTemplateModalOpen(true); // Opens the template modal
       } catch (error) {
         console.error('Error fetching templates:', error);
-        proceedNoneTemplate();
+        await proceedNoneTemplate(); // Proceed with no templates if the request fails
       }
     };
 
     const proceedNoneTemplate = async () => {
       try {
         const response = await axios.get(
-          `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}`
+          `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
         );
-        console.log(selectedVault.guid);
-        console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}`);
-        setSelectedClassId(classId);
-        setFormProperties(response.data);
-        console.log(response.data);
-        setFormValues(
+        // console.log('Class properties response:', response.data);
+
+        setFormProperties(() => response.data); // Functional update to avoid stale values
+        setFormValues(() =>
           response.data.reduce((acc, prop) => {
-            acc[prop.propId] = '';
+            acc[prop.propId] = ''; // Initialize form values
             return acc;
           }, {})
         );
-        setIsFormOpen(true);
+        setIsFormOpen(true); // Open the form modal
       } catch (error) {
         console.error('Error fetching class properties:', error);
       } finally {
-        closeDataDialog();
+        closeDataDialog(); // Close the dialog regardless of success or failure
       }
     };
 
+    // Check the selectedObjectId and decide which function to call
     if (selectedObjectId === 0) {
       await fetchTemplates();
     } else {
       await proceedNoneTemplate();
     }
   };
+
 
   // 7. Derived/Computed Values
   const data2 = [];
@@ -394,13 +401,19 @@ function Dashboard() {
   }
 
   function stringAvatar(name) {
+
+    const nameParts = name.split(' '); // Split the name into parts
+    const firstInitial = nameParts[0] ? nameParts[0][0] : ''; // Get the first letter of the first part
+    const secondInitial = nameParts[1] ? nameParts[1][0] : ''; // Get the first letter of the second part (if it exists)
+
     return {
       sx: {
-        bgcolor: stringToColor(name),
+        bgcolor: stringToColor(name), // Assuming stringToColor is defined elsewhere
       },
-      children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+      children: `${firstInitial}${secondInitial}`, // Combine the initials
     };
   }
+
 
   // 8. useEffect Hooks
   useEffect(() => {
@@ -452,72 +465,6 @@ function Dashboard() {
 
 
       />
-
-      {/* <div className="dashboard">
-        <nav className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1 }}>
-            <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
-              <span onClick={toggleSidebar} aria-label={sidebarOpen ? 'Close Sidebar' : 'Open Sidebar'} className="p-2 mx-2" style={{ display: 'flex', alignItems: 'center' }}>
-                <i className={`fas fa-${sidebarOpen ? 'times' : 'bars'}`} style={{ fontSize: '25px', color: '#fff' }}></i>
-                {sidebarOpen && <span className='mx-2 list-text' style={{ fontSize: '14px', color: '#fff' }}>Minimize</span>}
-              </span>
-            </Tooltip>
-          </Box>
-
-
-
-          <ul className="text-center">
-            {sidebarOpen ? (
-              <>
-                <li onClick={getVaultObjects} className='mt-5' >
-                  <i className="fas fa-plus-circle mx-3" style={{fontSize:'20px'}}></i>
-                  <span className="list-text" style={{fontSize:'13px'}}>Create</span>
-                </li>
-                <li onClick={adminPage}>
-                  <i className="fas fa-tools mx-3" style={{fontSize:'20px'}}></i>
-                  <span className="list-text" style={{fontSize:'13px'}}>Settings</span>
-                </li>
-               
-                <li onClick={logoutUser} className='my-5'>
-                  <i className="fas fa-sign-out-alt mx-3" style={{fontSize:'20px'}}></i>
-                  <span className="list-text" style={{fontSize:'13px'}}>Logout</span>
-                </li>
-              </>
-            ) : (
-              <>
-                <li onClick={getVaultObjects} className="closed mt-5"><i className="fas fa-plus-circle mx-3" style={{fontSize:'20px'}}></i></li>
-                <li onClick={adminPage} className="closed"><i className="fas fa-tools mx-3" style={{fontSize:'20px'}}></i></li>
-              
-                <li  onClick={logoutUser} className="closed mt-5"><i className="fas fa-sign-out-alt mx-3" style={{fontSize:'20px'}}></i></li>
-              </>
-            )}
-          </ul>
-        </nav>
-
-
-
-
-        <main className="content">
-          <DashboardContent
-            searchTerm={searchTerm}
-            data={data}
-            data2={data2}
-            getVaultObjects={getVaultObjects}
-            setData={setData}
-            searchObject={searchObject}
-            setSearchTerm={setSearchTerm}
-            user={user}
-            departments={departments}
-            docClasses={docClasses}
-            allrequisitions={allrequisitions}
-            logoutUser={logoutUser}
-            selectedVault={selectedVault}
-            viewableobjects={viewableobjects}
-            toggleSidebar={toggleSidebar}
-            sidebarOpen={sidebarOpen}
-          />
-        </main>
-      </div> */}
       <div className="dashboard">
         {/* Sidebar */}
         <nav className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -530,22 +477,39 @@ function Dashboard() {
                 </div>
                 <div className='my-2' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <Avatar
-                    alt={`${user.first_name} ${user.last_name}`}
-                    {...stringAvatar(`${user.first_name} ${user.last_name}`)} // Pass the name correctly here
-                    sx={{ 
-                      width: 50, 
-                      height: 50 ,   
+                    alt={
+                      user.first_name && user.last_name
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.first_name
+                          ? user.first_name
+                          : user.last_name
+                            ? user.last_name
+                            : user.username
+                    }
+                    {...stringAvatar(
+                      user.first_name && user.last_name
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.first_name
+                          ? user.first_name
+                          : user.last_name
+                            ? user.last_name
+                            : user.username
+                    )}
+                    sx={{
+                      width: 50,
+                      height: 50,
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                       transform: 'translateZ(0)',
                       transition: 'transform 0.2s'
                     }}
                   />
 
+
                 </div>
                 <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
                   <span className='p-2 mx-3'>{user.first_name} {user.last_name}</span>
                 </div>
-              
+
                 <ul className="menu-items" >
                   <li onClick={getVaultObjects2} className="menu-item" >
                     <i className="fas fa-plus-circle"></i>
@@ -601,11 +565,13 @@ function Dashboard() {
 
                     </ul>
                   )}
-
-                  <li onClick={adminPage} className="menu-item">
-                    <i className="fas fa-tools" style={{ fontSize: '20px' }}></i>
-                    <span style={{ fontSize: '13px' }}>Settings</span>
-                  </li>
+                 
+                  {user.is_admin === "True" && (
+                    <li onClick={adminPage} className="menu-item">
+                      <i className="fas fa-tools" style={{ fontSize: '20px' }}></i>
+                      <span style={{ fontSize: '13px' }}>Settings</span>
+                    </li>
+                  )}
                   <li onClick={logoutUser} className="menu-item" style={{ marginTop: isSublistVisible ? "0px" : "180px" }}
                   >
                     <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }} ></i>

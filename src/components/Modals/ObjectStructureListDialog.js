@@ -79,12 +79,12 @@ const findBestIconMatch = (name) => {
     return faFolder;
 };
 
-const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selectedVault,vaultObjectsList,setIsDataOpen,setSelectedObjectName,setIsLoading,setGroupedItems,setUngroupedItems,closeModal,setSelectedObjectId,selectedObjectId,setSelectedClassId,selectedClassId,isDataOpen,selectedObjectName,isLoading,groupedItems,ungroupedItems,handleClassSelection,setFormProperties,formProperties,setTemplateModalOpen,templateModalOpen,setFormValues,formValues,closeDataDialog,selectedClassName,setIsFormOpen,isFormOpen,setTemplateIsTrue,templateIsTrue,templates,setTemplates}) => {
+const ObjectStructureList = (props) => {
 
-   
+
     const [miniLoader, setMiniLoader] = useState(false);
- 
-    
+
+
 
 
 
@@ -102,194 +102,111 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
 
     const closeFormDialog = () => {
-        setIsFormOpen(false);
+        props.setIsFormOpen(false);
     };
 
     const fetchItemData = async (objectid, objectname) => {
-        setSelectedObjectName(objectname);
-        setIsLoading(true);
+        props.setSelectedObjectName(objectname);
+        props.setIsLoading(true);
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectid}`
+                `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${props.selectedVault.guid}/${objectid}`
             );
-            setSelectedObjectId(objectid);
-            setGroupedItems(response.data.grouped);
-            console.log(response.data.grouped)
-            setUngroupedItems(response.data.unGrouped);
-            setIsLoading(false);
+          
+            props.setSelectedObjectId(objectid);
+            props.setGroupedItems(response.data.grouped);
+            // console.log(response.data.grouped)
+            props.setUngroupedItems(response.data.unGrouped);
+            props.setIsLoading(false);
 
             const totalClasses = response.data.grouped.reduce((acc, group) => acc + group.members.length, 0) +
                 response.data.unGrouped.length;
 
             if (totalClasses === 1) {
                 if (response.data.grouped.length > 0) {
-                    handleClassSelection(
+                    props.handleClassSelection(
                         response.data.grouped[0].members[0].classId,
                         response.data.grouped[0].members[0].className,
                         response.data.grouped[0].classGroupId
                     );
                 } else {
-                    handleClassSelection(
+                    props.handleClassSelection(
                         response.data.unGrouped[0].classId,
                         response.data.unGrouped[0].className
                     );
                 }
-                closeModal();
+                props.closeModal();
             } else {
-                setIsDataOpen(true);
+                props.setIsDataOpen(true);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
-            setIsLoading(false);
+            props.setIsLoading(false);
         }
     };
 
-    // const handleClassSelection = async (classId, className, classGroupId = null) => {
-    //     setSelectedClassName(className);
-
-    //     try {
-    //         const response = await axios.get(
-    //             `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
-    //         );
-    //         console.log(selectedVault.guid)
-    //         console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
-    //         setSelectedClassId(classId);
-    //         setFormProperties(response.data);
-    //         console.log(response.data)
-    //         setFormValues(response.data.reduce((acc, prop) => {
-    //             acc[prop.propId] = '';
-    //             return acc;
-    //         }, {}));
-    //         setIsFormOpen(true);
-    //     } catch (error) {
-    //         console.error("Error fetching class properties:", error);
-    //     }
-    //     closeDataDialog();
-    // };
-
-    // const handleClassSelection = async (classId, className, classGroupId = null) => {
-    //     alert("called")
-    //     setSelectedClassName(className);
-
-    //     if (selectedObjectId === 0) {
-    //         axios.get(`${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`, {
-    //             headers: {
-    //                 'accept': '*/*'
-    //             }
-    //         })
-    //             .then(response => {
-    //                 setTemplates(response.data);
-    //                 setTemplateModalOpen(true)
-    //                 // alert("show templates available")
-
-
-    //             })
-    //             .catch(error => {
-    //                 console.error(error);
-    //                 proceedNoneTemplate();
-    //             });
-    //     }
-
-    //     const proceedNoneTemplate = async () => {
-    //         try {
-    //             const response = await axios.get(
-    //                 `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`
-    //             );
-    //             console.log(selectedVault.guid)
-    //             console.log(`${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${classId}`)
-    //             setSelectedClassId(classId);
-    //             setFormProperties(response.data);
-    //             console.log(response.data)
-    //             setFormValues(response.data.reduce((acc, prop) => {
-    //                 acc[prop.propId] = '';
-    //                 return acc;
-    //             }, {}));
-    //             setIsFormOpen(true);
-    //         } catch (error) {
-    //             console.error("Error fetching class properties:", error);
-    //         }
-    //         closeDataDialog();
-    //     }
-
-    //     const proceedTemplate = async () => {
-    //         try {
-    //             const response = await axios.get(
-    //                 `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${classId}/${selectedObjectId}`
-    //             );
-    //             setSelectedClassId(classId);
-    //             setFormProperties(response.data);
-    //             console.log(response.data)
-    //             setFormValues(response.data.reduce((acc, prop) => {
-    //                 acc[prop.propId] = '';
-    //                 return acc;
-    //             }, {}));
-    //             setIsFormOpen(true);
-    //         } catch (error) {
-    //             console.error("Error fetching class properties:", error);
-    //         }
-    //         closeDataDialog();
-    //     }
-    // };
- 
+  
     const UseTemplate = async (item) => {
-        setTemplateIsTrue(true)
+        props.setFormProperties([])
+        props.setTemplateIsTrue(true)
         setSelectedTemplate(item)
 
-        console.log(selectedVault.guid)
+        // console.log(props.selectedVault.guid)
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${item.classID}/${item.id}`
+                `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${props.selectedVault.guid}/${item.classID}/${item.id}`
             );
-            setSelectedClassId(selectedClassId);
-            setFormProperties(response.data);
-            console.log(response.data);
-            setFormValues(response.data.reduce((acc, prop) => {
+            // setSelectedClassId(selectedClassId);
+            props.setFormProperties(response.data);
+            // console.log(response.data);
+            props.setFormValues(response.data.reduce((acc, prop) => {
                 acc[prop.propId] = '';
                 return acc;
             }, {}));
-            setIsFormOpen(true);
+            props.setIsFormOpen(true);
         } catch (error) {
             console.error("Error fetching class properties:", error);
         } finally {
-            closeDataDialog();
+            props.closeDataDialog();
         }
     };
 
 
     const dontUseTemplates = async () => {
-        setTemplateIsTrue(false)
-        setSelectedTemplate({})
-        console.log(selectedClassId)
-        console.log(selectedClassName)
-        setTemplateModalOpen(false)
+        props.setFormProperties([])
+        props.setTemplateIsTrue(false)
+        props.setSelectedTemplate({})
+        // console.log(props.selectedClassId)
+        // console.log(props.selectedClassName)
+        props.setTemplateModalOpen(false)
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}`
+                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${props.selectedVault.guid}/${props.selectedObjectId}/${props.selectedClassId}`
             );
 
-            setSelectedClassId(selectedClassId);
-            setFormProperties(response.data);
-            console.log(response.data);
-            setFormValues(response.data.reduce((acc, prop) => {
+            // setSelectedClassId(selectedClassId);
+            props.setFormProperties(response.data);
+            // console.log(response.data);
+            props.setFormValues(response.data.reduce((acc, prop) => {
                 acc[prop.propId] = '';
                 return acc;
             }, {}));
-            setIsFormOpen(true);
+            props.setIsFormOpen(true);
         } catch (error) {
             console.error("Error fetching class properties:", error);
         } finally {
-            closeDataDialog();
+            props.closeDataDialog();
         }
     };
 
 
     const handleInputChange = (propId, value) => {
-        setFormValues({
-            ...formValues,
+        props.setFormValues({
+            ...props.formValues,
             [propId]: value
         });
 
-        const property = formProperties.find(prop => prop.propId === propId);
+        const property = props.formProperties.find(prop => prop.propId === propId);
         const newFormErrors = { ...formErrors };
 
         if (!value && property.isRequired && !property.isAutomatic) {
@@ -308,36 +225,38 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
         setUploadedFile(file);
     };
 
-    const filteredProperties = formProperties.filter(
-        prop => prop.propId > 101
+    const filteredProperties = props.formProperties.filter(
+        prop => prop.propId > 101 || prop.propId === 0 || prop.propId === 26  // except Name or title & Keywords
+
     );
 
+
     const handleSubmit = async () => {
-      
+
         const newFormErrors = {};
         const propertiesPayload = filteredProperties
-            .filter(prop => formValues[prop.propId] !== undefined && formValues[prop.propId] !== '' && !prop.isAutomatic)
+            .filter(prop => props.formValues[prop.propId] !== undefined && props.formValues[prop.propId] !== '' && !prop.isAutomatic)
             .map(prop => ({
-                value: `${formValues[prop.propId]}`,
+                value: `${props.formValues[prop.propId]}`,
                 propId: prop.propId,
                 propertytype: prop.propertytype
             }));
 
-        alert("called ")
-        console.log(propertiesPayload)
+
+        // console.log(propertiesPayload)
 
         propertiesPayload.forEach((prop) => {
-            if (prop.isRequired && !formValues[prop.propId]) {
+            if (prop.isRequired && !props.formValues[prop.propId]) {
                 alert("error was set")
                 newFormErrors[prop.propId] = `${prop.title} is required`;
             }
         });
 
-        if (selectedObjectId === 0 && !templateIsTrue && !uploadedFile) {
+        if (props.selectedObjectId === 0 && !props.templateIsTrue && !uploadedFile) {
             setFileUploadError('File upload is required.');
         }
 
-        if (Object.keys(newFormErrors).length > 0 || (selectedObjectId === 0 && !uploadedFile && !templateIsTrue )) {
+        if (Object.keys(newFormErrors).length > 0 || (props.selectedObjectId === 0 && !uploadedFile && !props.templateIsTrue)) {
             console.log(newFormErrors)
             setFormErrors(newFormErrors);
         } else {
@@ -346,9 +265,10 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
             try {
 
-                if (!templateIsTrue) {
-                    alert("called  template")
-                    if (selectedObjectId === 0 && uploadedFile) {
+                if (!props.templateIsTrue) {
+                    alert("not a template")
+
+                    if (props.selectedObjectId === 0 && uploadedFile) {
                         const formData = new FormData();
                         formData.append('formFiles', uploadedFile);
 
@@ -364,21 +284,23 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                         );
 
                         payload = {
-                            objectID: selectedObjectId,
-                            classID: selectedClassId,
+                            objectID: props.selectedObjectId,
+                            classID: props.selectedClassId,
                             properties: propertiesPayload,
-                            vaultGuid: selectedVault.guid,
+                            vaultGuid: props.selectedVault.guid,
                             uploadId: uploadResponse.data.uploadID
                         };
+
                     } else {
                         payload = {
-                            objectID: selectedObjectId,
-                            classID: selectedClassId,
+                            objectID: props.selectedObjectId,
+                            classID: props.selectedClassId,
                             properties: propertiesPayload,
-                            vaultGuid: selectedVault.guid
+                            vaultGuid: props.selectedVault.guid
                         };
-                    }
 
+                    }
+                    // console.log(payload)
                     await axios.post(
                         `${constants.mfiles_api}/api/objectinstance/ObjectCreation`,
                         payload,
@@ -395,15 +317,15 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                     setUploadedFile(null);
                     closeFormDialog();
                 } else {
-                    alert("called  template")
+                    alert("is a template")
                     payload = {
-                        objectTypeID: selectedObjectId,
-                        classID: selectedClassId,
+                        objectTypeID: props.selectedObjectId,
+                        classID: props.selectedClassId,
                         properties: propertiesPayload,
-                        vaultGuid: selectedVault.guid,
+                        vaultGuid: props.selectedVault.guid,
                         objectID: selectedTemplate.id
                     };
-                    console.log(payload)
+                    // console.log(payload)
                     await axios.post(
                         `${constants.mfiles_api}/api/Templates/ObjectCreation`,
                         payload,
@@ -418,8 +340,8 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                     setMiniLoader(false);
                     alert('Object was created successfully');
                     closeFormDialog();
-                    setTemplateModalOpen(false)
-                    setVaultObjectsModal(false)
+                    props.setTemplateModalOpen(false)
+                    props.setVaultObjectsModal(false)
 
                 }
 
@@ -431,7 +353,27 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
         }
     };
 
-  
+    useEffect(() => {
+
+    }, [
+        props.vaultObjectModalsOpen,
+        props.selectedVault,
+        props.vaultObjectsList,
+        props.isDataOpen,
+        props.selectedObjectName,
+        props.isLoading,
+        props.groupedItems,
+        props.ungroupedItems,
+        props.formProperties,
+        props.templateModalOpen,
+        props.formValues,
+        props.selectedClassName,
+        props.isFormOpen,
+        props.templateIsTrue,
+        props.templates,
+    ]);
+
+
 
 
     return (
@@ -442,7 +384,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                 setLoading={setMiniLoader}
             />
 
-            <Dialog open={vaultObjectModalsOpen} onClose={closeModal} fullWidth>
+            <Dialog open={props.vaultObjectModalsOpen} onClose={props.closeModal} fullWidth>
                 <DialogTitle
                     className='p-2 d-flex justify-content-between align-items-center'
                     style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -460,9 +402,9 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                         Please select from Item types below
                     </p>
                     <List className='p-0 list-group'>
-                        {vaultObjectsList ? (
+                        {props.vaultObjectsList ? (
                             <>
-                                {vaultObjectsList.map((item) => (
+                                {props.vaultObjectsList.map((item) => (
                                     <ListItem
                                         className='p-0 mx-2'
                                         button
@@ -487,10 +429,10 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={closeModal}>Close</Button>
+                    <Button onClick={props.closeModal}>Close</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={templateModalOpen} onClose={() => setTemplateModalOpen(false)} fullWidth>
+            <Dialog open={props.templateModalOpen} onClose={() => props.setTemplateModalOpen(false)} fullWidth>
                 <DialogTitle
                     className='p-2 d-flex justify-content-between align-items-center'
                     style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -498,7 +440,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
                     <img className="mx-3" src={logo} alt="Loading" width="130px" />
                     <span className="ml-auto mx-3">
-                        <FontAwesomeIcon icon={faPlus} className='mx-2' /> Templates for <span className='mx-2' style={{ fontWeight: "bold" }}>{selectedClassName}</span>
+                        <FontAwesomeIcon icon={faPlus} className='mx-2' /> Templates for <span className='mx-2' style={{ fontWeight: "bold" }}>{props.selectedClassName}</span>
                     </span>
                 </DialogTitle>
 
@@ -508,9 +450,9 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                         Please select a template
                     </p>
                     <List className='p-0 list-group'>
-                        {templates ? (
+                        {props.templates ? (
                             <>
-                                {templates.map((item) => (
+                                {props.templates.map((item) => (
                                     <ListItem
                                         className='p-0 mx-2'
                                         button
@@ -537,11 +479,11 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
                 <DialogActions>
                     <Button onClick={dontUseTemplates}>Don't use template</Button>
-                    <Button onClick={() => setTemplateModalOpen(false)}>Close</Button>
+                    <Button onClick={() => props.setTemplateModalOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={isDataOpen} onClose={closeDataDialog} fullWidth>
+            <Dialog open={props.isDataOpen} onClose={props.closeDataDialog} fullWidth>
                 <DialogTitle
                     className='p-2 d-flex justify-content-between align-items-center'
                     style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -549,9 +491,9 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
                     <img className="mx-3" src={logo} alt="Loading" width="130px" />
                     <span className="ml-auto">
-                        Select {selectedObjectName} Class
+                        Select {props.selectedObjectName} Class
                         <FontAwesomeIcon
-                            icon={findBestIconMatch(selectedObjectName)}
+                            icon={findBestIconMatch(props.selectedObjectName)}
                             className='mx-3'
                         />
                     </span>
@@ -559,13 +501,13 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
 
                 <DialogContent className=''>
-                    {isLoading ? (
+                    {props.isLoading ? (
                         <div className="d-flex justify-content-center align-items-center w-100">
                             <CircularProgress size={24} />
                         </div>
                     ) : (
                         <List className='p-0 list-group'>
-                            {groupedItems.map((group) => (
+                            {props.groupedItems.map((group) => (
                                 <div key={group.classGroupId}>
                                     <ListItem>
                                         <ListItemText
@@ -579,7 +521,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                 key={member.classId}
                                                 className='mx-4 p-0'
                                                 button
-                                                onClick={() => handleClassSelection(
+                                                onClick={() => props.handleClassSelection(
                                                     member.classId,
                                                     member.className,
                                                     group.classGroupId
@@ -606,12 +548,12 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                     />
                                 </ListItem>
                                 <List component="div" disablePadding className='mx-4'>
-                                    {ungroupedItems.map((item) => (
+                                    {props.ungroupedItems.map((item) => (
                                         <ListItem
                                             key={item.classId}
                                             className='mx-4 p-0'
                                             button
-                                            onClick={() => handleClassSelection(
+                                            onClick={() => props.handleClassSelection(
                                                 item.classId,
                                                 item.className
                                             )}
@@ -632,11 +574,11 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={closeDataDialog}>Close</Button>
+                    <Button onClick={props.closeDataDialog}>Close</Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={isFormOpen} onClose={closeFormDialog} fullWidth>
+            <Dialog open={props.isFormOpen} onClose={closeFormDialog} fullWidth>
                 <DialogTitle
                     className='p-2 d-flex justify-content-between align-items-center'
                     style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -644,7 +586,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
                     <img className="mx-3" src={logo} alt="Loading" width="130px" />
                     <span className="ml-auto mx-3">
-                        Create:  <small style={{ fontWeight: 'bold' }}>{selectedClassName} </small>
+                        Create:  <small style={{ fontWeight: 'bold' }}>{props.selectedClassName} </small>
                     </span>
                 </DialogTitle>
 
@@ -678,13 +620,13 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                     </Typography>
                                     <Box className='my-1' sx={{ flexBasis: '70%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
 
-                                        {selectedClassName}
+                                        {props.selectedClassName}
                                     </Box>
 
                                 </Box>
 
 
-                                {filteredProperties.map((prop) => (
+                                { filteredProperties.map((prop) => (
                                     <ListItem key={prop.propId} sx={{ p: 0 }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginY: '2px' }}>
                                             <Typography
@@ -711,7 +653,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
 
                                                             <TextField
                                                                 // label={prop.title}
-                                                                value={prop.value ? prop.value : formValues[prop.propId]}
+                                                                value={prop.value ? prop.value : props.formValues[prop.propId]}
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 fullWidth
                                                                 required={prop.isRequired}
@@ -738,7 +680,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                         ) : (
                                                             <TextField
                                                                 label={prop.title}
-                                                                value={formValues[prop.propId]}
+                                                                value={props.formValues[prop.propId]}
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 fullWidth
                                                                 required={prop.isRequired}
@@ -770,11 +712,11 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                                 propId={prop.propId}
                                                                 label={prop.title}
                                                                 onChange={handleInputChange}
-                                                                value={formValues[prop.propId]}
+                                                                value={props.formValues[prop.propId]}
                                                                 required={prop.isRequired}
                                                                 error={!!formErrors[prop.propId]}
                                                                 helperText={formErrors[prop.propId]}
-                                                                selectedVault={selectedVault}
+                                                                selectedVault={props.selectedVault}
                                                                 size='small'
                                                                 className='my-1'
                                                             />
@@ -782,7 +724,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                     </>
 
                                                 )}
-                                                
+
 
                                                 {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
                                                     <>
@@ -793,11 +735,11 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                                 propId={prop.propId}
                                                                 label={prop.title}
                                                                 onChange={handleInputChange}
-                                                                value={formValues[prop.propId] || []}
+                                                                value={props.formValues[prop.propId] || []}
                                                                 required={prop.isRequired}
                                                                 error={!!formErrors[prop.propId]}
                                                                 helperText={formErrors[prop.propId]}
-                                                                selectedVault={selectedVault}
+                                                                selectedVault={props.selectedVault}
                                                                 size='small'
                                                                 className='my-1'
                                                             />
@@ -815,7 +757,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                                 {/* <label>{prop.title} :</label> */}
                                                                 <Select
                                                                     size='small'
-                                                                    value={formValues[prop.propId] ?? (
+                                                                    value={props.formValues[prop.propId] ?? (
                                                                         prop.value === "Yes" ? true : (prop.value === "No" ? false : '')
                                                                     )}
                                                                     onChange={(e) => handleInputChange(prop.propId, e.target.value)}
@@ -847,7 +789,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                                 <input
                                                                     type="time"
                                                                     className="form-control"
-                                                                    value={formValues[prop.propId]} // Ensure default value is shown
+                                                                    value={props.formValues[prop.propId]} // Ensure default value is shown
                                                                     onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 />
                                                                 {formErrors[prop.propId] && <div className="text-danger">{formErrors[prop.propId]}</div>}
@@ -867,7 +809,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                                                             <TextField
                                                                 // label={prop.title}
                                                                 type="date"
-                                                                value={formValues[prop.propId]}
+                                                                value={props.formValues[prop.propId]}
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 fullWidth
                                                                 required={prop.isRequired}
@@ -896,7 +838,7 @@ const ObjectStructureList = ({vaultObjectModalsOpen,setVaultObjectsModal,selecte
                     </Box>
 
 
-                    {(selectedObjectId === 0 && !templateIsTrue) && (
+                    {(props.selectedObjectId === 0 && !props.templateIsTrue) && (
                         <div>
                             <FileUploadComponent
                                 handleFileChange={handleFileChange}

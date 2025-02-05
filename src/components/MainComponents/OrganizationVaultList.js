@@ -2,10 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Authcontext from '../Auth/Authprovider';
 import * as constants from '../Auth/configs'
+import Box from '@mui/material/Box';
 
 
 function OrganizationVaultList(props) {
-  const [vaults, setVaults] = useState([]);
+
   const [openVaults, setOpenVaults] = useState({});
   const [showFlatSublists, setShowFlatSublists] = useState({});
   const [showHierarchicalSublists, setShowHierarchicalSublists] = useState({});
@@ -24,8 +25,8 @@ function OrganizationVaultList(props) {
 
       axios.request(config)
         .then((response) => {
-          setVaults(response.data);
-          console.log(JSON.stringify(response.data));
+          props.setVaults(response.data);
+          // console.log(JSON.stringify(response.data));
         })
         .catch((error) => {
           console.log(error);
@@ -78,7 +79,7 @@ function OrganizationVaultList(props) {
 
     axios.request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         props.viewvaultobjects();
         props.fetchVaultObjects(guid)
       })
@@ -89,55 +90,77 @@ function OrganizationVaultList(props) {
   }
 
   return (
-    <ul style={{ listStyleType: 'none', padding: 0, marginLeft:'30px' }} className='shadow-lg '>
-    {vaults.map((vault) => (
-        <li key={vault.guid} className='my-3'>
+    <>
+
+      <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '30px' }} className='shadow-lg '>
+        {props.vaults.map((vault) => (
+          <li key={vault.guid} className='my-3'>
             <div
-                onClick={() => { toggleVaultSublist(vault); }}
-                className='p-2 text-center flex items-center cursor-pointer rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105'
-                style={{ backgroundColor: '#fff', color: '#1C4690' }}
+              onClick={() => toggleVaultSublist(vault)}
+              className="p-2 text-center flex items-center cursor-pointer rounded-lg shadow-md transition-transform duration-300 ease-in-out hover:scale-105"
+              style={{
+                backgroundColor: '#2757aa',
+                color: '#fff',
+                gap: '12px', // Adds spacing between elements
+              }}
             >
-                <i className="fas fa-hdd mx-2" style={{ fontSize: '1.5em' }}></i>
-                <span className='list-text'>{vault.name}</span>
+              {/* Left Content */}
+              <div className="flex items-center gap-2">
+
+                <div>
+                  {/* Main Name */}
+                  <i className="fas fa-hdd mx-2" style={{ fontSize: '2.0em' }}></i>
+                  <span className="font-bold text-sm">{vault.name}</span>
+
+                </div>
+              </div>
             </div>
 
+
             {openVaults[vault.guid] && (
+              <>
+
+
                 <ul className='shadow-lg p-3 ml-4 rounded-lg transition-all duration-300 ease-in-out' style={{ listStyleType: 'none', padding: 0 }}>
-                    <li onClick={() => toggleFlatSublist(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                        <i className="fas fa-list mx-2" style={{ fontSize: '1.5em' }}></i>
-                        <span className='list-text'>Metadata Structure (Flat View)</span>
-                    </li>
+                  <li onClick={() => toggleFlatSublist(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
+                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                    <span className='list-text'>Metadata Structure (Flat View)</span>
+                  </li>
 
-                    {showFlatSublists[vault.guid] && (
-                        <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
-                            <li onClick={() => { props.viewvaultobjects(); props.fetchVaultObjects(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                                <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Object Types</span>
-                            </li>
-                            <li onClick={() => sycVaultObjects(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                                <i className="fas fa-sync-alt mx-2" style={{ fontSize: '1.5em' }}></i>
-                                <span className='list-text'>Sync Vault Objects</span>
-                            </li>
-                        </ul>
-                    )}
+                  {showFlatSublists[vault.guid] && (
+                    <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
+                      <li onClick={() => { props.viewvaultobjects(); props.fetchVaultObjects(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
+                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                        <span className='list-text'>Object Types</span>
+                      </li>
+                      <li onClick={() => sycVaultObjects(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
+                        <i className="fas fa-sync-alt mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                        <span className='list-text'>Sync Vault Objects</span>
+                      </li>
+                    </ul>
+                  )}
 
-                    <li onClick={() => { props.setSelectedVault(vault); props.viewvaultusers(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
-                        <span className='list-text'>Vault Users</span>
-                    </li>
-                    {/* <li onClick={() => { props.viewvaultgroups(); props.VaultUsergroups() }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
+                  <li onClick={() => { props.setSelectedVault(vault); props.viewvaultusers(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
+                    <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                    <span className='list-text'>Vault Users</span>
+                  </li>
+                  <li className='my-3'>
+                   
+                    <span  style={{ fontSize: '10px' }}>GUID:  {vault.guid}</span>
+                  </li>
+                  {/* <li onClick={() => { props.viewvaultgroups(); props.VaultUsergroups() }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
                         <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
                         <span className='list-text'>User Groups</span>
                     </li> */}
                 </ul>
+
+              </>
             )}
-        </li>
-    ))}
-    <li onClick={() => { props.fetchOrgUsers(); props.viewloginaccounts(); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
-        <span className='list-text'>All Login Accounts</span>
-    </li>
-</ul>
+          </li>
+        ))}
+
+      </ul>
+    </>
 
   );
 }

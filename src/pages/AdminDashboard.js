@@ -73,7 +73,7 @@ function a11yProps(index) {
 
 function AdminDashboard() {
     const [progress, setProgress] = React.useState(10);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
     const { user, authTokens, logoutUser } = useContext(Authcontext);
     const [vaultObjects, setVaultObjects] = useState([])
@@ -100,6 +100,7 @@ function AdminDashboard() {
     const [userGroups, setuserGroups] = useState([])
     const [selecedGroup, setSelectedGroup] = useState({})
     const [openGroupUsersDialog, setOpenGroupUsersDialog] = useState(false)
+    const [vaults, setVaults] = useState([]);
 
 
 
@@ -421,7 +422,7 @@ function AdminDashboard() {
         setViewObjectStructure(false)
     }
 
-    const viewvaultusers = (vault) => {
+    const viewvaultusers = async (vault) => {
 
         let data = {
             vault_id: vault
@@ -436,7 +437,7 @@ function AdminDashboard() {
             data: data
         };
 
-        axios.request(config)
+        await axios.request(config)
             .then((response) => {
                 setVaultUsers(response.data);
             })
@@ -497,7 +498,7 @@ function AdminDashboard() {
             data: data
         };
 
-        axios.request(config)
+        await axios.request(config)
             .then((response) => {
 
 
@@ -555,6 +556,90 @@ function AdminDashboard() {
         }
     };
 
+    function stringToColor(string) {
+        let hash = 0;
+        let i;
+
+        /* eslint-disable no-bitwise */
+        for (i = 0; i < string.length; i += 1) {
+            hash = string.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        let color = '#';
+
+        for (i = 0; i < 3; i += 1) {
+            const value = (hash >> (i * 8)) & 0xff;
+            color += `00${value.toString(16)}`.slice(-2);
+        }
+        /* eslint-enable no-bitwise */
+
+        return color;
+    }
+
+    function stringAvatar(name) {
+
+        const nameParts = name.split(' '); // Split the name into parts
+        const firstInitial = nameParts[0] ? nameParts[0][0] : ''; // Get the first letter of the first part
+        const secondInitial = nameParts[1] ? nameParts[1][0] : ''; // Get the first letter of the second part (if it exists)
+
+        return {
+            sx: {
+                bgcolor: stringToColor(name), // Assuming stringToColor is defined elsewhere
+            },
+            children: `${firstInitial}${secondInitial}`, // Combine the initials
+        };
+    }
+
+    const buttonStyle = {
+        textTransform: 'none',
+        fontWeight: 'lighter',
+        fontSize: '10px',
+        mx: 1,
+    };
+
+    const smallButtonStyle = {
+        textTransform: 'none',
+        fontWeight: 'lighter',
+        fontSize: '9px',
+        mx: 2,
+    };
+
+    const inputStyle = {
+        fontSize: '12px',
+        mx: 2,
+    };
+
+    const syncUser = async () => {
+        let data = JSON.stringify({
+            "guid": `${selectedVault.guid}`,
+            "organization_id": `${user.organizationid}`
+        });
+
+        console.log(data)
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${constants.auth_api}/api/sync-vault-users/`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        await axios.request(config)
+            .then((response) => {
+                fetchOrgUsers()
+                viewvaultusers(selectedVault.guid)
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
+
     useEffect(() => {
         fetchOrgUsers();
     }, []);
@@ -566,153 +651,223 @@ function AdminDashboard() {
             <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
             <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid} open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
             <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
-
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
-            <div className="dashboard ">
-
+            <div className="dashboard">
                 <nav className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
                     {/* Sidebar content */}
-                    <div className="sidebar-content">
+                    <div className="sidebar-content" style={{ marginTop: '0%' }}>
                         {sidebarOpen && (
-                            <ul className="menu-items" style={{ marginTop: '100%' }}>
+                            <>
+                                <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
+                                    <span className='p-2 mx-3'>{user.organization}</span>
+                                </div>
+                                <div className='my-2' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <Avatar
+                                        alt={
+                                            user.first_name && user.last_name
+                                                ? `${user.first_name} ${user.last_name}`
+                                                : user.first_name
+                                                    ? user.first_name
+                                                    : user.last_name
+                                                        ? user.last_name
+                                                        : user.username
+                                        }
+                                        {...stringAvatar(
+                                            user.first_name && user.last_name
+                                                ? `${user.first_name} ${user.last_name}`
+                                                : user.first_name
+                                                    ? user.first_name
+                                                    : user.last_name
+                                                        ? user.last_name
+                                                        : user.username
+                                        )}
+                                        sx={{
+                                            width: 50,
+                                            height: 50,
+                                            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                                            transform: 'translateZ(0)',
+                                            transition: 'transform 0.2s'
+                                        }}
+                                    />
 
-                                <li onClick={homePage}>
-                                    <i className="fas fa-home " style={{ fontSize: '20px' }}></i>
-                                    <span style={{ fontSize: '13px' }}>Home</span>
-                                </li>
-                                <li onClick={logoutUser} style={{ marginTop: '100%' }}>
-                                    <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }}></i>
-                                    <span style={{ fontSize: '13px' }}>Logout</span>
-                                </li>
-                            </ul>
+                                </div>
+                                <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
+                                    <span className='p-2 mx-3'>{user.first_name} {user.last_name}</span>
+                                </div>
+
+                                <ul className="menu-items" >
+                                    <li onClick={homePage} className="menu-item" >
+                                        <i className="fas fa-home"></i>
+                                        <span style={{ fontSize: '13px' }}>Home</span>
+                                    </li>
+
+
+                                    <li onClick={logoutUser} className="menu-item" style={{ marginTop: "180px" }}
+                                    >
+                                        <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }} ></i>
+                                        <span style={{ fontSize: '13px' }}>Logout</span>
+                                    </li>
+                                </ul>
+                            </>
                         )}
                     </div>
 
-                    {/* Bump Toggle - Inside Sidebar */}
+                </nav >
+                <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'} bg-white`} >
+                    <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
+                        <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
+                            <i style={{ fontSize: '18px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'}`} ></i>
+                        </div>
+                    </Tooltip>
+                    <div className='row container-fluid ' style={{ height: '100vh', overflowY: 'auto' }}>
 
-                </nav>
-
-                <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
-
-                    <div className='row'>
-                        <Tooltip  title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
-                            <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
-                                <i style={{ fontSize: '18px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'}`} ></i>
-                            </div>
-                        </Tooltip>
-                        <div className="col-lg-4 col-md-4 col-sm-12 text-dark bg-white" style={{ fontSize: '12px', height: '100vh', overflowY: 'scroll' }}>
+                        <div className="col-lg-4 col-md-6 col-sm-12 text-dark bg-white">
+                            {/* Header Box */}
                             <Box
                                 sx={{
-                                    padding: 2,
                                     fontSize: '12px',
                                     backgroundColor: '#fff',
                                     color: '#2757aa',
-
-                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', /* Add a subtle shadow for depth */
-
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
+                                  
+                                    display: 'flex',
+                                    alignItems: 'center', // Vertical alignment
+                                    justifyContent: 'space-between', // Spacing between icon and text
+                                    gap: 1.5,
+                                    padding: '12px', // Add padding for better spacing
                                 }}
-                                className=" shadow-lg"
+                                className="shadow-lg mb-3"
                             >
-                                <span className="d-flex align-items-center">
-                                    <i className="fas fa-building mx-2" style={{ fontSize: '1.5em' }}></i>
-                                    ORGANIZATION VAULTS
+                                <i
+                                    className="fas fa-building"
+                                    style={{
+                                        fontSize: '1.5em',
+                                        color: '#2757aa',
+                                    }}
+                                ></i>
+                                <span style={{ fontSize: '14px' }}>
+                                    <span className='text-dark'>ORGANIZATION VAULTS</span> (
+                                    <span style={{ fontWeight: 'bold' }}>{vaults ? vaults.length : <></>}</span>)
                                 </span>
                             </Box>
 
-                            <OrganizationVaultList
-                                VaultUsergroups={VaultUsergroups}
-                                fetchVaultObjects={fetchVaultObjects}
-                                fetchOrgUsers={fetchOrgUsers}
-                                fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault}
-                                setSelectedVault={setSelectedVault}
-                                viewvaultusers={viewvaultusers}
-                                getObjectStructureById={getObjectStructureById}
-                                viewnewobject={viewnewobject}
-                                showSublist={showSublist}
-                                showSublist1={showSublist1}
-                                toggleSublist={toggleSublist}
-                                toggleSublist1={toggleSublist1}
-                                viewvaultobjects={viewvaultobjects}
-                                viewLoginAccounts={viewLoginAccounts}
-                                viewvaultgroups={viewvaultgroups}
-                                vaultObjects={vaultObjects}
-                                viewloginaccounts={viewloginaccounts}
-                            />
+                            {/* Vault List */}
+                            <div
+                                style={{
+                                    fontSize: '12px',
+                                    height: '70vh',
+                                    overflowY: 'auto', // Enable scrolling
+                                    border: '1px solid #ddd',
+                                
+                                   
+                                }}
+                                className="mb-3 shadow-lg"
+                            >
+                                <OrganizationVaultList
+                                    VaultUsergroups={VaultUsergroups}
+                                    fetchVaultObjects={fetchVaultObjects}
+                                    fetchOrgUsers={fetchOrgUsers}
+                                    fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault}
+                                    setSelectedVault={setSelectedVault}
+                                    viewvaultusers={viewvaultusers}
+                                    getObjectStructureById={getObjectStructureById}
+                                    viewnewobject={viewnewobject}
+                                    showSublist={showSublist}
+                                    showSublist1={showSublist1}
+                                    toggleSublist={toggleSublist}
+                                    toggleSublist1={toggleSublist1}
+                                    viewvaultobjects={viewvaultobjects}
+                                    viewLoginAccounts={viewLoginAccounts}
+                                    viewvaultgroups={viewvaultgroups}
+                                    vaultObjects={vaultObjects}
+                                    viewloginaccounts={viewloginaccounts}
+                                    vaults={vaults}
+                                    setVaults={setVaults}
+                                />
+                            </div>
+
+                            {/* Action Button */}
+                            <div className="container text-center">
+                                <div
+                                    onClick={() => {
+                                        fetchOrgUsers();
+                                        viewloginaccounts();
+                                    }}
+                                    className="p-2 cursor-pointer rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
+                                    style={{
+                                        backgroundColor: '#2757aa',
+                                        color: '#fff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                    }}
+                                >
+                                    <i className="fas fa-users" style={{ fontSize: '12px' }}></i>
+                                    <span style={{ fontSize: '12px' }} className="list-text">All Login Accounts</span>
+                                </div>
+                            </div>
                         </div>
 
-
-
-
-                        <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg" style={{ fontSize: '12px', height: '100vh' }}>
+                        <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg text-dark" style={{ fontSize: '12px', height: '90vh', overflowY: 'auto' }}>
                             {viewCreateObject ?
-                                <div id='newobject' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id="newobject" style={{ fontSize: '12px', marginBottom: '20px' }}>
                                     <div>
-                                        <div>
-                                            <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
-                                                <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i> Create New Object
-                                            </h6>
-                                            <p className='my-3' style={{ fontSize: '0.8em' }}>Please create your new object type below with the respective properties</p>
-                                        </div>
-                                        <div className='card-body my-4' style={{ height: '80%', overflowY: 'scroll' }}>
+                                        <Box sx={{ p: 3, boxShadow: 2, fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
+                                            <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i> Create New Object
+                                        </Box>
+                                        <Typography variant="body2" sx={{ my: 3, fontSize: '0.8em' }}>
+                                            Please create your new object type below with the respective properties
+                                        </Typography>
+
+                                        <Box className="card-body" sx={{ my: 4, overflowY: 'auto' }}>
                                             <Grid container spacing={2}>
                                                 <Grid item xs={12}>
-                                                    <FormControl variant='standard' fullWidth>
+                                                    <FormControl variant="standard" fullWidth>
                                                         <Input
                                                             id="objectName"
-                                                            placeholder='Object name'
-                                                            className='mx-2'
+                                                            placeholder="Object name"
+                                                            className="mx-2"
                                                             value={objectName}
                                                             onChange={(e) => setObjectName(e.target.value)}
-                                                            type='text'
+                                                            type="text"
                                                             required
                                                             onInput={(e) => capitalize(e.target)}
                                                         />
                                                     </FormControl>
                                                 </Grid>
                                                 <Grid item xs={12}>
-                                                    <ButtonComponent
-                                                        size='sm'
-                                                        onClick={addProperty}
-                                                        className='mx-1'
-                                                        style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '10px' }}
-                                                        disabled={false}
-                                                    >
+                                                    <ButtonComponent size="sm" onClick={addProperty} sx={buttonStyle}>
                                                         <i className="fas fa-tag mx-1"></i> Add Property
                                                     </ButtonComponent>
-                                                    <ButtonComponent
-                                                        onClick={handleSubmit}
-                                                        className='mx-1'
-                                                        style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '10px' }}
-                                                        disabled={false}
-                                                    >
-                                                        <i className='fas fa-plus-circle mx-1'></i> Create Object
+                                                    <ButtonComponent onClick={handleSubmit} sx={buttonStyle}>
+                                                        <i className="fas fa-plus-circle mx-1"></i> Create Object
                                                     </ButtonComponent>
                                                 </Grid>
                                             </Grid>
-                                        </div>
-                                        <div className='container-fluid' style={{ height: '80%', overflowY: 'scroll' }}>
+                                        </Box>
+
+                                        <Box className="container-fluid" sx={{ overflowY: 'auto' }}>
                                             {properties.map((property, index) => (
-                                                <Grid container spacing={2} alignItems="center" key={index} style={{ fontSize: '9px', marginBottom: '10px' }}>
+                                                <Grid container spacing={2} alignItems="center" key={index} sx={{ fontSize: '9px', mb: 2 }}>
                                                     <Grid item xs={12} sm={4}>
                                                         <FormControl variant="standard" fullWidth>
                                                             <Input
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
+                                                                sx={inputStyle}
                                                                 id={`title-input-${index}`}
-                                                                placeholder='Property Title*'
+                                                                placeholder="Property Title*"
                                                                 value={property.title}
                                                                 onChange={(e) => handlePropertyChange(index, 'title', e.target.value)}
-                                                                type='text'
+                                                                type="text"
                                                                 onInput={(e) => capitalize(e.target)}
                                                                 required
                                                             />
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item xs={12} sm={4}>
-                                                        <FormControl variant='standard' fullWidth>
+                                                        <FormControl variant="standard" fullWidth>
                                                             <Select
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
+                                                                sx={inputStyle}
                                                                 id={`dataType-select-${index}`}
                                                                 displayEmpty
                                                                 value={property.dataType}
@@ -727,10 +882,9 @@ function AdminDashboard() {
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item xs={12} sm={2}>
-                                                        <FormControl variant='standard' fullWidth>
+                                                        <FormControl variant="standard" fullWidth>
                                                             <Select
-                                                                style={{ fontSize: '12px' }}
-                                                                className='mx-2'
+                                                                sx={inputStyle}
                                                                 id={`required-select-${index}`}
                                                                 displayEmpty
                                                                 value={property.required}
@@ -745,32 +899,28 @@ function AdminDashboard() {
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item xs={12} sm={2}>
-                                                        <ButtonComponent
-                                                            onClick={() => removeProperty(index)}
-                                                            className='mx-2'
-                                                            style={{ textTransform: 'none', fontWeight: 'lighter', fontSize: '9px' }}
-                                                            disabled={false}
-                                                        >
-                                                            <i className='fas fa-trash mx-1'></i> Remove Property
+                                                        <ButtonComponent onClick={() => removeProperty(index)} sx={smallButtonStyle}>
+                                                            <i className="fas fa-trash mx-1"></i> Remove Property
                                                         </ButtonComponent>
                                                     </Grid>
                                                 </Grid>
                                             ))}
-                                        </div>
+                                        </Box>
                                     </div>
                                 </div>
+
                                 : <></>
 
                             }
 
                             {viewObjects ?
                                 <>
-                                    <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( Vault Objects )</h6>
+                                    <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>{selectedVault.name} ( Vault Objects )</h6>
 
                                     <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
 
 
-                                        <div style={{ boxShadow: 'none', height: '455px' }} className='shadow-lg p-3'>
+                                        <div style={{ boxShadow: 'none' }} className='shadow-lg p-3'>
                                             <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                                 <TableHead className='my-3 p-3'>
                                                     <TableRow >
@@ -780,7 +930,7 @@ function AdminDashboard() {
                                                     </TableRow>
                                                 </TableHead>
                                             </Table>
-                                            <div style={{ height: '400px', overflowY: 'scroll' }}>
+                                            <div style={{ overflowY: 'auto' }}>
                                                 <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                                     <TableBody>
                                                         {vaultObjects.map((row) => (
@@ -844,7 +994,7 @@ function AdminDashboard() {
 
                                         <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
 
-                                        <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ height: '80%', overflowY: 'scroll' }}>
+                                        <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>
                                             <Button
                                                 size="small"
                                                 variant="contained"
@@ -903,12 +1053,13 @@ function AdminDashboard() {
                                 <div id='usermanagement' style={{ fontSize: '12px', marginBottom: '20px' }}>
                                     <div>
 
-                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i>Login Accounts</h6>
+                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
                                         <p className='my-3' style={{ fontSize: '10px' }}>user Account Management</p>
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
-                                        <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
-                                        <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
+                                        {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
+                                        <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
+
                                     </div>
 
                                     <OrganizationUsersTable users={organizationusers} />
@@ -917,13 +1068,11 @@ function AdminDashboard() {
 
                             }
                             {viewVaultUsers ?
-                                <div id='vaultusermanagement' style={{ fontSize: '12px', marginBottom: '20px' }}>
-                                    <div>
+                                <div id='vaultusermanagement' style={{ fontSize: '12px' }}>
 
-                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em' }}></i> {selectedVault.name} Vault Accounts</h6>
-                                    </div>
+                                    <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i> <span style={{ color: '#2757aa' }}>{selectedVault.name}</span>  Vault Users</h6>
 
-                                    <VaultUsersTable fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
+                                    <VaultUsersTable syncUser={syncUser} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
                                 </div>
                                 : <></>
 
@@ -933,7 +1082,7 @@ function AdminDashboard() {
                                 <div style={{ fontSize: '12px', marginBottom: '20px' }}>
 
                                     <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
-                                    <ul className=' p-3' style={{ height: '80%', overflowY: 'scroll' }}>
+                                    <ul className=' p-3' style={{ overflowY: 'auto' }}>
                                         <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
                                             <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
                                             <span className='list-text'>Organization Name: <b>{user.organization}</b></span>
@@ -956,9 +1105,7 @@ function AdminDashboard() {
 
                             }
                         </div>
-
                     </div>
-
                 </main>
             </div>
         </>

@@ -30,42 +30,51 @@ function VaultUsersTable(props) {
 
   return (
     <>
-      <AddUserToVault selectedVault={props.vault} viewvaultusers={props.viewvaultusers} usersnotlinkedtovault={props.usersnotlinkedtovault} fetchUsersNotLinkedToVault={ props.fetchUsersNotLinkedToVault} />
 
-      <TableContainer component={Paper} className='p-2' style={{height:'80%' ,overflowY:'scroll' }}>
-        <Table className='table table-sm'>
+      <Button className='my-2' variant="contained" color="primary" onClick={props.syncUser}>
+        <span style={{ fontSize: '12px' }}>Sync Vault Users</span>
+      </Button>
+      <AddUserToVault
+        selectedVault={props.vault}
+        viewvaultusers={props.viewvaultusers}
+        usersnotlinkedtovault={props.usersnotlinkedtovault}
+        fetchUsersNotLinkedToVault={props.fetchUsersNotLinkedToVault}
+      />
+
+      <TableContainer component={Paper}  style={{ height: '250px', overflowY: 'auto', fontSize:'8px' }}>
+        <Table className='table table-sm table-responsive'>
           <TableHead>
             <TableRow>
-              {/* <TableCell>ID</TableCell> */}
-              <TableCell>Email</TableCell>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              {/* <TableCell>Staff</TableCell> */}
-              <TableCell>Active</TableCell>
-              <TableCell>Admin</TableCell>
-              {/* <TableCell>Organization</TableCell> */}
-              <TableCell>Action</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>ID (M-Files)</TableCell>
+              {/* <TableCell>Username</TableCell> */}
+              <TableCell style={{ textAlign: 'center' }}>Email</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>FName</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>LName</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>Active</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>Admin</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {props.vaultUsers.map((user) => (
               <TableRow key={user.id}>
-                {/* <TableCell>{user.id}</TableCell> */}
-                <TableCell><i className='fas fa-user mx-2' style={{color:'#2a68af'}}></i> {user.email}</TableCell>
-                <TableCell>{user.first_name}</TableCell>
-                <TableCell>{user.last_name}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{user.mfiles_id}</TableCell>
+                {/* <TableCell>{user.username}</TableCell> */}
+                <TableCell style={{ textAlign: 'center' }}>{user.email}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{user.first_name}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{user.last_name}</TableCell>
                 {/* <TableCell>{user.is_staff ? 'Yes' : 'No'}</TableCell> */}
-                <TableCell>{user.is_active ? 'Yes' : 'No'}</TableCell>
-                <TableCell>{user.is_admin ? 'Yes' : 'No'}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{user.is_active ? 'Yes' : 'No'}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{user.is_admin ? 'Yes' : 'No'}</TableCell>
                 {/* <TableCell>{user.organization}</TableCell> */}
-                <TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
                   <Button
                     size="small"
                     variant="contained"
                     color="warning"
                     onClick={() => handleDetach(user.id)}
                   >
-                    <small><i className='fas fa-unlink mx-2'></i>Detach</small> 
+                    <small><i className='fas fa-unlink mx-2'></i>Detach</small>
                   </Button>
                 </TableCell>
               </TableRow>
@@ -73,6 +82,7 @@ function VaultUsersTable(props) {
           </TableBody>
         </Table>
       </TableContainer>
+
     </>
   );
 }

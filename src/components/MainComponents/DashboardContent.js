@@ -271,12 +271,12 @@ const DocumentList = (props) => {
       setFormValues({})
       getLinkedObjects(item.id, (item.classId !== undefined ? item.classId : item.classID), (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
       setSelectedObject(item)
-      console.log(item)
+      // console.log(item)
       getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID), item.id)
 
       try {
         const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}`);
-        console.log(propsResponse.data)
+        // console.log(propsResponse.data)
         setPreviewObjectProps(propsResponse.data);
         setLoadingObject(false)
         setLoadingClick(false)
@@ -313,7 +313,7 @@ const DocumentList = (props) => {
     setLoadingClick(true)
     setFormValues({});
     setSelectedObject(item);
-    console.log(item)
+    // console.log(item)
 
     // Fetch the object workflow asynchronously
     getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID, item.id));
@@ -391,7 +391,7 @@ const DocumentList = (props) => {
     setDialogOpen(false)
     setSelectedState({})
     setFormValues({})
-    console.log(currentState)
+    // console.log(currentState)
     setSelectedState(currentState)
 
   }
@@ -681,7 +681,7 @@ const DocumentList = (props) => {
       />
       <LoadingDialog opendialogloading={loadingClick} />
 
-      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100vh', backgroundColor: '#fff',  overflowY: 'auto'}}>
+      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100vh', backgroundColor: '#fff', overflowY: 'auto' }}>
         {/* Object List */}
         <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', height: '100vh', backgroundColor: 'white', minWidth: '38%' }}>
           <Box
@@ -693,7 +693,7 @@ const DocumentList = (props) => {
               fontSize: '12px !important',
               backgroundColor: '#ffff',
               color: '#1C4690',
-            
+
             }}
 
           >
@@ -846,7 +846,7 @@ const DocumentList = (props) => {
                       Search Results
                     </h6>
 
-                    <div style={{ height: '65vh',  overflowY: 'auto' }} className='shadow-lg p-3'>
+                    <div style={{ height: '65vh', overflowY: 'auto' }} className='shadow-lg p-3'>
                       {props.data.map((item, index) => (
                         <Accordion
                           key={index}
@@ -998,7 +998,7 @@ const DocumentList = (props) => {
                   </>
                 ) : (
                   <>
-                    {props.viewableobjects.length > 0 ? (
+                    {/* {props.viewableobjects.length > 0 ? (
                       <ViewsList
                         selectedFileId={selectedFileId}
                         viewableobjects={props.viewableobjects}
@@ -1015,12 +1015,41 @@ const DocumentList = (props) => {
                         setAlertPopMessage={setAlertPopMessage}
                       />
                     ) : (
-                      <Box sx={{ width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                        <FontAwesomeIcon icon={faTable} className="my-2" style={{ color: '#1C4690', fontSize: '120px' }} />
-                        {/* <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>Loading Views...</Typography> */}
-                        <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}> Views</Typography>
+                      <Box sx={{ width: '100%', marginTop: '15%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
+                        <FontAwesomeIcon icon={faTable}  style={{ color: '#1C4690', fontSize: '120px' }} />
+                        <Typography
+                          variant="body2"
+                          className='my-2 text-secondary'
+                          sx={{ textAlign: 'center' }}
+                        >
+                          Views
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          className='text-secondary'
+                          sx={{ textAlign: 'center', fontSize: '12px' }}
+                        >
+                          Common Views & Other Views 
+                        </Typography>
+                        
                       </Box>
-                    )}
+                    )} */}
+                    <ViewsList
+                        selectedFileId={selectedFileId}
+                        viewableobjects={props.viewableobjects}
+                        previewSublistObject={previewSublistObject}
+                        selectedObject={selectedObject}
+                        linkedObjects={linkedObjects}
+                        loadingobjects={loadingobjects}
+                        selectedVault={props.selectedVault}
+                        setPreviewObjectProps={setPreviewObjectProps}
+                        setLoadingPreviewObject={setLoadingPreviewObject}
+                        previewObject={previewObject}
+                        setAlertPopOpen={setAlertPopOpen}
+                        setAlertPopSeverity={setAlertPopSeverity}
+                        setAlertPopMessage={setAlertPopMessage}
+                      />
                   </>
                 )}
               </>

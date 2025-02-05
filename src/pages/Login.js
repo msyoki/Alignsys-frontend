@@ -123,18 +123,16 @@ const Login = () => {
             </div>
           </div>
 
-          <small className="small mb-0">
+          {/* <small className="small mb-0">
             Don't have an account?<br />
             Register your <Link to="/register" style={{ textDecoration: 'none', color: '#2364aa' }}>Organization account</Link>
-          </small>
+          </small> */}
         </form>
       </div>
 
       <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
         <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <p className="text-center responsive-font mt-5">
-            <span style={{ color: '#fff' }}>TECHEDGE AFRICA</span>
-          </p>
+   
           <img className="" src={logo2} alt="Loading" width="400px" />
         </div>
         <div className="text-center" style={{ marginTop: 'auto' }}>
