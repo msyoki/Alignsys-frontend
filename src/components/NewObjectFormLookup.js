@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import * as constants from './Auth/configs'
-
+import * as constants from './Auth/configs';
 
 const LookupSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault }) => {
   const [lookupOptions, setLookupOptions] = useState([]);
@@ -44,13 +43,7 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
   }, [searchTerm, selectedVault, propId]);
 
   const handleChange = (selectedOption) => {
-    // If the selectedOption is null (when cleared), set value to null or empty
-    if (!selectedOption) {
-      onChange(propId, null);
-    } else {
-      // Otherwise, set the value to the selected option's value (ID)
-      onChange(propId, selectedOption.value);
-    }
+    onChange(propId, selectedOption ? selectedOption.value : null);
   };
 
   const handleInputChange = (newValue) => {
@@ -59,31 +52,28 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
 
   // Custom styles for react-select
   const customStyles = {
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: 'white', // Ensuring the background is not see-through
-      zIndex: 9999, // Ensure the dropdown appears above other elements
-    }),
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // Ensures dropdown stays above all elements
     control: (provided) => ({
       ...provided,
-      borderColor: error ? 'red' : provided.borderColor, // Handling error state
+      borderColor: error ? 'red' : provided.borderColor,
     }),
   };
 
   return (
     <div>
-      {/* <label><small>{label}</small></label> */}
       <Select
         label={`Select ${label}`}
         value={lookupOptions.find(option => option.value === value)}
         onChange={handleChange}
         options={lookupOptions}
-        isClearable={true}
+        isClearable
         placeholder={`Select ${label}`}
         onInputChange={handleInputChange}
         noOptionsMessage={() => "No options found"}
         styles={customStyles}
         required={required}
+        menuPortalTarget={document.body}  // Fix overflow issue
+        menuPosition="absolute"  // Ensures dropdown renders correctly
       />
       {helperText && <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '12px' }} className='mx-3'>{helperText}</span>}
     </div>

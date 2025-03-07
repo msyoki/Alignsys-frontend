@@ -16,15 +16,22 @@ import * as constants from '../components/Auth/configs';
 import Alerts from '../components/Alert';
 import image from '../images/ZFBLU.webp';
 import logo2 from '../images/ZFWHITE.webp';
+import TimedAlert from '../components/TimedAlert';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+
+
+
   const {
-    loginUser, alertmsg, alertseverity, openalert,
-    setOpenAlert, setAlertMsg, setAlertSeverity
+    loginUser, openAlert,
+    setOpenAlert, setAlertMsg, setAlertSeverity, alertMsg, alertSeverity
   } = useContext(Authcontext);
+
+
+
 
   const togglePasswordVisibility = () => {
     const passwordInput = document.getElementById('password');
@@ -40,115 +47,120 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="left-side">
-        <form onSubmit={loginUser} className="text-center text-dark p-3">
-          <div>
-            <img src={image} alt="Sample logo" style={{ width: '200px' }} />
-            {/* <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
-              Welcome back
-            </p> */}
-            <h6 className="my-3 p-2 shadow-lg">SIGN IN</h6>
+    <>
 
-          </div>
+      <TimedAlert
+        open={openAlert}
+        onClose={setOpenAlert}
+        severity={alertSeverity}
+        message={alertMsg}
+        setSeverity={setAlertSeverity}
+        setMessage={setAlertMsg}
+      />
+      <div className="login-container">
 
-          <Alerts
-            alertseverity={alertseverity}
-            alertmsg={alertmsg}
-            openalert={openalert}
-            setOpenAlert={setOpenAlert}
-          />
+        <div className="left-side">
+          <form onSubmit={loginUser} className="text-center text-dark p-3">
+            <div>
+              <img src={image} alt="Sample logo" style={{ width: '200px' }} />
+              {/* <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
+        Welcome back
+      </p> */}
+              <h6 className="my-3 p-2 shadow-lg">SIGN IN</h6>
 
-          <div className="form-group my-2">
-            <FormControl variant="standard" fullWidth>
-              <InputLabel htmlFor="email">Email*</InputLabel>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="User email address"
-                startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
-                style={{ fontSize: '14px' }}
-              />
-            </FormControl>
-          </div>
-
-          <div className="form-group my-2">
-            <FormControl variant="standard" fullWidth>
-              <InputLabel htmlFor="password">Password*</InputLabel>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                placeholder="User password"
-                startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <i
-                      onClick={togglePasswordVisibility}
-                      className="fas fa-eye-slash"
-                      id="togglePassword"
-                    ></i>
-                  </InputAdornment>
-                }
-                style={{ fontSize: '14px' }}
-              />
-            </FormControl>
-          </div>
-
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <p className="small">
-              <a
-                href={`${constants.auth_api}/api/reset_password/`}
-                style={{ textDecoration: 'none', color: 'black' }}
-              >
-                Forgot password?
-              </a>
-            </p>
-          </div>
-
-          <div className="text-center text-lg-start mt-1 row">
-            <div className="col-lg-12 text-center">
-              <ButtonComponent
-                type="submit"
-                cssClass="e-custom-primary"
-                className="mb-3 m-2"
-                style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
-                disabled={false}
-              >
-                Login
-              </ButtonComponent>
             </div>
+
+
+
+
+            <div className="form-group my-2">
+              <FormControl variant="standard" fullWidth>
+                <InputLabel htmlFor="email">Email*</InputLabel>
+                <Input
+                  id="email"
+                  name="email"
+                  type="text"
+                  required
+                  placeholder="User email address"
+                  startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
+                  style={{ fontSize: '14px' }}
+                />
+              </FormControl>
+            </div>
+
+            <div className="form-group my-2">
+              <FormControl variant="standard" fullWidth>
+                <InputLabel htmlFor="password">Password*</InputLabel>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="User password"
+                  startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <i
+                        onClick={togglePasswordVisibility}
+                        className="fas fa-eye-slash"
+                        id="togglePassword"
+                      ></i>
+                    </InputAdornment>
+                  }
+                  style={{ fontSize: '14px' }}
+                />
+              </FormControl>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <p className="small">
+                {/* <a
+                  href={`${constants.auth_api}/api/reset_password/`}
+                  style={{ textDecoration: 'none', color: 'black' }}
+                > */}
+                  Forgot password?
+                {/* </a> */}
+              </p>
+            </div>
+
+            <div className="text-center text-lg-start mt-1 row">
+              <div className="col-lg-12 text-center">
+                <ButtonComponent
+                  type="submit"
+                  cssClass="e-custom-primary"
+                  className="mb-3 m-2"
+                  style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
+                  disabled={false}
+                >
+                  Login
+                </ButtonComponent>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
+          <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+
+            <img className="" src={logo2} alt="Loading" width="400px" />
           </div>
+          <div className="text-center" style={{ marginTop: 'auto' }}>
+            {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
+              <b>EMDS</b> Software Solution
+            </h5>
+            <p className="text-center font-weight-italic responsive-font mb-4">
+              Streamline Document-Centric Processes with Efficiency and Security
+            </p> */}
 
-          {/* <small className="small mb-0">
-            Don't have an account?<br />
-            Register your <Link to="/register" style={{ textDecoration: 'none', color: '#2364aa' }}>Organization account</Link>
-          </small> */}
-        </form>
-      </div>
-
-      <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
-        <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-   
-          <img className="" src={logo2} alt="Loading" width="400px" />
+          </div>
         </div>
-        <div className="text-center" style={{ marginTop: 'auto' }}>
-          {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
-            <b>EMDS</b> Software Solution
-          </h5>
-          <p className="text-center font-weight-italic responsive-font mb-4">
-            Streamline Document-Centric Processes with Efficiency and Security
-          </p> */}
 
-        </div>
+
+
       </div>
+    </>
 
-
-
-    </div>
   );
 };
 

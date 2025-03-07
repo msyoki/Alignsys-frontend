@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-import logo from "../images/ZF.png";
+import logo from "../images/waica.png";
 import axios from 'axios'
 import ObjComponent from '../components/Admin/ObjStructureComponent';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
@@ -110,6 +110,15 @@ function AdminDashboard() {
     const [showVaultSublist, setShowVaultSublist] = useState(false);
 
     const [showSublist1, setShowSublist1] = useState(false);
+
+
+
+    const [loading, setLoading] = useState(false)
+    const [alertOpen, setOpenAlert] = useState(false);
+    const [alertSeverity, setAlertSeverity] = useState('');
+    const [alertMsg, setAlertMsg] = useState('');
+
+
     const navigate = useNavigate()
 
     const homePage = () => {
@@ -423,7 +432,7 @@ function AdminDashboard() {
     }
 
     const viewvaultusers = async (vault) => {
-
+        setVaultUsers([])
         let data = {
             vault_id: vault
         }
@@ -436,6 +445,7 @@ function AdminDashboard() {
             },
             data: data
         };
+        console.log(data)
 
         await axios.request(config)
             .then((response) => {
@@ -523,6 +533,7 @@ function AdminDashboard() {
     };
 
     const fetchVaultObjects = async (guid) => {
+        alert(guid)
         try {
             const payload = {
                 guid: guid
@@ -610,6 +621,7 @@ function AdminDashboard() {
     };
 
     const syncUser = async () => {
+        setLoading(true)
         let data = JSON.stringify({
             "guid": `${selectedVault.guid}`,
             "organization_id": `${user.organizationid}`
@@ -632,10 +644,20 @@ function AdminDashboard() {
                 fetchOrgUsers()
                 viewvaultusers(selectedVault.guid)
                 console.log(JSON.stringify(response.data));
+                setLoading(false)
+                setOpenAlert(true);
+                setAlertSeverity("success");
+                setAlertMsg("Accouns were synced successfully");
             })
             .catch((error) => {
+                setLoading(false)
+                setOpenAlert(true);
+                setAlertSeverity("error");
+                setAlertMsg("Failed syncing accounts, ensure vault users have emails (unique)");
                 console.log(error);
             });
+
+
 
     }
 
@@ -658,10 +680,7 @@ function AdminDashboard() {
                     <div className="sidebar-content" style={{ marginTop: '0%' }}>
                         {sidebarOpen && (
                             <>
-                                <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
-                                    <span className='p-2 mx-3'>{user.organization}</span>
-                                </div>
-                                <div className='my-2' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <div className='bg-white shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                     <Avatar
                                         alt={
                                             user.first_name && user.last_name
@@ -682,29 +701,39 @@ function AdminDashboard() {
                                                         : user.username
                                         )}
                                         sx={{
-                                            width: 50,
-                                            height: 50,
+                                            width: 60,
+                                            height: 60,
                                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                                             transform: 'translateZ(0)',
                                             transition: 'transform 0.2s'
+                                            
+
                                         }}
+                                        className='my-3'
                                     />
+
 
                                 </div>
                                 <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
-                                    <span className='p-2 mx-3'>{user.first_name} {user.last_name}</span>
+                                    <span className='p-2 mx-3'>  {user.first_name} {user.last_name}</span>
                                 </div>
-
+                                <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
+                                    <span className='p-2 mx-3'>  {user.organization} Admin Account </span>
+                                </div>
+                                {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
+                                    <span className='p-2 mx-3'>{user.organization}</span>
+                                </div> */}
+                               
                                 <ul className="menu-items" >
-                                    <li onClick={homePage} className="menu-item" >
-                                        <i className="fas fa-home"></i>
-                                        <span style={{ fontSize: '13px' }}>Home</span>
+                                    <li onClick={homePage} className="menu-item" style={{ marginTop: "220px" }}>
+                                        <i className="fas fa-house-user" style={{ fontSize: '18px' }}></i>
+                                        <span style={{ fontSize: '13px' }}>Back Home</span>
                                     </li>
 
 
-                                    <li onClick={logoutUser} className="menu-item" style={{ marginTop: "180px" }}
+                                    <li onClick={logoutUser} className="menu-item"
                                     >
-                                        <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }} ></i>
+                                        <i className="fas fa-sign-out-alt" style={{ fontSize: '18px' }} ></i>
                                         <span style={{ fontSize: '13px' }}>Logout</span>
                                     </li>
                                 </ul>
@@ -719,50 +748,61 @@ function AdminDashboard() {
                             <i style={{ fontSize: '18px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'}`} ></i>
                         </div>
                     </Tooltip>
-                    <div className='row container-fluid ' style={{ height: '100vh', overflowY: 'auto' }}>
+                    <div className='row container-fluid ' style={{height:'100Vh'}} >
 
-                        <div className="col-lg-4 col-md-6 col-sm-12 text-dark bg-white">
+                        <div className="col-lg-5 col-md-5 col-sm-12 text-dark " style={{ backgroundColor: '#e5e5e5'}}>
                             {/* Header Box */}
                             <Box
                                 sx={{
                                     fontSize: '12px',
-                                    backgroundColor: '#fff',
+                                    backgroundColor: '#e0fbfc',
                                     color: '#2757aa',
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
-                                  
+
                                     display: 'flex',
                                     alignItems: 'center', // Vertical alignment
                                     justifyContent: 'space-between', // Spacing between icon and text
-                                    gap: 1.5,
+                                 
                                     padding: '12px', // Add padding for better spacing
                                 }}
-                                className="shadow-lg mb-3"
+                                
                             >
-                                <i
-                                    className="fas fa-building"
+
+                                {/* <i
+                                    className="fas fa-user-shield"
                                     style={{
                                         fontSize: '1.5em',
                                         color: '#2757aa',
                                     }}
-                                ></i>
-                                <span style={{ fontSize: '14px' }}>
-                                    <span className='text-dark'>ORGANIZATION VAULTS</span> (
-                                    <span style={{ fontWeight: 'bold' }}>{vaults ? vaults.length : <></>}</span>)
-                                </span>
+                                ></i> */}
+                                <span style={{ fontSize: '14px' }} className='text-dark'>  Vault Accounts Manager</span>
+                                {/* <span >
+                                    <i
+                                        className="fas fa-cog"
+                                        style={{
+                                            fontSize: '1.5em',
+                                            color: '#2757aa',
+                                        }}
+                                    ></i>
+
+                                </span> */}
                             </Box>
+                            {/* Action Button */}
 
                             {/* Vault List */}
                             <div
                                 style={{
                                     fontSize: '12px',
-                                    height: '70vh',
+                                  
                                     overflowY: 'auto', // Enable scrolling
-                                    border: '1px solid #ddd',
-                                
-                                   
+                                    // border: '1px solid #ddd',
+                                    marginLeft:'20px'
+
+
                                 }}
                                 className="mb-3 shadow-lg"
                             >
+
                                 <OrganizationVaultList
                                     VaultUsergroups={VaultUsergroups}
                                     fetchVaultObjects={fetchVaultObjects}
@@ -783,33 +823,16 @@ function AdminDashboard() {
                                     viewloginaccounts={viewloginaccounts}
                                     vaults={vaults}
                                     setVaults={setVaults}
+
+
                                 />
                             </div>
 
-                            {/* Action Button */}
-                            <div className="container text-center">
-                                <div
-                                    onClick={() => {
-                                        fetchOrgUsers();
-                                        viewloginaccounts();
-                                    }}
-                                    className="p-2 cursor-pointer rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
-                                    style={{
-                                        backgroundColor: '#2757aa',
-                                        color: '#fff',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px',
-                                    }}
-                                >
-                                    <i className="fas fa-users" style={{ fontSize: '12px' }}></i>
-                                    <span style={{ fontSize: '12px' }} className="list-text">All Login Accounts</span>
-                                </div>
-                            </div>
+
+
                         </div>
 
-                        <div className="col-lg-8 col-md-8 col-sm-12 bg-white shadow-lg text-dark" style={{ fontSize: '12px', height: '90vh', overflowY: 'auto' }}>
+                        <div className="col-lg-7 col-md-7 col-sm-12 bg-white shadow-lg text-dark" style={{ fontSize: '12px', height: '90vh', overflowY: 'auto' }}>
                             {viewCreateObject ?
                                 <div id="newobject" style={{ fontSize: '12px', marginBottom: '20px' }}>
                                     <div>
@@ -1054,7 +1077,7 @@ function AdminDashboard() {
                                     <div>
 
                                         <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
-                                        <p className='my-3' style={{ fontSize: '10px' }}>user Account Management</p>
+                                        <p className='my-3' style={{ fontSize: '10px' }}>User Accounts</p>
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
                                         {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
@@ -1072,9 +1095,10 @@ function AdminDashboard() {
 
                                     <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i> <span style={{ color: '#2757aa' }}>{selectedVault.name}</span>  Vault Users</h6>
 
-                                    <VaultUsersTable syncUser={syncUser} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
+                                    <VaultUsersTable alertOpen={alertOpen} setOpenAlert={setOpenAlert} alertSeverity={alertSeverity} setAlertSeverity={setAlertSeverity} alertMsg={alertMsg} setAlertMsg={setAlertMsg} setLoading={setLoading} loading={loading} syncUser={syncUser} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
                                 </div>
                                 : <></>
+
 
                             }
 

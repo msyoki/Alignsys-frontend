@@ -235,20 +235,20 @@ const CSVViewer = ({ data }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const headers = data[0] || [];
-  
+
   const filteredData = data.slice(1).filter(row =>
-    row.some(cell => 
+    row.some(cell =>
       cell.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return filteredData;
-    
+
     return [...filteredData].sort((a, b) => {
       const aValue = a[headers.indexOf(sortConfig.key)];
       const bValue = b[headers.indexOf(sortConfig.key)];
-      
+
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -283,13 +283,13 @@ const CSVViewer = ({ data }) => {
           <Button onClick={() => setRowsPerPage(prev => Math.max(5, prev - 5))}>Show Less Rows</Button>
         </Box>
       </Box>
-      
+
       <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
               {headers.map((header, index) => (
-                <TableCell 
+                <TableCell
                   key={index}
                   onClick={() => handleSort(header)}
                   style={{ cursor: 'pointer', fontWeight: 'bold' }}
@@ -313,13 +313,13 @@ const CSVViewer = ({ data }) => {
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>
           Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, sortedData.length)} of {sortedData.length} entries
         </span>
         <Box>
-          <Button 
+          <Button
             onClick={() => setPage(prev => Math.max(0, prev - 1))}
             disabled={page === 0}
           >
@@ -390,7 +390,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
 
   const mimeTypes = useMemo(() => ({
     jpg: 'image/jpeg',
-    jpeg: 'image/jpeg', 
+    jpeg: 'image/jpeg',
     png: 'image/png',
     gif: 'image/gif',
     pdf: 'application/pdf',
@@ -477,7 +477,8 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
       return <TextViewer content={atob(base64Content)} />;
     }
 
-    if (ext === 'docx' || ext === 'xlsx') {
+    if (ext === 'docx' || ext === 'doc' || ext === 'xlsx') {
+ 
       return (
         <iframe
           src={`https://view.officeapps.live.com/op/embed.aspx?src=${constants.tempfilesurl}${tempUrl}`}
@@ -485,6 +486,8 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
           height="500px"
           frameBorder="0"
         />
+
+
       );
     }
 
@@ -497,6 +500,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
 
   useEffect(() => {
     const uploadData = async () => {
+ 
       try {
         const response = await axios.post(
           `${constants.tempfilesurl}`,
@@ -511,16 +515,23 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
             }
           }
         );
+        if (response.data){
+  
+          console.log(response.data.url)
+        }
+        
         setTempUrl(response.data.url);
+
       } catch (error) {
+        alert(error)
         console.error("Error uploading data:", error);
       }
     };
 
-    if (['xlsx', 'docx'].includes(fileExtension?.toLowerCase())) {
+    if (['xlsx', 'docx','doc'].includes(fileExtension?.toLowerCase())) {
       uploadData();
     }
-    
+
     if (base64Content && fileExtension) {
       handleViewFile();
     }

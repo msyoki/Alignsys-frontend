@@ -83,7 +83,7 @@ const NetworkIcon = () => {
 
     return (
       <Tooltip title={tooltipText}>
-        <Icon style={{ color, fontSize: '25px' }} />
+        <Icon style={{ color, fontSize: '20px' }} className='mx-3' />
       </Tooltip>
     );
   };

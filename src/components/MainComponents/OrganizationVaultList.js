@@ -1,167 +1,141 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import Authcontext from '../Auth/Authprovider';
-import * as constants from '../Auth/configs'
-import Box from '@mui/material/Box';
-
+import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import Authcontext from "../Auth/Authprovider";
+import * as constants from "../Auth/configs";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Typography,
+} from "@mui/material";
+import { ExpandLess, ExpandMore, People, Storage } from "@mui/icons-material";
 
 function OrganizationVaultList(props) {
-
   const [openVaults, setOpenVaults] = useState({});
-  const [showFlatSublists, setShowFlatSublists] = useState({});
-  const [showHierarchicalSublists, setShowHierarchicalSublists] = useState({});
-  let { authTokens } = useContext(Authcontext);
+  const { authTokens } = useContext(Authcontext);
 
   useEffect(() => {
-    const getOrganizationVaults = () => {
-      let config = {
-        method: 'get',
-        url: `${constants.auth_api}/api/organization-vaults/`,
-        headers: {
-          'Authorization': `Bearer ${authTokens.access}`,
-          'Content-Type': 'application/json',
-        },
-      };
-
-      axios.request(config)
-        .then((response) => {
-          props.setVaults(response.data);
-          // console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    const getOrganizationVaults = async () => {
+      try {
+        const response = await axios.get(
+          `${constants.auth_api}/api/organization-vaults/`,
+          {
+            headers: {
+              Authorization: `Bearer ${authTokens.access}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        props.setVaults(response.data);
+      } catch (error) {
+        console.error("Error fetching vaults:", error);
+      }
     };
-
     getOrganizationVaults();
-  }, [authTokens]);
+  }, [authTokens, props.setVaults]);
 
   const toggleVaultSublist = (vault) => {
-    props.setSelectedVault(vault)
-    props.fetchUsersNotLinkedToVault(vault.guid)
-    setOpenVaults(prevState => ({
+    props.setSelectedVault(vault);
+    props.fetchUsersNotLinkedToVault(vault.guid);
+    setOpenVaults((prevState) => ({
       ...prevState,
       [vault.guid]: !prevState[vault.guid],
     }));
-
   };
-
-  const toggleFlatSublist = (guid) => {
-    setShowFlatSublists(prevState => ({
-      ...prevState,
-      [guid]: !prevState[guid],
-    }));
-  };
-
-  const toggleHierarchicalSublist = (guid) => {
-    setShowHierarchicalSublists(prevState => ({
-      ...prevState,
-      [guid]: !prevState[guid],
-    }));
-  };
-
-
-  const sycVaultObjects = async (guid) => {
-
-    let data = JSON.stringify({
-      "guid": `${guid}`
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${constants.auth_api}/api/update-specific-vault-objects/`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: data
-    };
-
-    axios.request(config)
-      .then((response) => {
-        // console.log(JSON.stringify(response.data));
-        props.viewvaultobjects();
-        props.fetchVaultObjects(guid)
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-  }
 
   return (
-    <>
-
-      <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '30px' }} className='shadow-lg '>
-        {props.vaults.map((vault) => (
-          <li key={vault.guid} className='my-3'>
-            <div
-              onClick={() => toggleVaultSublist(vault)}
-              className="p-2 text-center flex items-center cursor-pointer rounded-lg shadow-md transition-transform duration-300 ease-in-out hover:scale-105"
-              style={{
-                backgroundColor: '#2757aa',
-                color: '#fff',
-                gap: '12px', // Adds spacing between elements
-              }}
-            >
-              {/* Left Content */}
-              <div className="flex items-center gap-2">
-
-                <div>
-                  {/* Main Name */}
-                  <i className="fas fa-hdd mx-2" style={{ fontSize: '2.0em' }}></i>
-                  <span className="font-bold text-sm">{vault.name}</span>
-
-                </div>
-              </div>
-            </div>
-
-
-            {openVaults[vault.guid] && (
-              <>
-
-
-                <ul className='shadow-lg p-3 ml-4 rounded-lg transition-all duration-300 ease-in-out' style={{ listStyleType: 'none', padding: 0 }}>
-                  <li onClick={() => toggleFlatSublist(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
-                    <span className='list-text'>Metadata Structure (Flat View)</span>
-                  </li>
-
-                  {showFlatSublists[vault.guid] && (
-                    <ul style={{ listStyleType: 'none', padding: 0, marginLeft: '20px' }}>
-                      <li onClick={() => { props.viewvaultobjects(); props.fetchVaultObjects(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
-                        <span className='list-text'>Object Types</span>
-                      </li>
-                      <li onClick={() => sycVaultObjects(vault.guid)} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                        <i className="fas fa-sync-alt mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
-                        <span className='list-text'>Sync Vault Objects</span>
-                      </li>
-                    </ul>
-                  )}
-
-                  <li onClick={() => { props.setSelectedVault(vault); props.viewvaultusers(vault.guid); }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                    <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
-                    <span className='list-text'>Vault Users</span>
-                  </li>
-                  <li className='my-3'>
-                   
-                    <span  style={{ fontSize: '10px' }}>GUID:  {vault.guid}</span>
-                  </li>
-                  {/* <li onClick={() => { props.viewvaultgroups(); props.VaultUsergroups() }} className='flex items-center cursor-pointer my-2 transition-all duration-300 ease-in-out transform hover:scale-105'>
-                        <i className="fas fa-users mx-2" style={{ fontSize: '1.5em' }}></i>
-                        <span className='list-text'>User Groups</span>
-                    </li> */}
-                </ul>
-
-              </>
-            )}
-          </li>
-        ))}
-
-      </ul>
-    </>
-
+    <Box className="shadow-lg p-2 rounded-lg" sx={{ backgroundColor: "#fff" }}>
+    {/* Total Vaults Section */}
+    <Box sx={{ p: 1, backgroundColor: "#e0fbfc", borderRadius: 1 }}>
+      <Typography variant="caption">
+        <i className="fas fa-list mx-1"></i>
+        Total Vaults:{" "}
+        <strong style={{ color: "#2757aa" }}>
+          ({props.vaults ? props.vaults.length : 0})
+        </strong>
+      </Typography>
+    </Box>
+  
+    {/* Vaults List */}
+    <List sx={{ maxHeight: "350px", overflowY: "auto", p: 3 }}>
+      {props.vaults.map((vault) => (
+        <Box key={vault.guid}>
+          {/* Vault Item */}
+          <ListItemButton
+            onClick={() => toggleVaultSublist(vault)}
+            sx={{
+              backgroundColor: "#2757aa",
+              color: "#fff",
+              borderRadius: 1,
+              p: 1,
+              my: 0.5,
+              "&:hover": { backgroundColor: "#1e4686" },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 30 }}>
+              {/* <Storage sx={{ color: "#fff", fontSize: 18 }} /> */}
+              <i class="fas fa-hdd" style={{ color: "#fff", fontSize: "18px" }}></i>
+            </ListItemIcon>
+            <ListItemText primaryTypographyProps={{ variant: "caption" }} primary={vault.name} />
+            {openVaults[vault.guid] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+          </ListItemButton>
+  
+          {/* Vault Sublist */}
+          <Collapse in={openVaults[vault.guid]} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding sx={{ pl: 2 }} className="shadow-lg bg-white">
+              {/* Vault Users */}
+              <ListItemButton
+                onClick={() => {
+                  props.setSelectedVault(vault);
+                  props.viewvaultusers(vault.guid);
+                }}
+                sx={{ "&:hover": { backgroundColor: "#f0f0f0" }, p: 1 }}
+              >
+                <ListItemIcon sx={{ minWidth: 30 }}>
+                  <People sx={{ color: "#2757aa", fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Vault Users" />
+              </ListItemButton>
+  
+              {/* Vault GUID */}
+              <ListItem sx={{  py: 0.5 }}>
+                <Typography variant="caption" color="textSecondary" sx={{ fontSize: 10 }}>
+                  GUID: {vault.guid}
+                </Typography>
+              </ListItem>
+            </List>
+          </Collapse>
+        </Box>
+      ))}
+    </List>
+  
+    {/* Login Accounts Section */}
+    <List sx={{ p: 0 ,my:2 }}>
+      <ListItemButton
+        onClick={() => {
+          props.fetchOrgUsers();
+          props.viewloginaccounts();
+        }}
+        sx={{
+          backgroundColor: "#2757aa",
+          color: "#fff",
+          borderRadius: 1,
+          p: 1,
+          "&:hover": { backgroundColor: "#1e4686" },
+        }}
+      >
+        <ListItemIcon sx={{ minWidth: 30 }}>
+          <People sx={{ color: "#fff", fontSize: 18 }} />
+        </ListItemIcon>
+        <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Login Accounts" />
+      </ListItemButton>
+    </List>
+  </Box>
+  
   );
 }
 

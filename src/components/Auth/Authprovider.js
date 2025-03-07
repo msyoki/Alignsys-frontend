@@ -17,9 +17,9 @@ export const AuthProvider = ({ children }) => {
     let navigate = useNavigate()
   
 
-    let [openalert, setOpenAlert] = useState(false)
-    let [alertseverity, setAlertSeverity] = useState('')
-    let [alertmsg, setAlertMsg] = useState('')
+    let [openAlert, setOpenAlert] = useState(false)
+    let [alertSeverity, setAlertSeverity] = useState('')
+    let [alertMsg, setAlertMsg] = useState('')
 
 
     // login request
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
                 setAuthtokens(data);
                 setUser(jwt_decode(data.access))
                 sessionStorage.setItem('authTokens', JSON.stringify(data))
-                navigate('/vault', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
+                navigate('/vault')
 
                 // if (jwt_decode(response.data.access).is_superuser === 'True') {
 
@@ -50,7 +50,11 @@ export const AuthProvider = ({ children }) => {
             }
         }
         catch (error) {
-            alert("login failed")
+
+            setOpenAlert(true);
+            setAlertSeverity("error");
+            setAlertMsg(`Login failed, ${error}!!`);
+            // alert("login failed")
 
         }
     }
@@ -122,7 +126,7 @@ export const AuthProvider = ({ children }) => {
             setUser(jwt_decode(data.access))
             // console.log(data.refresh)
             sessionStorage.setItem('authTokens', JSON.stringify(data))
-            alert("user authenticated")
+           
         } else {
             // console.log(response)
             logoutUser()
@@ -141,9 +145,9 @@ export const AuthProvider = ({ children }) => {
         loginUser: loginUser,
         logoutUser: logoutUser,
         authenticateGuest: authenticateGuest,
-        alertmsg: alertmsg,
-        alertseverity: alertseverity,
-        openalert: openalert,
+        alertMsg: alertMsg,
+        alertSeverity: alertSeverity,
+        openAlert: openAlert,
         setOpenAlert: setOpenAlert,
         setAlertMsg: setAlertMsg,
         setAlertSeverity: setAlertSeverity

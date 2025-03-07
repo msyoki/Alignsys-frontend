@@ -10,28 +10,28 @@ function OrganizationUsersTable(props) {
         <TableHead>
           <TableRow>
             {/* <TableCell>ID</TableCell> */}
-            <TableCell align="center">ID (M-Files)</TableCell>
+            <TableCell align="center">ID</TableCell>
             <TableCell align="center">Username</TableCell>
             <TableCell align="center">Email</TableCell>
             <TableCell align="center">First Name</TableCell>
             <TableCell align="center">Last Name</TableCell>
-            <TableCell align="center">Active</TableCell>
-            <TableCell align="center">Admin</TableCell>
+            {/* <TableCell align="center">Active</TableCell>
+            <TableCell align="center">Admin</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
           {props.users.map((user) => (
             <TableRow key={user.id}>
-              {/* <TableCell>{user.id}</TableCell> */}
-              <TableCell align="center">{user.mfiles_id}</TableCell>
+              <TableCell>{user.id}</TableCell>
+              {/* <TableCell align="center">{user.mfiles_id}</TableCell> */}
               <TableCell align="center">{user.username}</TableCell>
               <TableCell align="center">
                 {user.email}
               </TableCell>
-              <TableCell align="center">{user.first_name}</TableCell>
+              <TableCell align="center">{user.first_name} </TableCell>
               <TableCell align="center">{user.last_name}</TableCell>
-              <TableCell align="center">{user.is_active ? 'Yes' : 'No'}</TableCell>
-              <TableCell align="center">{user.is_admin ? 'Yes' : 'No'}</TableCell>
+              {/* <TableCell align="center">{user.is_active ? 'Yes' : 'No'}</TableCell>
+              <TableCell align="center">{user.is_admin ? 'Yes' : 'No'}</TableCell> */}
             </TableRow>
           ))}
         </TableBody>

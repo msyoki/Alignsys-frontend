@@ -16,8 +16,7 @@ const LoadingMini = (props) => (
          
          
             <img className="my-3" src={logo} alt="Loading" width='100px' />
-            <p className="text-dseark" style={{fontSize:'13px'}}> The Smart way to work.</p>
-          
+         
             <Box  className='d-flex justify-content-center main-loader'>
               <LinearProgress sx={{ width: '60%' }}/>
             

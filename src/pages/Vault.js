@@ -36,7 +36,7 @@ const VaultSelectForm = () => {
         const selectedObj = vaults.find(vault => vault.guid === value);
         setSelectedVault(selectedObj);
         localStorage.setItem('selectedVault', JSON.stringify(selectedObj));
-        navigate('/');
+        navigate('/',{ state: { openalert: true, alertMsg: "logged in successfully", alertSeverity: "success" } });
     };
 
     return (

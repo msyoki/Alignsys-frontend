@@ -1,23 +1,31 @@
 import React from "react";
-import loading from "../../images/loading.svg";
-import logo from "../../images/ZFBLU.webp";
+import logo from "../../images/ZFWHITE.webp";
 import '../../styles/Loader.css'
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
 const Loading = () => (
-  <div className='loading d-flex justify-content-center main-loader' style={{ margin: '15%' }} >
+  <div 
+  className="loading d-flex justify-content-center align-items-center" 
+  style={{
+    width: "100vw", 
+    height: "100vh", 
+    position: "absolute", 
+    top: 0, 
+    left: 0, 
+    margin: 0, 
+    overflow: "hidden"
+  }}
+>
+  <Box className="my-3 text-center">
+    <img src={logo} style={{ width: "200px", height: "auto" }} />
+  </Box>
 
-    <img src={logo} alt="logo" width='200px' />
-    <br />
+  <Box className="text-center">
+    <CircularProgress size="50px" style={{ color: "#fff" }} />
+  </Box>
+</div>
 
-    <Box sx={{ width: '45%' }}>
-      <LinearProgress />
-
-    </Box>
-    <p className="mt-2" style={{ fontSize: '12.5px' }}>Please wait, loading resources ...</p>
-
-  </div>
 
 );
 

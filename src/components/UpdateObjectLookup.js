@@ -70,14 +70,11 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
   const filteredOptions = options.filter(option => option.value !== initialValue?.value);
 
   const customStyles = {
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: 'white', // Ensure the dropdown background is not see-through
-      zIndex: 9999, // Ensure the dropdown appears above other elements
-    }),
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // Ensures dropdown is always on top
     control: (provided) => ({
       ...provided,
-      borderColor: error ? 'red' : provided.borderColor, // Handling error state
+      borderColor: error ? 'red' : provided.borderColor, // Handles error state
+      fontSize:'12px'
     }),
   };
 
@@ -95,6 +92,8 @@ const LookupSelect = ({ propId, label, onChange, value, required, error, helperT
         required={required}
         className='my-2'
         disabled={disabled}
+        menuPortalTarget={document.body}  // Fix overflow issue
+        menuPosition="absolute"  // Ensures dropdown is positioned correctly
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

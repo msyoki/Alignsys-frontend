@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
-import * as constants from './Auth/configs'
+import * as constants from './Auth/configs';
 
 const FileExtText = (props) => {
   const [extension, setExtension] = useState(null);
@@ -9,39 +9,46 @@ const FileExtText = (props) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
-   
+
       try {
-        const response = await axios.get(url);
+        const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
-        console.log(data)
-    
-        const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-        setExtension(extension);
-      } catch (error) {
-        console.error('Error fetching the extension:', error);
-        setError(error.message);
+        const ext = data[0]?.extension?.replace(/^\./, '').toLowerCase(); // Normalize extension
+        console.log(ext);
+        setExtension(ext);
+      } catch (err) {
+        if (axios.isCancel(err)) {
+          console.log('Request canceled:', err.message);
+        } else {
+          console.error('Error fetching the extension:', err);
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchExtension();
-  }, [props.guid, props.objectId, props.classId]); // Added props dependencies to re-fetch if props change
+
+    // Cleanup function to cancel the request on unmount
+    return () => {
+      controller.abort();
+    };
+  }, [props.guid, props.objectId, props.classId]);
 
   if (loading) {
-    return <CircularProgress size={10} className='mx-2' />;
+    return <CircularProgress size={10} className="mx-2" />;
   }
 
   if (error) {
-    // return <p>Error: {error}</p>;
-    return <p></p>;
-    
+    return <p></p>; // Return empty text if there's an error
   }
 
-  return extension
-
+  return extension || ''; // Ensure a safe fallback for extension
 };
 
 export default FileExtText;

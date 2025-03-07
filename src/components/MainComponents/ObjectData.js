@@ -18,6 +18,8 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CommentsCompoenent from '../ObjectComments'
 import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
+import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
+import TimedAlert from '../TimedAlert';
 
 
 
@@ -61,6 +63,54 @@ const formatDateForInput = (dateString) => {
 
 export default function ObjectData(props) {
   const [value, setValue] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState('');
+  const [alertMsg, setAlertMsg] = useState('');
+
+
+
+  const deleteObject = () => {
+
+    let data = JSON.stringify({
+      "vaultGuid": props.vault.guid,
+      "objectId": props.selectedObject.id,
+      "classId": props.selectedObject.classID,
+      "userID": props.mfilesId
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${constants.mfiles_api}/api/ObjectDeletion/DeleteObject`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    axios.request(config)
+      .then((response) => {
+        props.setPreviewObjectProps([])
+        props.setSelectedObject({})
+        props.resetViews()
+        setOpenAlert(true);
+        setAlertSeverity("success");
+        setAlertMsg("Object was deleted successsfully");
+        setDeleteDialogOpen(false)
+
+      })
+      .catch((error) => {
+        setOpenAlert(true);
+        setAlertSeverity("error");
+        setAlertMsg("Failed to delete, please try again later");
+        setDeleteDialogOpen(false)
+
+        console.log(error);
+      });
+
+
+  }
 
   const navigateToComments = () => {
     setValue(3);
@@ -73,7 +123,7 @@ export default function ObjectData(props) {
 
     if (props.selectedState) {
       props.setSelectedState(selectedState);
-      
+
     }
 
   };
@@ -146,6 +196,7 @@ export default function ObjectData(props) {
     item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class', 'State', 'Workflow'].includes(item.propName)
   );
 
+
   const getPropValue = name => {
     const foundItem = props.previewObjectProps.find(item => item.propName === name);
     return foundItem ? foundItem.value : null;
@@ -153,177 +204,264 @@ export default function ObjectData(props) {
 
 
 
+
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }} className='bg-white'>
-        <Tabs
-          variant="scrollable"
-          value={value}
-          onChange={handleChange}
-          aria-label="Horizontal tabs example"
-          sx={{ borderColor: 'divider' }}
-          className='bg-white'
-        >
-          <Tab
-            style={{ textTransform: 'none' }}
-            label="Metadata"
-            {...a11yProps(0)}
-          />
-          <Tab
-            style={{ textTransform: 'none' }}
-            label="Preview"
-            {...a11yProps(1)}
-          />
-          <Tab
-            style={{ textTransform: 'none' }}
-            label="AI Chatbot"
-            {...a11yProps(2)}
-          />
-          <Tab
-            style={{ textTransform: 'none' }}
-            label="Comments"
-            {...a11yProps(3)}
-          />
-        </Tabs>
-      </Box>
+    <>
+      <ConfirmDeleteObject open={deleteDialogOpen} Delete={deleteObject} Close={() => setDeleteDialogOpen(false)} objectTitle={props.selectedObject.title} />
+      <TimedAlert
+        open={openAlert}
+        onClose={() => setOpenAlert(false)}
+        severity={alertSeverity}
+        message={alertMsg}
+        setSeverity={setAlertSeverity}
+        setMessage={setAlertMsg}
+      />
 
-      <Box sx={{ flexGrow: 1, margin: 0, color:'#555' }} >
-        <CustomTabPanel
-          value={value}
-          index={0}
-          style={{
-            backgroundColor: '#e5e5e5',
-            height: '90vh',
-            padding: '0%',
-            width: '100%',
-            overflowY:'auto'
-          }}
-        >
-          {props.previewObjectProps.length < 1 && (
-            <Box sx={{
+      <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'row' }} className='bg-white'>
+          <Tabs
+            variant="scrollable"
+            value={value}
+            onChange={handleChange}
+            aria-label="Horizontal tabs example"
+            sx={{ borderColor: 'divider'}}
+            className='bg-white'
+          >
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                width: 'auto',
+                height:'61px',
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label="Metadata"
+              {...a11yProps(0)}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                width: 'auto',
+                height:'61px',
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label="Preview"
+              {...a11yProps(1)}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                width: 'auto',
+                height:'61px',
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label="AI Chatbot"
+              {...a11yProps(2)}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                width: 'auto',
+                height:'61px',
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label="Comments"
+              {...a11yProps(3)}
+            />
+          </Tabs>
+        </Box>
+
+        <Box sx={{ flexGrow: 1, margin: 0, color: '#555' }} >
+          <CustomTabPanel
+            value={value}
+            index={0}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '100%',
+              padding: '0%',
               width: '100%',
-              marginTop: '20%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto'
-            }}>
-              <i
-                className="fas fa-info-circle my-2"
-                style={{ fontSize: '120px', color: '#2757aa' }}
-              />
-              {props.loadingobject ? (
-                <>
-                  <Box sx={{ width: '50%' }} className="my-2">
-                    <LinearProgress />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    Loading metadata...
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    Metadata Card
-                  </Typography>
-                </>
-              )}
+              overflowY: 'auto'
+            }}
+          >
+            {props.previewObjectProps.length < 1 && (
+              <Box sx={{
+                width: '100%',
+                marginTop: '20%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto'
+              }}>
+                <i
+                  className="fas fa-info-circle my-2"
+                  style={{ fontSize: '120px', color: '#2757aa' }}
+                />
+                {props.loadingobject ? (
+                  <>
+                    <Box sx={{ width: '50%' }} className="my-2">
+                      <LinearProgress />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      Loading metadata...
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      Metadata Card
+                    </Typography>
+                  </>
+                )}
 
-              <Typography
-                variant="body2"
-                sx={{ textAlign: 'center', fontSize: '12px' }}
-              >
-                Please select an object to view its metadata
-              </Typography>
-            </Box>
-          )}
-
-          {props.previewObjectProps.length > 0 && (
-            <Box>
-              <Box
-                className="p-2 bg-white shadow-lg my-1"
-                display="flex"
-                flexDirection="column"
-              >
-                <Box
-                  className="input-group"
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: '13px'
-                  }}
+                <Typography
+                  variant="body2"
+                  sx={{ textAlign: 'center', fontSize: '12px' }}
                 >
-                  <span className='text-center mx-2' style={{ color: '#1d3557' }}>
-                    {props.selectedObject && (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
-                      <>
-                        <FileExtIcon
-                          guid={props.vault.guid}
-                          objectId={props.selectedObject.id}
-                          classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
-                        />
-                        <span>{props.selectedObject.title}.
-                          <FileExtText
+                  Please select an object to view its metadata
+                </Typography>
+              </Box>
+            )}
+
+            {props.previewObjectProps.length > 0 && (
+              <Box>
+                <Box
+                  className="p-2 bg-white shadow-lg my-1"
+                  display="flex"
+                  flexDirection="column"
+                >
+                  <Box
+                    className="input-group"
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontSize: '13px'
+                    }}
+                  >
+                    <span className='text-center mx-2' style={{ color: '#1d3557' }}>
+                      {props.selectedObject && (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
+                        <>
+                          <FileExtIcon
                             guid={props.vault.guid}
                             objectId={props.selectedObject.id}
                             classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
                           />
-                        </span>
-                      </>
-                    ) : (
+                          <span>{props.selectedObject.title}.
+                            <FileExtText
+                              guid={props.vault.guid}
+                              objectId={props.selectedObject.id}
+                              classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
+                            />
+                          </span>
+
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-layer-group mx-2" style={{ fontSize: '15px', color: '#2757aa' }}></i>
+                          <span>{props.selectedObject.title}</span>
+
+                        </>
+                      )}
+                    </span>
+                  </Box>
+
+                  <Box
+                    className='input-group my-2'
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      fontSize: '10px'
+                    }}
+                  >
+                    {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
                       <>
-                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '15px', color: '#2757aa' }}></i>
-                        <span>{props.selectedObject.title}.</span>
+                        <Box>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => props.updateObjectMetadata()}
+                            sx={{ textTransform: 'none', mr: 1 }}
+                          >
+                            <i
+                              className="fas fa-save"
+                              style={{
+                                fontSize: '11px',
+                                cursor: 'pointer',
+                                marginRight: '4px'
+                              }}
+                            />
+                            <small>Save</small>
+                          </Button>
+
+
+                        </Box>
+
+                        <Box>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="warning"
+                            onClick={() => props.discardChange()}
+                            sx={{ textTransform: 'none', mr: 1 }}
+                          >
+                            <i
+                              className="fas fa-window-close"
+                              style={{
+                                fontSize: '11px',
+                                cursor: 'pointer',
+                                marginRight: '4px'
+                              }}
+                            />
+                            <small>Discard</small>
+                          </Button>
+                        </Box>
                       </>
                     )}
-                  </span>
-                </Box>
 
-                <Box
-                  className='input-group'
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    fontSize: '10px'
-                  }}
-                >
-                  {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
-                    <>
-                      <Box>
+                    {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                      <Box className='mx-1'>
                         <Button
                           size="small"
                           variant="contained"
                           color="primary"
-                          onClick={() => props.updateObjectMetadata()}
-                          sx={{ textTransform: 'none', mr: 1 }}
+                          onClick={downloadFile}
+                          sx={{ textTransform: 'none', ml: 1 }}
                         >
                           <i
-                            className="fas fa-save"
+                            className="fas fa-download"
                             style={{
                               fontSize: '11px',
                               cursor: 'pointer',
                               marginRight: '4px'
                             }}
                           />
-                          <small>Save</small>
+                          <small>Download</small>
                         </Button>
                       </Box>
-                      <Box>
+                    )}
+
+                    {props.selectedObject.userPermission.deletePermission ?
+                      <Box className='mx-1'>
                         <Button
                           size="small"
                           variant="contained"
-                          color="primary"
-                          onClick={() => props.discardChange()}
+                          color="error"
+                          onClick={() => setDeleteDialogOpen(true)}
                           sx={{ textTransform: 'none', mr: 1 }}
                         >
                           <i
@@ -334,111 +472,65 @@ export default function ObjectData(props) {
                               marginRight: '4px'
                             }}
                           />
-                          <small>Discard</small>
+                          <small>Delete</small>
                         </Button>
                       </Box>
-                    </>
-                  )}
-
-                  {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                    <Box>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        onClick={downloadFile}
-                        sx={{ textTransform: 'none', ml: 1 }}
+                      : <></>}
+                    {props.comments.length > 0 && (
+                      <div
+                        style={{
+                          position: 'relative',
+                          display: 'inline-block'
+                        }}
+                        className='mx-2'
                       >
-                        <i
-                          className="fas fa-download"
+                        <span
+                          className="fas fa-comment-alt mx-1 go-to-comments"
                           style={{
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            marginRight: '4px'
+                            color: '#2757aa',
+                            fontSize: '20px',
+                            cursor: 'pointer'
                           }}
+                          onClick={navigateToComments}
                         />
-                        <small>Download</small>
-                      </Button>
-                    </Box>
-                  )}
-
-                  {props.comments.length > 0 && (
-                    <div
-                      style={{
-                        position: 'relative',
-                        display: 'inline-block'
-                      }}
-                      className='mx-2'
-                    >
-                      <span
-                        className="fas fa-comment-alt mx-1 go-to-comments"
-                        style={{
-                          color: '#2757aa',
-                          fontSize: '20px',
-                          cursor: 'pointer'
-                        }}
-                        onClick={navigateToComments}
-                      />
-                      <span
-                        style={{
-                          position: 'absolute',
-                          top: '-5px',
-                          right: '-5px',
-                          backgroundColor: '#e63946',
-                          color: '#fff',
-                          borderRadius: '50%',
-                          padding: '2px 6px',
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          lineHeight: '1',
-                          minWidth: '16px',
-                          textAlign: 'center'
-                        }}
-                      >
-                        {props.comments.length}
-                      </span>
-                    </div>
-                  )}
-                </Box>
-              </Box>
-
-
-              <Box
-                className='shadow-lg shadow-sm p-2'
-                sx={{
-                  width: '100%',
-                  backgroundColor: '#fff',
-                  fontSize: '12px',
-                  height:'55vh',
-                  overflowY:'auto'
-                }}
-              >
-                <List sx={{ p: 0 }}>
-                  <>
-                    <ListItem sx={{ p: 0 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
-                        <Typography
-                          className='my-2'
-                          variant="body2"
-                          sx={{
-                            color: '#4f5d75',
-                            // fontWeight: 'bold',
-                            flexBasis: '40%',
-                            fontSize: '12px',
-                            textAlign: 'end',
-                            alignSelf: 'center'
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '-5px',
+                            right: '-5px',
+                            backgroundColor: '#e63946',
+                            color: '#fff',
+                            borderRadius: '50%',
+                            padding: '2px 6px',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '1',
+                            minWidth: '16px',
+                            textAlign: 'center'
                           }}
                         >
-                          Class:
-                        </Typography>
-                        <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', color:'#2757aa' }}>
-                          <span>{getPropValue('Class')}</span>
-                        </Box>
-                      </Box>
-                    </ListItem>
+                          {props.comments.length}
+                        </span>
+                      </div>
+                    )}
+                  </Box>
+                </Box>
 
-                    {filteredProps.map((item, index) => (
-                      <ListItem key={index} sx={{ p: 0 }}>
+
+                <Box
+                  className='shadow-lg shadow-sm p-2'
+                  sx={{
+                    width: '100%',
+                    backgroundColor: '#e0fbfc',
+                    fontSize: '12px',
+                    height: '65vh',
+                    overflowY: 'auto'
+                  }}
+                >
+
+                  <List sx={{ p: 0 }}>
+                    <>
+                      <ListItem sx={{ p: 0 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
                           <Typography
                             className='my-2'
@@ -448,353 +540,406 @@ export default function ObjectData(props) {
                               // fontWeight: 'bold',
                               flexBasis: '40%',
                               fontSize: '12px',
-                              textAlign: 'end'
-                            }}
-                          >
-                            {item.propName} {item.isRequired ? <span className='text-danger mx-1'>*</span>:<></>}:
-                          </Typography>
-                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                            {item.propName === 'Class' && <>{item.value}</>}
-
-                            {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating') && !item.isHidden && (
-                              <input
-                                value={props.formValues?.[item.id]?.value || ''}
-                                placeholder={item.value}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                className='form-control form-control-sm my-1'
-                                disabled={item.isAutomatic}
-                              />
-                            )}
-
-                            {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
-                              <textarea
-                                placeholder={item.value}
-                                value={props.formValues?.[item.id]?.value || ''}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                rows={2}
-                                className="form-control form-control-sm my-1"
-                                disabled={item.isAutomatic}
-                              />
-                            )}
-
-                            {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
-                              <input
-                                placeholder={item.value}
-                                type="date"
-                                value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                className='form-control form-control-sm my-1'
-                                disabled={item.isAutomatic}
-                              />
-                            )}
-
-                            {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                              <Select
-                                size='small'
-                                value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                displayEmpty
-                                fullWidth
-                                disabled={item.isAutomatic}
-                                sx={{
-                                  fontSize: '12px',
-                                  padding: '4px',
-                                  backgroundColor: 'white',
-                                  marginY: '8px'
-                                }}
-                                className='form-control form-control-sm'
-                              >
-                                <MenuItem value=""><em>None</em></MenuItem>
-                                <MenuItem value={true}>Yes</MenuItem>
-                                <MenuItem value={false}>No</MenuItem>
-                              </Select>
-                            )}
-
-                            {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
-                              <LookupMultiSelect
-                                propId={item.id}
-                                onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                value={props.formValues?.[item.id]?.value || []}
-                                selectedVault={props.vault}
-                                label={item.propName}
-                                itemValue={item.value}
-                                disabled={item.isAutomatic}
-                              />
-                            )}
-
-                            {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
-                              <LookupSelect
-                                propId={item.id}
-                                label={item.propName}
-                                onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
-                                value={props.formValues?.[item.id]?.value || ''}
-                                selectedVault={props.vault}
-                                itemValue={item.value}
-                                disabled={item.isAutomatic}
-                              />
-                            )}
-                          </Box>
-                        </Box>
-                      </ListItem>
-                    ))}
-
-                    {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                      <ListItem sx={{ p: 0 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
-                          <Typography
-                            className='my-2'
-                            variant="body2"
-                            sx={{
-                              color: '#1d3557',
-                              fontWeight: 'bold',
-                              flexBasis: '40%',
-                              fontSize: '12px',
                               textAlign: 'end',
                               alignSelf: 'center'
                             }}
                           >
-                            Sign Document:
+                            Class:
                           </Typography>
-                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
-                            <SignButton
-                              objectid={props.selectedObject.id}
-                              fileId={props.selectedFileId}
-                              vault={props.vault.guid}
-                              email={props.email}
-                            />
+                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', color: '#2757aa' }}>
+                            <span>{getPropValue('Class')}</span>
                           </Box>
                         </Box>
                       </ListItem>
+
+                      {filteredProps.map((item, index) => (
+                        <ListItem key={index} sx={{ p: 0 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                            <Typography
+                              className='my-2'
+                              variant="body2"
+                              sx={{
+                                color: '#4f5d75',
+                                // fontWeight: 'bold',
+                                flexBasis: '40%',
+                                fontSize: '12px',
+                                textAlign: 'end'
+                              }}
+                            >
+                              {item.propName} {item.isRequired ? <span className='text-danger mx-1'>*</span> : <></>}:
+                            </Typography>
+                            <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
+                              {item.propName === 'Class' && <>{item.value}</>}
+
+                              {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating' || item.datatype === 'MFDatatypeInteger') && !item.isHidden && (
+                                <input
+                                  value={props.formValues?.[item.id]?.value || ''}
+                                  placeholder={item.value}
+                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                  className='form-control form-control-sm my-1'
+                                  disabled={item.isAutomatic}
+                                />
+                              )}
+
+                              {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
+                                <textarea
+                                  placeholder={item.value}
+                                  value={props.formValues?.[item.id]?.value || ''}
+                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                  rows={2}
+                                  className="form-control form-control-sm my-1"
+                                  disabled={item.isAutomatic}
+                                />
+                              )}
+
+                              {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
+                                <input
+                                  placeholder={item.value}
+                                  type="date"
+                                  value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                  className='form-control form-control-sm my-1'
+                                  disabled={item.isAutomatic}
+                                />
+                              )}
+
+
+                              {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
+                                <>
+                                  <div className="cs-form">
+                                    <input
+                                      type="time"
+                                      className="form-control"
+                                      value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                      onChange={(e) => {
+                                        handleInputChange(item.id, e.target.value, item.datatype); // Store as ISO datetime
+                                      }}
+                                      disabled={item.isAutomatic}
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+
+                              {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
+                                <Select
+                                  size='small'
+                                  value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
+                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                  displayEmpty
+                                  fullWidth
+                                  disabled={item.isAutomatic}
+                                  sx={{
+                                    fontSize: '12px',
+                                    padding: '4px',
+                                    backgroundColor: 'white',
+                                    marginY: '8px'
+                                  }}
+                                  className='form-control form-control-sm'
+                                >
+                                  <MenuItem value=""><em>None</em></MenuItem>
+                                  <MenuItem value={true}>Yes</MenuItem>
+                                  <MenuItem value={false}>No</MenuItem>
+                                </Select>
+                              )}
+
+                              {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
+                                <LookupMultiSelect
+                                  propId={item.id}
+                                  onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+                                  value={props.formValues?.[item.id]?.value || []}
+                                  selectedVault={props.vault}
+                                  label={item.propName}
+                                  itemValue={item.value}
+                                  disabled={item.isAutomatic}
+                                />
+                              )}
+
+                              {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
+                                <LookupSelect
+                                  propId={item.id}
+                                  label={item.propName}
+                                  onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
+                                  value={props.formValues?.[item.id]?.value || ''}
+                                  selectedVault={props.vault}
+                                  itemValue={item.value}
+                                  disabled={item.isAutomatic}
+                                />
+                              )}
+
+                            </Box>
+                          </Box>
+                        </ListItem>
+                      ))}
+
+                      {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                        <ListItem sx={{ p: 0 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
+                            <Typography
+                              className='my-2'
+                              variant="body2"
+                              sx={{
+                                color: '#1d3557',
+                                fontWeight: 'bold',
+                                flexBasis: '40%',
+                                fontSize: '12px',
+                                textAlign: 'end',
+                                alignSelf: 'center'
+                              }}
+                            >
+                              Sign Document:
+                            </Typography>
+                            <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
+                              <SignButton
+                                objectid={props.selectedObject.id}
+                                fileId={props.selectedFileId}
+                                vault={props.vault.guid}
+                                email={props.email}
+                              />
+                            </Box>
+                          </Box>
+                        </ListItem>
+                      )}
+                    </>
+                  </List>
+
+                </Box>
+
+                <Box className="bg-white shadow-sm my-1" display="flex" justifyContent="space-between">
+                  {/* Left Section */}
+                  <Box
+                    sx={{ textAlign: 'start', fontSize: '11px', width: '60%' }}
+                    className="p-2"
+                  >
+                    {props.selectedObkjWf ? (
+                      <>
+                        <p className="my-1">
+                          <i className="fas fa-circle-notch bold text-danger mx-2" />
+                          <span>
+                            <small style={{ color: '#2757aa', fontWeight: 'bold' }}>Workflow</small>:{" "}
+                            {props.selectedObkjWf.workflowTitle}
+                          </span>
+                        </p>
+                        <p className="my-1">
+                          <i className="fas fa-square-full bold text-warning mx-2" />
+                          <span>
+                            <small style={{ color: '#2757aa', fontWeight: 'bold' }}>State</small>:{" "}
+                            {props.currentState.stateTitle}
+                          </span>
+                          {props.selectedObkjWf.nextStates && (
+                            <Select
+                              value={props.selectedState.title}
+                              onChange={handleStateChange}
+                              size="small"
+                              sx={{ fontSize: '12px', height: '20px', marginLeft: '0.5rem' }}
+                            >
+                              {props.selectedObkjWf.nextStates.map((state) => (
+                                <MenuItem key={state.id} value={state.title}>
+                                  <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
+                                  {state.title}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          )}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="my-0">
+                          <span className="mx-2">---</span>
+                        </p>
+                        <p className="my-0">
+                          <span className="mx-2">---</span>
+                        </p>
+                      </>
                     )}
-                  </>
-                </List>
+                  </Box>
+
+                  {/* Right Section */}
+                  <Box
+                    sx={{ textAlign: 'end', fontSize: '10px', width: '40%' }}
+                    className="p-2"
+                  >
+                    {["Created", "Last modified"].map((label, index) => (
+                      <p className="my-0" key={label}>
+                        {label}: {getPropValue(label)} {getPropValue(`${label} by`)}
+                      </p>
+                    ))}
+                  </Box>
+                </Box>
 
               </Box>
+            )}
+          </CustomTabPanel>
 
+          <CustomTabPanel
+            value={value}
+            index={1}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '100%',
+              padding: '0%',
+              overflowY: 'auto',
+              width: '100%'
+            }}
+          >
+            {props.base64 ? (
+              <DynamicFileViewer
+                base64Content={props.base64}
+                fileExtension={props.extension}
+                objectid={props.selectedObject.id}
+                fileId={props.selectedFileId}
+                vault={props.vault.guid}
+                email={props.email}
+              />
+            ) : (
               <Box
-                className="bg-white shadow-sm my-1"
-                display="flex"
-                justifyContent="space-between"
+                sx={{
+                  width: '100%',
+                  marginTop: '20%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto'
+                }}
               >
-                <Box sx={{ textAlign: 'start', fontSize: '11px', width: '70%' }} className='p-2'>
-                  {props.selectedObkjWf ? (
-                    <>
-                      <p className='my-1'>
-                        <i className="fas fa-circle-notch bold text-danger mx-2" />
-                        <span>
-                          <small style={{ color: '#2757aa', fontWeight: 'bold' }}>Workflow</small>: {props.selectedObkjWf.workflowTitle}
-                        </span>
-                      </p>
-                      <p className='my-1'>
-                        <i className="fas fa-square-full bold text-warning mx-2" />
-                        <span>
-                          <small style={{ color: '#2757aa', fontWeight: 'bold' }}>State</small>: {props.currentState.stateTitle}
-                        </span>
-                        {props.selectedObkjWf.nextStates && (
-                          <Select
-                            value={props.selectedState.title}
-                            onChange={handleStateChange}
-                            size="small"
-                            sx={{ fontSize: '12px', height: '20px' }}
-                            className='mx-1'
-                          >
-                            {props.selectedObkjWf.nextStates.map((state) => (
-                              <MenuItem key={state.id} value={state.title}>
-                                <i className="mx-1 fas fa-long-arrow-alt-right text-primary" /> {state.title}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        )}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className='my-0'>
-                        <span className='mx-2'>---</span>
-                      </p>
-                      <p className='my-0'>
-                        <span className='mx-2'>---</span>
-                      </p>
-                    </>
-                  )}
-                </Box>
+                <i
+                  className="fas fa-tv my-2"
+                  style={{ fontSize: '120px', color: '#2757aa' }}
+                />
 
-                <Box sx={{ textAlign: 'end', fontSize: '10px', width: '30%' }} className='p-2'>
-                  <p className='my-0'>Created: {getPropValue('Created')}</p>
-                  <p className='my-0'>Last modified: {getPropValue('Last modified')}</p>
-                </Box>
+                {props.loadingfile ? (
+                  <>
+                    <Box sx={{ width: '50%' }} className="my-2">
+                      <LinearProgress />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      Loading file...
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                    >
+                      Please wait as we load the document
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      Nothing to Preview
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                    >
+                      Please select a document to view its content
+                    </Typography>
+                  </>
+                )}
               </Box>
-            </Box>
-          )}
-        </CustomTabPanel>
+            )}
+          </CustomTabPanel>
 
-        <CustomTabPanel
-          value={value}
-          index={1}
-          style={{
-            backgroundColor: '#e5e5e5',
-            height: '100%',
-            padding: '0%',
-            overflowY: 'clip',
-            width: '100%'
-          }}
-        >
-          {props.base64 ? (
-            <DynamicFileViewer
-              base64Content={props.base64}
-              fileExtension={props.extension}
-              objectid={props.selectedObject.id}
-              fileId={props.selectedFileId}
-              vault={props.vault.guid}
-              email={props.email}
+          <CustomTabPanel
+            value={value}
+            index={2}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '100&',
+              padding: '0%',
+              width: '100%'
+            }}
+          >
+            {props.base64 && props.extension === 'pdf' ? (
+              <Bot base64={props.base64} objectTitle={props.selectedObject.title} />
+            ) : (
+              <Box
+                sx={{
+                  width: '100%',
+                  marginTop: '20%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto'
+                }}
+              >
+                <i
+                  className="fas fa-robot my-2"
+                  style={{ fontSize: '120px', color: '#2757aa' }}
+                />
+
+                {props.loadingfile ? (
+                  <>
+                    <Box sx={{ width: '50%' }} className="my-2">
+                      <LinearProgress />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      Starting chat...
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                    >
+                      Please wait as we load the resources
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography
+                      variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}
+                    >
+                      No PDF Selected
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                    >
+                      Please select a PDF to interact with the chatbot
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            )}
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value={value}
+            index={3}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '100%',
+              padding: '0%',
+              width: '100%'
+            }}
+          >
+            <CommentsCompoenent
+              selectedObject={props.selectedObject}
+              guid={props.vault ? props.vault.guid : ""}
+              loadingcomments={props.loadingcomments}
+              user={props.user}
+              comments={props.comments}
+              getObjectComments={props.getObjectComments}
             />
-          ) : (
-            <Box
-              sx={{
-                width: '100%',
-                marginTop: '20%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto'
-              }}
-            >
-              <i
-                className="fas fa-tv my-2"
-                style={{ fontSize: '120px', color: '#2757aa' }}
-              />
-
-              {props.loadingfile ? (
-                <>
-                  <Box sx={{ width: '50%' }} className="my-2">
-                    <LinearProgress />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    Loading file...
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ textAlign: 'center', fontSize: '12px' }}
-                  >
-                    Please wait as we load the document
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    Nothing to Preview
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ textAlign: 'center', fontSize: '12px' }}
-                  >
-                    Please select a document to view its content
-                  </Typography>
-                </>
-              )}
-            </Box>
-          )}
-        </CustomTabPanel>
-
-        <CustomTabPanel
-          value={value}
-          index={2}
-          style={{
-            backgroundColor: '#e5e5e5',
-            height: '90vh',
-            padding: '0%',
-            width: '100%'
-          }}
-        >
-          {props.base64 && props.extension === 'pdf' ? (
-            <Bot base64={props.base64} objectTitle={props.selectedObject.title} />
-          ) : (
-            <Box
-              sx={{
-                width: '100%',
-                marginTop: '20%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto'
-              }}
-            >
-              <i
-                className="fas fa-robot my-2"
-                style={{ fontSize: '120px', color: '#2757aa' }}
-              />
-
-              {props.loadingfile ? (
-                <>
-                  <Box sx={{ width: '50%' }} className="my-2">
-                    <LinearProgress />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    Starting chat...
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ textAlign: 'center', fontSize: '12px' }}
-                  >
-                    Please wait as we load the resources
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography
-                    variant="body2"
-                    className='my-2'
-                    sx={{ textAlign: 'center' }}
-                  >
-                    No PDF Selected
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ textAlign: 'center', fontSize: '12px' }}
-                  >
-                    Please select a PDF to interact with the chatbot
-                  </Typography>
-                </>
-              )}
-            </Box>
-          )}
-        </CustomTabPanel>
-
-        <CustomTabPanel
-          value={value}
-          index={3}
-          style={{
-            backgroundColor: '#e5e5e5',
-            height: '90vh',
-            padding: '0%',
-            width: '100%'
-          }}
-        >
-          <CommentsCompoenent
-            selectedObject={props.selectedObject}
-            guid={props.vault ? props.vault.guid : ""}
-            loadingcomments={props.loadingcomments}
-            user={props.user}
-            comments={props.comments}
-            getObjectComments={props.getObjectComments}
-          />
-        </CustomTabPanel>
+          </CustomTabPanel>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
 

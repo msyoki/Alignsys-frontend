@@ -2,7 +2,8 @@
   --primary-color: #2757aa;
   --secondary-color: #1C4690;
   --text-color: #fff;
-  --hover-bg-color: rgba(255, 255, 255, 0.1);
+  --hover-bg-color: #fff;
+  --hover-text-color: #1C4690;
   --highlight-color: #fff;
 }
 
@@ -17,18 +18,26 @@
 /* Sidebar */
 .sidebar {
   width: auto;
-  min-width: max-content;
-  background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
-  color: var(--text-color);
+  min-width: '300px';
+  background: #2757aa;
+ 
+  color: #edf4f7;
   transition: width 0.0s;
   overflow: hidden; /* Hide excess content when sidebar is closed */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow for depth */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
+ 
 
 }
+
+
 
 .sidebar.closed {
   width: 0px;
 }
+
+
+
+
 
 .sidebar ul {
   list-style: none;
@@ -38,7 +47,8 @@
 }
 
 .sidebar ul li {
-  padding: 15px;
+  padding: 10px;
+  
   text-align: start;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s; /* Smooth transitions for hover effects */
@@ -47,35 +57,60 @@
   justify-content: flex-start; /* Align items to the start when sidebar is open */
 }
 
+.sidebar ul li span {
+  margin-right: 15px;
+}
+
+
 .sidebar ul li i {
   margin-right: 10px; /* Add space between icon and text */
+  margin-left: 10px; /* Add space between icon and text */
 }
 
 .sidebar ul li.closed i {
   margin-right: 0; /* Remove space between icon and text when sidebar is closed */
 }
 
-.sidebar ul li:hover {
-  background-color: var(--hover-bg-color); /* Lighten background on hover */
+/* .sidebar.closed .menu-items {
+  display: none;
+} */
+
+
+/* .sidebar ul li.main-li:hover {
+ 
+  background-color: #e0fbfc ; 
+  color: #293241;
+} */
+
+.sidebar ul li.main-li{
+ 
+  background-color: #2757aa;
 }
 
 /* Bump Toggle */
 .bump-toggle {
   position: fixed;
-  top: 35%;
-  width: 23px;
-  height: 100px;
-  background: #fff;
-  color: var(--secondary-color);
-  border-radius: 0; /* Removes rounded corners, making the edges sharp */
+  top: 40%;
+  width: 15px;
+  height: 70px;
+  background: #2757aa;
+  color: var(--text-color);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: left 0.0s ease-in-out;
   z-index: 1100;
+  
+  /* Clip-path for triangle effect on left and right */
+  clip-path: polygon(0% 0%, 100% 8px, 100% calc(100% - 8px), 0% 100%);
+  border-color: var(--secondary-color);
+  
+  /* Maintain the shadow effect */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+
 
 .bump-toggle.moved {
   left: 0; /* Keeps it on the edge of the sidebar even when it’s open */
@@ -90,13 +125,43 @@
 .content {
   flex-grow: 1;
   transition: margin-left 0.0s ease-in-out;
-  width: 100%;
-  background-color: var(--primary-color); /* Keep this as part of content-specific styling */
-  color: var(--text-color); /* Keep text color specific to content */
+  width: 20vh;
+  background-color: var(--secondary-color); /* Keep this as part of content-specific styling */
+  color: '#555';
+  height:'100vh';
 }
 
 .content.full-width {
   margin-left: 0;
 }
+
+body{
+  background-color: #2757aa;
+  max-height: max-content;
+  color: #293241;
+}
+
+
+
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full height */
+  justify-content: space-between; /* Pushes the logout and admin buttons to the bottom */
+}
+
+.menu-items {
+  flex-grow: 2; /* Ensures the menu fills available space */
+  display: flex;
+  flex-direction: column;
+
+}
+
+.bottom-buttons {
+  margin-top: auto; /* Pushes the logout and admin buttons to the bottom */
+  margin-bottom: 5%;
+}
+
 
 

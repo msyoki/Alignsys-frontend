@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import axios from 'axios';
-import * as constants from './Auth/configs'
-
+import * as constants from './Auth/configs';
 
 const LookupMultiSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault }) => {
   const [options, setOptions] = useState([]);
@@ -44,24 +43,19 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
   }, [searchTerm, selectedVault, propId]);
 
   const handleChange = (selectedOptions) => {
-    onChange(propId, selectedOptions.map(option => option.value));
+    onChange(propId, selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
   const customStyles = {
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: 'white', // Ensure the dropdown background is not see-through
-      zIndex: 9999, // Ensure the dropdown appears above other elements
-    }),
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // Ensures dropdown is always on top
     control: (provided) => ({
       ...provided,
-      borderColor: error ? 'red' : provided.borderColor, // Handling error state
+      borderColor: error ? 'red' : provided.borderColor, // Handles error state
     }),
   };
 
   return (
     <div>
-      {/* <label ><small>{`${label}`}</small></label> */}
       <Select
         isMulti
         value={options.filter(option => value.includes(option.value))}
@@ -72,8 +66,10 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
+        menuPortalTarget={document.body}  // Fix overflow issue
+        menuPosition="absolute"  // Ensures dropdown is positioned correctly
       />
-      {helperText && <span style={{ color: error ? '#CC3333' : 'inherit',fontSize:'12px' }} className='mx-3'>{helperText}</span>}
+      {helperText && <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '12px' }} className='mx-3'>{helperText}</span>}
     </div>
   );
 };

@@ -35,7 +35,7 @@ const AddUserToVault = (props) => {
 
     return (
         <div>
-            <label >Select to add new login account</label>
+            <label >Select to attach new login account</label>
             <Select
                 openMenuOnFocus={props.fetchUsers}
                 value={selectedUser}

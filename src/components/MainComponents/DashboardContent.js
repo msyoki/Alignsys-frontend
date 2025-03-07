@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
-import { Button } from '@chakra-ui/react';
-
+import { Avatar, Button } from '@mui/material';
 import { LinearProgress, Typography } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -33,7 +32,7 @@ import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, fa
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewsList from './ViewsList';
 import VaultSelectForm from '../SelectVault';
-import FileExt from '../FileExtIcon';
+import FileExtIcon from '../FileExtIcon';
 import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObjectDialog';
 import TimedAlert from '../TimedAlert';
 import { UTurnLeft } from '@mui/icons-material';
@@ -41,15 +40,48 @@ import OfficeApp from '../Modals/OfficeAppDialog';
 import * as constants from '../Auth/configs'
 import LoadingDialog from '../Loaders/LoaderDialog';
 import FileExtText from '../FileExtText';
-import logo from '../../images/ZFBLU.webp';
-
+import logo from '../../images/ZFBLU.png';
+import { Tabs, Tab } from '@mui/material';
+import PropTypes from 'prop-types';
 import { Tooltip } from '@mui/material';
 
 
 const baseurldata = constants.mfiles_api
 
+function CustomTabPanel({ children, value, index, ...other }) {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ ml: 4, height: '100%', overflowY: 'auto' }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 
 const DocumentList = (props) => {
+  const [value, setValue] = useState(0);
 
   const [loading, setLoading] = useState(false)
   let [requisitionProps, setRequisitionProps] = useState({})
@@ -95,6 +127,9 @@ const DocumentList = (props) => {
   const relatedObjects = linkedObjects.filter(item => (item.objectID !== undefined ? item.objectID : item.objectTypeId) !== 0);
   const relatedDocuments = linkedObjects.filter(item => (item.objectID !== undefined ? item.objectID : item.objectTypeId) === 0);
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   const transformFormValues = async () => {
     try {
       setUpdatingObject(true);
@@ -126,8 +161,15 @@ const DocumentList = (props) => {
             datatype,
           };
         }),
+        userID: parseInt(props.mfilesId, 10),
+
         vaultGuid: props.selectedVault?.guid || "", // Ensure valid vaultGuid
       };
+
+
+
+      // console.log(requestData);
+
 
       await axios.put(
         `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
@@ -135,13 +177,28 @@ const DocumentList = (props) => {
         { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
       );
 
-      if (!selectedState) {
-        await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
-      }
+      // if (!selectedState) {
+      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
+      // }
+
+
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
       setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
       setFormValues({});
+
+      // console.log(selectedObject)
+      setPreviewObjectProps([])
+      setSelectedObject({})
+
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject();
+        } else {
+          previewSublistObject();
+        }
+      }, 5000);
+
     } catch (error) {
       console.error('Error updating object props:', error);
       setAlertPopOpen(true);
@@ -159,6 +216,7 @@ const DocumentList = (props) => {
         objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
         objectId: selectedObject.id,
         nextStateId: selectedState.id,
+        userID: props.mfilesId
       };
 
       await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
@@ -211,9 +269,9 @@ const DocumentList = (props) => {
     await getSelectedObjWorkflow(selectedObject.objectTypeId, selectedObject.id);
 
     if (selectedObject.objectTypeId === 0) {
-      await previewObject(selectedObject);  // Await previewObject to ensure it's completed
+      await previewObject(selectedObject, false);  // Await previewObject to ensure it's completed
     } else {
-      await previewSublistObject(selectedObject);  // Await previewSublistObject to ensure it's completed
+      await previewSublistObject(selectedObject, false);  // Await previewSublistObject to ensure it's completed
     }
 
   };
@@ -232,14 +290,16 @@ const DocumentList = (props) => {
   };
 
 
-  const getLinkedObjects = async (id, classid, objectType) => {
+  const getLinkedObjects = async (id, objectType) => {
+    setLinkedObjects([])
     setLoadingObjects(true)
 
     try {
-      let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}`
+      let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}/${props.mfilesId}`
       const response = await axios.get(url);
 
       setLinkedObjects(response.data)
+      // console.log(response.data)
 
       setLoadingObjects(false)
     }
@@ -254,47 +314,50 @@ const DocumentList = (props) => {
 
 
 
-  const previewObject = async (item) => {
+  const previewObject = async (item, getLinkedItems) => {
 
 
     setComments([])
 
-    if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
-      handleOpenDialog();
-      return;
+    // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
+    //   handleOpenDialog();
+    //   return;
+    // }
+    // else {
+    setSelectedState({})
+    setLoadingObject(true)
+    setLoadingClick(true)
+    // console.log(formValues)
+    setFormValues({})
+    if (getLinkedItems) {
+      getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
     }
-    else {
-      setSelectedState({})
-      setLoadingObject(true)
-      setLoadingClick(true)
-      // console.log(formValues)
-      setFormValues({})
-      getLinkedObjects(item.id, (item.classId !== undefined ? item.classId : item.classID), (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
-      setSelectedObject(item)
-      // console.log(item)
-      getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID), item.id)
 
-      try {
-        const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}`);
-        // console.log(propsResponse.data)
-        setPreviewObjectProps(propsResponse.data);
-        setLoadingObject(false)
-        setLoadingClick(false)
-      } catch (error) {
-        setLoadingClick(false)
-        setAlertPopOpen(true);
-        setAlertPopSeverity("error");
-        setAlertPopMessage("something went wrong, please try again later!");
-        console.error('Error fetching view objects:', error);
-        setLoadingObject(false)
-      }
-      setBase64('');
-      setExtension('');
+    setSelectedObject(item)
+    console.log(item)
+    getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID), item.id)
+
+    try {
+      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`);
+      // console.log(propsResponse.data)
+      setPreviewObjectProps(propsResponse.data);
+      setLoadingObject(false)
+      setLoadingClick(false)
+    } catch (error) {
+      setLoadingClick(false)
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("something went wrong, please try again later!");
+      console.error('Error fetching view objects:', error);
+      setLoadingObject(false)
     }
+    setBase64('');
+    setExtension('');
+    // }
     getObjectComments(item);
   };
 
-  const previewSublistObject = async (item) => {
+  const previewSublistObject = async (item, getLinkedItems) => {
 
 
 
@@ -302,9 +365,13 @@ const DocumentList = (props) => {
     setComments([]);
 
     // Handle dialog open if form values or state exist
-    if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
-      handleOpenDialog();
-      return;
+    // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
+    //   handleOpenDialog();
+    //   return;
+    // }
+
+    if (getLinkedItems) {
+      getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
     }
 
     // Set loading states and clear selected state/form
@@ -313,7 +380,7 @@ const DocumentList = (props) => {
     setLoadingClick(true)
     setFormValues({});
     setSelectedObject(item);
-    // console.log(item)
+    console.log(item)
 
     // Fetch the object workflow asynchronously
     getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID, item.id));
@@ -321,7 +388,7 @@ const DocumentList = (props) => {
     try {
       // Fetch view object properties
       const propsResponse = await axios.get(
-        `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}`
+        `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
@@ -387,6 +454,11 @@ const DocumentList = (props) => {
   };
 
 
+
+
+
+
+
   const discardChange = () => {
     setDialogOpen(false)
     setSelectedState({})
@@ -404,7 +476,8 @@ const DocumentList = (props) => {
       vaultGuid: props.selectedVault.guid,
       objectTypeId: dataType,
       objectId: objectsId,
-      userEmail: props.user.email
+      userEmail: props.user.email,
+      userID: props.mfilesId
     };
 
 
@@ -417,7 +490,7 @@ const DocumentList = (props) => {
       .then(response => {
 
         setSelectedObjWf(response.data)
-
+        console.log(response.data)
         setCurrentState({
           stateTitle: response.data.currentStateTitle,
           stateId: response.data.currentStateid
@@ -526,6 +599,7 @@ const DocumentList = (props) => {
       if (objId === 0) {
         url = `${baseurldata}/api/RequisitionDocs?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
       } else {
+
         getLinkedObjects(internalId)
         url = `${baseurldata}/api/Requisition/getRequisitionProps?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
       }
@@ -555,6 +629,7 @@ const DocumentList = (props) => {
 
 
   const handleSearch = (e) => {
+    setValue(0)
     e.preventDefault();
     setLoading(true)
     // Trigger a search for documents based on 'searchTerm'
@@ -604,7 +679,7 @@ const DocumentList = (props) => {
         }
       } catch (error) {
         console.error('Error fetching the extension:', error);
-        alert('Failed to retrieve file extension.');
+
       }
     };
 
@@ -653,6 +728,79 @@ const DocumentList = (props) => {
   const handleMouseDown = () => {
     if (!isMobile) setIsDragging(true);
   };
+
+
+  const trimTitle2 = (title) => {
+    const maxLength = 50; // Updated to match the desired max length
+    if (title) {
+      if (title.length > maxLength) {
+        return title.substring(0, maxLength) + '...';
+      }
+    }
+    return title;
+  };
+
+  const handleRowClick = (subItem) => {
+    if (subItem.objectID === 0) {
+      previewSublistObject(subItem, false);
+    } else {
+      previewObject(subItem, false);
+    }
+  };
+
+
+  const documents = linkedObjects.filter(item => item.objecttypeID === 0);
+  const otherObjects = linkedObjects.filter(item => item.objecttypeID !== 0);
+
+
+  const restoreObject = async (item) => {
+
+
+    let data = JSON.stringify(
+      {
+        "vaultGuid": `${props.selectedVault.guid}`,
+        "objectId": item.id,
+        "classId": item.classID,
+        "userID": props.mfilesId
+      }
+
+    );
+    console.log(data)
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${constants.mfiles_api}/api/ObjectDeletion/UnDeleteObject`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    await axios.request(config)
+      .then((response) => {
+        props.resetViews()
+        setAlertPopOpen(true);
+        setAlertPopSeverity("success");
+        setAlertPopMessage("Object was restored successsfully")
+
+      })
+      .catch((error) => {
+        setOpenAlert(true);
+        setAlertSeverity("error");
+        setAlertMsg("Failed to restore, please try again later");
+
+
+        console.log(error);
+      });
+
+
+  }
+
+
+
+
+
+
   return (
     <>
       <ConfirmUpdateDialog
@@ -681,25 +829,26 @@ const DocumentList = (props) => {
       />
       <LoadingDialog opendialogloading={loadingClick} />
 
-      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100vh', backgroundColor: '#fff', overflowY: 'auto' }}>
+      <div id="container" ref={containerRef} style={{ height: '100vh', display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd', overflowY: 'auto' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', height: '100vh', backgroundColor: 'white', minWidth: '38%' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', backgroundColor: '#dedddd', minWidth: '38%' }}>
           <Box
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '5px',
+              padding: '10px',
+
               fontSize: '12px !important',
-              backgroundColor: '#ffff',
+              backgroundColor: '#fff',
               color: '#1C4690',
 
             }}
 
           >
-            <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-1 p-1">
+            <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-2 ">
               <img style={{
-                fontSize: '25px',
+
                 cursor: 'pointer',
                 color: '#fff',
                 textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
@@ -709,19 +858,7 @@ const DocumentList = (props) => {
 
 
 
-              {/* <span onClick={props.toggleSidebar} aria-label={props.sidebarOpen ? "Close Sidebar" : "Open Sidebar"} className="p-2 mx-2">
-                  {!props.sidebarOpen ? (
-                    <Tooltip title='Expand sidebar'>
-                      <i className="fas fa-bars" style={{ fontSize: '25px' }}></i>
-                    </Tooltip>
-                  ) : (
-                    <Tooltip title='Minimize sidebar'>
-                      <i className="fas fa-hand-point-left" style={{ fontSize: '25px' }}></i>
-                     
-                    </Tooltip>
-                  )}
-                </span> */}
-              {/* {props.sidebarOpen ? "Close" : "Open"} Sidebar */}
+
 
             </Box>
 
@@ -734,39 +871,12 @@ const DocumentList = (props) => {
                 color="text.white"
                 fontSize="11.5px"
               >
-                {/* <Box mr={2}>
-                  {props.user.first_name} {props.user.last_name}
-                </Box>
-                <Box mr={2}>
-                  <NetworkIcon />
-                </Box> */}
-                <i
-                  onClick={reloadPage}
-                  className="fas fa-home mx-2"
-                  style={{
-                    fontSize: '25px',
-                    cursor: 'pointer',
-                    color: '#1C4690',
-                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                    transform: 'translateZ(0)',
-                    transition: 'transform 0.2s'
-                  }}
-                ></i>
-                <i
-                  onClick={props.getVaultObjects}
-                  className="fas fa-plus mx-3"
-                  style={{
-                    fontSize: '25px',
-                    cursor: 'pointer',
-                    color: '#1C4690',
-                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                    transform: 'translateZ(0)',
-                    transition: 'transform 0.2s'
-                  }}
 
-                // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-                ></i>
+
+                <Tooltip title='Switch to a different vault'>
+                  <VaultSelectForm activeVault={props.selectedVault} />
+                </Tooltip>
+                {/* <NetworkIcon /> */}
                 <Box style={{
 
                   cursor: 'pointer',
@@ -775,20 +885,83 @@ const DocumentList = (props) => {
                   transform: 'translateZ(0)',
                   transition: 'transform 0.2s'
                 }}
-                  className='mx-2'
+                  className='mx-3'
                 >
-                  <NetworkIcon />
+            
+                  <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
+
+                    <Avatar
+                      alt={
+                        props.user.first_name && props.user.last_name
+                          ? `${props.user.first_name} ${props.user.last_name}`
+                          : props.user.first_name
+                            ? props.user.first_name
+                            : props.user.last_name
+                              ? props.user.last_name
+                              : props.user.username
+                      }
+                      {...props.stringAvatar(
+                        props.user.first_name && props.user.last_name
+                          ? `${props.user.first_name} ${props.user.last_name}`
+                          : props.user.first_name
+                            ? props.user.first_name
+                            : props.user.last_name
+                              ? props.user.last_name
+                              : props.user.username
+                      )}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        backgroundColor:'#2757aa',
+                        fontSize:'12px'
+
+                      }}
+                      className='p-3'
+
+                    />
+                  </Tooltip>
+
                 </Box>
+            
               </Box>
             </Box>
           </Box>
 
 
-          <div className="shadow-lg p-2 d-flex justify-content-center" style={{ backgroundColor: '#dedddd' }}>
+          <div className=" p-2 d-flex justify-content-center" style={{ backgroundColor: '#dedddd' }}>
             <form onSubmit={handleSearch} className="input-group" style={{ maxWidth: '600px', width: '100%' }}>
               <div className='p-1' style={{ display: 'flex', alignItems: 'center' }}>
-                <Tooltip title='Switch to a different vault'>
-                  <VaultSelectForm activeVault={props.selectedVault} />
+
+                <Tooltip title='Go back home'>
+                  <i
+                    onClick={reloadPage}
+                    className="fas fa-home mx-2"
+                    style={{
+                      fontSize: '25px',
+                      cursor: 'pointer',
+                      color: '#1C4690',
+                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                      transform: 'translateZ(0)',
+                      transition: 'transform 0.2s'
+                    }}
+                  ></i>
+                </Tooltip>
+                <Tooltip title='Create/ Add new object or document'>
+                  <i
+                    onClick={props.getVaultObjects}
+                    className="fas fa-plus mx-3"
+                    style={{
+                      fontSize: '25px',
+                      cursor: 'pointer',
+                      color: '#1C4690',
+                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+                      transform: 'translateZ(0)',
+                      transition: 'transform 0.2s'
+                    }}
+
+                  // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                  ></i>
                 </Tooltip>
                 {/* <i
             onClick={props.getVaultObjects}
@@ -834,22 +1007,86 @@ const DocumentList = (props) => {
 
           </div>
 
-          <div className="table-responsive-sm " >
+
+          <Tabs
+            variant="scrollable"
+            value={value}
+            onChange={handleChange}
+            aria-label="Horizontal tabs example"
+            sx={{ borderColor: 'divider' }}
+            className='bg-white'
+          >
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                width: 'auto',
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label="All"
+              {...a11yProps(0)}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label={`Recent`}
+              // label={`Recent (${props.recentData ? props.recentData.length : <></>})`}
+              {...a11yProps(1)}
+              onClick={props.getRecent}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label={`Assigned `}
+              // label={`Assigned (${props.assignedData ? props.assignedData.length : <></>})`}
+              {...a11yProps(2)}
+              onClick={props.getAssigned}
+            />
+            <Tab
+              style={{ textTransform: 'none' }}
+              sx={{
+
+                minWidth: 'auto',      // Adjust the width to fit the label text
+              }}
+              label={`Deleted `}
+              // label={`Deleted (${props.deletedData ? props.deletedData.length : <></>})`}
+              {...a11yProps(3)}
+            />
+          </Tabs>
+          <CustomTabPanel
+            value={value}
+            index={0}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '80vh',
+              padding: '0%',
+              width: '100%',
+              overflowY: 'auto'
+            }}
+          >
+
             {loading ? (
               <Loader />
             ) : (
               <>
                 {props.data.length > 0 ? (
-                  <>
-                    <h6 className='p-3 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa' }}>
+                  <div className='bg-white'>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                      <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
+                      <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
                       Search Results
                     </h6>
 
-                    <div style={{ height: '65vh', overflowY: 'auto' }} className='shadow-lg p-3'>
+                    <div style={{ height: '50vh', overflowY: 'auto' }} >
                       {props.data.map((item, index) => (
                         <Accordion
-                          key={index}
                           expanded={selectedIndex === index}
                           onChange={handleAccordionChange(index)}
                           sx={{
@@ -860,214 +1097,807 @@ const DocumentList = (props) => {
                             '&::before': { display: 'none' },
                           }}
                         >
-                          {(item.objectID !== undefined ? item.objectID : item.objectTypeId) === 0 ? (
+                          {item.objectID === 0 ? (
                             <AccordionSummary
-                              onClick={() => previewSublistObject(item)}
+                              onClick={() => previewSublistObject(item, true)}
+
                               expandIcon={<ExpandMoreIcon />}
                               aria-controls={`panel${index}a-content`}
                               id={`panel${index}a-header`}
-                              sx={{ bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit' }}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
                               className="shadow-sm"
                             >
-                              <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <FileExt
+                              <Typography
+                                variant="body1"
+                                style={{
+                                  fontSize: '11px',
+                                  margin: 0, // Removes any extra margin
+                                }}
+                              >
+                                <span className='mx-2'> <FileExtIcon
                                   guid={props.selectedVault.guid}
                                   objectId={item.id}
-                                  classId={item.classId !== undefined ? item.classId : item.classID}
+                                  classId={item.classID}
+                                /></span>
+
+                                {trimTitle2(item.title)}.
+                                <FileExtText
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
                                 />
-                                {item.title}
                               </Typography>
                             </AccordionSummary>
+
                           ) : (
                             <AccordionSummary
-                              onClick={() => previewObject(item)}
+                              onClick={() => previewObject(item, true)}
                               expandIcon={<ExpandMoreIcon />}
                               aria-controls={`panel${index}a-content`}
                               id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
                               className="shadow-sm"
                             >
                               <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#0077b6' }}></i>
-                                {item.title}
+                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                {trimTitle2(item.title)}
                               </Typography>
                             </AccordionSummary>
                           )}
-                          {linkedObjects ? (
-                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className="p-2 shadow-sm mx-3">
-                              {linkedObjects.requisitionID === item.internalID ? (
-                                props.loadingobjects ? (
-                                  <div className="text-center">
-                                    <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                    <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                  </div>
-                                ) : (
-                                  <>
-                                    {linkedObjects.length > 0 ? (
-                                      <>
-                                        {relatedObjects.length > 0 && (
-                                          <>
-                                            {/* <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1C4690' }} className="p-1">
-                                                Related Objects ({relatedObjects.length})
-                                              </Typography>
-                                              <table id="
-                                              
-                                              dByMe" className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                                <tbody>
-                                                  {relatedObjects.map((relatedItem, relatedIndex) => (
-                                                    <tr key={relatedIndex} onClick={() => previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
-                                                      <td>
-                                                        <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
-                                                        {relatedItem.title}
-                                                      </td>
-                                                    </tr>
-                                                  ))}
-                                                </tbody>
-                                              </table> */}
+                          {linkedObjects && (
+                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                              {props.loadingobjects ? (
+                                <div className="text-center">
+                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
+                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                </div>
+                              ) : (
+                                <>
+                                  {linkedObjects.length > 0 ? (
+                                    <>
+                                      {/* Render Other Objects */}
+                                      {otherObjects.map((item, index) => (
+                                        <div key={index}>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                          </Typography>
 
-                                            <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
-                                              Related Objects ({relatedObjects.length})
-                                            </Typography>
-                                            <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                              <tbody>
-                                                {relatedObjects.map((relatedItem, relatedIndex) => (
-                                                  <tr key={relatedIndex} onClick={() => previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
-                                                    <td>
-                                                      <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
-                                                      {relatedItem.title}
-                                                    </td>
-                                                  </tr>
-                                                ))}
-                                              </tbody>
-                                            </table>
-                                          </>
-                                        )}
-                                        {relatedDocuments.length > 0 && (
-                                          <>
-                                            {/* <Typography variant="body2" style={{ fontSize: '11px', color: '#fff', backgroundColor: '#1C4690' }} className="p-1">
-                                                Attached Documents ({relatedDocuments.length})
-                                              </Typography>
-                                              <table id="createdByMe" className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                                <tbody>
-                                                  {relatedDocuments.map((docItem, docIndex) => (
-                                                    <tr
-                                                      key={docIndex}
-                                                      onClick={() => previewSublistObject(docItem)}
-                                                      onDoubleClick={() => openApp(docItem)}
-                                                      style={{ cursor: 'pointer' }}
-                                                    >
-                                                      <td>
-                                                        <FileExt guid={props.selectedVault.guid} objectId={docItem.id} classId={docItem.classID} />
-                                                        {docItem.title}
-                                                      </td>
-                                                    </tr>
-                                                  ))}
-                                                </tbody>
-                                              </table> */}
-                                            <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
-                                              Attached Documents ({relatedDocuments.length})
-                                            </Typography>
-                                            <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
-                                              <tbody>
-                                                {relatedDocuments.map((doc, docIndex) => (
-                                                  <tr key={docIndex} onClick={() => previewSublistObject(doc)} onDoubleClick={() => openApp(doc)} style={{ cursor: 'pointer' }}>
-                                                    <td>
-                                                      <FileExt guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
-                                                      {doc.title}.<FileExtText guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
-                                                    </td>
-                                                  </tr>
-                                                ))}
-                                              </tbody>
-                                            </table>
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                                          >
+                                            <tbody>
+                                              {item.items.map((subItem, subIndex) => (
+                                                <tr
+                                                  key={subIndex}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      ))}
 
-                                          </>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
-                                        No Relationships Found
-                                      </p>
-                                    )}
-                                  </>
-                                )
-                              ) : null}
+                                      {/* Render Documents Together */}
+                                      {documents.length > 0 && (
+                                        <>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                          </Typography>
+
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                                          >
+                                            <tbody>
+                                              {documents.flatMap(item => item.items).map((subItem, index) => (
+                                                <tr
+                                                  key={index}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                      No Relationships Found
+                                    </p>
+                                  )}
+                                </>
+                              )}
                             </AccordionDetails>
-                          ) : null}
+                          )}
                         </Accordion>
+
                       ))}
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <>
-                    {/* {props.viewableobjects.length > 0 ? (
-                      <ViewsList
-                        selectedFileId={selectedFileId}
-                        viewableobjects={props.viewableobjects}
-                        previewSublistObject={previewSublistObject}
-                        selectedObject={selectedObject}
-                        linkedObjects={linkedObjects}
-                        loadingobjects={loadingobjects}
-                        selectedVault={props.selectedVault}
-                        setPreviewObjectProps={setPreviewObjectProps}
-                        setLoadingPreviewObject={setLoadingPreviewObject}
-                        previewObject={previewObject}
-                        setAlertPopOpen={setAlertPopOpen}
-                        setAlertPopSeverity={setAlertPopSeverity}
-                        setAlertPopMessage={setAlertPopMessage}
-                      />
-                    ) : (
-                      <Box sx={{ width: '100%', marginTop: '15%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }}>
-                        <FontAwesomeIcon icon={faTable}  style={{ color: '#1C4690', fontSize: '120px' }} />
-                        <Typography
-                          variant="body2"
-                          className='my-2 text-secondary'
-                          sx={{ textAlign: 'center' }}
-                        >
-                          Views
-                        </Typography>
 
-                        <Typography
-                          variant="body2"
-                          className='text-secondary'
-                          sx={{ textAlign: 'center', fontSize: '12px' }}
-                        >
-                          Common Views & Other Views 
-                        </Typography>
-                        
-                      </Box>
-                    )} */}
                     <ViewsList
-                        selectedFileId={selectedFileId}
-                        viewableobjects={props.viewableobjects}
-                        previewSublistObject={previewSublistObject}
-                        selectedObject={selectedObject}
-                        linkedObjects={linkedObjects}
-                        loadingobjects={loadingobjects}
-                        selectedVault={props.selectedVault}
-                        setPreviewObjectProps={setPreviewObjectProps}
-                        setLoadingPreviewObject={setLoadingPreviewObject}
-                        previewObject={previewObject}
-                        setAlertPopOpen={setAlertPopOpen}
-                        setAlertPopSeverity={setAlertPopSeverity}
-                        setAlertPopMessage={setAlertPopMessage}
-                      />
+                      selectedFileId={selectedFileId}
+                      viewableobjects={props.viewableobjects}
+                      previewSublistObject={previewSublistObject}
+                      selectedObject={selectedObject}
+                      linkedObjects={linkedObjects}
+                      loadingobjects={loadingobjects}
+                      selectedVault={props.selectedVault}
+                      setPreviewObjectProps={setPreviewObjectProps}
+                      setLoadingPreviewObject={setLoadingPreviewObject}
+                      previewObject={previewObject}
+                      setAlertPopOpen={setAlertPopOpen}
+                      setAlertPopSeverity={setAlertPopSeverity}
+                      setAlertPopMessage={setAlertPopMessage}
+                      user={props.user}
+                      mfilesId={props.mfilesId}
+
+                    />
                   </>
                 )}
               </>
             )}
-          </div>
+
+
+
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value={value}
+            index={1}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '100%',
+              padding: '0%',
+              overflowY: 'clip',
+              width: '100%'
+            }}
+          >
+            {loading ? (
+              <Loader />
+            ) : (
+              <>
+                {props.recentData.length > 0 ? (
+                  <div className='bg-white'>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+
+                      Recently Modified By Me ({props.recentData.length})
+                    </h6>
+
+                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                      {props.recentData.map((item, index) => (
+                        <Accordion
+                          expanded={selectedIndex === index}
+                          onChange={handleAccordionChange(index)}
+                          sx={{
+                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            '&:not(:last-child)': {
+                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            },
+                            '&::before': { display: 'none' },
+                          }}
+                        >
+                          {item.objectID === 0 ? (
+                            <AccordionSummary
+                              onClick={() => previewSublistObject(item, true)}
+
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography
+                                variant="body1"
+                                style={{
+                                  fontSize: '11px',
+                                  margin: 0, // Removes any extra margin
+                                }}
+                              >
+                                <span className='mx-2'> <FileExtIcon
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
+                                /></span>
+
+                                {trimTitle2(item.title)}.
+                                <FileExtText
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
+                                />
+                              </Typography>
+                            </AccordionSummary>
+
+                          ) : (
+                            <AccordionSummary
+                              onClick={() => previewObject(item, true)}
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                {trimTitle2(item.title)}
+                              </Typography>
+                            </AccordionSummary>
+                          )}
+                          {linkedObjects && (
+                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                              {props.loadingobjects ? (
+                                <div className="text-center">
+                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
+                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                </div>
+                              ) : (
+                                <>
+                                  {linkedObjects.length > 0 ? (
+                                    <>
+                                      {/* Render Other Objects */}
+                                      {otherObjects.map((item, index) => (
+                                        <div key={index}>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                          </Typography>
+
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                                          >
+                                            <tbody>
+                                              {item.items.map((subItem, subIndex) => (
+                                                <tr
+                                                  key={subIndex}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      ))}
+
+                                      {/* Render Documents Together */}
+                                      {documents.length > 0 && (
+                                        <>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                          </Typography>
+
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                                          >
+                                            <tbody>
+                                              {documents.flatMap(item => item.items).map((subItem, index) => (
+                                                <tr
+                                                  key={index}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                      No Relationships Found
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                            </AccordionDetails>
+                          )}
+                        </Accordion>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+
+
+                  </>
+                )}
+              </>
+            )}
+
+
+
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value={value}
+            index={2}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '90vh',
+              padding: '0%',
+              width: '100%'
+            }}
+          >
+            {loading ? (
+              <Loader />
+            ) : (
+              <>
+                {props.assignedData.length > 0 ? (
+                  <div className='bg-white'>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+
+                      Assigned ({props.assignedData.length})
+                    </h6>
+
+                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                      {props.assignedData.map((item, index) => (
+                        <Accordion
+                          expanded={selectedIndex === index}
+                          onChange={handleAccordionChange(index)}
+                          sx={{
+                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            '&:not(:last-child)': {
+                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            },
+                            '&::before': { display: 'none' },
+                          }}
+                        >
+                          {item.objectTypeId !== 0 ? (
+                            <AccordionSummary
+                              onClick={() => previewSublistObject(item, true)}
+
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography
+                                variant="body1"
+                                style={{
+                                  fontSize: '11px',
+                                  margin: 0, // Removes any extra margin
+                                }}
+                              >
+                                <span className='mx-2'> <FileExtIcon
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classId !== undefined ? item.classId : item.classID}
+                                /></span>
+
+                                {trimTitle2(item.title)}
+                              </Typography>
+                            </AccordionSummary>
+
+                          ) : (
+                            <AccordionSummary
+                              onClick={() => previewObject(item, true)}
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                {trimTitle2(item.title)}.
+                                <FileExtText
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classId}
+                                />
+                              </Typography>
+                            </AccordionSummary>
+                          )}
+                          {linkedObjects && (
+                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                              {props.loadingobjects ? (
+                                <div className="text-center">
+                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
+                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                </div>
+                              ) : (
+                                <>
+                                  {linkedObjects.length > 0 ? (
+                                    <>
+                                      {/* Render Other Objects */}
+                                      {otherObjects.map((item, index) => (
+                                        <div key={index}>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                          </Typography>
+
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                                          >
+                                            <tbody>
+                                              {item.items.map((subItem, subIndex) => (
+                                                <tr
+                                                  key={subIndex}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      ))}
+
+                                      {/* Render Documents Together */}
+                                      {documents.length > 0 && (
+                                        <>
+                                          <Typography
+                                            variant="body2"
+                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                            className="p-1"
+                                          >
+                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                          </Typography>
+
+                                          <table
+                                            id="createdByMe"
+                                            className="table table-hover"
+                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                                          >
+                                            <tbody>
+                                              {documents.flatMap(item => item.items).map((subItem, index) => (
+                                                <tr
+                                                  key={index}
+                                                  onClick={() => handleRowClick(subItem)}
+                                                  onDoubleClick={() => openApp(subItem)}
+                                                  style={{ cursor: 'pointer' }}
+                                                >
+                                                  <td>
+                                                    {subItem.objectID === 0 ? (
+                                                      <>
+                                                        <FileExtIcon
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                        {subItem.title}.
+                                                        <FileExtText
+                                                          guid={props.selectedVault.guid}
+                                                          objectId={subItem.id}
+                                                          classId={subItem.classID}
+                                                        />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                        {subItem.title}
+                                                      </>
+                                                    )}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                      No Relationships Found
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                            </AccordionDetails>
+                          )}
+                        </Accordion>
+
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+
+
+                  </>
+                )}
+              </>
+            )}
+
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value={value}
+            index={3}
+            style={{
+              backgroundColor: '#dedddd',
+              height: '90vh',
+              padding: '0%',
+              width: '100%'
+            }}
+          >
+            {loading ? (
+              <Loader />
+            ) : (
+              <>
+                {props.deletedData.length > 0 ? (
+                  <div className='bg-white'>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+
+                      Deleted By Me ({props.deletedData.length})
+                    </h6>
+
+                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                      {props.deletedData.map((item, index) => (
+                        <Accordion
+                          expanded={selectedIndex === index}
+                          onChange={handleAccordionChange(index)}
+                          sx={{
+                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            '&:not(:last-child)': {
+                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            },
+                            '&::before': { display: 'none' },
+                          }}
+                        >
+
+                          <AccordionSummary
+                            // onClick={() => previewSublistObject(item, true)}
+                            aria-controls={`panel${index}a-content`}
+                            id={`panel${index}a-header`}
+                            sx={{
+                              bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                              padding: 0,
+                              minHeight: 'unset',
+                            }}
+                            className="shadow-sm"
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                              {/* Left Side Content */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+
+                                <Typography
+                                  variant="body1"
+                                  sx={{ fontSize: '11px', margin: 0 }}
+                                >
+                                  {item.objectID !== 0 ? <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i> :
+                                    <>
+                                      {/* <FileExtIcon
+                                    guid={props.selectedVault.guid}
+                                    objectId={item.id}
+                                    classId={item.classID}
+                                  /> */}
+                                      <i class="fas fa-file mx-2" style={{ fontSize: '15px', color: '#2a68af' }}></i></>}
+                                  {trimTitle2(item.title)}
+                                  {item.objectID !== 0 ? <></> : <>.
+                                    <FileExtText
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classID}
+                                    />  </>}
+                                </Typography>
+                              </Box>
+
+                              {/* Right-Aligned Delete Button */}
+                              <Button
+                                onClick={() => restoreObject(item)}
+                                size="small"
+                                variant="contained"
+                                color="success"
+                                className='mx-2'
+                                sx={{ textTransform: 'none', ml: 'auto' }} // Moves it to the right
+                              >
+
+                                <i class="fa-solid fa-trash-can-arrow-up" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
+                                <small>Restore</small>
+                              </Button>
+                            </Box>
+                          </AccordionSummary>
+
+                        </Accordion>
+
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+
+
+                  </>
+                )}
+              </>
+            )}
+
+          </CustomTabPanel>
+
+
 
 
 
         </div>
 
         {!isMobile && (
-          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
+          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc', height: 'auto' }}></div>
         )}
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', height: '100vh', backgroundColor: '#e5e5e5', minWidth: '55%' }}>
-          <ObjectData user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', backgroundColor: '#dedddd', minWidth: '55%' }}>
+          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>
 

@@ -12,11 +12,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ObjectPropValue from '../ObjectPropValue'
 import * as constants from '../Auth/configs'
-import FileExt from '../FileExtIcon';
+import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 import { Tooltip } from '@mui/material';
 import OfficeApp from '../Modals/OfficeAppDialog';
 import LoadingDialog from '../Loaders/LoaderDialog';
+
+
 
 
 const ViewsList = (props) => {
@@ -25,7 +27,7 @@ const ViewsList = (props) => {
     const [selectedViewObjects, setSelectedViewObjects] = useState([]);
     const [selectedViewName, setSelectedViewName] = useState('');
     const [selectedViewCategory, setSelectedViewCategory] = useState([]);
-    const [showOtherViewSublist, setshowOtherViewSublist] = useState(false);
+    const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
     const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [viewNavigation, setViewNavigation] = useState([]);
@@ -140,7 +142,7 @@ const ViewsList = (props) => {
                         }
                     }
                 );
-                // console.log(response.data)
+                console.log(response.data)
                 setLoading(false)
 
 
@@ -174,7 +176,7 @@ const ViewsList = (props) => {
 
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}`,
+                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.mfilesId}`,
                 {
                     headers: {
                         accept: '*/*',
@@ -182,7 +184,7 @@ const ViewsList = (props) => {
                 }
             );
             setLoading(false)
-            // console.log(response.data)
+            console.log(response.data)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
 
@@ -236,25 +238,35 @@ const ViewsList = (props) => {
 
     useEffect(() => {
         const savedOption = localStorage.getItem('selectedVault');
-        
+
         const fetchData = async () => {
-     
-            const guid=JSON.parse(savedOption).guid
-            // console.log(guid)
+            const guid = JSON.parse(savedOption).guid;
             try {
-                const response = await axios.get(`${constants.mfiles_api}/api/Views/GetViews/${JSON.parse(savedOption).guid}`);
+                const response = await axios.get(
+                    `${constants.mfiles_api}/api/Views/GetViews/${guid}/${props.mfilesId}`
+                );
 
-                setOtherViews(response.data.otherViews); // Assuming you want to render items from otherViews
+                // Sort the views alphabetically by their names before setting state
+                const sortedOtherViews = response.data.otherViews.sort((a, b) =>
+                    a.viewName.localeCompare(b.viewName)
+                );
 
-                setCommonViews(response.data.commonViews); // Assuming you want to render items from otherViews
+                const sortedCommonViews = response.data.commonViews.sort((a, b) =>
+                    a.viewName.localeCompare(b.viewName)
+                );
 
+                setOtherViews(sortedOtherViews);
+                setCommonViews(sortedCommonViews);
+                console.log(sortedOtherViews)
+                console.log(sortedOtherViews)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
 
         fetchData();
-    }, [viewNavigation]);
+    }, [viewNavigation, props.mfilesId]);
+
 
     const handleViewNavClick = (item) => {
         // Remove clicked item and all items after it from navigation
@@ -302,7 +314,7 @@ const ViewsList = (props) => {
                 }
             } catch (error) {
                 console.error('Error fetching the extension:', error);
-                alert('Failed to retrieve file extension.');
+
             }
         };
 
@@ -317,12 +329,34 @@ const ViewsList = (props) => {
         return title;
     };
 
-    const backToViews=()=>{
+    const trimTitle2 = (title) => {
+        const maxLength = 50; // Updated to match the desired max length
+        if (title.length > maxLength) {
+            return title.substring(0, maxLength) + '...';
+        }
+        return title;
+    };
+
+
+    const backToViews = () => {
         setSelectedViewObjects([])
         setViewNavigation([])
         setSelectedViewCategory([])
     }
 
+    const handleRowClick = (subItem) => {
+        if (subItem.objectID === 0) {
+            props.previewSublistObject(subItem, false);
+        } else {
+            props.previewObject(subItem, false);
+        }
+    };
+
+    const documents = props.linkedObjects.filter(item => item.objecttypeID === 0);
+    const otherObjects = props.linkedObjects.filter(item => item.objecttypeID !== 0);
+
+    const filteredOtherViews = otherviews.filter(view => view.userPermission?.readPermission);
+    const filteredCommonViews = commonviews.filter(view => view.userPermission?.readPermission);
 
     return (
         <>
@@ -330,9 +364,9 @@ const ViewsList = (props) => {
             <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
             {selectedViewObjects.length > 0 ? (
                 <>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
 
-                        <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#1C4690', fontSize: '20px' }} /> 
+                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                         <span onClick={backToViews} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
                         <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
                         {viewNavigation.map((item, index) => (
@@ -346,7 +380,7 @@ const ViewsList = (props) => {
                             </React.Fragment>
                         ))}
                     </h6>
-                    <div style={{ height: '65vh',  overflowY: 'auto' ,marginLeft:'30px'}} className='shadow-lg p-2 text-dark'>
+                    <div style={{ height: '60vh', overflowY: 'auto'}} className=' text-dark bg-white p-3'>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -355,93 +389,177 @@ const ViewsList = (props) => {
                                         onChange={handleAccordionChange(index)}
                                         sx={{
                                             border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                                            '&:not(:last-child)': { borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)' },
+                                            '&:not(:last-child)': {
+                                                borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                                            },
                                             '&::before': { display: 'none' },
                                         }}
                                     >
-                                        <AccordionSummary
-                                            onClick={() => { props.previewSublistObject(item); props.previewObject(item) }}
-                                            expandIcon={<ExpandMoreIcon />}
-                                            aria-controls={`panel${index}a-content`}
-                                            id={`panel${index}a-header`}
-                                            sx={{
-                                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                                height: 'auto',  // Set to auto to let the content define the height
-                                                minHeight: 0,  // Optional, set minimum height to zero
-                                                '&.Mui-expanded': {
-                                                    minHeight: 0  // Reduce height when expanded
-                                                },
-                                                padding: '0px 8px'  // Adjust padding to reduce height
-                                            }}
-                                            className='shadow-sm'
-                                        >
-                                            <Typography
-                                                variant="body1"
-                                                style={{ fontSize: '11px', lineHeight: '1.2', padding: '4px 0' }}  // Reduce padding and line height
-                                            >
-                                                {item.objectID === 0 || item.objectTypeId === 0 ? (
-                                                    <>
-                                                        <FileExt
-                                                            guid={props.selectedVault.guid}
-                                                            objectId={item.id}
-                                                            classId={(item.classId !== undefined ? item.classId : item.classID)}
-                                                        />
-                                                        {item.title}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <i
-                                                            className="fas fa-layer-group mx-2"
-                                                            style={{ fontSize: '14px', color: '#0077b6' }}
-                                                        ></i>
-                                                        {item.title}
-                                                    </>
-                                                )}
-                                            </Typography>
-                                        </AccordionSummary>
+                                        {item.objectTypeId === 0 ? (
+                                            <AccordionSummary
+                                                onClick={() => props.previewSublistObject(item, true)}
 
-                                        {props.linkedObjects && props.linkedObjects.requisitionID === item.internalID && (
-                                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className='p-2 shadow-sm mx-3'>
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls={`panel${index}a-content`}
+                                                id={`panel${index}a-header`}
+                                                sx={{
+                                                    bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                                    padding: 0, // Removes all padding
+                                                    minHeight: 'unset', // Ensures the height is not restricted by default styles
+                                                }}
+                                                className="shadow-sm"
+                                            >
+                                                <Typography
+                                                    variant="body1"
+                                                    style={{
+                                                        fontSize: '11px',
+                                                        margin: 0, // Removes any extra margin
+                                                    }}
+                                                >
+                                                    <span className='mx-1'> <FileExtIcon
+                                                        guid={props.selectedVault.guid}
+                                                        objectId={item.id}
+                                                        classId={item.classId !== undefined ? item.classId : item.classID}
+                                                    /></span>
+
+                                                    {trimTitle2(item.title)}.<FileExtText
+                                                        guid={props.selectedVault.guid}
+                                                        objectId={item.id}
+                                                        classId={item.classId}
+                                                    />
+                                                </Typography>
+                                            </AccordionSummary>
+
+                                        ) : (
+                                            <AccordionSummary
+                                                onClick={() => props.previewObject(item, true)}
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls={`panel${index}a-content`}
+                                                id={`panel${index}a-header`}
+                                                sx={{
+                                                    bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                                    padding: 0, // Removes all padding
+                                                    minHeight: 'unset', // Ensures the height is not restricted by default styles
+                                                }}
+                                                className="shadow-sm"
+                                            >
+                                                <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                                    <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                                    {trimTitle2(item.title)}
+                                                </Typography>
+                                            </AccordionSummary>
+                                        )}
+
+                                      
+                                        {props.linkedObjects && (
+                                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className="p-2 shadow-sm mx-3">
                                                 {props.loadingobjects ? (
-                                                    <div className='text-center'>
+                                                    <div className="text-center">
                                                         <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                                        <p className='text-dark' style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                                        <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
                                                     </div>
                                                 ) : (
                                                     <>
                                                         {props.linkedObjects.length > 0 ? (
                                                             <>
-                                                                {relatedObjects.length > 0 && (
-                                                                    <>
-                                                                        <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
-                                                                            Related Objects ({relatedObjects.length})
+                                                                {/* Render Other Objects */}
+                                                                {otherObjects.map((item, index) => (
+                                                                    <div key={index}>
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                                                            className="p-1"
+                                                                        >
+                                                                          <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span> 
                                                                         </Typography>
-                                                                        <table id='createdByMe' className="table" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+
+                                                                        <table
+                                                                            id="createdByMe"
+                                                                            className="table table-hover"
+                                                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                                                                        >
                                                                             <tbody>
-                                                                                {relatedObjects.map((relatedItem, relatedIndex) => (
-                                                                                    <tr key={relatedIndex} onClick={() => props.previewObject(relatedItem)} style={{ cursor: 'pointer' }}>
+                                                                                {item.items.map((subItem, subIndex) => (
+                                                                                    <tr
+                                                                                        key={subIndex}
+                                                                                        onClick={() => handleRowClick(subItem)}
+                                                                                        onDoubleClick={() => openApp(subItem)}
+                                                                                        style={{ cursor: 'pointer' }}
+                                                                                    >
                                                                                         <td>
-                                                                                            <i className="fas fa-layer-group mx-1" style={{ fontSize: '15px', color: '#1C4690' }}></i>
-                                                                                            {relatedItem.title}
+                                                                                            {subItem.objectID === 0 ? (
+                                                                                                <>
+                                                                                                    <FileExtIcon
+                                                                                                        guid={props.selectedVault.guid}
+                                                                                                        objectId={subItem.id}
+                                                                                                        classId={subItem.classID}
+                                                                                                    />
+                                                                                                    {subItem.title}.
+                                                                                                    <FileExtText
+                                                                                                        guid={props.selectedVault.guid}
+                                                                                                        objectId={subItem.id}
+                                                                                                        classId={subItem.classID}
+                                                                                                    />
+                                                                                                </>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                                                                    {subItem.title}
+                                                                                                </>
+                                                                                            )}
                                                                                         </td>
                                                                                     </tr>
                                                                                 ))}
                                                                             </tbody>
                                                                         </table>
-                                                                    </>
-                                                                )}
-                                                                {relatedDocuments.length > 0 && (
+                                                                    </div>
+                                                                ))}
+
+                                                                {/* Render Documents Together */}
+                                                                {documents.length > 0 && (
                                                                     <>
-                                                                        <Typography variant="body2" style={{ fontSize: '10px', color: "#fff", backgroundColor: '#1C4690' }} className='p-1'>
-                                                                            Attached Documents ({relatedDocuments.length})
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                                                                            className="p-1"
+                                                                        >
+                                                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0?<>s</>:<></>}</span> <small>( {documents.length} )</small>
                                                                         </Typography>
-                                                                        <table id='createdByMe' className="table table-hover" style={{ fontSize: '11px', backgroundColor: '#ffff' }}>
+
+                                                                        <table
+                                                                            id="createdByMe"
+                                                                            className="table table-hover"
+                                                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                                                                        >
                                                                             <tbody>
-                                                                                {relatedDocuments.map((doc, docIndex) => (
-                                                                                    <tr key={docIndex} onClick={() => props.previewSublistObject(doc)} onDoubleClick={() => openApp(doc)} style={{ cursor: 'pointer' }}>
+                                                                                {documents.flatMap(item => item.items).map((subItem, index) => (
+                                                                                    <tr
+                                                                                        key={index}
+                                                                                        onClick={() => handleRowClick(subItem)}
+                                                                                        onDoubleClick={() => openApp(subItem)}
+                                                                                        style={{ cursor: 'pointer' }}
+                                                                                    >
                                                                                         <td>
-                                                                                            <FileExt guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
-                                                                                            {doc.title}.<FileExtText guid={props.selectedVault.guid} objectId={doc.id} classId={(doc.classId !== undefined ? doc.classId : doc.classID)} />
+                                                                                            {subItem.objectID === 0 ? (
+                                                                                                <>
+                                                                                                    <FileExtIcon
+                                                                                                        guid={props.selectedVault.guid}
+                                                                                                        objectId={subItem.id}
+                                                                                                        classId={subItem.classID}
+                                                                                                    />
+                                                                                                    {subItem.title}.
+                                                                                                    <FileExtText
+                                                                                                        guid={props.selectedVault.guid}
+                                                                                                        objectId={subItem.id}
+                                                                                                        classId={subItem.classID}
+                                                                                                    />
+                                                                                                </>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                                                                                                    {subItem.title}
+                                                                                                </>
+                                                                                            )}
                                                                                         </td>
                                                                                     </tr>
                                                                                 ))}
@@ -451,13 +569,16 @@ const ViewsList = (props) => {
                                                                 )}
                                                             </>
                                                         ) : (
-                                                            <p className='my-1 mx-1 text-center' style={{ fontSize: '11px' }}> No Relationships Found</p>
+                                                            <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                                                No Relationships Found
+                                                            </p>
                                                         )}
                                                     </>
                                                 )}
                                             </AccordionDetails>
                                         )}
                                     </Accordion>
+
                                 )}
                                 {item.type === "MFFolderContentItemTypePropertyFolder" && (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
@@ -481,43 +602,43 @@ const ViewsList = (props) => {
                 </>
             ) : (
                 <>
-                    {commonviews.length > 0 && (
-                        <>
-                            <h6 onClick={toggleCommonViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i> Common Views <small style={{ color: '#2a68af' }}>({commonviews.length})</small>
+                    {filteredCommonViews.length > 0 && (
+                        <div className='bg-white'>
+                            <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Common Views <small style={{ color: '#2a68af' }}>({filteredCommonViews.length})</small>
                             </h6>
                             {showCommonViewSublist && (
-                                <div style={{ height: '30vh',  overflowY: 'auto',marginLeft:'30px' }} className='p-3 shadow-lg text-dark'>
-                                    {commonviews.map((view) => (
+                                <div style={{ height: '30vh', overflowY: 'auto' }} className='p-1  text-dark bg-white'>
+                                    {filteredCommonViews.map((view) => (
                                         <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
                                             <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
                                                 <span className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
                                     ))}
                                 </div>
                             )}
-                        </>
+                          </div>
                     )}
-                    {otherviews.length > 0 && (
-                        <>
-                            <h6 onClick={toggleOtherViewSublist} className='mx-2 p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e8f9fa', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
+                    {filteredOtherViews.length > 0 && (
+                        <div className='bg-white'>
+                            <h6 onClick={toggleOtherViewSublist} className=' p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Other Views <small style={{ color: '#2a68af' }}>({filteredOtherViews.length})</small>
                             </h6>
                             {showOtherViewSublist && (
-                                <div style={{ height: '30vh',  overflowY: 'auto',marginLeft:'30px' }} className='p-3 shadow-lg text-dark'>
-                                    {otherviews.map((view) => (
+                                <div style={{ height: '30vh', overflowY: 'auto' }} className='p-1 text-dark bg-white'>
+                                    {filteredOtherViews.map((view) => (
                                         <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
                                             <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
+                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
                                                 <span className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
                                     ))}
                                 </div>
                             )}
-                        </>
+                        </div>
                     )}
                 </>
             )}
