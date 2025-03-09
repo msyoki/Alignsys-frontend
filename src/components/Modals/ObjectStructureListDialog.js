@@ -801,7 +801,7 @@ const ObjectStructureList = (props) => {
                                                                 multiline
                                                                 rows={4}
                                                                 size="small"
-                                                                className="my-1"
+                                                                className="my-1 bg-white"
                                                                 InputProps={{ style: { fontSize: '12px' } }}
                                                                 InputLabelProps={{ style: { fontSize: '12px' } }}
                                                             /></>}
@@ -857,6 +857,7 @@ const ObjectStructureList = (props) => {
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value)}
                                                                 displayEmpty
                                                                 fullWidth
+                                                                className='bg-white'
                                                             >
                                                                 <MenuItem value=""><em>None</em></MenuItem>
                                                                 <MenuItem value={true}>True</MenuItem>
@@ -871,7 +872,7 @@ const ObjectStructureList = (props) => {
                                                         {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
                                                             <input
                                                                 type="datetime-local"
-                                                                className="form-control"
+                                                                className="form-control bg-white"
                                                                 value={props.formValues[prop.propId] || ''}
                                                                 onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
                                                             /></>}

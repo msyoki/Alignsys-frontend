@@ -706,7 +706,7 @@ function AdminDashboard() {
                                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                                             transform: 'translateZ(0)',
                                             transition: 'transform 0.2s'
-                                            
+
 
                                         }}
                                         className='my-3'
@@ -714,29 +714,43 @@ function AdminDashboard() {
 
 
                                 </div>
-                                <div className='shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
-                                    <span className='p-2 mx-3'>  {user.first_name} {user.last_name}</span>
-                                </div>
-                                <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
-                                    <span className='p-2 mx-3'>  {user.organization} Admin Account </span>
-                                </div>
+                           
+                                <ul className="bottom-top menu-items">
+                                <li  className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  
+                                    <span className=' text-center' style={{ fontSize: '13px' }}>{user.first_name} {user.last_name}</span>
+                                    </div>
+                     
+                                </li>
+                                <li  className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                 
+                                    <span className=' text-center' style={{ fontSize: '13px' }}> {user.organization} Admin</span>
+                                    </div>
+                     
+                                </li>
+                                </ul>
                                 {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
                                     <span className='p-2 mx-3'>{user.organization}</span>
                                 </div> */}
-                               
-                                <ul className="menu-items" >
-                                    <li onClick={homePage} className="menu-item" style={{ marginTop: "220px" }}>
-                                        <i className="fas fa-house-user" style={{ fontSize: '18px' }}></i>
-                                        <span style={{ fontSize: '13px' }}>Back Home</span>
-                                    </li>
 
 
-                                    <li onClick={logoutUser} className="menu-item"
-                                    >
-                                        <i className="fas fa-sign-out-alt" style={{ fontSize: '18px' }} ></i>
-                                        <span style={{ fontSize: '13px' }}>Logout</span>
-                                    </li>
-                                </ul>
+                                <div>
+                                    <ul className="bottom-buttons">
+
+
+                                        <li onClick={homePage} className="menu-item main-li shadow-lg">
+                                            <i className="fas fa-house-user" style={{ fontSize: '20px' }}></i>
+                                            <span style={{ fontSize: '13px' }}>Back Home</span>
+                                        </li>
+
+                                        <li onClick={logoutUser} className="menu-item main-li shadow-lg">
+                                            <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }}></i>
+                                            <span style={{ fontSize: '13px' }}>Logout</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </>
                         )}
                     </div>
@@ -748,9 +762,9 @@ function AdminDashboard() {
                             <i style={{ fontSize: '18px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'}`} ></i>
                         </div>
                     </Tooltip>
-                    <div className='row container-fluid ' style={{height:'100Vh'}} >
+                    <div className='row container-fluid ' style={{ height: '100Vh' }} >
 
-                        <div className="col-lg-5 col-md-5 col-sm-12 text-dark " style={{ backgroundColor: '#e5e5e5'}}>
+                        <div className="col-lg-5 col-md-5 col-sm-12 text-dark " style={{ backgroundColor: '#e5e5e5' }}>
                             {/* Header Box */}
                             <Box
                                 sx={{
@@ -762,10 +776,10 @@ function AdminDashboard() {
                                     display: 'flex',
                                     alignItems: 'center', // Vertical alignment
                                     justifyContent: 'space-between', // Spacing between icon and text
-                                 
+
                                     padding: '12px', // Add padding for better spacing
                                 }}
-                                
+
                             >
 
                                 {/* <i
@@ -793,10 +807,10 @@ function AdminDashboard() {
                             <div
                                 style={{
                                     fontSize: '12px',
-                                  
+
                                     overflowY: 'auto', // Enable scrolling
                                     // border: '1px solid #ddd',
-                                    marginLeft:'20px'
+                                    marginLeft: '20px'
 
 
                                 }}

@@ -75,13 +75,13 @@ const Login = () => {
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="email">Email*</InputLabel>
+                <InputLabel htmlFor="email">Username*</InputLabel>
                 <Input
                   id="email"
                   name="email"
                   type="text"
                   required
-                  placeholder="User email address"
+                  placeholder="Username"
                   startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
                   style={{ fontSize: '14px' }}
                 />
@@ -144,7 +144,11 @@ const Login = () => {
           <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
 
             <img className="" src={logo2} alt="Loading" width="400px" />
+            <p className="text-center font-weight-italic responsive-font mb-2 mt-4">
+              <span>EMDS</span> Software Solution
+            </p>
           </div>
+         
           <div className="text-center" style={{ marginTop: 'auto' }}>
             {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
               <b>EMDS</b> Software Solution

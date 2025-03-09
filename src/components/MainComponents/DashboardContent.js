@@ -831,7 +831,7 @@ const DocumentList = (props) => {
 
       <div id="container" ref={containerRef} style={{ height: '100vh', display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd', overflowY: 'auto' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', backgroundColor: '#dedddd', minWidth: '38%' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', backgroundColor: '#dedddd', minWidth: '35%' }}>
           <Box
             style={{
               display: 'flex',
@@ -977,6 +977,7 @@ const DocumentList = (props) => {
                 placeholder="Quick search ..."
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
+                style={{borderRadius:'0px'}}
               />
 
               <button
@@ -1896,7 +1897,7 @@ const DocumentList = (props) => {
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', backgroundColor: '#dedddd', minWidth: '55%' }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', backgroundColor: '#dedddd', minWidth: '35%' }}>
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>

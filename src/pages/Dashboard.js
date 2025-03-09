@@ -15,7 +15,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-import logo from '../images/waica.png';
+import logo from '../images/TechEdgeLogo.png';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
@@ -634,135 +634,188 @@ function Dashboard() {
 
       <div className="dashboard">
         {/* Sidebar */}
-        <nav className={`sidebar ${sidebarOpen ? 'open' : 'closed' } `}>
-          {/* Sidebar content */}
-          <div className="sidebar-content" style={{ marginTop: '0%' }}>
+        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} `}>
+          <div className="sidebar-content">
             {sidebarOpen && (
               <>
-
+                {/* Logo Section */}
                 <div
-                 
-                  className=" d-flex flex-column justify-content-center align-items-center  bg-white"
+                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg"
+                  style={{
+                    height: "60px", // Fixed height (adjust as needed)
+                    minHeight: "61px", // Prevent shrinking
+                    maxHeight: "61px", // Prevent expansion
+                    overflow: "hidden", // Prevent content from affecting height
+                  }}
                 >
                   <img
                     src={logo}
                     alt="Organization logo"
-                    className=""
+                    className="logo"
                     style={{
                       width: "auto",
-                      maxWidth: "105px",
-                      height: "61px",
+                      maxWidth: "80%",
+                      maxHeight: "48px",
                       objectFit: "contain",
                     }}
                   />
-                  {/* <p className="text-white text-center  my-2 mx-4" style={{ fontSize: "12px"}}>
-                    Organization Logo
-                  </p> */}
-
                 </div>
 
 
-
-                {/* <div className='text-center mt-0 mb-0 p-1 shadow-lg' style={{ textTransform: 'uppercase' }}>
-                  <span className='mx-3' style={{ fontSize: '12px' }}>
-                    {user.organization} 
-                  </span>
-                </div>
-                <div className='text-center mt-0 mb-0 p-1  shadow-lg' >
-                  <span className='mx-3' style={{ fontSize: '12px' }}>{user.first_name} {user.last_name}  </span>
-
-                </div> */}
-
-
-                <ul className="bottom-top menu-items">
-                  <li onClick={getVaultObjects2} className="menu-item main-li " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <i className="fas fa-plus-circle" style={{ fontSize: '18px' }}></i>
-                      <span style={{ fontSize: '13px' }}>Create</span>
+                {/* Menu Items */}
+                <ul className="menu-items">
+                  <li
+                    onClick={getVaultObjects2}
+                    className="menu-item main-li shadow-lg"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 15px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <i className="fas fa-plus-circle" style={{ fontSize: "18px" }}></i>
+                      <span style={{ fontSize: "14px" }}>Create</span>
                     </div>
-                    {isSublistVisible && vaultObjectsList !== null ?  <i className="fas fa-angle-up" style={{ marginLeft: 'auto' }}></i>: <i className="fas fa-angle-down" style={{ marginLeft: 'auto' }}></i>}
-                   
+                    <i
+                      className={`fas ${isSublistVisible ? "fa-angle-up" : "fa-angle-down"}`}
+                      style={{ transition: "transform 0.3s ease-in-out" }}
+                    ></i>
                   </li>
 
+                  {/* Sublist with Smooth Animation */}
+                  <List
+                    dense
+                    disablePadding
+                    className="shadow-lg"
+                    sx={{
+                      color: "#fff",
+                      maxHeight: isSublistVisible ? "280px" : "0",
+                      overflowY: "auto",
+                      width: "100%",
+                      opacity: isSublistVisible ? "1" : "0",
+                      transition: "max-height 0.4s ease, opacity 0.3s ease",
+                      padding: isSublistVisible ? "10px 20px" : "0",
+                      backgroundColor: "#2757aa",
 
-                  {isSublistVisible && vaultObjectsList !== null && (
-                    <List
-                      dense
-                      disablePadding
-                      sx={{
-                        color: "#1C4690",
-                        maxHeight: isSublistVisible ? "250px" : "0",
-                        overflowY: "auto",
-                        width: "100%",
-                  
-                        opacity: isSublistVisible ? "1" : "0",
-                        transition: "max-height 0.3s ease, opacity 0.3s ease, background-color 0.3s ease",
-                        padding: 0,
-                        gap: "4px",
-                        // borderRadius:'0px 0px 8px 8px'
-                      }}
-                    >
-                      {vaultObjectsList.map((item) => (
-                        <ListItem
-                          key={item.objectid}
-                          onMouseEnter={() => setHoveredItem(item.objectid)}
-                          onMouseLeave={() => setHoveredItem(null)}
-                          onClick={() => fetchItemData(item.objectid, item.namesingular)}
-                          sx={{
-                            textAlign: "start",
-                            cursor: "pointer",
-                            transition: "background-color 0.3s, color 0.3s",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                            backgroundColor: hoveredItem === item.objectid ? "#e0fbfc" : "#fff",
-                            py: 0,
-                            px: 2,
-                            margin: 0,
-                            borderBottom: "1px solid #e7ecef",
-                            height:'25px',
+                      // Move scrollbar to the left
+                      direction: "rtl",
 
-                         
-                          }}
-                          className='shadow-lg'
-                        >
-                          <ListItemIcon sx={{ minWidth: "20px", color: "#2a68af" }}>
-                            <i className="fas fa-folder-plus" style={{ color: "#2a68af", fontSize: "14px" }}></i>
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={item.namesingular}
-                            primaryTypographyProps={{ fontSize: "11px" }}
-                            sx={{ color: "#000", margin: 0, padding: 0 }}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
+                      // Keep content aligned normally
+                      "& *": {
+                        direction: "ltr",
+                      },
+
+                      // Modern Scrollbar Styling (ChatGPT-like)
+                      "&::-webkit-scrollbar": {
+                        width: "3px",
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        background: "rgba(255, 255, 255, 0.15)",
+                        borderRadius: "10px",
+                        boxShadow: "inset 0 0 5px rgba(255, 255, 255, 0.2)", // Subtle glow effect
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        background: "rgba(255, 255, 255, 0.6)",
+                        borderRadius: "10px",
+                        minHeight: "25px",
+                        transition: "background 0.3s",
+                        border: "2px solid rgba(255, 255, 255, 0.2)", // Outline effect
+                      },
+                      "&::-webkit-scrollbar-thumb:hover": {
+                        background: "#ffffff",
+                        boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
+                      },
+
+                      // Scrollbar Arrows (like ChatGPT)
+                      "&::-webkit-scrollbar-button:single-button": {
+                        display: "block",
+                        height: "10px",
+                        background: "rgba(255, 255, 255, 0.2)",
+                        borderRadius: "4px",
+                      },
+                      "&::-webkit-scrollbar-button:single-button:hover": {
+                        background: "rgba(255, 255, 255, 0.4)",
+                      },
+
+                      // Up arrow
+                      "&::-webkit-scrollbar-button:single-button:vertical:decrement": {
+                        backgroundImage:
+                          "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 14l5-5 5 5H7z\"/></svg>')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                      },
+
+                      // Down arrow
+                      "&::-webkit-scrollbar-button:single-button:vertical:increment": {
+                        backgroundImage:
+                          "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 10l5 5 5-5H7z\"/></svg>')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                      },
+                    }}
+                  >
+
+
+                    {isSublistVisible &&
+                      vaultObjectsList !== null &&
+                      vaultObjectsList
+                        .filter((item) => item.userPermission?.attachObjectsPermission)
+                        .map((item) => (
+                          <ListItem
+                            key={item.objectid}
+                            onMouseEnter={() => setHoveredItem(item.objectid)}
+                            onMouseLeave={() => setHoveredItem(null)}
+                            onClick={() => fetchItemData(item.objectid, item.namesingular)}
+                            sx={{
+                              textAlign: "start",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                              backgroundColor: hoveredItem === item.objectid ? "#e0fbfc" : "#2757aa",
+                              color: hoveredItem === item.objectid ? "#555" : "#fff",
+                              py: 0,
+                              px: 1, // Reduced padding
+                              margin: "2px 0", // Smaller margin
+                              height: "22px", // Reduced height for a compact look
+                              boxShadow: hoveredItem === item.objectid ? "0px 2px 5px rgba(0, 0, 0, 0.1)" : "none",
+                            }}
+                            className="shadow-lg"
+                          >
+                            <ListItemText
+                              primary={item.namesingular}
+                              primaryTypographyProps={{ fontSize: "10px" }} // Smaller text size
+                              sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
+                            />
+                          </ListItem>
+
+                        ))}
+                  </List>
                 </ul>
+
+                {/* Bottom Buttons */}
                 <div>
                   <ul className="bottom-buttons">
-
                     {user.is_admin === "True" && (
-                      <li onClick={adminPage} className="menu-item main-li ">
-                        <i className="fas fa-user-shield" style={{ fontSize: '18px' }}></i>
-                        <span style={{ fontSize: '13px' }}>Admin</span>
+                      <li onClick={adminPage} className="menu-item main-li shadow-lg">
+                        <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
+                        <span style={{ fontSize: "14px" }}>Admin</span>
                       </li>
                     )}
-                    <li onClick={logoutUser} className="menu-item main-li">
-                      <i className="fas fa-sign-out-alt" style={{ fontSize: '18px' }}></i>
-                      <span style={{ fontSize: '13px' }}>Logout</span>
+                    <li onClick={logoutUser} className="menu-item main-li shadow-lg">
+                      <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
+                      <span style={{ fontSize: "14px" }}>Logout</span>
                     </li>
                   </ul>
                 </div>
-
-
-
-
               </>
             )}
           </div>
+        </nav>
 
-        </nav >
 
 
         {/* Content Section */}
@@ -770,7 +823,7 @@ function Dashboard() {
         }>
           <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
             <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
-              <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right' } mx-2`} ></i>
+              <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
             </div>
           </Tooltip>
           <DashboardContent

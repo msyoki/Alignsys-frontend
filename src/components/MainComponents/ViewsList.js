@@ -258,7 +258,7 @@ const ViewsList = (props) => {
                 setOtherViews(sortedOtherViews);
                 setCommonViews(sortedCommonViews);
                 console.log(sortedOtherViews)
-                console.log(sortedOtherViews)
+                console.log(sortedCommonViews)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -621,14 +621,14 @@ const ViewsList = (props) => {
                             )}
                           </div>
                     )}
-                    {filteredOtherViews.length > 0 && (
+                    {otherviews.length > 0 && (
                         <div className='bg-white'>
                             <h6 onClick={toggleOtherViewSublist} className=' p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Other Views <small style={{ color: '#2a68af' }}>({filteredOtherViews.length})</small>
+                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
                             </h6>
                             {showOtherViewSublist && (
                                 <div style={{ height: '30vh', overflowY: 'auto' }} className='p-1 text-dark bg-white'>
-                                    {filteredOtherViews.map((view) => (
+                                    {otherviews.map((view) => (
                                         <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
                                             <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                                                 <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
