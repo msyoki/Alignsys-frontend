@@ -1065,7 +1065,7 @@ const DocumentList = (props) => {
             index={0}
             style={{
               backgroundColor: '#dedddd',
-              height: '80vh',
+              height: '100vh',
               padding: '0%',
               width: '100%',
               overflowY: 'auto'
@@ -1077,8 +1077,8 @@ const DocumentList = (props) => {
             ) : (
               <>
                 {props.data.length > 0 ? (
-                  <div className='bg-white'>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                  <div>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                       <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
                       <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
@@ -1154,7 +1154,7 @@ const DocumentList = (props) => {
                             </AccordionSummary>
                           )}
                           {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
                               {props.loadingobjects ? (
                                 <div className="text-center">
                                   <CircularProgress style={{ width: '20px', height: '20px' }} />
@@ -1172,7 +1172,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
                                           </Typography>
 
                                           <table
@@ -1225,7 +1225,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
                                           </Typography>
 
                                           <table
@@ -1271,7 +1271,7 @@ const DocumentList = (props) => {
                                       )}
                                     </>
                                   ) : (
-                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
                                       No Relationships Found
                                     </p>
                                   )}
@@ -1330,8 +1330,8 @@ const DocumentList = (props) => {
             ) : (
               <>
                 {props.recentData.length > 0 ? (
-                  <div className='bg-white'>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                  <div >
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
@@ -1406,7 +1406,7 @@ const DocumentList = (props) => {
                             </AccordionSummary>
                           )}
                           {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
                               {props.loadingobjects ? (
                                 <div className="text-center">
                                   <CircularProgress style={{ width: '20px', height: '20px' }} />
@@ -1424,7 +1424,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                             <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
                                           </Typography>
 
                                           <table
@@ -1477,7 +1477,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
                                           </Typography>
 
                                           <table
@@ -1523,7 +1523,7 @@ const DocumentList = (props) => {
                                       )}
                                     </>
                                   ) : (
-                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
                                       No Relationships Found
                                     </p>
                                   )}
@@ -1563,8 +1563,8 @@ const DocumentList = (props) => {
             ) : (
               <>
                 {props.assignedData.length > 0 ? (
-                  <div className='bg-white'>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                  <div >
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
@@ -1639,7 +1639,7 @@ const DocumentList = (props) => {
                             </AccordionSummary>
                           )}
                           {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#dedddd' }} className="p-2 shadow-sm mx-3">
+                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
                               {props.loadingobjects ? (
                                 <div className="text-center">
                                   <CircularProgress style={{ width: '20px', height: '20px' }} />
@@ -1657,7 +1657,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span>
+                                             <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
                                           </Typography>
 
                                           <table
@@ -1710,7 +1710,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
                                           </Typography>
 
                                           <table
@@ -1756,7 +1756,7 @@ const DocumentList = (props) => {
                                       )}
                                     </>
                                   ) : (
-                                    <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
                                       No Relationships Found
                                     </p>
                                   )}
@@ -1795,8 +1795,8 @@ const DocumentList = (props) => {
             ) : (
               <>
                 {props.deletedData.length > 0 ? (
-                  <div className='bg-white'>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc' }}>
+                  <div >
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})

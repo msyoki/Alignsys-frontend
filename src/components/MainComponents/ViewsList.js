@@ -364,7 +364,7 @@ const ViewsList = (props) => {
             <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
             {selectedViewObjects.length > 0 ? (
                 <>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
 
                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                         <span onClick={backToViews} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
@@ -380,7 +380,7 @@ const ViewsList = (props) => {
                             </React.Fragment>
                         ))}
                     </h6>
-                    <div style={{ height: '60vh', overflowY: 'auto'}} className=' text-dark bg-white p-3'>
+                    <div style={{ height: '60vh', overflowY: 'auto'}} className=' text-dark '>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -452,11 +452,12 @@ const ViewsList = (props) => {
 
                                       
                                         {props.linkedObjects && (
-                                            <AccordionDetails style={{ backgroundColor: '#e5e5e5' }} className="p-2 shadow-sm mx-3">
+                                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} >
                                                 {props.loadingobjects ? (
                                                     <div className="text-center">
-                                                        <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                                        <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                                       
+                                                        <p className="text-white" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                                                        <CircularProgress style={{ width: '15px', height: '15px', color:'#fff' }} />
                                                     </div>
                                                 ) : (
                                                     <>
@@ -470,7 +471,7 @@ const ViewsList = (props) => {
                                                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                                                             className="p-1"
                                                                         >
-                                                                          <i class="fas fa-stream mx-1"></i> <span>{item.objectTitle}</span> 
+                                                                           <span>{item.objectTitle} ( {item.items.length} )</span> 
                                                                         </Typography>
 
                                                                         <table
@@ -523,7 +524,7 @@ const ViewsList = (props) => {
                                                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                                                             className="p-1"
                                                                         >
-                                                                            <i class="fas fa-stream mx-1"></i><span>Document{documents.length > 0?<>s</>:<></>}</span> <small>( {documents.length} )</small>
+                                                                           <span>Document{documents.length > 0?<>s</>:<></>}</span> <small>( {documents.length} )</small>
                                                                         </Typography>
 
                                                                         <table
@@ -569,7 +570,7 @@ const ViewsList = (props) => {
                                                                 )}
                                                             </>
                                                         ) : (
-                                                            <p className="my-1 mx-1 text-center" style={{ fontSize: '11px' }}>
+                                                            <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px', backgroundColor:'#2a68af' }}>
                                                                 No Relationships Found
                                                             </p>
                                                         )}

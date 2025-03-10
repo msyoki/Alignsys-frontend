@@ -75,13 +75,13 @@ const Login = () => {
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="email">Username*</InputLabel>
+                <InputLabel htmlFor="email">Email*</InputLabel>
                 <Input
                   id="email"
                   name="email"
-                  type="text"
+                  type="email"
                   required
-                  placeholder="Username"
+                  placeholder="Email"
                   startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
                   style={{ fontSize: '14px' }}
                 />
@@ -145,7 +145,7 @@ const Login = () => {
 
             <img className="" src={logo2} alt="Loading" width="400px" />
             <p className="text-center font-weight-italic responsive-font mb-2 mt-4">
-              <span>EMDS</span> Software Solution
+              <span>EDMS</span> Software Solution
             </p>
           </div>
          

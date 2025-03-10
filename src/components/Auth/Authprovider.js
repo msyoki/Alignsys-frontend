@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         e.preventDefault()
         try {
             const response = await axios.post(`${constants.auth_api}/api/token/`, {
-                username: e.target.email.value,
+                email: e.target.email.value,
                 password: e.target.password.value
             });
 
