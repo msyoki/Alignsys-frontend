@@ -324,7 +324,8 @@ const ViewsList = (props) => {
     const trimTitle = (title) => {
         const maxLength = 12; // Set your desired max length
         if (title.length > maxLength) {
-            return title.substring(0, maxLength) + '...';
+            // return title.substring(0, maxLength) + '...';
+            return title
         }
         return title;
     };
@@ -332,7 +333,8 @@ const ViewsList = (props) => {
     const trimTitle2 = (title) => {
         const maxLength = 50; // Updated to match the desired max length
         if (title.length > maxLength) {
-            return title.substring(0, maxLength) + '...';
+            // return title.substring(0, maxLength) + '...';
+            return title
         }
         return title;
     };
@@ -380,7 +382,7 @@ const ViewsList = (props) => {
                             </React.Fragment>
                         ))}
                     </h6>
-                    <div style={{ height: '60vh', overflowY: 'auto'}} className=' text-dark '>
+                    <div  className='p-2 text-dark'  style={{marginLeft:'20px', height:'60vh', overflowY:'auto'}}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -582,18 +584,18 @@ const ViewsList = (props) => {
 
                                 )}
                                 {item.type === "MFFolderContentItemTypePropertyFolder" && (
-                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
+                                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px', margin:'0%' }}>
                                         <li className='mx-4' onClick={() => fetchViewData(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                            <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
-                                            <span className='list-text'>{item.title}</span>
+                                            <i className='fas fa-folder-plus mx-2 my-1' style={{ color: '#6a994e', fontSize: '20px' }}></i>
+                                            <span style={{fontSize:'12px'}} className='list-text'>{item.title}</span>
                                         </li>
                                     </ul>
                                 )}
                                 {item.type === "MFFolderContentItemTypeViewFolder" && (
                                     <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-                                        <li className='mx-4' onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                        <li className='mx-4 ' onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                                             <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
-                                            <span className='list-text'>{item.title}</span>
+                                            <span style={{fontSize:'12px'}} className='list-text'>{item.title}</span>
                                         </li>
                                     </ul>
                                 )}
@@ -605,16 +607,16 @@ const ViewsList = (props) => {
                 <>
                     {filteredCommonViews.length > 0 && (
                         <div className='bg-white'>
-                            <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
+                            <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
                                 <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Common Views <small style={{ color: '#2a68af' }}>({filteredCommonViews.length})</small>
                             </h6>
                             {showCommonViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto' }} className='p-1  text-dark bg-white'>
+                                <div style={{ height: '30vh', overflowY: 'auto', marginLeft:'20px' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view) => (
-                                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
-                                            <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                                <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                                <span className='list-text'>{view.viewName}</span>
+                                        <ul style={{ listStyleType: 'none', padding: 0}} key={view.viewName}>
+                                            <li  onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                                <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#2a68af', fontSize: '20px' }} />
+                                                <span style={{fontSize:'13px'}} className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
                                     ))}
@@ -624,16 +626,16 @@ const ViewsList = (props) => {
                     )}
                     {otherviews.length > 0 && (
                         <div className='bg-white'>
-                            <h6 onClick={toggleOtherViewSublist} className=' p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
+                            <h6 onClick={toggleOtherViewSublist} className=' p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc', cursor: 'pointer' }}>
                                 <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
                             </h6>
                             {showOtherViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto' }} className='p-1 text-dark bg-white'>
+                                <div style={{ height: '30vh', overflowY: 'auto' , marginLeft:'20px' }} className=' text-dark bg-white'>
                                     {otherviews.map((view) => (
-                                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }} key={view.viewName}>
-                                            <li className='mx-4' onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
+                                        <ul style={{ listStyleType: 'none', padding: 0}} key={view.viewName}>
+                                            <li onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
                                                 <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                                <span className='list-text'>{view.viewName}</span>
+                                                <span style={{fontSize:'13px'}} className='list-text'>{view.viewName}</span>
                                             </li>
                                         </ul>
                                     ))}

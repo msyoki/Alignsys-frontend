@@ -18,11 +18,11 @@ const Loading = () => (
   }}
 >
   <Box className="my-3 text-center">
-    <img src={logo} style={{ width: "200px", height: "auto" }} />
+    <img src={logo} style={{ width: "250px", height: "auto" }} />
   </Box>
 
   <Box className="text-center">
-    <CircularProgress size="50px" style={{ color: "#fff" }} />
+    <CircularProgress size="40px" style={{ color: "#fff" }} />
   </Box>
 </div>
 

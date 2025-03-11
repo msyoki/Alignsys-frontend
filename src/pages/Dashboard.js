@@ -15,7 +15,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-import logo from '../images/TechEdgeLogo.png';
+import logo from '../images/waica.png';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
@@ -445,9 +445,11 @@ function Dashboard() {
           `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
           { headers: { accept: '*/*' } }
         );
-        // console.log('Templates response:', response.data);
-
+        console.log('Templates response:', response.data);
+        console.log(selectedVault.guid)
         setTemplates(response.data);
+
+      
         setTemplateModalOpen(true); // Opens the template modal
         setLoadingDialog(false)
       } catch (error) {

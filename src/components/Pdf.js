@@ -289,7 +289,7 @@ const PDFViewerPreview = (props) => {
         </div>
       </div>
 
-      <div className="pdfrender" style={{ display: 'flex', height: '90vh', backgroundColor: '#e5e6e4' }}>
+      <div className="pdfrender" style={{ display: 'flex', height: '100vh', backgroundColor: '#e5e6e4' }}>
         {isAsideOpen && (
           <aside style={{
             position: 'relative',
@@ -378,13 +378,13 @@ const PDFViewerPreview = (props) => {
               >
                 <Page
                   pageNumber={pageIndex + 1}
-                  scale={getScaleForPage(pageIndex + 1)}
+                  scale={zoom}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                   className="page-container shadow-sm"
                   onLoadSuccess={onPageLoadSuccess}
                   style={{
-                    transform: `scale(${zoom})`,
+                  
                     transformOrigin: 'top left',
                     position: 'relative',
                     zIndex: 1,

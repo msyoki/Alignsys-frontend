@@ -48,8 +48,8 @@ const CommentsComponent = (props) => {
   };
 
   return (
-    <div className={props.selectedObject.id ? "bg-white p-4 shadow-lg" : "p-4"} style={{ height: '100%' }}>
-      <span style={{ fontSize: '14px' }}>
+    <div  style={{ height: '100vh' }}>
+      {/* <span style={{ fontSize: '14px' }}>
         {props.selectedObject.id && (
           <>
             Refresh Comments
@@ -68,12 +68,49 @@ const CommentsComponent = (props) => {
             ></span>
           </>
         )}
-      </span>
+      </span> */}
+        {props.selectedObject.id && (
+      <Box
+        className="p-2"
+        sx={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: 'important 12px',
+          backgroundColor: '#edf2f4',
+          height: '53px',
+          fontSize:'14px'
+
+        }}
+      >
+      
+
+          <>
+            Refresh Comments
+            <span
+              className="fas fa-sync-alt btn-sm mx-2"
+              onClick={refreshComments}
+              style={{
+                cursor: 'pointer',
+                padding: '5px',
+                backgroundColor: '#f0f0f0',
+                borderRadius: '5px',
+                transition: 'background-color 0.3s',
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e0e0e0')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+            ></span>
+          </>
+
+       
+
+      </Box>
+       )}
 
       {props.selectedObject.id && props.comments.length > 0 ? (
         <ul
-          style={{ listStyle: 'none', padding: 0, height: '40vh', overflowY: 'scroll' }}
-          className="p-3 my-2"
+          style={{ listStyle: 'none', padding: 0, height: '60vh', overflowY: 'scroll' }}
+          className="p-3 my-2 bg-white"
         >
           {props.comments.map((comment, index) => {
             const [boldText, regularText] = comment.coment.split(':');
@@ -102,41 +139,48 @@ const CommentsComponent = (props) => {
           })}
         </ul>
       ) : (
-        <Box
-          sx={
-            props.selectedObject.id
-              ? { width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }
-              : { width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }
-          }
-        >
-          <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: '#2757aa' }}></i>
-          {props.loadingcomments ? (
-            <>
-              <Box sx={{ width: '50%' }} className="my-2">
-                <LinearProgress />
+        <>
+          {
+            !props.selectedObject.id ?
+              <Box
+                sx={
+                  props.selectedObject.id
+                    ? { width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }
+                    : { width: '100%', marginTop: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mx: 'auto' }
+                }
+              >
+                <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: '#2757aa' }}></i>
+                {props.loadingcomments ? (
+                  <>
+                    <Box sx={{ width: '50%' }} className="my-2">
+                      <LinearProgress />
+                    </Box>
+                    <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>
+                      Searching comments...
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="body2"
+                      className='my-2'
+                      sx={{ textAlign: 'center' }}>
+                      Comments
+                    </Typography>
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                      {props.selectedObject.id ? "No comments found" : "Please select an object to preview comments"}
+                    </Typography>
+                  </>
+                )}
               </Box>
-              <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>
-                Searching comments...
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Typography variant="body2"
-                className='my-2'
-                sx={{ textAlign: 'center' }}>
-                Comments
-              </Typography>
-              <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
-                {props.selectedObject.id ? "No comments found" : "Please select an object to preview comments"}
-              </Typography>
-            </>
-          )}
-        </Box>
+              :
+              <></>
+          }
+        </>
       )}
 
 
       {props.selectedObject.id && (
-        <form onSubmit={handleSubmit} className="mt-3">
+        <form onSubmit={handleSubmit} className=" p-2">
           <div className="form-group">
             <textarea
               className="form-control"

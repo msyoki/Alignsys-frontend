@@ -20,7 +20,7 @@ import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
-
+import { Tooltip } from '@mui/material';
 
 
 function CustomTabPanel({ children, value, index, ...other }) {
@@ -33,7 +33,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3, height: '100%', overflowY: 'auto' }}>
+        <Box sx={{ height: '100%', overflowY: 'auto' }}>
           {children}
         </Box>
       )}
@@ -225,7 +225,7 @@ export default function ObjectData(props) {
             value={value}
             onChange={handleChange}
             aria-label="Horizontal tabs example"
-            sx={{ borderColor: 'divider'}}
+            sx={{ borderColor: 'divider' }}
             className='bg-white'
           >
             <Tab
@@ -233,7 +233,7 @@ export default function ObjectData(props) {
               sx={{
 
                 width: 'auto',
-                height:'61px',
+                height: '61px',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label="Metadata"
@@ -244,7 +244,7 @@ export default function ObjectData(props) {
               sx={{
 
                 width: 'auto',
-                height:'61px',
+                height: '61px',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label="Preview"
@@ -255,7 +255,7 @@ export default function ObjectData(props) {
               sx={{
 
                 width: 'auto',
-                height:'61px',
+                height: '61px',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label="AI Chatbot"
@@ -266,7 +266,7 @@ export default function ObjectData(props) {
               sx={{
 
                 width: 'auto',
-                height:'61px',
+                height: '61px',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label="Comments"
@@ -281,10 +281,10 @@ export default function ObjectData(props) {
             index={0}
             style={{
               backgroundColor: '#dedddd',
-              height: '100%',
+
               padding: '0%',
               width: '100%',
-              overflowY: 'auto'
+
             }}
           >
             {props.previewObjectProps.length < 1 && (
@@ -337,10 +337,12 @@ export default function ObjectData(props) {
 
             {props.previewObjectProps.length > 0 && (
               <Box>
+
                 <Box
-                  className="p-2 bg-white shadow-lg my-1"
+                  className="  shadow-lg p-2"
                   display="flex"
                   flexDirection="column"
+                  sx={{ height: '53px', backgroundColor: '#edf2f4' }}
                 >
                   <Box
                     className="input-group"
@@ -348,10 +350,11 @@ export default function ObjectData(props) {
                       width: '100%',
                       display: 'flex',
                       alignItems: 'center',
-                      fontSize: '13px'
+                      fontSize: 'important 12px'
+
                     }}
                   >
-                    <span className='text-center mx-2' style={{ color: '#1d3557' }}>
+                    <span className='text-center ' style={{ color: '#1d3557' }}>
                       {props.selectedObject && (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
                         <>
                           <FileExtIcon
@@ -359,7 +362,7 @@ export default function ObjectData(props) {
                             objectId={props.selectedObject.id}
                             classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
                           />
-                          <span>{props.selectedObject.title}.
+                          <span style={{ fontSize: '12px' }}>{props.selectedObject.title}.
                             <FileExtText
                               guid={props.vault.guid}
                               objectId={props.selectedObject.id}
@@ -371,150 +374,55 @@ export default function ObjectData(props) {
                       ) : (
                         <>
                           <i className="fas fa-layer-group mx-2" style={{ fontSize: '15px', color: '#2757aa' }}></i>
-                          <span>{props.selectedObject.title}</span>
+                          <span style={{ fontSize: '12px' }}>{props.selectedObject.title}</span>
 
                         </>
                       )}
                     </span>
-                  </Box>
-
-                  <Box
-                    className='input-group my-2'
-                    sx={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'flex-end',
-                      fontSize: '10px'
-                    }}
-                  >
-                    {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
-                      <>
-                        <Box>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="primary"
-                            onClick={() => props.updateObjectMetadata()}
-                            sx={{ textTransform: 'none', mr: 1 }}
-                          >
-                            <i
-                              className="fas fa-save"
-                              style={{
-                                fontSize: '11px',
-                                cursor: 'pointer',
-                                marginRight: '4px'
-                              }}
-                            />
-                            <small>Save</small>
-                          </Button>
-
-
-                        </Box>
-
-                        <Box>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="warning"
-                            onClick={() => props.discardChange()}
-                            sx={{ textTransform: 'none', mr: 1 }}
-                          >
-                            <i
-                              className="fas fa-window-close"
-                              style={{
-                                fontSize: '11px',
-                                cursor: 'pointer',
-                                marginRight: '4px'
-                              }}
-                            />
-                            <small>Discard</small>
-                          </Button>
-                        </Box>
-                      </>
-                    )}
-
-                    {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                      <Box className='mx-1'>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="primary"
-                          onClick={downloadFile}
-                          sx={{ textTransform: 'none', ml: 1 }}
-                        >
-                          <i
-                            className="fas fa-download"
-                            style={{
-                              fontSize: '11px',
-                              cursor: 'pointer',
-                              marginRight: '4px'
-                            }}
-                          />
-                          <small>Download</small>
-                        </Button>
-                      </Box>
-                    )}
-
-                    {props.selectedObject.userPermission.deletePermission ?
-                      <Box className='mx-1'>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="error"
-                          onClick={() => setDeleteDialogOpen(true)}
-                          sx={{ textTransform: 'none', mr: 1 }}
-                        >
-                          <i
-                            className="fas fa-trash"
-                            style={{
-                              fontSize: '11px',
-                              cursor: 'pointer',
-                              marginRight: '4px'
-                            }}
-                          />
-                          <small>Delete</small>
-                        </Button>
-                      </Box>
-                      : <></>}
                     {props.comments.length > 0 && (
-                      <div
-                        style={{
-                          position: 'relative',
-                          display: 'inline-block'
-                        }}
-                        className='mx-2'
-                      >
-                        <span
-                          className="fas fa-comment-alt mx-1 go-to-comments"
+                      <Tooltip title='Comments'>
+                        <div
                           style={{
-                            color: '#2757aa',
-                            fontSize: '20px',
-                            cursor: 'pointer'
+                            position: 'relative',
+                            display: 'inline-block'
                           }}
-                          onClick={navigateToComments}
-                        />
-                        <span
-                          style={{
-                            position: 'absolute',
-                            top: '-5px',
-                            right: '-5px',
-                            backgroundColor: '#e63946',
-                            color: '#fff',
-                            borderRadius: '50%',
-                            padding: '2px 6px',
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            lineHeight: '1',
-                            minWidth: '16px',
-                            textAlign: 'center'
-                          }}
+                          className='mx-3'
                         >
-                          {props.comments.length}
-                        </span>
-                      </div>
+                          <span
+                            className="fas fa-comment-alt mx-1 go-to-comments"
+                            style={{
+                              // color: '#2757aa',
+                              fontSize: '20px',
+                              cursor: 'pointer'
+                            }}
+                            onClick={navigateToComments}
+                          />
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '-5px',
+                              right: '-5px',
+                              backgroundColor: '#e63946',
+                              color: '#fff',
+                              borderRadius: '50%',
+                              padding: '2px 6px',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              lineHeight: '1',
+                              minWidth: '16px',
+                              textAlign: 'center'
+                            }}
+                          >
+                            {props.comments.length}
+                          </span>
+                        </div>
+                      </Tooltip>
                     )}
                   </Box>
+
+
                 </Box>
+
 
 
                 <Box
@@ -528,184 +436,205 @@ export default function ObjectData(props) {
                   }}
                 >
 
+
                   <List sx={{ p: 0 }}>
                     <>
                       <ListItem sx={{ p: 0 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                           <Typography
                             className='my-2'
                             variant="body2"
                             sx={{
-                              color: '#4f5d75',
-                              // fontWeight: 'bold',
-                              flexBasis: '40%',
+                              color: '#1C4690',
+
+                              flexBasis: '35%',
                               fontSize: '12px',
-                              textAlign: 'end',
-                              alignSelf: 'center'
+                              textAlign: 'end'
                             }}
                           >
                             Class:
                           </Typography>
-                          <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', color: '#2757aa' }}>
+                          <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1, mt: 1 }}>
                             <span>{getPropValue('Class')}</span>
                           </Box>
                         </Box>
                       </ListItem>
+                      <Box sx={{ fontSize: '12px' }}> {/* Global font size */}
+                        {filteredProps.map((item, index) => (
+                          <ListItem key={index} sx={{ p: 0 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                              <Typography
+                                className='my-2'
+                                variant="body2"
+                                sx={{
+                                  color: '#1C4690',
 
-                      {filteredProps.map((item, index) => (
-                        <ListItem key={index} sx={{ p: 0 }}>
+                                  flexBasis: '35%',
+                                  fontSize: '12px',
+                                  textAlign: 'end'
+                                }}
+                              >
+                                {item.propName} {item.isRequired && <span className="text-danger"> *</span>} :
+                              </Typography>
+                              <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1 }}>
+                                <>
+                                  {item.isAutomatic || !item.userPermission.editPermission ?
+                                    <>
+                                      <Typography
+                                        className='my-2'
+                                        variant="body2"
+                                        sx={{
+                                          fontSize: '11px'
+                                        }}
+
+                                      >
+                                        {item.value}
+                                      </Typography>
+                                    </> :
+                                    <>
+                                      {item.propName === 'Class' && <>{item.value}</>}
+
+                                      {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating' || item.datatype === 'MFDatatypeInteger') && !item.isHidden && (
+                                        <input
+                                          value={props.formValues?.[item.id]?.value || ''}
+                                          placeholder={item.value}
+                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                          className='form-control form-control-sm my-1'
+                                          disabled={item.isAutomatic}
+                                          style={{ fontSize: 'inherit' }}
+                                        />
+                                      )}
+
+                                      {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
+                                        <textarea
+                                          placeholder={item.value}
+                                          value={props.formValues?.[item.id]?.value || ''}
+                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                          rows={2}
+                                          className="form-control form-control-sm my-1"
+                                          disabled={item.isAutomatic}
+                                          style={{ fontSize: 'inherit' }}
+                                        />
+                                      )}
+
+                                      {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
+                                        <input
+                                          placeholder={item.value}
+                                          type="date"
+                                          value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                          className='form-control form-control-sm my-1'
+                                          disabled={item.isAutomatic}
+                                          style={{ fontSize: 'inherit' }}
+                                        />
+                                      )}
+
+                                      {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
+                                        <div className="cs-form">
+                                          <input
+                                            type="time"
+                                            className="form-control"
+                                            value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                            onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                            disabled={item.isAutomatic}
+                                            style={{ fontSize: 'inherit' }}
+                                          />
+                                        </div>
+                                      )}
+
+                                      {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
+                                        <Select
+                                          size='small'
+                                          value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
+                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                          displayEmpty
+                                          fullWidth
+                                          disabled={item.isAutomatic}
+                                          sx={{
+                                            fontSize: 'inherit',
+                                            padding: '4px',
+                                            backgroundColor: 'white',
+                                            marginY: '8px'
+                                          }}
+                                          className='form-control form-control-sm'
+                                        >
+                                          <MenuItem value=""><em>None</em></MenuItem>
+                                          <MenuItem value={true}>Yes</MenuItem>
+                                          <MenuItem value={false}>No</MenuItem>
+                                        </Select>
+                                      )}
+
+                                      {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
+                                        <LookupMultiSelect
+                                          propId={item.id}
+                                          onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+                                          value={props.formValues?.[item.id]?.value || []}
+                                          selectedVault={props.vault}
+                                          label={item.propName}
+                                          itemValue={item.value}
+                                          disabled={item.isAutomatic}
+                                        />
+                                      )}
+
+                                      {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
+                                        <LookupSelect
+                                          propId={item.id}
+                                          label={item.propName}
+                                          onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
+                                          value={props.formValues?.[item.id]?.value || ''}
+                                          selectedVault={props.vault}
+                                          itemValue={item.value}
+                                          disabled={item.isAutomatic}
+                                        />
+                                      )}
+                                    </>}
+                                </>
+
+
+                              </Box>
+                            </Box>
+                          </ListItem>
+                        ))}
+                      </Box>
+
+
+                      {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                        <ListItem sx={{ p: 0 }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                             <Typography
-                              className='my-2'
+                              className='my-3'
                               variant="body2"
                               sx={{
-                                color: '#4f5d75',
-                                // fontWeight: 'bold',
-                                flexBasis: '40%',
+                                color: '#1C4690',
+
+                                flexBasis: '35%',
                                 fontSize: '12px',
                                 textAlign: 'end'
                               }}
                             >
-                              {item.propName} {item.isRequired ? <span className='text-danger mx-1'>*</span> : <></>}:
+                              Sign:
                             </Typography>
-                            <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                              {item.propName === 'Class' && <>{item.value}</>}
-
-                              {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating' || item.datatype === 'MFDatatypeInteger') && !item.isHidden && (
-                                <input
-                                  value={props.formValues?.[item.id]?.value || ''}
-                                  placeholder={item.value}
-                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                  className='form-control form-control-sm my-1'
-                                  disabled={item.isAutomatic}
-                                />
-                              )}
-
-                              {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
-                                <textarea
-                                  placeholder={item.value}
-                                  value={props.formValues?.[item.id]?.value || ''}
-                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                  rows={2}
-                                  className="form-control form-control-sm my-1"
-                                  disabled={item.isAutomatic}
-                                />
-                              )}
-
-                              {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
-                                <input
-                                  placeholder={item.value}
-                                  type="date"
-                                  value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                  className='form-control form-control-sm my-1'
-                                  disabled={item.isAutomatic}
-                                />
-                              )}
-
-
-                              {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
-                                <>
-                                  <div className="cs-form">
-                                    <input
-                                      type="time"
-                                      className="form-control"
-                                      value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                      onChange={(e) => {
-                                        handleInputChange(item.id, e.target.value, item.datatype); // Store as ISO datetime
-                                      }}
-                                      disabled={item.isAutomatic}
-                                    />
-                                  </div>
-                                </>
-                              )}
-
-
-                              {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                                <Select
-                                  size='small'
-                                  value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
-                                  onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                  displayEmpty
-                                  fullWidth
-                                  disabled={item.isAutomatic}
-                                  sx={{
-                                    fontSize: '12px',
-                                    padding: '4px',
-                                    backgroundColor: 'white',
-                                    marginY: '8px'
-                                  }}
-                                  className='form-control form-control-sm'
-                                >
-                                  <MenuItem value=""><em>None</em></MenuItem>
-                                  <MenuItem value={true}>Yes</MenuItem>
-                                  <MenuItem value={false}>No</MenuItem>
-                                </Select>
-                              )}
-
-                              {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
-                                <LookupMultiSelect
-                                  propId={item.id}
-                                  onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                  value={props.formValues?.[item.id]?.value || []}
-                                  selectedVault={props.vault}
-                                  label={item.propName}
-                                  itemValue={item.value}
-                                  disabled={item.isAutomatic}
-                                />
-                              )}
-
-                              {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
-                                <LookupSelect
-                                  propId={item.id}
-                                  label={item.propName}
-                                  onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
-                                  value={props.formValues?.[item.id]?.value || ''}
-                                  selectedVault={props.vault}
-                                  itemValue={item.value}
-                                  disabled={item.isAutomatic}
-                                />
-                              )}
-
-                            </Box>
-                          </Box>
-                        </ListItem>
-                      ))}
-
-                      {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                        <ListItem sx={{ p: 0 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '95%' }}>
-                            <Typography
-                              className='my-2'
-                              variant="body2"
-                              sx={{
-                                color: '#1d3557',
-                                fontWeight: 'bold',
-                                flexBasis: '40%',
-                                fontSize: '12px',
-                                textAlign: 'end',
-                                alignSelf: 'center'
-                              }}
-                            >
-                              Sign Document:
-                            </Typography>
-                            <Box sx={{ flexBasis: '60%', fontSize: '12px', textAlign: 'start', ml: 1, display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
+                            <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1, mt: 2 }}>
                               <SignButton
                                 objectid={props.selectedObject.id}
                                 fileId={props.selectedFileId}
                                 vault={props.vault.guid}
                                 email={props.email}
                               />
+
                             </Box>
                           </Box>
                         </ListItem>
                       )}
                     </>
+
                   </List>
+
 
                 </Box>
 
-                <Box className="bg-white shadow-sm my-1" display="flex" justifyContent="space-between">
+
+                <Box className="bg-white shadow-sm my-1 p-2" display="flex" justifyContent="space-between">
                   {/* Left Section */}
                   <Box
                     sx={{ textAlign: 'start', fontSize: '11px', width: '60%' }}
@@ -767,6 +696,117 @@ export default function ObjectData(props) {
                     ))}
                   </Box>
                 </Box>
+                <Box
+                  className='input-group  bg-white p-2'
+                  sx={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    fontSize: '10px',
+
+                  }}
+                >
+                  {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
+                    <>
+                      <Box>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          onClick={() => props.updateObjectMetadata()}
+                          sx={{ textTransform: 'none', mr: 1 }}
+                        >
+
+                          <i
+                            className="fas fa-save"
+                            style={{
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              marginRight: '4px'
+                            }}
+                          />
+                          <small>Save</small>
+                        </Button>
+
+
+                      </Box>
+
+                      <Box>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="warning"
+                          onClick={() => props.discardChange()}
+                          sx={{ textTransform: 'none', mr: 1 }}
+                        >
+                          <i
+                            className="fas fa-window-close"
+                            style={{
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              marginRight: '4px'
+                            }}
+                          />
+                          <small>Discard</small>
+                        </Button>
+                      </Box>
+                    </>
+                  )}
+
+                  {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                    <Box className='mx-1'>
+                      {/* <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          onClick={downloadFile}
+                          sx={{ textTransform: 'none', ml: 1 }}
+                        > */}
+
+                      <Tooltip title='Download document'>
+                        <i
+                          className="fas fa-download "
+                          onClick={downloadFile}
+                          style={{
+                            fontSize: '20px',
+                            cursor: 'pointer',
+                            marginRight: '4px',
+                            // color: '#2757aa',
+
+
+                          }}
+                        />
+
+                        <small>Download</small>
+                      </Tooltip>
+                      {/* </Button> */}
+
+
+
+                    </Box>
+                  )}
+
+                  {props.selectedObject.userPermission.deletePermission ?
+                    <Box className='mx-2'>
+                      <Tooltip title='Delect Object'>
+                        <i
+                          onClick={() => setDeleteDialogOpen(true)}
+                          className="fas fa-trash "
+                          style={{
+                            fontSize: '20px',
+                            cursor: 'pointer',
+                            marginRight: '4px',
+                            // color: '#2757aa',
+
+                          }}
+                        />
+                        <small>Delete</small>
+                      </Tooltip>
+                    </Box>
+                    : <></>}
+
+
+                </Box>
 
               </Box>
             )}
@@ -777,9 +817,9 @@ export default function ObjectData(props) {
             index={1}
             style={{
               backgroundColor: '#dedddd',
-              height: '100%',
+
               padding: '0%',
-              overflowY: 'auto',
+
               width: '100%'
             }}
           >
@@ -854,7 +894,7 @@ export default function ObjectData(props) {
             index={2}
             style={{
               backgroundColor: '#dedddd',
-              height: '100&',
+
               padding: '0%',
               width: '100%'
             }}
@@ -923,7 +963,7 @@ export default function ObjectData(props) {
             index={3}
             style={{
               backgroundColor: '#dedddd',
-              height: '100%',
+
               padding: '0%',
               width: '100%'
             }}

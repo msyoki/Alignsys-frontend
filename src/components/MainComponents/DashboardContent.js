@@ -58,7 +58,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ ml: 4, height: '100%', overflowY: 'auto' }}>
+        <Box sx={{  height: '100%', overflowY: 'auto' }}>
           {children}
         </Box>
       )}
@@ -339,7 +339,7 @@ const DocumentList = (props) => {
 
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`);
-      // console.log(propsResponse.data)
+      console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
       setLoadingObject(false)
       setLoadingClick(false)
@@ -390,6 +390,7 @@ const DocumentList = (props) => {
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
+      console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       setLoadingClick(false)
@@ -636,6 +637,7 @@ const DocumentList = (props) => {
     props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
       setLoading(false)
       props.setData(data);
+      console.log(data)
     });
 
   };
@@ -734,7 +736,8 @@ const DocumentList = (props) => {
     const maxLength = 50; // Updated to match the desired max length
     if (title) {
       if (title.length > maxLength) {
-        return title.substring(0, maxLength) + '...';
+        // return title.substring(0, maxLength) + '...';
+        return title
       }
     }
     return title;
@@ -827,11 +830,13 @@ const DocumentList = (props) => {
         close={() => setOpenOfficeApp(false)}
         object={objectToEditOnOffice}
       />
+
       <LoadingDialog opendialogloading={loadingClick} />
 
-      <div id="container" ref={containerRef} style={{ height: '100vh', display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd', overflowY: 'auto' }}>
+
+      <div id="container" ref={containerRef} style={{  display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '45%', backgroundColor: '#dedddd', minWidth: '35%' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#fff', minWidth: '35%', minHeight:'100vh'}}>
           <Box
             style={{
               display: 'flex',
@@ -887,7 +892,7 @@ const DocumentList = (props) => {
                 }}
                   className='mx-3'
                 >
-            
+
                   <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
 
                     <Avatar
@@ -912,8 +917,8 @@ const DocumentList = (props) => {
                       sx={{
                         width: 40,
                         height: 40,
-                        backgroundColor:'#2757aa',
-                        fontSize:'12px'
+                        backgroundColor: '#2757aa',
+                        fontSize: '12px'
 
                       }}
                       className='p-3'
@@ -922,7 +927,7 @@ const DocumentList = (props) => {
                   </Tooltip>
 
                 </Box>
-            
+
               </Box>
             </Box>
           </Box>
@@ -977,7 +982,7 @@ const DocumentList = (props) => {
                 placeholder="Quick search ..."
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
-                style={{borderRadius:'0px'}}
+                style={{ borderRadius: '0px' }}
               />
 
               <button
@@ -1015,22 +1020,24 @@ const DocumentList = (props) => {
             onChange={handleChange}
             aria-label="Horizontal tabs example"
             sx={{ borderColor: 'divider' }}
-            className='bg-white'
+            className='bg-white shadow-lg'
           >
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-
+                fontSize: '13px',
                 width: 'auto',
-                minWidth: 'auto',      // Adjust the width to fit the label text
+                minWidth: 'auto',
+                height: 'auto'
+                // Adjust the width to fit the label text
               }}
               label="All"
               {...a11yProps(0)}
             />
             <Tab
-              style={{ textTransform: 'none' }}
+              style={{ textTransform: 'none', fontSize: '13px', }}
               sx={{
-
+                height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label={`Recent`}
@@ -1041,7 +1048,7 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-
+                fontSize: '13px',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label={`Assigned `}
@@ -1052,7 +1059,8 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-
+                fontSize: '13px',
+                height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
               label={`Deleted `}
@@ -1064,16 +1072,16 @@ const DocumentList = (props) => {
             value={value}
             index={0}
             style={{
-              backgroundColor: '#dedddd',
-              height: '100vh',
+              backgroundColor: '#fff',
               padding: '0%',
               width: '100%',
-              overflowY: 'auto'
+       
             }}
           >
 
             {loading ? (
-              <Loader />
+              <div className='bg-white my-2'>  <Loader /></div>
+
             ) : (
               <>
                 {props.data.length > 0 ? (
@@ -1085,7 +1093,7 @@ const DocumentList = (props) => {
                       Search Results
                     </h6>
 
-                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                    <div className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
                       {props.data.map((item, index) => (
                         <Accordion
                           expanded={selectedIndex === index}
@@ -1119,6 +1127,7 @@ const DocumentList = (props) => {
                                   margin: 0, // Removes any extra margin
                                 }}
                               >
+                                
                                 <span className='mx-2'> <FileExtIcon
                                   guid={props.selectedVault.guid}
                                   objectId={item.id}
@@ -1318,11 +1327,11 @@ const DocumentList = (props) => {
             value={value}
             index={1}
             style={{
-              backgroundColor: '#dedddd',
-              height: '100%',
+              backgroundColor: '#fff',
+              // height: '100%',
               padding: '0%',
-              overflowY: 'clip',
-              width: '100%'
+              width: '100%',
+              overflowY: 'auto'
             }}
           >
             {loading ? (
@@ -1337,7 +1346,7 @@ const DocumentList = (props) => {
                       Recently Modified By Me ({props.recentData.length})
                     </h6>
 
-                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                    <div className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
                       {props.recentData.map((item, index) => (
                         <Accordion
                           expanded={selectedIndex === index}
@@ -1371,6 +1380,7 @@ const DocumentList = (props) => {
                                   margin: 0, // Removes any extra margin
                                 }}
                               >
+                                
                                 <span className='mx-2'> <FileExtIcon
                                   guid={props.selectedVault.guid}
                                   objectId={item.id}
@@ -1424,7 +1434,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                             <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
+                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
                                           </Typography>
 
                                           <table
@@ -1532,6 +1542,7 @@ const DocumentList = (props) => {
                             </AccordionDetails>
                           )}
                         </Accordion>
+
                       ))}
                     </div>
                   </div>
@@ -1552,10 +1563,11 @@ const DocumentList = (props) => {
             value={value}
             index={2}
             style={{
-              backgroundColor: '#dedddd',
-              height: '90vh',
+              backgroundColor: '#fff',
+              // height: '100%',
               padding: '0%',
-              width: '100%'
+              width: '100%',
+              overflowY: 'auto'
             }}
           >
             {loading ? (
@@ -1570,7 +1582,7 @@ const DocumentList = (props) => {
                       Assigned ({props.assignedData.length})
                     </h6>
 
-                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                    <div  className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
                       {props.assignedData.map((item, index) => (
                         <Accordion
                           expanded={selectedIndex === index}
@@ -1583,7 +1595,7 @@ const DocumentList = (props) => {
                             '&::before': { display: 'none' },
                           }}
                         >
-                          {item.objectTypeId !== 0 ? (
+                          {item.objectID === 0 ? (
                             <AccordionSummary
                               onClick={() => previewSublistObject(item, true)}
 
@@ -1604,13 +1616,19 @@ const DocumentList = (props) => {
                                   margin: 0, // Removes any extra margin
                                 }}
                               >
+                                
                                 <span className='mx-2'> <FileExtIcon
                                   guid={props.selectedVault.guid}
                                   objectId={item.id}
-                                  classId={item.classId !== undefined ? item.classId : item.classID}
+                                  classId={item.classID}
                                 /></span>
 
-                                {trimTitle2(item.title)}
+                                {trimTitle2(item.title)}.
+                                <FileExtText
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
+                                />
                               </Typography>
                             </AccordionSummary>
 
@@ -1629,12 +1647,7 @@ const DocumentList = (props) => {
                             >
                               <Typography variant="body1" style={{ fontSize: '11px' }}>
                                 <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                {trimTitle2(item.title)}.
-                                <FileExtText
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classId}
-                                />
+                                {trimTitle2(item.title)}
                               </Typography>
                             </AccordionSummary>
                           )}
@@ -1657,7 +1670,7 @@ const DocumentList = (props) => {
                                             style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
                                             className="p-1"
                                           >
-                                             <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
+                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
                                           </Typography>
 
                                           <table
@@ -1785,9 +1798,10 @@ const DocumentList = (props) => {
             index={3}
             style={{
               backgroundColor: '#dedddd',
-              height: '90vh',
+              // height: '100%',
               padding: '0%',
-              width: '100%'
+              width: '90vh',
+              overflowY: 'auto'
             }}
           >
             {loading ? (
@@ -1802,7 +1816,7 @@ const DocumentList = (props) => {
                       Deleted By Me ({props.deletedData.length})
                     </h6>
 
-                    <div style={{ height: '50vh', overflowY: 'auto' }} >
+                    <div  className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
                       {props.deletedData.map((item, index) => (
                         <Accordion
                           expanded={selectedIndex === index}
@@ -1815,60 +1829,63 @@ const DocumentList = (props) => {
                             '&::before': { display: 'none' },
                           }}
                         >
+                          {item.objectID === 0 ? (
+                            <AccordionSummary
+                              onClick={() => previewSublistObject(item, true)}
 
-                          <AccordionSummary
-                            // onClick={() => previewSublistObject(item, true)}
-                            aria-controls={`panel${index}a-content`}
-                            id={`panel${index}a-header`}
-                            sx={{
-                              bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                              padding: 0,
-                              minHeight: 'unset',
-                            }}
-                            className="shadow-sm"
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                              {/* Left Side Content */}
-                              <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-
-                                <Typography
-                                  variant="body1"
-                                  sx={{ fontSize: '11px', margin: 0 }}
-                                >
-                                  {item.objectID !== 0 ? <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i> :
-                                    <>
-                                      {/* <FileExtIcon
-                                    guid={props.selectedVault.guid}
-                                    objectId={item.id}
-                                    classId={item.classID}
-                                  /> */}
-                                      <i class="fas fa-file mx-2" style={{ fontSize: '15px', color: '#2a68af' }}></i></>}
-                                  {trimTitle2(item.title)}
-                                  {item.objectID !== 0 ? <></> : <>.
-                                    <FileExtText
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classID}
-                                    />  </>}
-                                </Typography>
-                              </Box>
-
-                              {/* Right-Aligned Delete Button */}
-                              <Button
-                                onClick={() => restoreObject(item)}
-                                size="small"
-                                variant="contained"
-                                color="success"
-                                className='mx-2'
-                                sx={{ textTransform: 'none', ml: 'auto' }} // Moves it to the right
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography
+                                variant="body1"
+                                style={{
+                                  fontSize: '11px',
+                                  margin: 0, // Removes any extra margin
+                                }}
                               >
+                                
+                                <span className='mx-2'> <FileExtIcon
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
+                                /></span>
 
-                                <i class="fa-solid fa-trash-can-arrow-up" style={{ fontSize: '11px', cursor: 'pointer', marginRight: '4px' }}></i>
-                                <small>Restore</small>
-                              </Button>
-                            </Box>
-                          </AccordionSummary>
+                                {trimTitle2(item.title)}.
+                                <FileExtText
+                                  guid={props.selectedVault.guid}
+                                  objectId={item.id}
+                                  classId={item.classID}
+                                />
+                              </Typography>
+                            </AccordionSummary>
 
+                          ) : (
+                            <AccordionSummary
+                              onClick={() => previewObject(item, true)}
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls={`panel${index}a-content`}
+                              id={`panel${index}a-header`}
+                              sx={{
+                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                                padding: 0, // Removes all padding
+                                minHeight: 'unset', // Ensures the height is not restricted by default styles
+                              }}
+                              className="shadow-sm"
+                            >
+                              <Typography variant="body1" style={{ fontSize: '11px' }}>
+                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                {trimTitle2(item.title)}
+                              </Typography>
+                            </AccordionSummary>
+                          )}
+                      
                         </Accordion>
 
                       ))}
@@ -1892,12 +1909,12 @@ const DocumentList = (props) => {
         </div>
 
         {!isMobile && (
-          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc', height: 'auto' }}></div>
+          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
         )}
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '55%', backgroundColor: '#dedddd', minWidth: '35%' }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#dedddd', minWidth: '35%', minHeight:'100vh' }}>
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>

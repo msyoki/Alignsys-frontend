@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
 import { format } from 'date-fns'; // Import the format function
 import '../styles/Chatbot.css';
-
+import { Box } from '@mui/material';
 function Bot(props) {
     const [index, setIndex] = useState(0);
     const [messages, setMessages] = useState([]);
@@ -111,50 +111,76 @@ function Bot(props) {
 
     return (
         <div>
-            <p className='text-dark' style={{ fontSize: '12px' }}>
-                <span style={{ color: "#1d3557", fontSize: '14px', fontWeight: 'bold' }}>
-                    Document:
-                </span>
-                {' '}{props.objectTitle}.pdf
-            </p>
+            <Box
+                className="p-2"
+                sx={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: 'important 12px',
+                    backgroundColor: '#edf2f4',
+                    height: '53px',
 
-            <form onSubmit={handleChatSubmit} className='input-group my-3'>
-                <input
-                    type="text"
-                    id="chat-input"
-                    className='form-control form-control-sm'
-                    placeholder="Query from document..."
-                    value={inputValue}
-                    autoComplete="off"
-                    onChange={(e) => setInputValue(e.target.value)}
-                />
-                <button type="submit" className='btn btn-sm btn-success'>
-                    <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>
-                    <small>Search</small>
-                </button>
-            </form>
+                }}
+            >
 
-            <div 
-                className='shadow-sm p-4' 
-                style={{ 
-                    height: '65vh',
+
+                <i className="fas fa-file-pdf mx-2 text-danger" style={{ fontSize: '15px' }}></i>
+                <span style={{ fontSize: '12px' }}>{props.objectTitle}.pdf</span>
+
+
+
+            </Box>
+
+
+            <Box
+                className="p-2 bg-white"
+                sx={{
+                    width: '100%',
+
+
+                }}
+            >
+                <form onSubmit={handleChatSubmit} className='input-group  '>
+                    <input
+                        type="text"
+                        id="chat-input"
+                        className='form-control form-control-sm'
+                        placeholder="Query from document..."
+                        value={inputValue}
+                        autoComplete="off"
+                        onChange={(e) => setInputValue(e.target.value)}
+                    />
+                    <button type="submit" className='btn btn-sm btn-success'>
+                        <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>
+                        <small>Search</small>
+                    </button>
+                </form>
+            </Box>
+
+
+
+            <div
+                className='shadow-sm p-2'
+                style={{
+                    height: '80vh',
                     overflowY: 'scroll',
                     scrollbarColor: '#1d3557',
                     scrollBehavior: 'smooth',
-                    backgroundColor: '#f8f0e5'
+                    backgroundColor: '#fff'
                 }}
             >
                 {messages.map((message) => (
                     <div key={message.id} className={`chat-msg ${message.type}`}>
                         <span className="msg-avatar">
-                            <i 
+                            <i
                                 className={`fas ${message.type === 'self' ? 'fa-user' : 'fa-robot'}`}
-                                style={{ color: '#1d3557', fontSize: '20px' }}
+                                style={{ color: '#2757aa', fontSize: '20px' }}
                             />
                         </span>
 
-                        <div 
-                            className="cm-msg-text" 
+                        <div
+                            className="cm-msg-text"
                             style={{
                                 backgroundColor: message.type === 'self' ? '#e76f51' : '#2a68af'
                             }}

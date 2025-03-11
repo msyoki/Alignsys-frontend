@@ -101,6 +101,7 @@ const ObjectStructureList = (props) => {
     };
 
     const fetchItemData = async (objectid, objectname) => {
+        setSearchTerm("")
         props.setSelectedObjectName(objectname);
         props.setIsLoading(true);
         try {
@@ -376,6 +377,12 @@ const ObjectStructureList = (props) => {
         }
     };
 
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSearchTermChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
 
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -443,14 +450,29 @@ const ObjectStructureList = (props) => {
 
 
                     <DialogContent>
-                        <p className='my-4' style={{ fontSize: '13px' }}>
+                    <p className='my-2' style={{ fontSize: '12px' }}>
                             Please select from Item types below
                         </p>
+
+                        {/* Search Input */}
+                        <TextField
+                            variant="outlined"
+                            placeholder="Search Object Type..."
+                            size="small"
+                            fullWidth
+                            value={searchTerm}
+                            onChange={handleSearchTermChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <div style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'hidden' }}>
                         <List className='p-0 list-group'>
                             {props.vaultObjectsList ? (
                                 <>
                                     {props.vaultObjectsList
-                                        .filter((item) => item.userPermission?.attachObjectsPermission) // Filter only allowed items
+                                        .filter((item) =>
+                                            item.userPermission?.attachObjectsPermission &&
+                                            item.namesingular.toLowerCase().includes(searchTerm.toLowerCase()) // Filter based on search term
+                                        )
                                         .map((item) => (
                                             <ListItem
                                                 className="p-0 mx-2"
@@ -462,16 +484,17 @@ const ObjectStructureList = (props) => {
                                                 <ListItemIcon sx={{ minWidth: "auto", marginRight: "4px" }}>
                                                     <i className="fas fa-folder-plus mx-2" style={{ color: "#2a68af", fontSize: "20px" }}></i>
                                                 </ListItemIcon>
-                                                <ListItemText primary={item.namesingular} />
+                                                <ListItemText
+                                                    primary={item.namesingular}
+                                                    sx={{ '& .MuiTypography-root': { fontSize: '15px' } }}
+                                                />
                                             </ListItem>
                                         ))}
-
-
                                 </>
-                            ) : (
-                                <></>
-                            )}
+                            ) : null}
                         </List>
+                        </div>
+                       
                     </DialogContent>
 
                     <DialogActions>
@@ -507,7 +530,7 @@ const ObjectStructureList = (props) => {
 
                     {/* Dialog Content */}
                     <DialogContent>
-                        <p className='my-4' style={{ fontSize: '13px' }}>
+                        <p className='mt-2' style={{ fontSize: '13px' }}>
                             Please select / search from classes below
                         </p>
 
@@ -519,10 +542,10 @@ const ObjectStructureList = (props) => {
                             placeholder="Search class..."
                             value={searchQuery}
                             onChange={handleSearchChange}
-                            style={{ marginBottom: "10px" }}
+                            style={{ marginBottom: "10px", margin: '0%' }}
                         />
 
-                        <div style={{ maxHeight: '250px', overflowY: 'auto',overflowX: 'hidden' }}>
+                        <div style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'hidden' }}>
                             {props.isLoading ? (
                                 <div className="flex justify-center items-center w-full">
                                     <CircularProgress size={24} />
@@ -538,14 +561,15 @@ const ObjectStructureList = (props) => {
                                                         <ListItemText
                                                             primary={group.classGroupName}
                                                             className="p-1 mx-2"
-                                                            style={{ color: '#555' }}
+                                                            style={{ '& .MuiTypography-root': { fontSize: '15px' }, color: '#555' }}
+
                                                         />
                                                     </ListItem>
                                                     <List component="div" disablePadding className="ml-4">
                                                         {filteredMembers.map((member) => (
                                                             <ListItem
                                                                 key={member.classId}
-                                                                onClick={() => props.handleClassSelection(member.classId, member.className, props.selectedObjectId)}
+                                                                onClick={() => { props.handleClassSelection(member.classId, member.className, props.selectedObjectId); setSearchQuery('') }}
                                                                 className="p-0 mx-2 transition hover:bg-gray-100 rounded-lg"
                                                                 button
                                                                 disablePadding
@@ -555,7 +579,7 @@ const ObjectStructureList = (props) => {
                                                                         style={{ color: "#2a68af", fontSize: "20px" }}>
                                                                     </i>
                                                                 </ListItemIcon>
-                                                                <ListItemText primary={member.className} />
+                                                                <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={member.className} />
                                                             </ListItem>
                                                         ))}
                                                     </List>
@@ -567,7 +591,7 @@ const ObjectStructureList = (props) => {
                                     {props.ungroupedItems.length > 0 && filterItems(props.ungroupedItems).length > 0 && (
                                         <>
                                             <ListItem className='p-0 my-3' style={{ backgroundColor: '#e0fbfc' }}>
-                                                <ListItemText style={{ color: '#555' }} primary="Ungrouped" className="p-1 mx-2" />
+                                                <ListItemText style={{ '& .MuiTypography-root': { fontSize: '15px' }, color: '#555' }} primary="Ungrouped" className="p-1 mx-2" />
                                             </ListItem>
                                             <List component="div" disablePadding className="ml-4">
                                                 {filterItems(props.ungroupedItems).map((member) => (
@@ -583,7 +607,7 @@ const ObjectStructureList = (props) => {
                                                                 style={{ color: "#2a68af", fontSize: "20px" }}>
                                                             </i>
                                                         </ListItemIcon>
-                                                        <ListItemText primary={member.className} />
+                                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={member.className} />
                                                     </ListItem>
                                                 ))}
                                             </List>
@@ -637,7 +661,7 @@ const ObjectStructureList = (props) => {
                                                 <i style={{ color: "#2a68af", fontSize: "20px" }} className="fas fa-folder-plus mx-1"></i>
                                             }
                                         </ListItemIcon>
-                                        <ListItemText primary={item.title} />
+                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={item.title} />
                                     </ListItem>
                                 ))
                             ) : (
@@ -721,7 +745,7 @@ const ObjectStructureList = (props) => {
                                         variant="body2"
                                         sx={{
                                             color: '#1C4690',
-                                            fontWeight: 'bold',
+
                                             flexBasis: '35%',
                                             fontSize: '12px',
                                             textAlign: 'end'
@@ -749,7 +773,7 @@ const ObjectStructureList = (props) => {
                                                 variant="body2"
                                                 sx={{
                                                     color: '#1C4690',
-                                                    fontWeight: 'bold',
+
                                                     flexBasis: '35%',
                                                     fontSize: '12px',
                                                     textAlign: 'end'
@@ -759,145 +783,153 @@ const ObjectStructureList = (props) => {
                                             </Typography>
 
                                             <Box sx={{ width: '65%', fontSize: '12px', textAlign: 'start', ml: 1 }}>
-                                                {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
-                                                    <>
-                                                        {prop.isAutomatic ? (
+                                                <>
+                                                    {prop.isAutomatic || !prop.userPermission.editPermission ?
+                                                        <>
+                                                            <Typography
+                                                                className='my-2'
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontSize: '11px'
+                                                                }}
 
-                                                            <>
+                                                            >
+                                                                ( Automatic )
+                                                            </Typography>
+                                                        </> :
+                                                        <Box sx={{ fontSize: '12px' }}>
+                                                            {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
+
+                                                                <TextField
+                                                                    value={prop.value || props.formValues[prop.propId]}
+                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                    fullWidth
+                                                                    required={prop.isRequired}
+                                                                    error={!!formErrors[prop.propId]}
+                                                                    helperText={formErrors[prop.propId]}
+                                                                    size="small"
+                                                                    className="my-1 bg-white"
+                                                                    disabled={!!prop.value}
+                                                                    InputProps={{ style: { fontSize: '12px' } }}
+                                                                    InputLabelProps={{ style: { fontSize: '12px' } }}
+                                                                />
+
+                                                            )}
+
+                                                            {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
                                                                 <>
                                                                     {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <p className="p-1"> (automatic) {formErrors[prop.propId]}</p></>}
+                                                                        <TextField
+                                                                            label={prop.title}
+                                                                            value={props.formValues[prop.propId]}
+                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                            fullWidth
+                                                                            required={prop.isRequired}
+                                                                            error={!!formErrors[prop.propId]}
+                                                                            helperText={formErrors[prop.propId]}
+                                                                            multiline
+                                                                            rows={4}
+                                                                            size="small"
+                                                                            className="my-1 bg-white"
+                                                                            InputProps={{ style: { fontSize: '12px' } }}
+                                                                            InputLabelProps={{ style: { fontSize: '12px' } }}
+                                                                        /></>}
                                                                 </>
-                                                            </>
-                                                        ) : (
-                                                            <TextField
-                                                                value={prop.value || props.formValues[prop.propId]}
-                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                fullWidth
-                                                                required={prop.isRequired}
-                                                                error={!!formErrors[prop.propId]}
-                                                                helperText={formErrors[prop.propId]}
-                                                                size="small"
-                                                                className="my-1 bg-white"
-                                                                disabled={!!prop.value}
-                                                                InputProps={{ style: { fontSize: '12px' } }}
-                                                                InputLabelProps={{ style: { fontSize: '12px' } }}
-                                                            />
-                                                        )}
-                                                    </>
-                                                )}
 
-                                                {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <TextField
-                                                                label={prop.title}
-                                                                value={props.formValues[prop.propId]}
-                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                fullWidth
-                                                                required={prop.isRequired}
-                                                                error={!!formErrors[prop.propId]}
-                                                                helperText={formErrors[prop.propId]}
-                                                                multiline
-                                                                rows={4}
-                                                                size="small"
-                                                                className="my-1 bg-white"
-                                                                InputProps={{ style: { fontSize: '12px' } }}
-                                                                InputLabelProps={{ style: { fontSize: '12px' } }}
-                                                            /></>}
-                                                    </>
+                                                            )}
 
-                                                )}
+                                                            {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
+                                                                <>
+                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                        <LookupSelect
+                                                                            propId={prop.propId}
+                                                                            label={prop.title}
+                                                                            onChange={handleInputChange}
+                                                                            value={props.formValues[prop.propId]}
+                                                                            required={prop.isRequired}
+                                                                            error={!!formErrors[prop.propId]}
+                                                                            helperText={formErrors[prop.propId]}
+                                                                            selectedVault={props.selectedVault}
+                                                                            size="small"
+                                                                            className="my-1"
+                                                                        /></>}
+                                                                </>
 
-                                                {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <LookupSelect
-                                                                propId={prop.propId}
-                                                                label={prop.title}
-                                                                onChange={handleInputChange}
-                                                                value={props.formValues[prop.propId]}
-                                                                required={prop.isRequired}
-                                                                error={!!formErrors[prop.propId]}
-                                                                helperText={formErrors[prop.propId]}
-                                                                selectedVault={props.selectedVault}
-                                                                size="small"
-                                                                className="my-1"
-                                                            /></>}
-                                                    </>
+                                                            )}
 
-                                                )}
+                                                            {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
+                                                                <>
+                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                        <LookupMultiSelect
+                                                                            propId={prop.propId}
+                                                                            label={prop.title}
+                                                                            onChange={handleInputChange}
+                                                                            value={props.formValues[prop.propId] || []}
+                                                                            required={prop.isRequired}
+                                                                            error={!!formErrors[prop.propId]}
+                                                                            helperText={formErrors[prop.propId]}
+                                                                            selectedVault={props.selectedVault}
+                                                                            size="small"
+                                                                            className="my-1"
+                                                                        /></>}
 
-                                                {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <LookupMultiSelect
-                                                                propId={prop.propId}
-                                                                label={prop.title}
-                                                                onChange={handleInputChange}
-                                                                value={props.formValues[prop.propId] || []}
-                                                                required={prop.isRequired}
-                                                                error={!!formErrors[prop.propId]}
-                                                                helperText={formErrors[prop.propId]}
-                                                                selectedVault={props.selectedVault}
-                                                                size="small"
-                                                                className="my-1"
-                                                            /></>}
+                                                                </>
 
-                                                    </>
+                                                            )}
 
-                                                )}
+                                                            {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
+                                                                <>
+                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                        <Select
+                                                                            size="small"
+                                                                            value={props.formValues[prop.propId] ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
+                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                            displayEmpty
+                                                                            fullWidth
+                                                                            className='bg-white'
+                                                                        >
+                                                                            <MenuItem value=""><em>None</em></MenuItem>
+                                                                            <MenuItem value={true}>True</MenuItem>
+                                                                            <MenuItem value={false}>False</MenuItem>
+                                                                        </Select></>}
+                                                                </>
 
-                                                {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <Select
-                                                                size="small"
-                                                                value={props.formValues[prop.propId] ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
-                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                displayEmpty
-                                                                fullWidth
-                                                                className='bg-white'
-                                                            >
-                                                                <MenuItem value=""><em>None</em></MenuItem>
-                                                                <MenuItem value={true}>True</MenuItem>
-                                                                <MenuItem value={false}>False</MenuItem>
-                                                            </Select></>}
-                                                    </>
+                                                            )}
 
-                                                )}
+                                                            {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
+                                                                <>
+                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                        <input
+                                                                            type="datetime-local"
+                                                                            className="form-control bg-white"
+                                                                            value={props.formValues[prop.propId] || ''}
+                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
+                                                                        /></>}
+                                                                </>
 
-                                                {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <input
-                                                                type="datetime-local"
-                                                                className="form-control bg-white"
-                                                                value={props.formValues[prop.propId] || ''}
-                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
-                                                            /></>}
-                                                    </>
+                                                            )}
 
-                                                )}
+                                                            {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
+                                                                <>
+                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                        <TextField
+                                                                            type="date"
+                                                                            value={props.formValues[prop.propId]}
+                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                            fullWidth
+                                                                            required={prop.isRequired}
+                                                                            error={!!formErrors[prop.propId]}
+                                                                            helperText={formErrors[prop.propId]}
+                                                                            InputLabelProps={{ shrink: true }}
+                                                                            size="small"
+                                                                            className="my-1 bg-white"
+                                                                        /></>}
+                                                                </>
 
-                                                {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
-                                                    <>
-                                                        {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                            <TextField
-                                                                type="date"
-                                                                value={props.formValues[prop.propId]}
-                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                fullWidth
-                                                                required={prop.isRequired}
-                                                                error={!!formErrors[prop.propId]}
-                                                                helperText={formErrors[prop.propId]}
-                                                                InputLabelProps={{ shrink: true }}
-                                                                size="small"
-                                                                className="my-1 bg-white"
-                                                            /></>}
-                                                    </>
-
-                                                )}
+                                                            )}
+                                                        </Box>
+                                                    }
+                                                </>
                                             </Box>
                                         </Box>
                                     </ListItem>

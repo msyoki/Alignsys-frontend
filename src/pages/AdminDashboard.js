@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext,useRef, useEffect, useState } from 'react';
 import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Dashboard.css'
 import '../styles/Custombuttons.css'
@@ -86,7 +86,7 @@ function AdminDashboard() {
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
     const [viewVaultSettings, setViewVaultSettings] = useState(false);
-
+ 
     const [viewVaultUsers, setViewVaultUsers] = useState(false);
     const [viewObjectStructure, setViewObjectStructure] = useState(false);
     const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
@@ -117,6 +117,51 @@ function AdminDashboard() {
     const [alertOpen, setOpenAlert] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState('');
     const [alertMsg, setAlertMsg] = useState('');
+
+
+      const col1Ref = useRef(null);
+      const col2Ref = useRef(null);
+      const dividerRef = useRef(null);
+      const containerRef = useRef(null);
+      const [isDragging, setIsDragging] = useState(false);
+      const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    
+      useEffect(() => {
+        const handleResize = () => {
+          setIsMobile(window.innerWidth <= 768);
+        };
+    
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
+    
+      useEffect(() => {
+        if (isMobile) return;
+    
+        const handleMouseMove = (e) => {
+          if (!isDragging) return;
+          const containerWidth = containerRef.current.getBoundingClientRect().width;
+          let newCol1Width = (e.clientX / containerWidth) * 100;
+          if (newCol1Width < 10) newCol1Width = 10;
+          if (newCol1Width > 90) newCol1Width = 90;
+          col1Ref.current.style.width = `${newCol1Width}%`;
+          col2Ref.current.style.width = `${100 - newCol1Width}%`;
+        };
+    
+        const handleMouseUp = () => setIsDragging(false);
+    
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+          document.removeEventListener('mousemove', handleMouseMove);
+          document.removeEventListener('mouseup', handleMouseUp);
+        };
+      }, [isDragging, isMobile]);
+    
+      const handleMouseDown = () => {
+        if (!isMobile) setIsDragging(true);
+      };
+    
 
 
     const navigate = useNavigate()
@@ -714,22 +759,22 @@ function AdminDashboard() {
 
 
                                 </div>
-                           
+
                                 <ul className="bottom-top menu-items">
-                                <li  className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                  
-                                    <span className=' text-center' style={{ fontSize: '13px' }}>{user.first_name} {user.last_name}</span>
-                                    </div>
-                     
-                                </li>
-                                <li  className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                 
-                                    <span className=' text-center' style={{ fontSize: '13px' }}> {user.organization} Admin</span>
-                                    </div>
-                     
-                                </li>
+                                    <li className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+
+                                            <span className=' text-center' style={{ fontSize: '13px' }}>{user.first_name} {user.last_name}</span>
+                                        </div>
+
+                                    </li>
+                                    <li className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+
+                                            <span className=' text-center' style={{ fontSize: '13px' }}> {user.organization} Admin</span>
+                                        </div>
+
+                                    </li>
                                 </ul>
                                 {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
                                     <span className='p-2 mx-3'>{user.organization}</span>
@@ -756,15 +801,16 @@ function AdminDashboard() {
                     </div>
 
                 </nav >
-                <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'} bg-white`} >
+                < main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`
+                }>
                     <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
                         <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
-                            <i style={{ fontSize: '18px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'}`} ></i>
+                            <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
                         </div>
                     </Tooltip>
-                    <div className='row container-fluid ' style={{ height: '100Vh' }} >
+                    <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
 
-                        <div className="col-lg-5 col-md-5 col-sm-12 text-dark " style={{ backgroundColor: '#e5e5e5' }}>
+                        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
                             {/* Header Box */}
                             <Box
                                 sx={{
@@ -782,24 +828,9 @@ function AdminDashboard() {
 
                             >
 
-                                {/* <i
-                                    className="fas fa-user-shield"
-                                    style={{
-                                        fontSize: '1.5em',
-                                        color: '#2757aa',
-                                    }}
-                                ></i> */}
-                                <span style={{ fontSize: '14px' }} className='text-dark'>  Vault Accounts Manager</span>
-                                {/* <span >
-                                    <i
-                                        className="fas fa-cog"
-                                        style={{
-                                            fontSize: '1.5em',
-                                            color: '#2757aa',
-                                        }}
-                                    ></i>
 
-                                </span> */}
+                                <span style={{ fontSize: '14px' }} className='text-dark'>  ADMIN MANAGER</span>
+
                             </Box>
                             {/* Action Button */}
 
@@ -810,7 +841,6 @@ function AdminDashboard() {
 
                                     overflowY: 'auto', // Enable scrolling
                                     // border: '1px solid #ddd',
-                                    marginLeft: '20px'
 
 
                                 }}
@@ -844,9 +874,12 @@ function AdminDashboard() {
 
 
 
-                        </div>
+                        </div>  {!isMobile && (
+                            <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
+                        )}
 
-                        <div className="col-lg-7 col-md-7 col-sm-12 bg-white shadow-lg text-dark" style={{ fontSize: '12px', height: '90vh', overflowY: 'auto' }}>
+
+                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
                             {viewCreateObject ?
                                 <div id="newobject" style={{ fontSize: '12px', marginBottom: '20px' }}>
                                     <div>
@@ -977,18 +1010,18 @@ function AdminDashboard() {
                                                                 </TableCell>
                                                                 <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
                                                                 {/* <TableCell>
-                                                                <Button
-                                                                    size="small"
-                                                                    variant="contained"
-                                                                    color="warning"
-                                                                    onClick={() => fetchObjectPermisions(row)}
-                                                                    style={{ textTransform: 'none' }}
-                                                                >
-                                                                    <small>
-                                                                        <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions
-                                                                    </small>
-                                                                </Button>
-                                                            </TableCell> */}
+                                        <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="warning"
+                                            onClick={() => fetchObjectPermisions(row)}
+                                            style={{ textTransform: 'none' }}
+                                        >
+                                            <small>
+                                                <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions
+                                            </small>
+                                        </Button>
+                                    </TableCell> */}
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -1091,11 +1124,11 @@ function AdminDashboard() {
                                     <div>
 
                                         <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
-                                        <p className='my-3' style={{ fontSize: '10px' }}>User Accounts</p>
+                                       
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
                                         {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
-                                        <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
+                <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
 
                                     </div>
 
@@ -1143,6 +1176,7 @@ function AdminDashboard() {
 
                             }
                         </div>
+
                     </div>
                 </main>
             </div>
