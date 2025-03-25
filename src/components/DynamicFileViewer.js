@@ -379,7 +379,7 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email }) => {
+const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName }) => {
   const [fileUrl, setFileUrl] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [numPages, setNumPages] = useState(null);
@@ -470,7 +470,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     }
 
     if (ext === 'pdf') {
-      return <PDFViewerPreview document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email} />;
+      return <PDFViewerPreview document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email}  base64Content={base64Content} fileExtension={fileExtension} fileName={fileName}  />;
     }
 
     if (ext === 'txt') {

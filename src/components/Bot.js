@@ -118,7 +118,7 @@ function Bot(props) {
                     display: 'flex',
                     alignItems: 'center',
                     fontSize: 'important 12px',
-                    backgroundColor: '#edf2f4',
+                    backgroundColor: '#ecf4fc',
                     height: '53px',
 
                 }}
@@ -145,13 +145,13 @@ function Bot(props) {
                     <input
                         type="text"
                         id="chat-input"
-                        className='form-control form-control-sm'
+                        className='form-control form-control-md'
                         placeholder="Query from document..."
                         value={inputValue}
                         autoComplete="off"
                         onChange={(e) => setInputValue(e.target.value)}
                     />
-                    <button type="submit" className='btn btn-sm btn-success'>
+                    <button style={{ backgroundColor: '#6a994e' }} type="submit" className='btn btn-md text-white'>
                         <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>
                         <small>Search</small>
                     </button>
@@ -161,10 +161,10 @@ function Bot(props) {
 
 
             <div
-                className='shadow-sm p-2'
+                className=' p-2'
                 style={{
-                    height: '80vh',
-                    overflowY: 'scroll',
+                    height: '70vh',
+                    overflowY: 'auto',
                     scrollbarColor: '#1d3557',
                     scrollBehavior: 'smooth',
                     backgroundColor: '#fff'

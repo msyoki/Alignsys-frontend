@@ -45,8 +45,8 @@ const FileExtIcon = (props) => {
   if (error) {
     return (
       <i
-        className="fas fa-layer-group mx-2"
-        style={{ fontSize: '15px', color: '#2a68af' }}
+        className="fas fa-layer-group "
+        style={{ fontSize: props.fontSize || '20px', color: '#2a68af' }}
       ></i>
     );
   }
@@ -58,37 +58,38 @@ const FileExtIcon = (props) => {
     case 'pdf':
       return (
         <i
-          className="fas fa-file-pdf mx-2"
-          style={{ fontSize: '15px', color: '#f21b3f' }}
-        ></i>
+        className="fas fa-file-pdf"
+        style={{ fontSize: props.fontSize || '20px', color: '#f21b3f' }}
+      ></i>
+      
       );
     case 'csv':
       return (
         <i
-          className="fas fa-file-csv mx-2"
-          style={{ fontSize: '15px', color: '#7cb518' }}
+          className="fas fa-file-csv "
+          style={{ fontSize: props.fontSize || '20px', color: '#7cb518' }}
         ></i>
       );
     case 'txt':
       return (
         <i
-          className="fas fa-file-alt mx-2 text-secondary"
-          style={{ fontSize: '15px' }}
+          className="fas fa-file-alt  text-secondary"
+          style={{ fontSize: props.fontSize || '20px', }}
         ></i>
       );
     case 'xlsx':
       return (
         <i
-          className="far fa-file-excel mx-2"
-          style={{ fontSize: '15px', color: '#3e8914' }}
+          className="far fa-file-excel "
+          style={{ fontSize: props.fontSize || '20px', color: '#3e8914' }}
         ></i>
       );
     case 'docx':
     case 'doc':
       return (
         <i
-          className="fas fa-file-word mx-2"
-          style={{ fontSize: '15px', color: '#0077b6' }}
+          className="fas fa-file-word "
+          style={{ fontSize: props.fontSize || '20px', color: '#0077b6' }}
         ></i>
       );
     case 'png':
@@ -96,17 +97,19 @@ const FileExtIcon = (props) => {
     case 'jpg':
       return (
         <i
-          className="fas fa-file-image mx-2"
-          style={{ fontSize: '15px', color: '#2a68af' }}
+          className="fas fa-file-image "
+          style={{ fontSize: props.fontSize || '20px',color: '#2a68af' }}
         ></i>
       );
     default:
       return (
-        <i
-        className="fas fa-layer-group mx-2"
-        style={{ fontSize: '15px', color: '#2a68af' }}
-      ></i>
+        props.objectId === 0 ? (
+          <i className="fas fa-folder " style={{ fontSize: props.fontSize || '20px', color: "#2a68af" }}></i>
+        ) : (
+          <i className="fas fa-file " style={{ fontSize: props.fontSize || '20px', color: "#2a68af" }}></i>
+        )
       );
+      
   }
 };
 

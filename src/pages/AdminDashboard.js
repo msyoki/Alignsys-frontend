@@ -1,4 +1,4 @@
-import React, { useContext,useRef, useEffect, useState } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Dashboard.css'
 import '../styles/Custombuttons.css'
@@ -86,7 +86,7 @@ function AdminDashboard() {
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
     const [viewVaultSettings, setViewVaultSettings] = useState(false);
- 
+
     const [viewVaultUsers, setViewVaultUsers] = useState(false);
     const [viewObjectStructure, setViewObjectStructure] = useState(false);
     const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
@@ -119,49 +119,49 @@ function AdminDashboard() {
     const [alertMsg, setAlertMsg] = useState('');
 
 
-      const col1Ref = useRef(null);
-      const col2Ref = useRef(null);
-      const dividerRef = useRef(null);
-      const containerRef = useRef(null);
-      const [isDragging, setIsDragging] = useState(false);
-      const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    
-      useEffect(() => {
+    const col1Ref = useRef(null);
+    const col2Ref = useRef(null);
+    const dividerRef = useRef(null);
+    const containerRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
         const handleResize = () => {
-          setIsMobile(window.innerWidth <= 768);
+            setIsMobile(window.innerWidth <= 768);
         };
-    
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-      }, []);
-    
-      useEffect(() => {
+    }, []);
+
+    useEffect(() => {
         if (isMobile) return;
-    
+
         const handleMouseMove = (e) => {
-          if (!isDragging) return;
-          const containerWidth = containerRef.current.getBoundingClientRect().width;
-          let newCol1Width = (e.clientX / containerWidth) * 100;
-          if (newCol1Width < 10) newCol1Width = 10;
-          if (newCol1Width > 90) newCol1Width = 90;
-          col1Ref.current.style.width = `${newCol1Width}%`;
-          col2Ref.current.style.width = `${100 - newCol1Width}%`;
+            if (!isDragging) return;
+            const containerWidth = containerRef.current.getBoundingClientRect().width;
+            let newCol1Width = (e.clientX / containerWidth) * 100;
+            if (newCol1Width < 10) newCol1Width = 10;
+            if (newCol1Width > 90) newCol1Width = 90;
+            col1Ref.current.style.width = `${newCol1Width}%`;
+            col2Ref.current.style.width = `${100 - newCol1Width}%`;
         };
-    
+
         const handleMouseUp = () => setIsDragging(false);
-    
+
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
         return () => {
-          document.removeEventListener('mousemove', handleMouseMove);
-          document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
         };
-      }, [isDragging, isMobile]);
-    
-      const handleMouseDown = () => {
+    }, [isDragging, isMobile]);
+
+    const handleMouseDown = () => {
         if (!isMobile) setIsDragging(true);
-      };
-    
+    };
+
 
 
     const navigate = useNavigate()
@@ -746,8 +746,8 @@ function AdminDashboard() {
                                                         : user.username
                                         )}
                                         sx={{
-                                            width: 60,
-                                            height: 60,
+                                            width: 40,
+                                            height: 40,
                                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                                             transform: 'translateZ(0)',
                                             transition: 'transform 0.2s'
@@ -815,7 +815,7 @@ function AdminDashboard() {
                             <Box
                                 sx={{
                                     fontSize: '12px',
-                                    backgroundColor: '#e0fbfc',
+                                    backgroundColor: '#ecf4fc',
                                     color: '#2757aa',
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
 
@@ -1124,7 +1124,7 @@ function AdminDashboard() {
                                     <div>
 
                                         <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
-                                       
+
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
                                         {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />

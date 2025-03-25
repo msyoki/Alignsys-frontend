@@ -53,7 +53,8 @@ export const AuthProvider = ({ children }) => {
 
             setOpenAlert(true);
             setAlertSeverity("error");
-            setAlertMsg(`Login failed, ${error}!!`);
+            setAlertMsg(`Login failed, ivalid username or password!!`);
+            console.log(`${error}`)
             // alert("login failed")
 
         }

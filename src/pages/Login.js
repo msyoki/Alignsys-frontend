@@ -144,7 +144,7 @@ const Login = () => {
           <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
 
             <img className="" src={logo2} alt="Loading" width="400px" />
-            <p className="text-center font-weight-italic responsive-font mb-2 mt-4">
+            <p className="text-center font-weight-italic responsive-font mb-2 mt-4 text-white">
               <span>EDMS</span> Software Solution
             </p>
           </div>

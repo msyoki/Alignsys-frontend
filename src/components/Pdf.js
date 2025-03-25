@@ -7,6 +7,7 @@ import { Tooltip } from '@mui/material';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import LoadingDialog from './Loaders/LoaderDialog';
 import SignButton from './SignDocument';
+import { ZoomOut } from '@mui/icons-material';
 
 
 // Configure PDF.js worker
@@ -15,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 const PDFViewerPreview = (props) => {
   const [numPages, setNumPages] = useState(null);
   const [zoom, setZoom] = useState(1);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(0.9);
   const containerRef = useRef(null);
   const mainContainerRef = useRef(null);
   const [pageDimensions, setPageDimensions] = useState([]);
@@ -23,14 +24,14 @@ const PDFViewerPreview = (props) => {
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isRotated, setIsRotated] = useState(false);
   const [loadingPercentage, setLoadingPercentage] = useState(0);
-  const [isAsideOpen, setIsAsideOpen] = useState(false);
+  const [isAsideOpen, setIsAsideOpen] = useState(true);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // Add zoom controls
-  const zoomIn = () => setZoom(prev => Math.min(prev + 0.1, 2));
-  const zoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5));
-  const resetZoom = () => setZoom(1);
+  const zoomIn = () =>{ setZoom(prev => Math.min(prev + 0.1, 2))}
+  const zoomOut = () => {setZoom(prev => Math.max(prev - 0.1, 0.5))}
+  const resetZoom = () => setZoom(0.9);
 
   // Handle pinch zoom
   useEffect(() => {
@@ -150,38 +151,81 @@ const PDFViewerPreview = (props) => {
   const getScaleForPage = (pageNumber) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
 
-    if (!pageDim) {
-      // Return a default scale if page dimensions are not found
-      return 0.8;
+    if (!pageDim || containerWidth === 0) {
+      return 1; // Default scale
     }
 
     const { width, height } = pageDim;
-    const isLandscape = width > height;
 
+    // Check if the page is rotated
+    const adjustedWidth = isRotated ? height : width;
 
-    // Determine scale based on orientation and rotation status
-    if (isLandscape) {
-      // return isRotated ? 1 : 0.7;
-      return isRotated ? 0.8 : 0.5;
-    }
+    // Calculate scale based on container width
+    const newScale = containerWidth / adjustedWidth;
 
-    // For portrait orientation
-    return 0.8;
+    return newScale;
   };
+
+
 
 
   const getScaleForPageThumbnail = (pageNumber) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
-    return pageDim && pageDim.width > pageDim.height ? 0.08 : 0.14; // Adjust the scale as needed
+    return pageDim && pageDim.width > pageDim.height ? 0.08 : 0.17; // Adjust the scale as needed
   };
 
 
-  const handleDownload = () => {
-    if (typeof window !== 'undefined') {
-      const link = window.document.createElement('a');
-      link.href = document;
-      link.download = `sample.pdf`;
+
+
+  const handleDownload = (base64, ext, fileName) => {
+    try {
+      // Convert Base64 to raw binary data
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+
+      // Determine the MIME type from the extension
+      const mimeTypes = {
+        pdf: "application/pdf",
+        png: "image/png",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        txt: "text/plain",
+        doc: "application/msword",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        xls: "application/vnd.ms-excel",
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ppt: "application/vnd.ms-powerpoint",
+        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        mp4: "video/mp4",
+        mp3: "audio/mpeg",
+        csv: "text/csv"
+      };
+
+      const mimeType = mimeTypes[ext.toLowerCase()] || "application/octet-stream"; // Default if unknown
+
+      // Create a Blob from the byteArray
+      const blob = new Blob([byteArray], { type: mimeType });
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${fileName}.${ext}`);
+
+      // Trigger download
+      document.body.appendChild(link);
       link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+      alert("Failed to download the file. Please try again.");
     }
   };
 
@@ -233,61 +277,60 @@ const PDFViewerPreview = (props) => {
 
   return (
     <>
-      <div className="controls bg-white shadow-lg text-dark  shadow-sm d-flex align-items-center justify-content-between">
-        <div className="toggle-button mx-4" style={{ marginRight: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-            <span onClick={toggleAside} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <Tooltip title={isAsideOpen ? "Close thumbnail view" : "Open thumbnail view"}>
-                <span>
-                  <i 
-                    className={isAsideOpen ? "fas fa-clone mx-1" : "fas fa-bars mx-1"}
-                    style={{ fontSize: isMobile ? '16px' : '20px', color: '#1C4690' }} 
-                  />
-                </span>
-              </Tooltip>
-              <span className='text-muted' style={{ fontSize: isMobile ? '10px' : '12px', marginLeft: '8px' }}>
-                {isAsideOpen ? "Close" : "Open"} Snapshot View
-              </span>
-            </span>
+      <div className="controls bg-white shadow-lg text-dark d-flex align-items-center justify-content-between px-3 py-2">
+        <div className="d-flex align-items-center flex-wrap gap-3">
 
-            <span className="text-dark" style={{ fontSize: isMobile ? '10px' : '12px' }}>
-              Page{' '}
-              <input
-                type="number"
-                value={pageNumber}
-                placeholder={pageNumber}
-                onChange={handlePageInputChange}
-                style={{
-                  marginLeft: '1rem',
-                  width: isMobile ? '40px' : '60px',
-                  padding: '5px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  fontSize: isMobile ? '10px' : '12px'
-                }}
-              />{' '}
-              / {numPages}
-            </span>
-
-            <Tooltip title="Download PDF">
-              <button className='btn btn-sm mx-3' onClick={handleDownload}>
-                <i className="fas fa-download" style={{ fontSize: isMobile ? '16px' : '20px', color: '#1C4690' }}></i>
-              </button>
+          {/* Toggle Sidebar Button */}
+          <span className="d-flex align-items-center cursor-pointer" onClick={toggleAside}>
+            <Tooltip title={isAsideOpen ? "Close thumbnail view" : "Open thumbnail view"}>
+              <i className={`mx-1 fas ${isAsideOpen ? "fa-clone" : "fa-bars"} `} style={{ fontSize: isMobile ? '16px' : '20px' , color:'#2757aa'}} />
             </Tooltip>
+            <span className="text-muted ms-2" style={{ fontSize: isMobile ? '10px' : '12px' }}>
+              {isAsideOpen ? "Close" : "Open"} Snapshot View
+            </span>
+          </span>
 
-            <Tooltip title="Digitally Sign copy">
-              <span>
-                <SignButton 
-                  objectid={props.objectid} 
-                  fileId={props.fileId} 
-                  vault={props.vault} 
-                  email={props.email} 
-                />
-              </span>
-            </Tooltip>
+          {/* Page Navigation */}
+          <span className="d-flex align-items-center text-dark" style={{ fontSize: isMobile ? '10px' : '12px' }}>
+            Page
+            <input
+              type="number"
+              value={pageNumber}
+              onChange={handlePageInputChange}
+              className="mx-2 page-input "
+            />
+            / {numPages}
+          </span>
+
+          {/* Zoom Controls */}
+          <div className="d-flex align-items-center">
+            <i style={{color:'#2757aa', fontSize:'20px'}} onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus mx-2 zoom-icon" />
+            <i  style={{color:'#2757aa',fontSize:'20px'}} onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus mx-2 zoom-icon" />
+               {/* Reset Zoom Button */}
+               <Tooltip title="Reset Zoom">
+            <button style={{fontSize:'12px'}} onClick={resetZoom} className="btn btn-sm btn-light ">Reset Zoom</button>
+          </Tooltip>
+
           </div>
+
+     
+          {/* Download Button */}
+          <Tooltip title="Download PDF">
+          
+              <i onClick={() => handleDownload(props.base64Content, props.fileExtension, props.fileName)} className="fas fa-download " style={{ fontSize: isMobile ? '16px' : '20px', color:'#2757aa' }}></i>
+       
+          </Tooltip>
+
+          {/* Sign Button */}
+          <Tooltip title="Digitally Sign Copy">
+            <span>
+              <SignButton {...props} />
+            </span>
+          </Tooltip>
+
         </div>
       </div>
+
 
       <div className="pdfrender" style={{ display: 'flex', height: '100vh', backgroundColor: '#e5e6e4' }}>
         {isAsideOpen && (
@@ -379,12 +422,15 @@ const PDFViewerPreview = (props) => {
                 <Page
                   pageNumber={pageIndex + 1}
                   scale={zoom}
+
+                  key={`page_${pageNumber}`}
+
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                   className="page-container shadow-sm"
                   onLoadSuccess={onPageLoadSuccess}
                   style={{
-                  
+
                     transformOrigin: 'top left',
                     position: 'relative',
                     zIndex: 1,

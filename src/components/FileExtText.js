@@ -48,7 +48,7 @@ const FileExtText = (props) => {
     return <p></p>; // Return empty text if there's an error
   }
 
-  return extension || ''; // Ensure a safe fallback for extension
+  return <>.{extension}</> || ''; // Ensure a safe fallback for extension
 };
 
 export default FileExtText;

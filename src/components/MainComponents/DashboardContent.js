@@ -46,6 +46,12 @@ import PropTypes from 'prop-types';
 import { Tooltip } from '@mui/material';
 
 
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import LinkedObjectsTree from './LinkedObjectsTree';
+
+
+
 const baseurldata = constants.mfiles_api
 
 function CustomTabPanel({ children, value, index, ...other }) {
@@ -58,7 +64,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{  height: '100%', overflowY: 'auto' }}>
+        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor:'#fff' }}>
           {children}
         </Box>
       )}
@@ -73,6 +79,7 @@ CustomTabPanel.propTypes = {
 };
 
 function a11yProps(index) {
+
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
@@ -117,6 +124,7 @@ const DocumentList = (props) => {
   const [openOfficeApp, setOpenOfficeApp] = useState(false)
   const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
   const [loadingClick, setLoadingClick] = useState(false);
+  const [searched, setSearched] = useState(false)
 
 
 
@@ -124,8 +132,8 @@ const DocumentList = (props) => {
   const handleCloseDialog = () => setDialogOpen(false);
 
 
-  const relatedObjects = linkedObjects.filter(item => (item.objectID !== undefined ? item.objectID : item.objectTypeId) !== 0);
-  const relatedDocuments = linkedObjects.filter(item => (item.objectID !== undefined ? item.objectID : item.objectTypeId) === 0);
+  const relatedObjects = linkedObjects.filter(item => (item.objectID || item.objectTypeId) !== 0);
+  const relatedDocuments = linkedObjects.filter(item => (item.objectID || item.objectTypeId) === 0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -290,16 +298,19 @@ const DocumentList = (props) => {
   };
 
 
+
+
   const getLinkedObjects = async (id, objectType) => {
     setLinkedObjects([])
     setLoadingObjects(true)
 
     try {
       let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}/${props.mfilesId}`
+
       const response = await axios.get(url);
 
       setLinkedObjects(response.data)
-      // console.log(response.data)
+      console.log(response.data)
 
       setLoadingObjects(false)
     }
@@ -316,7 +327,6 @@ const DocumentList = (props) => {
 
   const previewObject = async (item, getLinkedItems) => {
 
-
     setComments([])
 
     // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
@@ -329,17 +339,18 @@ const DocumentList = (props) => {
     setLoadingClick(true)
     // console.log(formValues)
     setFormValues({})
-    if (getLinkedItems) {
-      getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
-    }
+    // if (getLinkedItems) {
+    //   getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
+    // }
 
     setSelectedObject(item)
+
     console.log(item)
-    getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID), item.id)
+    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id)
 
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`);
-      console.log(propsResponse.data)
+      // console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
       setLoadingObject(false)
       setLoadingClick(false)
@@ -370,9 +381,9 @@ const DocumentList = (props) => {
     //   return;
     // }
 
-    if (getLinkedItems) {
-      getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
-    }
+    // if (getLinkedItems) {
+    //   getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
+    // }
 
     // Set loading states and clear selected state/form
     setSelectedState({});
@@ -380,17 +391,17 @@ const DocumentList = (props) => {
     setLoadingClick(true)
     setFormValues({});
     setSelectedObject(item);
-    console.log(item)
+    // console.log(item)
 
     // Fetch the object workflow asynchronously
-    getSelectedObjWorkflow((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID, item.id));
+    getSelectedObjWorkflow((item.objectTypeId || item.objectID, item.id));
 
     try {
       // Fetch view object properties
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
-      console.log(propsResponse.data)
+      // console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       setLoadingClick(false)
@@ -403,12 +414,18 @@ const DocumentList = (props) => {
       setLoadingClick(false)
     }
 
+    // console.log(item.objectID)
+    // console.log(item.objectTypeId)
+
     // Handle document fetching if item is a document
-    if ((item.objectTypeId !== undefined ? item.objectTypeId : item.objectID) === 0) {
+    if (item.objectTypeId  === 0 || item.objectID === 0) {
+      
 
       setLoadingFile(true);
-      let url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)}`;
+      
+      let url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId ?? item.objectID)}`;
 
+      // console.log(url)
       try {
         // Fetch object files
         const filesResponse = await axios.get(
@@ -423,13 +440,15 @@ const DocumentList = (props) => {
         // Download the file using the fileId
         try {
           const downloadResponse = await axios.get(
-            `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)}/${fileId}`,
+            `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId ?? item.objectID)}/${fileId}`,
             { headers: { Accept: '*/*' } }
           );
 
           setLoadingClick(false)
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
+          let ext=downloadResponse.data.extension.replace('.', '')
+          console.log(ext)
         } catch (downloadError) {
           console.error('Error downloading file:', downloadError);
         } finally {
@@ -453,6 +472,7 @@ const DocumentList = (props) => {
     // Fetch object comments
     getObjectComments(item);
   };
+
 
 
 
@@ -508,9 +528,8 @@ const DocumentList = (props) => {
   const getObjectComments = async (item) => {
     setLoadingComments(true)
     // Define the API URL
-    let objectID = item.objectID !== undefined ? item.objectID : item.objectTypeId;
-
-    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${objectID}`;
+ 
+    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${(item.objectID ?? item.objectTypeId)}`;
 
     // Fetch the comments using Axios
     await axios.get(url, {
@@ -636,8 +655,9 @@ const DocumentList = (props) => {
     // Trigger a search for documents based on 'searchTerm'
     props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
       setLoading(false)
+      setSearched(true)
       props.setData(data);
-      console.log(data)
+      // console.log(data)
     });
 
   };
@@ -654,6 +674,7 @@ const DocumentList = (props) => {
 
   function openApp(item) {
     const fetchExtension = async () => {
+      
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
       //   console.log(url)
       try {
@@ -768,7 +789,7 @@ const DocumentList = (props) => {
       }
 
     );
-    console.log(data)
+    // console.log(data)
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -793,7 +814,7 @@ const DocumentList = (props) => {
         setAlertMsg("Failed to restore, please try again later");
 
 
-        console.log(error);
+        // console.log(error);
       });
 
 
@@ -834,9 +855,9 @@ const DocumentList = (props) => {
       <LoadingDialog opendialogloading={loadingClick} />
 
 
-      <div id="container" ref={containerRef} style={{  display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
+      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#fff', minWidth: '35%', minHeight:'100vh'}}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
           <Box
             style={{
               display: 'flex',
@@ -976,10 +997,10 @@ const DocumentList = (props) => {
               </div>
 
               <input
-                className="form-control form-control-md rounded mx-2"
+                className="form-control form-control-md  mx-1 rounded"
                 type="text"
                 required
-                placeholder="Quick search ..."
+                placeholder="Search ..."
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
                 style={{ borderRadius: '0px' }}
@@ -987,17 +1008,17 @@ const DocumentList = (props) => {
 
               <button
                 type="submit"
-                className="btn btn-md rounded mx-2 shadow"
+                className="btn btn-md  shadow rounded"
                 style={{
                   fontSize: '13px',
                   color: '#fff',
-                  backgroundColor: '#1C4690',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19)',
-                  transition: 'transform 0.2s',
+                  backgroundColor: '#2757aa',
+                  // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19)',
+                  // transition: 'transform 0.2s',
                   cursor: 'pointer'
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
                 <span className="mx-2">Search</span>
@@ -1019,26 +1040,28 @@ const DocumentList = (props) => {
             value={value}
             onChange={handleChange}
             aria-label="Horizontal tabs example"
-            sx={{ borderColor: 'divider' }}
-            className='bg-white shadow-lg'
+            sx={{ borderColor: 'divider'}}
+            className='bg-white'
           >
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-                fontSize: '13px',
+                fontSize: '12px',
                 width: 'auto',
                 minWidth: 'auto',
                 height: 'auto'
                 // Adjust the width to fit the label text
               }}
+              onClick={() => setSearched(false)}
               label="All"
               {...a11yProps(0)}
             />
             <Tab
-              style={{ textTransform: 'none', fontSize: '13px', }}
+              style={{ textTransform: 'none'}}
               sx={{
                 height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
+                fontSize: '12px',
               }}
               label={`Recent`}
               // label={`Recent (${props.recentData ? props.recentData.length : <></>})`}
@@ -1059,7 +1082,7 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-                fontSize: '13px',
+                fontSize: '12px',
                 height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
               }}
@@ -1075,247 +1098,343 @@ const DocumentList = (props) => {
               backgroundColor: '#fff',
               padding: '0%',
               width: '100%',
-       
+
             }}
           >
 
             {loading ? (
-              <div className='bg-white my-2'>  <Loader /></div>
+              <Loader />
 
             ) : (
               <>
-                {props.data.length > 0 ? (
-                  <div>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-                      <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
-                      <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
-                      Search Results
-                    </h6>
+                {searched ?
+                  <>
+                    {props.data.length > 0 ? (
+                      <div>
+                        <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
+                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
+                          <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
+                          Search Results
+                        </h6>
 
-                    <div className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
-                      {props.data.map((item, index) => (
-                        <Accordion
-                          expanded={selectedIndex === index}
-                          onChange={handleAccordionChange(index)}
+                        <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
+                          {props.data.map((item, index) => (
+                            // <Accordion
+                            //   expanded={selectedIndex === index}
+                            //   onChange={handleAccordionChange(index)}
+                            //   sx={{
+                            //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            //     '&:not(:last-child)': {
+                            //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                            //     },
+                            //     '&::before': { display: 'none' },
+                            //   }}
+                            // >
+                            //   {item.objectID === 0 ? (
+                            //     <AccordionSummary
+                            //       onClick={() => previewSublistObject(item, true)}
+
+                            //       expandIcon={<ExpandMoreIcon />}
+                            //       aria-controls={`panel${index}a-content`}
+                            //       id={`panel${index}a-header`}
+                            //       sx={{
+                            //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                            //         padding: 0, // Removes all padding
+                            //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                            //       }}
+                            //       className="shadow-sm"
+                            //     >
+                            //       <Typography
+                            //         variant="body1"
+                            //         style={{
+                            //           fontSize: '11px',
+                            //           margin: 0, // Removes any extra margin
+                            //         }}
+                            //       >
+
+                            //         <span className='mx-2'> <FileExtIcon
+                            //           guid={props.selectedVault.guid}
+                            //           objectId={item.id}
+                            //           classId={item.classID}
+                            //         /></span>
+
+                            //         {trimTitle2(item.title)}
+                            //         <FileExtText
+                            //           guid={props.selectedVault.guid}
+                            //           objectId={item.id}
+                            //           classId={item.classID}
+                            //         />
+                            //       </Typography>
+                            //     </AccordionSummary>
+
+                            //   ) : (
+                            //     <AccordionSummary
+                            //       onClick={() => previewObject(item, true)}
+                            //       expandIcon={<ExpandMoreIcon />}
+                            //       aria-controls={`panel${index}a-content`}
+                            //       id={`panel${index}a-header`}
+                            //       sx={{
+                            //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                            //         padding: 0, // Removes all padding
+                            //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                            //       }}
+                            //       className="shadow-sm"
+                            //     >
+                            //       <Typography variant="body1" style={{ fontSize: '11px' }}>
+                            //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                            //         {trimTitle2(item.title)}
+                            //       </Typography>
+                            //     </AccordionSummary>
+                            //   )}
+                            //   {linkedObjects && (
+                            //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
+                            //       {props.loadingobjects ? (
+                            //         <div className="text-center">
+                            //           <CircularProgress style={{ width: '20px', height: '20px' }} />
+                            //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                            //         </div>
+                            //       ) : (
+                            //         <>
+                            //           {linkedObjects.length > 0 ? (
+                            //             <>
+                            //               {/* Render Other Objects */}
+                            //               {otherObjects.map((item, index) => (
+                            //                 <div key={index}>
+                            //                   <Typography
+                            //                     variant="body2"
+                            //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                            //                     className="p-1"
+                            //                   >
+                            //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
+                            //                   </Typography>
+
+                            //                   <table
+                            //                     id="createdByMe"
+                            //                     className="table table-hover"
+                            //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                            //                   >
+                            //                     <tbody>
+                            //                       {item.items.map((subItem, subIndex) => (
+                            //                         <tr
+                            //                           key={subIndex}
+                            //                           onClick={() => handleRowClick(subItem)}
+                            //                           onDoubleClick={() => openApp(subItem)}
+                            //                           style={{ cursor: 'pointer' }}
+                            //                         >
+                            //                           <td>
+                            //                             {subItem.objectID === 0 ? (
+                            //                               <>
+                            //                                 <FileExtIcon
+                            //                                   guid={props.selectedVault.guid}
+                            //                                   objectId={subItem.id}
+                            //                                   classId={subItem.classID}
+                            //                                 />
+                            //                                 {subItem.title}
+                            //                                 <FileExtText
+                            //                                   guid={props.selectedVault.guid}
+                            //                                   objectId={subItem.id}
+                            //                                   classId={subItem.classID}
+                            //                                 />
+                            //                               </>
+                            //                             ) : (
+                            //                               <>
+                            //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                            //                                 {subItem.title}
+                            //                               </>
+                            //                             )}
+                            //                           </td>
+                            //                         </tr>
+                            //                       ))}
+                            //                     </tbody>
+                            //                   </table>
+                            //                 </div>
+                            //               ))}
+
+                            //               {/* Render Documents Together */}
+                            //               {documents.length > 0 && (
+                            //                 <>
+                            //                   <Typography
+                            //                     variant="body2"
+                            //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                            //                     className="p-1"
+                            //                   >
+                            //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                            //                   </Typography>
+
+                            //                   <table
+                            //                     id="createdByMe"
+                            //                     className="table table-hover"
+                            //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                            //                   >
+                            //                     <tbody>
+                            //                       {documents.flatMap(item => item.items).map((subItem, index) => (
+                            //                         <tr
+                            //                           key={index}
+                            //                           onClick={() => handleRowClick(subItem)}
+                            //                           onDoubleClick={() => openApp(subItem)}
+                            //                           style={{ cursor: 'pointer' }}
+                            //                         >
+                            //                           <td>
+                            //                             {subItem.objectID === 0 ? (
+                            //                               <>
+                            //                                 <FileExtIcon
+                            //                                   guid={props.selectedVault.guid}
+                            //                                   objectId={subItem.id}
+                            //                                   classId={subItem.classID}
+                            //                                 />
+                            //                                 {subItem.title}
+                            //                                 <FileExtText
+                            //                                   guid={props.selectedVault.guid}
+                            //                                   objectId={subItem.id}
+                            //                                   classId={subItem.classID}
+                            //                                 />
+                            //                               </>
+                            //                             ) : (
+                            //                               <>
+                            //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                            //                                 {subItem.title}
+                            //                               </>
+                            //                             )}
+                            //                           </td>
+                            //                         </tr>
+                            //                       ))}
+                            //                     </tbody>
+                            //                   </table>
+                            //                 </>
+                            //               )}
+                            //             </>
+                            //           ) : (
+                            //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
+                            //               No Relationships Found
+                            //             </p>
+                            //           )}
+                            //         </>
+                            //       )}
+                            //     </AccordionDetails>
+                            //   )}
+                            // </Accordion>
+                            <SimpleTreeView>
+                              <TreeItem
+                                key={`tree-item-${index}`} // Unique key
+                                itemId={`tree-item-${index}`} // Unique itemId
+                                onClick={() =>
+                                  item.objectTypeId || item.objectID === 0
+                                    ? previewSublistObject(item, true)
+                                    : previewObject(item, true)
+                                }
+
+                                sx={{
+                                  fontSize: "12.5px", // Apply directly to TreeItem
+                                  "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
+                                  "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+
+                                  backgroundColor: "#fff",
+                                  "&:hover": {
+                                    backgroundColor: "#fff !important", // Maintain white background on hover
+                                  },
+
+                                  borderRadius: "0px !important", // Remove border radius
+                                  "& .MuiTreeItem-content": {
+                                    borderRadius: "0px !important", // Remove border radius from content area
+                                  },
+                                }}
+                                label={
+                                  <Box display="flex" alignItems="center">
+                                    {item.objectTypeId || item.objectID === 0 ? (
+                                      <>
+                                        <FileExtIcon
+                                          guid={props.selectedVault.guid}
+                                          objectId={item.id}
+                                          classId={item.classId || item.classID}
+                                        />
+                                      </>
+                                    ) : (
+                                      <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                    )}
+                                    <span style={{ marginLeft: '8px' }}>{item.title}</span>
+                                    {item.objectTypeId || item.objectID === 0 ? (
+                                      <>
+                                        <FileExtText
+                                          guid={props.selectedVault.guid}
+                                          objectId={item.id}
+                                          classId={item.classId || item.classID}
+                                        />
+                                      </>
+                                    ) : null}
+
+                                  </Box>
+                                }
+                              >
+
+                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                              </TreeItem>
+                            </SimpleTreeView>
+
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Box
                           sx={{
-                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            '&:not(:last-child)': {
-                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            },
-                            '&::before': { display: 'none' },
+                            width: '100%',
+                            marginTop: '5%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mx: 'auto'
                           }}
                         >
-                          {item.objectID === 0 ? (
-                            <AccordionSummary
-                              onClick={() => previewSublistObject(item, true)}
+                          <i
+                            className="fas fa-search my-2"
+                            style={{ fontSize: '120px', color: '#2757aa' }}
+                          />
 
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography
-                                variant="body1"
-                                style={{
-                                  fontSize: '11px',
-                                  margin: 0, // Removes any extra margin
-                                }}
-                              >
-                                
-                                <span className='mx-2'> <FileExtIcon
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                /></span>
 
-                                {trimTitle2(item.title)}.
-                                <FileExtText
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                />
-                              </Typography>
-                            </AccordionSummary>
+                          <Typography
+                            variant="body2"
+                            className='my-2 text-dark'
+                            sx={{ textAlign: 'center' }}
+                          >
+                            No Results Found
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            className='text-dark'
+                            sx={{ textAlign: 'center', fontSize: '12px' }}
+                          >
+                            Please try a different search paramenter
+                          </Typography>
 
-                          ) : (
-                            <AccordionSummary
-                              onClick={() => previewObject(item, true)}
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                {trimTitle2(item.title)}
-                              </Typography>
-                            </AccordionSummary>
-                          )}
-                          {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                              {props.loadingobjects ? (
-                                <div className="text-center">
-                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                </div>
-                              ) : (
-                                <>
-                                  {linkedObjects.length > 0 ? (
-                                    <>
-                                      {/* Render Other Objects */}
-                                      {otherObjects.map((item, index) => (
-                                        <div key={index}>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                                          </Typography>
+                        </Box>
 
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                                          >
-                                            <tbody>
-                                              {item.items.map((subItem, subIndex) => (
-                                                <tr
-                                                  key={subIndex}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      ))}
-
-                                      {/* Render Documents Together */}
-                                      {documents.length > 0 && (
-                                        <>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                                          </Typography>
-
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                                          >
-                                            <tbody>
-                                              {documents.flatMap(item => item.items).map((subItem, index) => (
-                                                <tr
-                                                  key={index}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                                      No Relationships Found
-                                    </p>
-                                  )}
-                                </>
-                              )}
-                            </AccordionDetails>
-                          )}
-                        </Accordion>
-
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-
-                    <ViewsList
-                      selectedFileId={selectedFileId}
-                      viewableobjects={props.viewableobjects}
-                      previewSublistObject={previewSublistObject}
-                      selectedObject={selectedObject}
-                      linkedObjects={linkedObjects}
-                      loadingobjects={loadingobjects}
-                      selectedVault={props.selectedVault}
-                      setPreviewObjectProps={setPreviewObjectProps}
-                      setLoadingPreviewObject={setLoadingPreviewObject}
-                      previewObject={previewObject}
-                      setAlertPopOpen={setAlertPopOpen}
-                      setAlertPopSeverity={setAlertPopSeverity}
-                      setAlertPopMessage={setAlertPopMessage}
-                      user={props.user}
-                      mfilesId={props.mfilesId}
-
-                    />
+                      </>
+                    )}
                   </>
-                )}
+                  :
+                  <ViewsList
+                    selectedFileId={selectedFileId}
+                    viewableobjects={props.viewableobjects}
+                    previewSublistObject={previewSublistObject}
+                    selectedObject={selectedObject}
+                    linkedObjects={linkedObjects}
+                    loadingobjects={loadingobjects}
+                    selectedVault={props.selectedVault}
+                    setPreviewObjectProps={setPreviewObjectProps}
+                    setLoadingPreviewObject={setLoadingPreviewObject}
+                    previewObject={previewObject}
+                    setAlertPopOpen={setAlertPopOpen}
+                    setAlertPopSeverity={setAlertPopSeverity}
+                    setAlertPopMessage={setAlertPopMessage}
+                    user={props.user}
+                    mfilesId={props.mfilesId}
+
+
+                  />
+
+                }
               </>
             )}
 
@@ -1340,208 +1459,264 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
                     </h6>
 
-                    <div className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
+                    <div className=' text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.recentData.map((item, index) => (
-                        <Accordion
-                          expanded={selectedIndex === index}
-                          onChange={handleAccordionChange(index)}
-                          sx={{
-                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            '&:not(:last-child)': {
-                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            },
-                            '&::before': { display: 'none' },
-                          }}
-                        >
-                          {item.objectID === 0 ? (
-                            <AccordionSummary
-                              onClick={() => previewSublistObject(item, true)}
+                        // <Accordion
+                        //   expanded={selectedIndex === index}
+                        //   onChange={handleAccordionChange(index)}
+                        //   sx={{
+                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     '&:not(:last-child)': {
+                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     },
+                        //     '&::before': { display: 'none' },
+                        //   }}
+                        // >
+                        //   {item.objectID === 0 ? (
+                        //     <AccordionSummary
+                        //       onClick={() => previewSublistObject(item, true)}
 
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography
-                                variant="body1"
-                                style={{
-                                  fontSize: '11px',
-                                  margin: 0, // Removes any extra margin
-                                }}
-                              >
-                                
-                                <span className='mx-2'> <FileExtIcon
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                /></span>
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography
+                        //         variant="body1"
+                        //         style={{
+                        //           fontSize: '11px',
+                        //           margin: 0, // Removes any extra margin
+                        //         }}
+                        //       >
 
-                                {trimTitle2(item.title)}.
-                                <FileExtText
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                />
-                              </Typography>
-                            </AccordionSummary>
+                        //         <span className='mx-2'> <FileExtIcon
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         /></span>
 
-                          ) : (
-                            <AccordionSummary
-                              onClick={() => previewObject(item, true)}
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                {trimTitle2(item.title)}
-                              </Typography>
-                            </AccordionSummary>
-                          )}
-                          {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                              {props.loadingobjects ? (
-                                <div className="text-center">
-                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                </div>
-                              ) : (
-                                <>
-                                  {linkedObjects.length > 0 ? (
-                                    <>
-                                      {/* Render Other Objects */}
-                                      {otherObjects.map((item, index) => (
-                                        <div key={index}>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                                          </Typography>
+                        //         {trimTitle2(item.title)}
+                        //         <FileExtText
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         />
+                        //       </Typography>
+                        //     </AccordionSummary>
 
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                                          >
-                                            <tbody>
-                                              {item.items.map((subItem, subIndex) => (
-                                                <tr
-                                                  key={subIndex}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      ))}
+                        //   ) : (
+                        //     <AccordionSummary
+                        //       onClick={() => previewObject(item, true)}
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
+                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                        //         {trimTitle2(item.title)}
+                        //       </Typography>
+                        //     </AccordionSummary>
+                        //   )}
+                        //   {linkedObjects && (
+                        //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
+                        //       {props.loadingobjects ? (
+                        //         <div className="text-center">
+                        //           <CircularProgress style={{ width: '20px', height: '20px' }} />
+                        //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                        //         </div>
+                        //       ) : (
+                        //         <>
+                        //           {linkedObjects.length > 0 ? (
+                        //             <>
+                        //               {/* Render Other Objects */}
+                        //               {otherObjects.map((item, index) => (
+                        //                 <div key={index}>
+                        //                   <Typography
+                        //                     variant="body2"
+                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                        //                     className="p-1"
+                        //                   >
+                        //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
+                        //                   </Typography>
 
-                                      {/* Render Documents Together */}
-                                      {documents.length > 0 && (
-                                        <>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                                          </Typography>
+                        //                   <table
+                        //                     id="createdByMe"
+                        //                     className="table table-hover"
+                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                        //                   >
+                        //                     <tbody>
+                        //                       {item.items.map((subItem, subIndex) => (
+                        //                         <tr
+                        //                           key={subIndex}
+                        //                           onClick={() => handleRowClick(subItem)}
+                        //                           onDoubleClick={() => openApp(subItem)}
+                        //                           style={{ cursor: 'pointer' }}
+                        //                         >
+                        //                           <td>
+                        //                             {subItem.objectID === 0 ? (
+                        //                               <>
+                        //                                 <FileExtIcon
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                                 {subItem.title}
+                        //                                 <FileExtText
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                               </>
+                        //                             ) : (
+                        //                               <>
+                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                        //                                 {subItem.title}
+                        //                               </>
+                        //                             )}
+                        //                           </td>
+                        //                         </tr>
+                        //                       ))}
+                        //                     </tbody>
+                        //                   </table>
+                        //                 </div>
+                        //               ))}
 
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                                          >
-                                            <tbody>
-                                              {documents.flatMap(item => item.items).map((subItem, index) => (
-                                                <tr
-                                                  key={index}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                                      No Relationships Found
-                                    </p>
-                                  )}
-                                </>
-                              )}
-                            </AccordionDetails>
-                          )}
-                        </Accordion>
+                        //               {/* Render Documents Together */}
+                        //               {documents.length > 0 && (
+                        //                 <>
+                        //                   <Typography
+                        //                     variant="body2"
+                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                        //                     className="p-1"
+                        //                   >
+                        //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                        //                   </Typography>
+
+                        //                   <table
+                        //                     id="createdByMe"
+                        //                     className="table table-hover"
+                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                        //                   >
+                        //                     <tbody>
+                        //                       {documents.flatMap(item => item.items).map((subItem, index) => (
+                        //                         <tr
+                        //                           key={index}
+                        //                           onClick={() => handleRowClick(subItem)}
+                        //                           onDoubleClick={() => openApp(subItem)}
+                        //                           style={{ cursor: 'pointer' }}
+                        //                         >
+                        //                           <td>
+                        //                             {subItem.objectID === 0 ? (
+                        //                               <>
+                        //                                 <FileExtIcon
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                                 {subItem.title}
+                        //                                 <FileExtText
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                               </>
+                        //                             ) : (
+                        //                               <>
+                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                        //                                 {subItem.title}
+                        //                               </>
+                        //                             )}
+                        //                           </td>
+                        //                         </tr>
+                        //                       ))}
+                        //                     </tbody>
+                        //                   </table>
+                        //                 </>
+                        //               )}
+                        //             </>
+                        //           ) : (
+                        //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
+                        //               No Relationships Found
+                        //             </p>
+                        //           )}
+                        //         </>
+                        //       )}
+                        //     </AccordionDetails>
+                        //   )}
+                        // </Accordion>
+                        <SimpleTreeView>
+                          <TreeItem
+                            key={`tree-item-${index}`} // Unique key
+                            itemId={`tree-item-${index}`} // Unique itemId
+                            onClick={() =>
+                              item.objectTypeId === 0 || item.objectID === 0
+                                ? previewSublistObject(item, true)
+                                : previewObject(item, true)
+                            }
+
+                            sx={{
+                              fontSize: "12.5px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+
+                              backgroundColor: "#fff",
+                              "&:hover": {
+                                backgroundColor: "#fff !important", // Maintain white background on hover
+                              },
+
+                              borderRadius: "0px !important", // Remove border radius
+                              "& .MuiTreeItem-content": {
+                                borderRadius: "0px !important", // Remove border radius from content area
+                              },
+                            }}
+                            label={
+                              <Box display="flex" alignItems="center">
+                                {item.objectTypeId  === 0 || item.objectID === 0? (
+                                  <>
+                                    <FileExtIcon
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  </>
+                                ) : (
+                                  <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                )}
+                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
+                                {item.objectTypeId  === 0 || item.objectID === 0? (
+                                  <>
+                                    <FileExtText
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  </>
+                                ) : null}
+
+                              </Box>
+                            }
+                          >
+
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId ||item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                          </TreeItem>
+                        </SimpleTreeView>
 
                       ))}
                     </div>
@@ -1576,208 +1751,264 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
                     </h6>
 
-                    <div  className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
+                    <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.assignedData.map((item, index) => (
-                        <Accordion
-                          expanded={selectedIndex === index}
-                          onChange={handleAccordionChange(index)}
-                          sx={{
-                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            '&:not(:last-child)': {
-                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            },
-                            '&::before': { display: 'none' },
-                          }}
-                        >
-                          {item.objectID === 0 ? (
-                            <AccordionSummary
-                              onClick={() => previewSublistObject(item, true)}
+                        // <Accordion
+                        //   expanded={selectedIndex === index}
+                        //   onChange={handleAccordionChange(index)}
+                        //   sx={{
+                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     '&:not(:last-child)': {
+                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     },
+                        //     '&::before': { display: 'none' },
+                        //   }}
+                        // >
+                        //   {item.objectID === 0 ? (
+                        //     <AccordionSummary
+                        //       onClick={() => previewSublistObject(item, true)}
 
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography
-                                variant="body1"
-                                style={{
-                                  fontSize: '11px',
-                                  margin: 0, // Removes any extra margin
-                                }}
-                              >
-                                
-                                <span className='mx-2'> <FileExtIcon
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                /></span>
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography
+                        //         variant="body1"
+                        //         style={{
+                        //           fontSize: '11px',
+                        //           margin: 0, // Removes any extra margin
+                        //         }}
+                        //       >
 
-                                {trimTitle2(item.title)}.
-                                <FileExtText
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                />
-                              </Typography>
-                            </AccordionSummary>
+                        //         <span className='mx-2'> <FileExtIcon
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         /></span>
 
-                          ) : (
-                            <AccordionSummary
-                              onClick={() => previewObject(item, true)}
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                {trimTitle2(item.title)}
-                              </Typography>
-                            </AccordionSummary>
-                          )}
-                          {linkedObjects && (
-                            <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                              {props.loadingobjects ? (
-                                <div className="text-center">
-                                  <CircularProgress style={{ width: '20px', height: '20px' }} />
-                                  <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                </div>
-                              ) : (
-                                <>
-                                  {linkedObjects.length > 0 ? (
-                                    <>
-                                      {/* Render Other Objects */}
-                                      {otherObjects.map((item, index) => (
-                                        <div key={index}>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                                          </Typography>
+                        //         {trimTitle2(item.title)}
+                        //         <FileExtText
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         />
+                        //       </Typography>
+                        //     </AccordionSummary>
 
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                                          >
-                                            <tbody>
-                                              {item.items.map((subItem, subIndex) => (
-                                                <tr
-                                                  key={subIndex}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      ))}
+                        //   ) : (
+                        //     <AccordionSummary
+                        //       onClick={() => previewObject(item, true)}
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
+                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                        //         {trimTitle2(item.title)}
+                        //       </Typography>
+                        //     </AccordionSummary>
+                        //   )}
+                        //   {linkedObjects && (
+                        //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
+                        //       {props.loadingobjects ? (
+                        //         <div className="text-center">
+                        //           <CircularProgress style={{ width: '20px', height: '20px' }} />
+                        //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
+                        //         </div>
+                        //       ) : (
+                        //         <>
+                        //           {linkedObjects.length > 0 ? (
+                        //             <>
+                        //               {/* Render Other Objects */}
+                        //               {otherObjects.map((item, index) => (
+                        //                 <div key={index}>
+                        //                   <Typography
+                        //                     variant="body2"
+                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                        //                     className="p-1"
+                        //                   >
+                        //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
+                        //                   </Typography>
 
-                                      {/* Render Documents Together */}
-                                      {documents.length > 0 && (
-                                        <>
-                                          <Typography
-                                            variant="body2"
-                                            style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                            className="p-1"
-                                          >
-                                            <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                                          </Typography>
+                        //                   <table
+                        //                     id="createdByMe"
+                        //                     className="table table-hover"
+                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
+                        //                   >
+                        //                     <tbody>
+                        //                       {item.items.map((subItem, subIndex) => (
+                        //                         <tr
+                        //                           key={subIndex}
+                        //                           onClick={() => handleRowClick(subItem)}
+                        //                           onDoubleClick={() => openApp(subItem)}
+                        //                           style={{ cursor: 'pointer' }}
+                        //                         >
+                        //                           <td>
+                        //                             {subItem.objectID === 0 ? (
+                        //                               <>
+                        //                                 <FileExtIcon
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                                 {subItem.title}
+                        //                                 <FileExtText
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                               </>
+                        //                             ) : (
+                        //                               <>
+                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                        //                                 {subItem.title}
+                        //                               </>
+                        //                             )}
+                        //                           </td>
+                        //                         </tr>
+                        //                       ))}
+                        //                     </tbody>
+                        //                   </table>
+                        //                 </div>
+                        //               ))}
 
-                                          <table
-                                            id="createdByMe"
-                                            className="table table-hover"
-                                            style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                                          >
-                                            <tbody>
-                                              {documents.flatMap(item => item.items).map((subItem, index) => (
-                                                <tr
-                                                  key={index}
-                                                  onClick={() => handleRowClick(subItem)}
-                                                  onDoubleClick={() => openApp(subItem)}
-                                                  style={{ cursor: 'pointer' }}
-                                                >
-                                                  <td>
-                                                    {subItem.objectID === 0 ? (
-                                                      <>
-                                                        <FileExtIcon
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                        {subItem.title}.
-                                                        <FileExtText
-                                                          guid={props.selectedVault.guid}
-                                                          objectId={subItem.id}
-                                                          classId={subItem.classID}
-                                                        />
-                                                      </>
-                                                    ) : (
-                                                      <>
-                                                        <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                                        {subItem.title}
-                                                      </>
-                                                    )}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                                      No Relationships Found
-                                    </p>
-                                  )}
-                                </>
-                              )}
-                            </AccordionDetails>
-                          )}
-                        </Accordion>
+                        //               {/* Render Documents Together */}
+                        //               {documents.length > 0 && (
+                        //                 <>
+                        //                   <Typography
+                        //                     variant="body2"
+                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
+                        //                     className="p-1"
+                        //                   >
+                        //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
+                        //                   </Typography>
+
+                        //                   <table
+                        //                     id="createdByMe"
+                        //                     className="table table-hover"
+                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
+                        //                   >
+                        //                     <tbody>
+                        //                       {documents.flatMap(item => item.items).map((subItem, index) => (
+                        //                         <tr
+                        //                           key={index}
+                        //                           onClick={() => handleRowClick(subItem)}
+                        //                           onDoubleClick={() => openApp(subItem)}
+                        //                           style={{ cursor: 'pointer' }}
+                        //                         >
+                        //                           <td>
+                        //                             {subItem.objectID === 0 ? (
+                        //                               <>
+                        //                                 <FileExtIcon
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                                 {subItem.title}
+                        //                                 <FileExtText
+                        //                                   guid={props.selectedVault.guid}
+                        //                                   objectId={subItem.id}
+                        //                                   classId={subItem.classID}
+                        //                                 />
+                        //                               </>
+                        //                             ) : (
+                        //                               <>
+                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
+                        //                                 {subItem.title}
+                        //                               </>
+                        //                             )}
+                        //                           </td>
+                        //                         </tr>
+                        //                       ))}
+                        //                     </tbody>
+                        //                   </table>
+                        //                 </>
+                        //               )}
+                        //             </>
+                        //           ) : (
+                        //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
+                        //               No Relationships Found
+                        //             </p>
+                        //           )}
+                        //         </>
+                        //       )}
+                        //     </AccordionDetails>
+                        //   )}
+                        // </Accordion>
+                        <SimpleTreeView>
+                          <TreeItem
+                            key={`tree-item-${index}`} // Unique key
+                            itemId={`tree-item-${index}`} // Unique itemId
+                            onClick={() =>
+                              item.objectTypeId  === 0 || item.objectID === 0
+                                ? previewSublistObject(item, true)
+                                : previewObject(item, true)
+                            }
+
+                            sx={{
+                              fontSize: "12.5px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+
+                              backgroundColor: "#fff",
+                              "&:hover": {
+                                backgroundColor: "#fff !important", // Maintain white background on hover
+                              },
+
+                              borderRadius: "0px !important", // Remove border radius
+                              "& .MuiTreeItem-content": {
+                                borderRadius: "0px !important", // Remove border radius from content area
+                              },
+                            }}
+                            label={
+                              <Box display="flex" alignItems="center">
+                                {item.objectTypeId || item.objectID === 0 ? (
+                                  <>
+                                    <FileExtIcon
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  </>
+                                ) : (
+                                  <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                )}
+                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
+                                {item.objectTypeId  === 0 || item.objectID === 0 ? (
+                                  <>
+                                    <FileExtText
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  </>
+                                ) : null}
+
+                              </Box>
+                            }
+                          >
+
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                          </TreeItem>
+                        </SimpleTreeView>
 
                       ))}
                     </div>
@@ -1797,10 +2028,10 @@ const DocumentList = (props) => {
             value={value}
             index={3}
             style={{
-              backgroundColor: '#dedddd',
+              backgroundColor: '#fff',
               // height: '100%',
               padding: '0%',
-              width: '90vh',
+              width: '100%',
               overflowY: 'auto'
             }}
           >
@@ -1810,83 +2041,156 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#e0fbfc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
                     </h6>
 
-                    <div  className='p-2'  style={{marginLeft:'20px', height:'65vh', overflowY:'auto'}}>
+                    <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.deletedData.map((item, index) => (
-                        <Accordion
-                          expanded={selectedIndex === index}
-                          onChange={handleAccordionChange(index)}
-                          sx={{
-                            border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            '&:not(:last-child)': {
-                              borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            },
-                            '&::before': { display: 'none' },
-                          }}
-                        >
-                          {item.objectID === 0 ? (
-                            <AccordionSummary
-                              onClick={() => previewSublistObject(item, true)}
+                        // <Accordion
+                        //   expanded={selectedIndex === index}
+                        //   onChange={handleAccordionChange(index)}
+                        //   sx={{
+                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     '&:not(:last-child)': {
+                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
+                        //     },
+                        //     '&::before': { display: 'none' },
+                        //   }}
+                        // >
+                        //   {item.objectID === 0 ? (
+                        //     <AccordionSummary
+                        //       onClick={() => previewSublistObject(item, true)}
 
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography
-                                variant="body1"
-                                style={{
-                                  fontSize: '11px',
-                                  margin: 0, // Removes any extra margin
-                                }}
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography
+                        //         variant="body1"
+                        //         style={{
+                        //           fontSize: '11px',
+                        //           margin: 0, // Removes any extra margin
+                        //         }}
+                        //       >
+
+                        //         <span className='mx-2'> <FileExtIcon
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         /></span>
+
+                        //         {trimTitle2(item.title)}
+                        //         <FileExtText
+                        //           guid={props.selectedVault.guid}
+                        //           objectId={item.id}
+                        //           classId={item.classID}
+                        //         />
+                        //       </Typography>
+                        //     </AccordionSummary>
+
+                        //   ) : (
+                        //     <AccordionSummary
+                        //       onClick={() => previewObject(item, true)}
+                        //       expandIcon={<ExpandMoreIcon />}
+                        //       aria-controls={`panel${index}a-content`}
+                        //       id={`panel${index}a-header`}
+                        //       sx={{
+                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
+                        //         padding: 0, // Removes all padding
+                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
+                        //       }}
+                        //       className="shadow-sm"
+                        //     >
+                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
+                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                        //         {trimTitle2(item.title)}
+                        //       </Typography>
+                        //     </AccordionSummary>
+                        //   )}
+
+                        // </Accordion>
+                        <SimpleTreeView>
+                          <TreeItem
+                            key={`tree-item-${index}`} // Unique key
+                            itemId={`tree-item-${index}`} // Unique itemId
+                            onClick={() =>
+                              item.objectTypeId || item.objectID === 0
+                                ? previewSublistObject(item, true)
+                                : previewObject(item, true)
+                            }
+
+                            sx={{
+                              fontSize: "12.5px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+
+                              backgroundColor: "#fff",
+                              "&:hover": {
+                                backgroundColor: "#fff !important", // Maintain white background on hover
+                              },
+
+                              borderRadius: "0px !important", // Remove border radius
+                              "& .MuiTreeItem-content": {
+                                borderRadius: "0px !important", // Remove border radius from content area
+                              },
+                            }}
+                            label={
+                              <Box display="flex" alignItems="center" justifyContent="space-between">
+                              <Box display="flex" alignItems="center">
+                                {item.objectTypeId || item.objectID === 0 ? (
+                                  <FileExtIcon
+                                    guid={props.selectedVault.guid}
+                                    objectId={item.id}
+                                    classId={item.classId || item.classID}
+                                  />
+                                ) : (
+                                  <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                )}
+                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
+                                {item.objectTypeId || item.objectID === 0 && (
+                                  <FileExtText
+                                    guid={props.selectedVault.guid}
+                                    objectId={item.id}
+                                    classId={item.classId}
+                                  />
+                                )}
+                              </Box>
+                            
+                              {/* Button at the right */}
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="warning"
+                                onClick={() => restoreObject(item)}
+                                sx={{ textTransform: 'none' }}
                               >
-                                
-                                <span className='mx-2'> <FileExtIcon
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
-                                /></span>
-
-                                {trimTitle2(item.title)}.
-                                <FileExtText
-                                  guid={props.selectedVault.guid}
-                                  objectId={item.id}
-                                  classId={item.classID}
+                                <i
+                                  className="fas fa-trash-restore"
+                                  style={{
+                                    fontSize: '11px',
+                                    cursor: 'pointer',
+                                    marginRight: '4px'
+                                  }}
                                 />
-                              </Typography>
-                            </AccordionSummary>
+                                <small>Restore</small>
+                              </Button>
+                            </Box>
+                            
+                            }
+                          >
 
-                          ) : (
-                            <AccordionSummary
-                              onClick={() => previewObject(item, true)}
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls={`panel${index}a-content`}
-                              id={`panel${index}a-header`}
-                              sx={{
-                                bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                padding: 0, // Removes all padding
-                                minHeight: 'unset', // Ensures the height is not restricted by default styles
-                              }}
-                              className="shadow-sm"
-                            >
-                              <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                {trimTitle2(item.title)}
-                              </Typography>
-                            </AccordionSummary>
-                          )}
-                      
-                        </Accordion>
+
+                          </TreeItem>
+                        </SimpleTreeView>
 
                       ))}
                     </div>
@@ -1914,7 +2218,7 @@ const DocumentList = (props) => {
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#dedddd', minWidth: '35%', minHeight:'100vh' }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>

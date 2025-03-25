@@ -16,6 +16,7 @@
     "@mui/material": "^5.16.14",
     "@mui/x-data-grid": "^6.9.0",
     "@mui/x-date-pickers": "^7.25.0",
+    "@mui/x-tree-view": "^7.26.0",
     "@syncfusion/ej2-react-buttons": "20.4.38",
     "@syncfusion/ej2-react-dropdowns": "^20.4.38",
     "@syncfusion/ej2-react-inputs": "20.4.38",

@@ -111,9 +111,9 @@ const ObjectStructureList = (props) => {
 
             props.setSelectedObjectId(objectid);
             props.setGroupedItems(response.data.grouped);
-            console.log(response.data.grouped)
+            // console.log(response.data.grouped)
             props.setUngroupedItems(response.data.unGrouped);
-            console.log(response.data.unGrouped)
+            // console.log(response.data.unGrouped)
             props.setIsLoading(false);
 
             const totalClasses = response.data.grouped.reduce((acc, group) => acc + group.members.length, 0) +
@@ -192,7 +192,7 @@ const ObjectStructureList = (props) => {
 
             // setSelectedClassId(selectedClassId);
             props.setFormProperties(response.data);
-            // console.log(response.data);
+            console.log(response.data);
             props.setFormValues(response.data.reduce((acc, prop) => {
                 acc[prop.propId] = '';
                 return acc;
@@ -234,10 +234,15 @@ const ObjectStructureList = (props) => {
         setUploadedFile(file);
     };
 
-    const filteredProperties = props.formProperties.filter(
-        prop => prop.propId > 101 || prop.propId === 0 || prop.propId === 26  // except Name or title & Keywords
+    // const filteredProperties = props.formProperties.filter(
+    //     prop => prop.propId > 101 || prop.propId === 0 || prop.propId === 26  || prop.isRequired === true // except Name or title & Keywords
 
+    // );
+
+    const filteredProperties = props.formProperties.filter(
+        prop => prop.propId >= 1000 || [0, 37, 38, 39, 41, 42, 43, 44].includes(prop.propId)
     );
+    
 
 
     const handleSubmit = async () => {
@@ -252,7 +257,7 @@ const ObjectStructureList = (props) => {
             }));
 
 
-        console.log(propertiesPayload)
+        // console.log(propertiesPayload)
 
         propertiesPayload.forEach((prop) => {
             if (prop.isRequired && !props.formValues[prop.propId]) {
@@ -265,7 +270,7 @@ const ObjectStructureList = (props) => {
         }
 
         if (Object.keys(newFormErrors).length > 0 || (props.selectedObjectId === 0 && !uploadedFile && !props.templateIsTrue)) {
-            console.log(newFormErrors)
+            // console.log(newFormErrors)
             setFormErrors(newFormErrors);
         } else {
             setMiniLoader(true);
@@ -557,7 +562,7 @@ const ObjectStructureList = (props) => {
                                         return (
                                             filteredMembers.length > 0 && (
                                                 <div key={group.classGroupId}>
-                                                    <ListItem className='p-0 my-3' style={{ backgroundColor: '#e0fbfc' }}>
+                                                    <ListItem className='p-0 my-3' style={{ backgroundColor: '#ecf4fc' }}>
                                                         <ListItemText
                                                             primary={group.classGroupName}
                                                             className="p-1 mx-2"
@@ -590,7 +595,7 @@ const ObjectStructureList = (props) => {
 
                                     {props.ungroupedItems.length > 0 && filterItems(props.ungroupedItems).length > 0 && (
                                         <>
-                                            <ListItem className='p-0 my-3' style={{ backgroundColor: '#e0fbfc' }}>
+                                            <ListItem className='p-0 my-3' style={{ backgroundColor: '#ecf4fc' }}>
                                                 <ListItemText style={{ '& .MuiTypography-root': { fontSize: '15px' }, color: '#555' }} primary="Ungrouped" className="p-1 mx-2" />
                                             </ListItem>
                                             <List component="div" disablePadding className="ml-4">
@@ -714,7 +719,7 @@ const ObjectStructureList = (props) => {
                                 width: '100%',
                                 maxHeight: '100%',
                                 overflowY: 'auto', // Allows scrolling if needed
-                                backgroundColor: '#e0fbfc',
+                                backgroundColor: '#ecf4fc',
                             }}
                         >
                             {(props.selectedObjectId === 0 && !props.templateIsTrue) && (

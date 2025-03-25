@@ -101,6 +101,7 @@ function Dashboard() {
   const [viewableobjects, setViewableObjects] = useState([]);
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searched, setSearched] = useState(false);
   const [allrequisitions, setRequisitions] = useState([]);
   const [selectedVault, setSelectedVault] = useState(null);
   const [vaultObjectsList, setVaultObjectsList] = useState(null);
@@ -176,14 +177,14 @@ function Dashboard() {
       const response = await axios.get(
         `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
       );
-      console.log(`Deleted: `)
-      console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
-      console.log(response.data)
+      // console.log(`Deleted: `)
+      // console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
+      // console.log(response.data)
       setDeletedData(response.data)
       return response.data;
     } catch (error) {
-      console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
-      console.error('Error fetching requisition data:', error);
+      // console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
+      // console.error('Error fetching requisition data:', error);
       return [];
     }
   }
@@ -196,7 +197,7 @@ function Dashboard() {
       const response = await axios.get(
         `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
       );
-      console.log(response.data)
+      // console.log(response.data)
       setAssignedData(response.data)
       return response.data;
     } catch (error) {
@@ -218,11 +219,11 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        console.log(response.data);
+        // console.log(response.data);
         setOpenObjectModal(true);
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
   };
 
@@ -243,7 +244,7 @@ function Dashboard() {
         toggleSublist();
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
   };
 
@@ -266,7 +267,7 @@ function Dashboard() {
       })
       .catch((error) => {
         // console.log("no viewable objects")
-        console.log(error);
+        // console.log(error);
       });
   };
 
@@ -292,12 +293,12 @@ function Dashboard() {
 
     axios.request(config)
       .then((response) => {
-        console.log(response.data);
-        console.log(response.data.mfilesID)
+        // console.log(response.data);
+        // console.log(response.data.mfilesID)
         setMfilesId(response.data.mfilesID)
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
 
   }
@@ -397,9 +398,9 @@ function Dashboard() {
       // Update state with fetched data
       setSelectedObjectId(objectId);
       setGroupedItems(grouped);
-      console.log(grouped)
+      // console.log(grouped)
       setUngroupedItems(unGrouped);
-      console.log(unGrouped)
+      // console.log(unGrouped)
 
       // console.log('Grouped Items:', grouped);
 
@@ -445,8 +446,8 @@ function Dashboard() {
           `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
           { headers: { accept: '*/*' } }
         );
-        console.log('Templates response:', response.data);
-        console.log(selectedVault.guid)
+        // console.log('Templates response:', response.data);
+        console.log(response.data)
         setTemplates(response.data);
 
       
@@ -464,7 +465,7 @@ function Dashboard() {
         const response = await axios.get(
           `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${mfilesId}`
         );
-        console.log('Class properties response:', response.data);
+        // console.log('Class properties response:', response.data);
 
         setFormProperties(() => response.data); // Functional update to avoid stale values
         setFormValues(() =>
@@ -777,7 +778,7 @@ function Dashboard() {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "flex-start",
-                              backgroundColor: hoveredItem === item.objectid ? "#e0fbfc" : "#2757aa",
+                              backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#2757aa  ",
                               color: hoveredItem === item.objectid ? "#555" : "#fff",
                               py: 0,
                               px: 1, // Reduced padding

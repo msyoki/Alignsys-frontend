@@ -50,7 +50,7 @@ function OrganizationVaultList(props) {
   return (
     <Box sx={{ backgroundColor: "#fff" }}>
       {/* Total Vaults Section */}
-      <Box sx={{ p: 1, backgroundColor: "#e0fbfc" }}>
+      <Box sx={{ p: 1, backgroundColor: "#ecf4fc" }}>
         <Typography variant="caption">
           <i className="fas fa-list mx-1"></i>
           Total Vaults:{" "}

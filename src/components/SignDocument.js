@@ -13,7 +13,8 @@ const SignButton = (props) => {
                 "objectid": props.objectid,
                 "fileid": props.fileId,
                 "vaultGuid": props.vault,
-                "signerEmail": props.email
+                "signerEmail": props.email,
+                "userID":props.mfilesId
             };
             console.log(data)
 
