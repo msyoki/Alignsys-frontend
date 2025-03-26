@@ -17,10 +17,17 @@ import Alerts from '../components/Alert';
 import image from '../images/ZFBLU.webp';
 import logo2 from '../images/ZFWHITE.webp';
 import TimedAlert from '../components/TimedAlert';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handlePasswordReset=()=>{
+    navigate('/password-reset');
+    
+  }
 
 
 
@@ -75,13 +82,13 @@ const Login = () => {
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="email">Username*</InputLabel>
+                <InputLabel htmlFor="email">Email*</InputLabel>
                 <Input
                   id="email"
                   name="email"
-                  type="text"
+                  type="email"
                   required
-                  placeholder="Username"
+                  placeholder="Email"
                   startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
                   style={{ fontSize: '14px' }}
                 />
@@ -112,14 +119,14 @@ const Login = () => {
               </FormControl>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="d-flex justify-content-between align-items-center  my-3">
               <p className="small">
-                {/* <a
-                  href={`${constants.auth_api}/api/reset_password/`}
-                  style={{ textDecoration: 'none', color: 'black' }}
-                > */}
+                <a
+                  onClick={handlePasswordReset}
+                  style={{ textDecoration: 'none', color: '#1C4690', cursor:'pointer', fontSize:'13px' }}
+                >
                   Forgot password?
-                {/* </a> */}
+                </a>
               </p>
             </div>
 

@@ -8,8 +8,8 @@ import { registerLicense } from '@syncfusion/ej2-base';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import VaultSelectForm from './pages/Vault';
-
-
+import PasswordResetConfirm from './pages/PasswordResetConfirm';
+import PasswordResetRequest from './pages/PasswordResetRequest';
 
 function App() {
   registerLicense('Mgo+DSMBPh8sVXJ0S0J+XE9HflRDX3xKf0x/TGpQb19xflBPallYVBYiSV9jS31TckVnWHlbcXFWT2NbVA==');
@@ -19,6 +19,8 @@ function App() {
       <div className="App bg-dark text-white">
         <Routes>
           <Route path="/"  exact={true} element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+          <Route path="/reset/:uid/:token" element={<PasswordResetConfirm/>}  />
+          <Route path="/password-reset" element={<PasswordResetRequest/>}  />
           <Route path="/vault" element={<PrivateRoute><VaultSelectForm/></PrivateRoute>}></Route>
           <Route path="/admin"  exact={true} element={<PrivateRoute><AdminDashboard/></PrivateRoute>} />
           <Route path="/login" element={<Login/>} />

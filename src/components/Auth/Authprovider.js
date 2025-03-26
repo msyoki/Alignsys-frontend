@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         e.preventDefault()
         try {
             const response = await axios.post(`${constants.auth_api}/api/token/`, {
-                username: e.target.email.value,
+                email: e.target.email.value,
                 password: e.target.password.value
             });
 
@@ -50,10 +50,11 @@ export const AuthProvider = ({ children }) => {
             }
         }
         catch (error) {
+            const errorMsg = error.response?.data?.error || error.message || 'An error occurred';
 
             setOpenAlert(true);
             setAlertSeverity("error");
-            setAlertMsg(`Login failed, ivalid username or password!!`);
+            setAlertMsg(`Login failed, ${errorMsg}!!`);
             console.log(`${error}`)
             // alert("login failed")
 

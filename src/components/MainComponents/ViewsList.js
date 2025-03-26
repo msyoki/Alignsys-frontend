@@ -296,7 +296,7 @@ const ViewsList = (props) => {
                 fetchViewData(item);
                 break;
             default:
-                // console.log('Unknown type');
+            // console.log('Unknown type');
         }
     };
 
@@ -376,22 +376,40 @@ const ViewsList = (props) => {
             <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
             {selectedViewObjects.length > 0 ? (
                 <>
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc', cursor: 'pointer' }}>
+                    <h6
+                        className="p-2 text-dark d-flex align-items-center flex-wrap"
+                        style={{
+                            fontSize: '11px',
+                            backgroundColor: '#ecf4fc',
+                            cursor: 'pointer',
+                            gap: '8px'  // Adds spacing between elements
+                        }}
+                    >
+                        <FontAwesomeIcon
+                            icon={faTable}
+                            className="mx-2"
+                            style={{ color: '#1C4690', fontSize: '20px' }}
+                        />
+                        <span onClick={backToViews} style={{ cursor: 'pointer' }}>
+                            Back to views
+                        </span>
+                        <span className="fas fa-chevron-right" style={{ color: '#2a68af' }}></span>
 
-                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
-                        <span onClick={backToViews} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
-                        <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
                         {viewNavigation.map((item, index) => (
                             <React.Fragment key={index}>
                                 <Tooltip title={item.title}>
-                                    <span onClick={() => handleViewNavClick(item)} style={{ cursor: 'pointer', width: '0.05px', overflowX: 'hidden' }}>
+                                    <span
+                                        onClick={() => handleViewNavClick(item)}
+                                        style={{ cursor: 'pointer', overflowX: 'hidden' }}
+                                    >
                                         {trimTitle(item.title)}
                                     </span>
                                 </Tooltip>
-                                <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
+                                <span className="fas fa-chevron-right" style={{ color: '#2a68af' }}></span>
                             </React.Fragment>
                         ))}
                     </h6>
+
                     <div className='p-2 text-dark' style={{ marginLeft: '20px', maxHeight: '65vh', overflowY: 'auto' }}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
@@ -402,7 +420,7 @@ const ViewsList = (props) => {
                                             key={`tree-item-${item.id || index}`} // Unique key
                                             itemId={`tree-item-${item.id || index}`} // Unique itemId
                                             onClick={() =>
-                                                item.objectTypeId  === 0
+                                                item.objectTypeId === 0
                                                     ? props.previewSublistObject(item, true)
                                                     : props.previewObject(item, true)
                                             }
@@ -453,212 +471,12 @@ const ViewsList = (props) => {
                                             <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
                                         </TreeItem>
                                     </SimpleTreeView>
-                                    // </Box>
-                                    // <Accordion
-                                    //     expanded={selectedIndex === index}
-                                    //     onChange={handleAccordionChange(index)}
-                                    //     sx={{
-                                    //         border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                                    //         '&:not(:last-child)': {
-                                    //             borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                                    //         },
-                                    //         '&::before': { display: 'none' },
-                                    //     }}
-                                    // >
-                                    //     {item.objectTypeId === 0 ? (
-                                    //         <AccordionSummary
-                                    //             onClick={() => props.previewSublistObject(item, true)}
 
-                                    //             expandIcon={<ExpandMoreIcon />}
-                                    //             aria-controls={`panel${index}a-content`}
-                                    //             id={`panel${index}a-header`}
-                                    //             sx={{
-                                    //                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                    //                 padding: 0, // Removes all padding
-                                    //                 minHeight: 'unset', // Ensures the height is not restricted by default styles
-                                    //             }}
-                                    //             className="shadow-sm"
-                                    //         >
-                                    //             <Typography
-                                    //                 variant="body1"
-                                    //                 style={{
-                                    //                     fontSize: '11px',
-                                    //                     margin: 0, // Removes any extra margin
-                                    //                 }}
-                                    //             >
-                                    //                 <span className='mx-1'> <FileExtIcon
-                                    //                     guid={props.selectedVault.guid}
-                                    //                     objectId={item.id}
-                                    //                     classId={item.classId !== undefined ? item.classId : item.classID}
-                                    //                 /></span>
-
-                                    //                 {trimTitle2(item.title)}.<FileExtText
-                                    //                     guid={props.selectedVault.guid}
-                                    //                     objectId={item.id}
-                                    //                     classId={item.classId}
-                                    //                 />
-                                    //             </Typography>
-                                    //         </AccordionSummary>
-
-                                    //     ) : (
-                                    //         <AccordionSummary
-                                    //             onClick={() => props.previewObject(item, true)}
-                                    //             expandIcon={<ExpandMoreIcon />}
-                                    //             aria-controls={`panel${index}a-content`}
-                                    //             id={`panel${index}a-header`}
-                                    //             sx={{
-                                    //                 bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                                    //                 padding: 0, // Removes all padding
-                                    //                 minHeight: 'unset', // Ensures the height is not restricted by default styles
-                                    //             }}
-                                    //             className="shadow-sm"
-                                    //         >
-                                    //             <Typography variant="body1" style={{ fontSize: '11px' }}>
-                                    //                 <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                    //                 {trimTitle2(item.title)}
-                                    //             </Typography>
-                                    //         </AccordionSummary>
-                                    //     )}
-
-
-                                    //     {props.linkedObjects && (
-                                    //         <AccordionDetails style={{ backgroundColor: '#2a68af' }} >
-                                    //             {props.loadingobjects ? (
-                                    //                 <div className="text-center">
-
-                                    //                     <p className="text-white" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                                    //                     <CircularProgress style={{ width: '15px', height: '15px', color:'#fff' }} />
-                                    //                 </div>
-                                    //             ) : (
-                                    //                 <>
-                                    //                     {props.linkedObjects.length > 0 ? (
-                                    //                         <>
-                                    //                             {/* Render Other Objects */}
-                                    //                             {otherObjects.map((item, index) => (
-                                    //                                 <div key={index}>
-                                    //                                     <Typography
-                                    //                                         variant="body2"
-                                    //                                         style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                    //                                         className="p-1"
-                                    //                                     >
-                                    //                                        <span>{item.objectTitle} ( {item.items.length} )</span> 
-                                    //                                     </Typography>
-
-                                    //                                     <table
-                                    //                                         id="createdByMe"
-                                    //                                         className="table table-hover"
-                                    //                                         style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                                    //                                     >
-                                    //                                         <tbody>
-                                    //                                             {item.items.map((subItem, subIndex) => (
-                                    //                                                 <tr
-                                    //                                                     key={subIndex}
-                                    //                                                     onClick={() => handleRowClick(subItem)}
-                                    //                                                     onDoubleClick={() => openApp(subItem)}
-                                    //                                                     style={{ cursor: 'pointer' }}
-                                    //                                                 >
-                                    //                                                     <td>
-                                    //                                                         {subItem.objectID === 0 ? (
-                                    //                                                             <>
-                                    //                                                                 <FileExtIcon
-                                    //                                                                     guid={props.selectedVault.guid}
-                                    //                                                                     objectId={subItem.id}
-                                    //                                                                     classId={subItem.classID}
-                                    //                                                                 />
-                                    //                                                                 {subItem.title}.
-                                    //                                                                 <FileExtText
-                                    //                                                                     guid={props.selectedVault.guid}
-                                    //                                                                     objectId={subItem.id}
-                                    //                                                                     classId={subItem.classID}
-                                    //                                                                 />
-                                    //                                                             </>
-                                    //                                                         ) : (
-                                    //                                                             <>
-                                    //                                                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                    //                                                                 {subItem.title}
-                                    //                                                             </>
-                                    //                                                         )}
-                                    //                                                     </td>
-                                    //                                                 </tr>
-                                    //                                             ))}
-                                    //                                         </tbody>
-                                    //                                     </table>
-                                    //                                 </div>
-                                    //                             ))}
-
-                                    //                             {/* Render Documents Together */}
-                                    //                             {documents.length > 0 && (
-                                    //                                 <>
-                                    //                                     <Typography
-                                    //                                         variant="body2"
-                                    //                                         style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                                    //                                         className="p-1"
-                                    //                                     >
-                                    //                                        <span>Document{documents.length > 0?<>s</>:<></>}</span> <small>( {documents.length} )</small>
-                                    //                                     </Typography>
-
-                                    //                                     <table
-                                    //                                         id="createdByMe"
-                                    //                                         className="table table-hover"
-                                    //                                         style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                                    //                                     >
-                                    //                                         <tbody>
-                                    //                                             {documents.flatMap(item => item.items).map((subItem, index) => (
-                                    //                                                 <tr
-                                    //                                                     key={index}
-                                    //                                                     onClick={() => handleRowClick(subItem)}
-                                    //                                                     onDoubleClick={() => openApp(subItem)}
-                                    //                                                     style={{ cursor: 'pointer' }}
-                                    //                                                 >
-                                    //                                                     <td>
-                                    //                                                         {subItem.objectID === 0 ? (
-                                    //                                                             <>
-                                    //                                                                 <FileExtIcon
-                                    //                                                                     guid={props.selectedVault.guid}
-                                    //                                                                     objectId={subItem.id}
-                                    //                                                                     classId={subItem.classID}
-                                    //                                                                 />
-                                    //                                                                 {subItem.title}.
-                                    //                                                                 <FileExtText
-                                    //                                                                     guid={props.selectedVault.guid}
-                                    //                                                                     objectId={subItem.id}
-                                    //                                                                     classId={subItem.classID}
-                                    //                                                                 />
-                                    //                                                             </>
-                                    //                                                         ) : (
-                                    //                                                             <>
-                                    //                                                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                                    //                                                                 {subItem.title}
-                                    //                                                             </>
-                                    //                                                         )}
-                                    //                                                     </td>
-                                    //                                                 </tr>
-                                    //                                             ))}
-                                    //                                         </tbody>
-                                    //                                     </table>
-                                    //                                 </>
-                                    //                             )}
-                                    //                         </>
-                                    //                     ) : (
-                                    //                         <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px', backgroundColor:'#2a68af' }}>
-                                    //                             No Relationships Found
-                                    //                         </p>
-                                    //                     )}
-                                    //                 </>
-                                    //             )}
-                                    //         </AccordionDetails>
-                                    //     )}
-                                    // </Accordion>
 
                                 )}
                                 {item.type === "MFFolderContentItemTypePropertyFolder" && (
 
-                                    // <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px', margin: '0%' }}>
-                                    //     <li className='mx-4' onClick={() => fetchViewData(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                    //         <i className='fas fa-folder-plus mx-2 my-1' style={{ color: '#6a994e', fontSize: '20px' }}></i>
-                                    //         <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
-                                    //     </li>
-                                    // </ul>
+
                                     <SimpleTreeView>
                                         <TreeItem
                                             key={`${index}`} // Unique key
@@ -692,12 +510,7 @@ const ViewsList = (props) => {
                                     </SimpleTreeView>
                                 )}
                                 {item.type === "MFFolderContentItemTypeViewFolder" && (
-                                    // <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-                                    //     <li className='mx-4 ' onClick={() => fetchMainViewObjects2(item)} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                    //         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
-                                    //         <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
-                                    //     </li>
-                                    // </ul>
+
                                     <SimpleTreeView>
                                         <TreeItem
                                             key={`${index}`} // Unique key
@@ -744,12 +557,7 @@ const ViewsList = (props) => {
                             {showCommonViewSublist && (
                                 <div style={{ height: '30vh', overflowY: 'auto', marginLeft: '20px' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
-                                        // <ul style={{ listStyleType: 'none', padding: 0 }} key={view.viewName}>
-                                        //     <li onClick={() => fetchMainViewObjects(view, "Common Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                        //         <FontAwesomeIcon icon={faTable} className='mx-3' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                        //         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
-                                        //     </li>
-                                        // </ul>
+
                                         <SimpleTreeView>
                                             <TreeItem
                                                 key={`${index}`} // Unique key
@@ -793,12 +601,7 @@ const ViewsList = (props) => {
                             {showOtherViewSublist && (
                                 <div style={{ height: '30vh', overflowY: 'auto', marginLeft: '20px' }} className=' text-dark bg-white'>
                                     {otherviews.map((view, index) => (
-                                        // <ul style={{ listStyleType: 'none', padding: 0 }} key={view.viewName}>
-                                        //     <li onClick={() => fetchMainViewObjects(view, "Other Views")} style={{ display: 'flex', alignItems: 'center', fontSize: '13px', cursor: 'pointer' }}>
-                                        //         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                        //         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
-                                        //     </li>
-                                        // </ul>
+
                                         <SimpleTreeView>
                                             <TreeItem
                                                 key={`${index}`} // Unique key

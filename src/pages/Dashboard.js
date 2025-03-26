@@ -15,7 +15,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-import logo from '../images/waica.png';
+import logo from '../images/TechEdgeLogo.png';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';

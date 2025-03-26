@@ -1,114 +1,168 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../../../../Dss/dss-frontend-linux-cutomviewer/src/components/axiosConfig';  // Import the Axios instance
-import { TextField, Button, Container, Typography, Box, CircularProgress, InputLabel } from '@mui/material';
-import Logo from '../../images/ZFBLU.webp';
+import axios from 'axios';
+import { TextField, Typography, Box, CircularProgress, InputLabel } from '@mui/material';
+import Logo from '../images/ZFBLU.webp';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import "../../styles/App.css";
+import * as constants from '../components/Auth/configs'
+import TimedAlert from '../components/TimedAlert';
 
 const PasswordResetRequest = () => {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [linksent, setLinkSent] = useState(false);
-  const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [linksent, setLinkSent] = useState(false);
+    const navigate = useNavigate();
 
-  const handleTryAgain = () => {
-    setMessage('');
-    setEmail('');
-    setLinkSent(false);
-  };
+    const [alertOpen, setOpenAlert] = useState(false);
+    const [alertSeverity, setAlertSeverity] = useState('');
+    const [alertMsg, setAlertMsg] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await axiosInstance.post('/api/password_reset/', { email });
-      setMessage(response.data.message);
-      setLinkSent(true);
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'An error occurred');
-      setLinkSent(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleTryAgain = () => {
+        setMessage('');
+        setEmail('');
+        setLinkSent(false);
+    };
 
-  const handleRedirect = () => {
-    navigate('/login');
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
-  return (
-    <Container maxWidth="sm" className="text-center ">
-          <Typography sx={{ marginTop: '10%',backgroundColor:'#1C4690' }}  variant="p" component="p" gutterBottom className="p-2 text-white ">
-          Password Reset
-        </Typography>
-      <Box className="shadow-lg p-4 bg-white">
-        <img src={Logo} alt="Techedge Logo" style={{ width: '260px' }} />
-    
+        try {
+            const response = await axios.post(`${constants.auth_api}/api/password_reset/`,
+                { email },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+            setMessage(response.data.message);
+            setLinkSent(true);
+        } catch (error) {
+            setOpenAlert(true);
+            setAlertSeverity('error');
 
-        {!linksent ? (
-          <form onSubmit={handleSubmit}>
-            <Box m={2}>
-              <InputLabel htmlFor="email">
-                <small>NB: Please enter your registered email address below</small>
-              </InputLabel>
-              <TextField
-                size="small"
-                label="Email address"
-                type="email"
-                fullWidth
-                margin="normal"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ width: '300px' }}
-                required
-              />
-            </Box>
-            <ButtonComponent
-              type="submit"
-              cssClass="e-custom-success"
-              style={{ textTransform: 'none', fontWeight: 'lighter', width: "30%", padding: '10px' }}
-              disabled={loading}
+            // Extract meaningful error message
+            const errorMsg = error.response?.data?.error || error.message || 'An error occurred';
+
+            setAlertMsg(errorMsg); // Ensure it's a string
+            console.error('Error sending password reset request:', error);
+            setMessage(errorMsg);
+            setLinkSent(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleRedirect = () => {
+        navigate('/login');
+    };
+
+    return (
+
+        <>
+            <TimedAlert
+                open={alertOpen}
+                onClose={setOpenAlert}
+                severity={alertSeverity}
+                message={alertMsg}
+                setSeverity={setAlertSeverity}
+                setMessage={setAlertMsg}
+            />
+            <Box
+                sx={{
+                    height: '100vh',
+                    width: '100vw',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#2757aa', // Full page background color
+                    padding: 2,
+                }}
             >
-              {loading ? <CircularProgress size={12} className="text-white" /> : 'Send Reset Link'}
-            </ButtonComponent>
-          </form>
-        ) : (
-          <Box mt={2}>
-            <Typography variant="body1" color="textSecondary">
-              <small style={{ fontSize: '13px' }}>{message}</small>
-            </Typography>
-            <Typography variant="body1" color="textDark" className="my-2">
-              OR
-            </Typography>
-            <Box mt={2}>
-              <ButtonComponent
-                cssClass="e-custom-warning"
-                className="mb-2"
-                style={{ textTransform: 'none', fontWeight: 'lighter', width: "30%", padding: '10px' }}
-                onClick={handleTryAgain}
-              >
-                Try Again
-              </ButtonComponent>
-            </Box>
-          </Box>
-        )}
+                <Box
+                    className="shadow-lg p-4 bg-white text-center"
+                    sx={{
+                        borderRadius: 2,
+                        textAlign: 'center',
+                        backgroundColor: 'white',
+                        padding: 4,
+                        boxShadow: 3,
+                        maxWidth: 400,
+                        width: '90%',
+                    }}
+                >
 
-        <Box mt={2}>
-          <ButtonComponent
-            type="button"
-            cssClass="e-custom-primary"
-            className="mb-3 m-2"
-            style={{ textTransform: 'none', fontWeight: 'lighter', width: "30%", padding: '10px' }}
-            onClick={handleRedirect}
-          >
-            {linksent ? 'Go to Login' : 'Cancel'}
-          </ButtonComponent>
-        </Box>
-      </Box>
-    </Container>
-  );
+                    <img src={Logo} alt="Techedge Logo" style={{ width: '200px', margin: '0 auto', display: 'block' }} />
+
+
+
+                    {!linksent ? (
+                        <form onSubmit={handleSubmit}>
+                            <Box mb={2}>
+                                <p style={{ backgroundColor: '#fff', color: '#555', margin: '10px ' }} >
+                                    Password Reset
+                                </p>
+                                <InputLabel htmlFor="email">
+                                    <small>NB: Please enter your registered email address below</small>
+                                </InputLabel>
+                                <TextField
+                                    size="small"
+                                    label="Email address"
+                                    type="email"
+                                    fullWidth
+                                    margin="normal"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </Box>
+                            <ButtonComponent
+                                type="submit"
+                                className='p-2'
+                                cssClass="e-custom-success"
+
+                                style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
+                                disabled={loading}
+                            >
+                                {loading ? <CircularProgress size={12} className="text-white " /> : 'Send Reset Link'}
+                            </ButtonComponent>
+                        </form>
+                    ) : (
+                        <Box mt={2}>
+                            <Typography variant="body1" color="textSecondary">
+                                <small style={{ fontSize: '13px' }}>{message}</small>
+                            </Typography>
+                            <Typography variant="body1" color="textDark" className="my-2">
+                                OR
+                            </Typography>
+                            <ButtonComponent
+                                cssClass="e-custom-warning"
+                                className="mb-2 p-2"
+
+                                style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
+                                onClick={handleTryAgain}
+                            >
+                                Try Again
+                            </ButtonComponent>
+                        </Box>
+                    )}
+
+                    <Box mt={2}>
+                        <ButtonComponent
+                            type="button"
+                            cssClass="e-custom-primary"
+                            className="mb-3 m-2 p-2"
+
+                            style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
+                            onClick={handleRedirect}
+                        >
+                            {linksent ? 'Go to Login' : 'Cancel Reset'}
+                        </ButtonComponent>
+                    </Box>
+                </Box>
+            </Box>
+        </>
+
+    );
 };
 
 export default PasswordResetRequest;
