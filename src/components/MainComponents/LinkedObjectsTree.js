@@ -116,7 +116,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                     borderBottom: '1px solid #dedddd'
                   }}
                 >
-                  <i style={{ color: '#2757aa' }} className="fa-solid fa-folder-open mx-2"></i> 
+                  <i style={{ color: '#2757aa' , fontSize:'15px'}} className="fa-solid fa-folder-open mx-2"></i> 
                   {obj.propertyName}(s)
                 </Box>
                 }
@@ -131,6 +131,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                       <Box display="flex" alignItems="center" >
                         {subItem.objectID === 0 ? (
                           <FileExtIcon
+                            fontSize={'15px'}
                             guid={selectedVault.guid}
                             objectId={subItem.id}
                             classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
@@ -138,10 +139,10 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                         ) : (
                           <i
                             className="fas fa-folder mx-1"
-                            style={{ fontSize: "12px", color: "#2757aa" }}
+                            style={{ fontSize: "15px", color: "#2757aa" }}
                           ></i>
                         )}
-                        {subItem.title}
+                        <span style={{fontWeight:'lighter', fontSize:'12px'}}>{subItem.title}</span>
                         {subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
@@ -190,7 +191,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                   // backgroundColor: '#e5e5e5',
                   padding: '3px',
                   borderBottom: '1px solid #dedddd', padding: '3px' }}>
-                  <i style={{ color: '#2757aa' }} class="fa-solid fa-copy mx-2"></i> Document(s)
+                  <i style={{ color: '#2757aa' ,fontSize:'15px'}} class="fa-solid fa-copy mx-2"></i> Document(s)
                 </Box>}
             >
               {documents.map((doc) =>
@@ -206,18 +207,18 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
 
 
                           <FileExtIcon
-                            fontSize={'12px'}
+                            fontSize={'15px'}
                             guid={selectedVault.guid}
                             objectId={subItem.id}
                             classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
                           />
                         ) : (
                           <i
-                            className="fas fa-layer-group mx-1"
-                            style={{ fontSize: "12px", color: "#fff" }}
+                            className="fas fa-folder mx-1"
+                            style={{ fontSize: "15px", color: "#fff" }}
                           ></i>
                         )}
-                        <span style={{marginLeft:'8px'}}>{subItem.title}</span>
+                        <span style={{marginLeft:'8px', fontWeight:'lighter', fontSize:'12px'}}>{subItem.title}</span>
                         {subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}

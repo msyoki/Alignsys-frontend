@@ -33,7 +33,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100vh', overflowY: 'auto', backgroundColor:'#fff' }}>
+        <Box sx={{ height: '100vh', overflowY: 'auto', backgroundColor: '#fff' }}>
           {children}
         </Box>
       )}
@@ -256,6 +256,15 @@ export default function ObjectData(props) {
     return foundItem ? foundItem.value : null;
   };
 
+  const trimTitle = (title) => {
+    const maxLength = 65; // Set your desired max length
+    // if (title.length > maxLength) {
+    //   return title.substring(0, maxLength) + '...';
+
+    // }
+    return title;
+  };
+
 
 
 
@@ -391,12 +400,7 @@ export default function ObjectData(props) {
 
             {props.previewObjectProps.length > 0 && (
               <Box>
-                <Box
-                  className=" p-2"
-                  display="flex"
-                  flexDirection="column"
-                  sx={{ backgroundColor: '#ecf4fc' }}
-                >
+                <Box className="p-1" display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '8px' }}>
                   <Box
                     className="input-group"
                     sx={{
@@ -405,124 +409,45 @@ export default function ObjectData(props) {
                       alignItems: 'center',
                       justifyContent: 'space-between', // Pushes title and icons apart
                       fontSize: '12px !important',
+                      padding: '2px 4px',
                     }}
                   >
-                    {/* Left Section: File Icon & Title */}
-                    <span className="text-center" style={{ color: '#1d3557', display: 'flex', alignItems: 'center' }}>
-                      {props.selectedObject && (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
-                        <>
-                          <span className="mx-2">
+
+                    <Tooltip title={props.selectedObject?.title}>
+                      <Box display="flex" alignItems="center" sx={{ color: '#1d3557', padding: '4px' }}>
+                        {props.selectedObject &&
+                          (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) ? (
+                          <>
                             <FileExtIcon
-                              fontSize={'25px'}
+                              fontSize="25px"
                               guid={props.vault.guid}
                               objectId={props.selectedObject.id}
-                              classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
-                              style={{ fontSize: '25px !important' }}
+                              classId={props.selectedObject.classId ?? props.selectedObject.classID}
+                              sx={{ fontSize: '25px !important', marginRight: '10px' }}
                             />
-                          </span>
-                          <span style={{ fontSize: '16px', marginLeft: '8px' }}>
-                            {props.selectedObject.title}
-                            <FileExtText
-                              guid={props.vault.guid}
-                              objectId={props.selectedObject.id}
-                              classId={props.selectedObject.classId !== undefined ? props.selectedObject.classId : props.selectedObject.classID}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-folder mx-2" style={{ fontSize: '25px', color: '#2757aa' }}></i>
-                          <span style={{ fontSize: '18px' }}>{props.selectedObject.title}</span>
-                        </>
-                      )}
-                    </span>
-
-                    {/* Right Section: Comment & Delete Buttons in One Row */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', ml: 'auto' }}>
-                      {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-
-                        <SignButton
-                          objectid={props.selectedObject.id}
-                          fileId={props.selectedFileId}
-                          vault={props.vault.guid}
-                          email={props.email}
-                          mfilesId={props.mfilesId}
-                        />
-
-
-                      )}
-                      {/* Comment Button */}
-                      {props.comments.length > 0 && (
-                        <Tooltip title="Comments">
-                          <div style={{ position: 'relative', display: 'inline-block' }} className="mx-3">
-                            <span
-                              className="fas fa-comment-alt mx-1 go-to-comments"
-                              style={{ fontSize: '20px', cursor: 'pointer' }}
-                              onClick={navigateToComments}
-                            />
-                            <span
-                              style={{
-                                position: 'absolute',
-                                top: '-5px',
-                                right: '-5px',
-                                backgroundColor: '#e63946',
-                                color: '#fff',
-                                borderRadius: '50%',
-                                padding: '2px 6px',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                lineHeight: '1',
-                                minWidth: '16px',
-                                textAlign: 'center',
-                              }}
-                            >
-                              {props.comments.length}
+                            <span style={{ fontSize: '15px', marginLeft: '8px' }}>
+                              {trimTitle(props.selectedObject.title)}
+                              <FileExtText
+                                guid={props.vault.guid}
+                                objectId={props.selectedObject.id}
+                                classId={props.selectedObject.classId ?? props.selectedObject.classID}
+                              />
                             </span>
-                          </div>
-                        </Tooltip>
-                      )}
-                        {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && (
-                
-                      <Tooltip title='Download document'>
-                        <i
-                          className="fas fa-download "
-                          onClick={() => downloadBase64File(props.base64, props.extension, props.selectedObject.title)}
-
-                          style={{
-                            fontSize: '20px',
-                            cursor: 'pointer',
-                            marginRight: '4px',
-                            // color: '#2757aa',
-
-
-                          }}
-                        />
-
-                     
-
-                      </Tooltip>
-               
-                  )}
-
-                      {/* Delete Button */}
-                      {props.selectedObject?.userPermission?.deletePermission && (
-                        <Tooltip title="Delete Object">
-                          <i
-                            onClick={() => setDeleteDialogOpen(true)}
-                            className="fas fa-trash mx-1 "
-                            style={{ fontSize: '20px', cursor: 'pointer' }}
-                          />
-                        </Tooltip>
-                      )}
-
-
-                    </Box>
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-folder" style={{ fontSize: '25px', color: '#2757aa', marginRight: '10px' }}></i>
+                            <span style={{ fontSize: '15px' }}>{trimTitle(props.selectedObject.title)}</span>
+                          </>
+                        )}
+                      </Box>
+                    </Tooltip>
                   </Box>
                 </Box>
 
 
 
-                <Box className="p-2 " display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
+                <Box className="p-1" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   {/* Left Section */}
                   <Box
                     sx={{ textAlign: 'start', fontSize: '13px', width: '60%' }}
@@ -530,7 +455,7 @@ export default function ObjectData(props) {
                   >
 
                     <p className="my-0" >
-                      {props.selectedObject.objectTypeName}
+                      {props.selectedObject.objectTypeName || getPropValue('Class')}
                     </p>
                     <p className="my-0" >
                       ID: {props.selectedObject.id}   Version : {props.selectedObject.versionId}
@@ -550,6 +475,91 @@ export default function ObjectData(props) {
                     ))}
                   </Box>
                 </Box>
+                <Box className="p-3 " display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '8px' }}>
+                  <Box
+                    className="input-group"
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between', // Pushes title and icons apart
+                      fontSize: '12px !important',
+                      padding: '6px 10px',
+                    }}
+                  >
+                    {/* Left Section: File Icon & Title */}
+                    <Box className="text-center" sx={{ color: '#1d3557', display: 'flex', alignItems: 'center' }} />
+
+                    {/* Right Section: Buttons */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px', ml: 'auto' }}>
+                      {/* Sign Button */}
+                      {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
+                        <SignButton
+                          objectid={props.selectedObject.id}
+                          fileId={props.selectedFileId}
+                          vault={props.vault.guid}
+                          email={props.email}
+                          mfilesId={props.mfilesId}
+                        />
+                      )}
+
+                      {/* Comment Button */}
+                      {props.comments.length > 0 && (
+                        <Tooltip title="Comments">
+                          <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <i
+                              className="fas fa-comment-alt"
+                              style={{ fontSize: '20px', cursor: 'pointer' }}
+                              onClick={navigateToComments}
+                            />
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                top: '-5px',
+                                right: '-5px',
+                                backgroundColor: '#e63946',
+                                color: '#fff',
+                                borderRadius: '50%',
+                                padding: '2px 6px',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                lineHeight: '1',
+                                minWidth: '16px',
+                                textAlign: 'center',
+                              }}
+                            >
+                              {props.comments.length}
+                            </Box>
+                          </Box>
+                        </Tooltip>
+                      )}
+
+                      {/* Download Button */}
+                      {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && (
+                        <Tooltip title="Download document">
+                          <i
+                            className="fas fa-download"
+                            onClick={() => downloadBase64File(props.base64, props.extension, props.selectedObject.title)}
+                            style={{ fontSize: '20px', cursor: 'pointer' }}
+                          />
+                        </Tooltip>
+                      )}
+
+                      {/* Delete Button */}
+                      {props.selectedObject?.userPermission?.deletePermission && (
+                        <Tooltip title="Delete Object">
+                          <i
+                            className="fas fa-trash"
+                            onClick={() => setDeleteDialogOpen(true)}
+                            style={{ fontSize: '20px', cursor: 'pointer' }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+
+
 
 
                 <Box
@@ -587,12 +597,12 @@ export default function ObjectData(props) {
                           </Typography>
                           <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1, mt: 1 }}>
                             {/* <span>{getPropValue('Class')}</span> */}
-                            <span>  {props.selectedObject.classTypeName}</span>
+                            <span>  {props.selectedObject.classTypeName || getPropValue('Class')}</span>
 
                           </Box>
                         </Box>
                       </ListItem>
-                      <Box sx={{ fontSize: '12px' }}> {/* Global font size */}
+                      {/* <Box sx={{ fontSize: '12px' }}> 
                         {filteredProps.map((item, index) => (
                           <ListItem key={index} sx={{ p: 0 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
@@ -728,39 +738,149 @@ export default function ObjectData(props) {
                             </Box>
                           </ListItem>
                         ))}
+                      </Box> */}
+                      <Box sx={{ fontSize: '12px' }}>
+                        {filteredProps.map((item, index) => (
+                          <ListItem key={index} sx={{ p: 0 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+
+                              {/* Label Section */}
+                              <Typography
+                                className="my-2"
+                                variant="body2"
+                                sx={{
+                                  color: '#555',
+                                  flexBasis: '35%',
+                                  fontSize: '13px',
+                                  textAlign: 'end',
+                                }}
+                              >
+                                {item.propName} {item.isRequired && <span className="text-danger"> *</span>} :
+                              </Typography>
+
+                              {/* Value/Input Section */}
+                              <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1 }}>
+                                {item.isAutomatic || !item.userPermission?.editPermission ? (
+                                  <Typography className="my-2" variant="body2" sx={{ fontSize: '11px' }}>
+                                    {item.value}
+                                  </Typography>
+                                ) : (
+                                  <>
+                                    {item.propName === 'Class' && item.value}
+
+                                    {/* Text Input */}
+                                    {(item.datatype === 'MFDatatypeText' ||
+                                      item.datatype === 'MFDatatypeFloating' ||
+                                      item.datatype === 'MFDatatypeInteger') &&
+                                      !item.isHidden && (
+                                        <input
+                                          value={props.formValues?.[item.id]?.value || ''}
+                                          placeholder={item.value}
+                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                          className="form-control form-control-sm my-1"
+                                          disabled={item.isAutomatic}
+                                          style={{ fontSize: 'inherit' }}
+                                        />
+                                      )}
+
+                                    {/* Multi-Line Textarea */}
+                                    {item.datatype === 'MFDatatypeMultiLineText' && !item.isHidden && (
+                                      <textarea
+                                        placeholder={item.value}
+                                        value={props.formValues?.[item.id]?.value || ''}
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        rows={2}
+                                        className="form-control form-control-sm my-1"
+                                        disabled={item.isAutomatic}
+                                        style={{ fontSize: 'inherit' }}
+                                      />
+                                    )}
+
+                                    {/* Date Picker */}
+                                    {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
+                                      <input
+                                        placeholder={item.value}
+                                        type="date"
+                                        value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        className="form-control form-control-sm my-1"
+                                        disabled={item.isAutomatic}
+                                        style={{ fontSize: 'inherit' }}
+                                      />
+                                    )}
+
+                                    {/* Timestamp Picker */}
+                                    {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
+                                      <input
+                                        type="time"
+                                        className="form-control"
+                                        value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        disabled={item.isAutomatic}
+                                        style={{ fontSize: 'inherit' }}
+                                      />
+                                    )}
+
+                                    {/* Boolean Select Dropdown */}
+                                    {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
+                                      <Select
+                                        size="small"
+                                        value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : item.value === "No" ? false : '')}
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        displayEmpty
+                                        fullWidth
+                                        disabled={item.isAutomatic}
+                                        sx={{
+                                          fontSize: 'inherit',
+                                          padding: '4px',
+                                          backgroundColor: 'white',
+                                          marginY: '8px',
+                                        }}
+                                        className="form-control form-control-sm"
+                                      >
+                                        <MenuItem value=""><em>None</em></MenuItem>
+                                        <MenuItem value={true}>Yes</MenuItem>
+                                        <MenuItem value={false}>No</MenuItem>
+                                      </Select>
+                                    )}
+
+                                    {/* Multi-Select Lookup */}
+                                    {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
+                                      <LookupMultiSelect
+                                        propId={item.id}
+                                        onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+                                        value={props.formValues?.[item.id]?.value || []}
+                                        selectedVault={props.vault}
+                                        label={item.propName}
+                                        itemValue={item.value}
+                                        disabled={item.isAutomatic}
+                                      />
+                                    )}
+
+                                    {/* Single Lookup Select */}
+                                    {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
+                                      <LookupSelect
+                                        propId={item.id}
+                                        label={item.propName}
+                                        onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
+                                        value={props.formValues?.[item.id]?.value || ''}
+                                        selectedVault={props.vault}
+                                        itemValue={item.value}
+                                        disabled={item.isAutomatic}
+                                      />
+                                    )}
+                                  </>
+                                )}
+                              </Box>
+                            </Box>
+                          </ListItem>
+                        ))}
                       </Box>
 
 
 
-                      {/* {props.selectedObject.objectID === 0 && props.extension === 'pdf' && (
-                        <ListItem sx={{ p: 0 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                            <Typography
-                              className='my-3'
-                              variant="body2"
-                              sx={{
-                                color: '#1C4690',
 
-                                flexBasis: '35%',
-                                fontSize: '12px',
-                                textAlign: 'end'
-                              }}
-                            >
-                              Sign:
-                            </Typography>
-                            <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1, mt: 2 }}>
-                              <SignButton
-                                objectid={props.selectedObject.id}
-                                fileId={props.selectedFileId}
-                                vault={props.vault.guid}
-                                email={props.email}
-                                mfilesId={props.mfilesId}
-                              />
-
-                            </Box>
-                          </Box>
-                        </ListItem>
-                      )} */}
+                     
                     </>
 
 
@@ -826,7 +946,7 @@ export default function ObjectData(props) {
                     </>
                   )}
 
-                
+
 
 
                 </Box>

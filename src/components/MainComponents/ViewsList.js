@@ -228,7 +228,7 @@ const ViewsList = (props) => {
                     }
                 }
             );
-            // console.log(response.data)
+            console.log(response.data)
             setLoading(false)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
@@ -329,7 +329,7 @@ const ViewsList = (props) => {
     }
 
     const trimTitle = (title) => {
-        const maxLength = 12; // Set your desired max length
+        const maxLength = 60; // Set your desired max length
         if (title.length > maxLength) {
             // return title.substring(0, maxLength) + '...';
             return title
@@ -382,25 +382,32 @@ const ViewsList = (props) => {
                             fontSize: '11px',
                             backgroundColor: '#ecf4fc',
                             cursor: 'pointer',
-                            gap: '8px'  // Adds spacing between elements
+                            display: 'flex',
+                            gap: '8px', // Adds spacing between elements
                         }}
                     >
+                        {/* Table Icon */}
                         <FontAwesomeIcon
                             icon={faTable}
                             className="mx-2"
                             style={{ color: '#1C4690', fontSize: '20px' }}
                         />
+
+                        {/* Back to Views */}
                         <span onClick={backToViews} style={{ cursor: 'pointer' }}>
                             Back to views
                         </span>
+
+                        {/* Chevron Icon */}
                         <span className="fas fa-chevron-right" style={{ color: '#2a68af' }}></span>
 
+                        {/* Dynamic View Navigation */}
                         {viewNavigation.map((item, index) => (
                             <React.Fragment key={index}>
                                 <Tooltip title={item.title}>
                                     <span
                                         onClick={() => handleViewNavClick(item)}
-                                        style={{ cursor: 'pointer', overflowX: 'hidden' }}
+                                        style={{ cursor: 'pointer', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
                                     >
                                         {trimTitle(item.title)}
                                     </span>
@@ -410,7 +417,7 @@ const ViewsList = (props) => {
                         ))}
                     </h6>
 
-                    <div className='p-2 text-dark' style={{ marginLeft: '20px', maxHeight: '65vh', overflowY: 'auto' }}>
+                    <div className='p-2 text-dark' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -453,7 +460,7 @@ const ViewsList = (props) => {
                                                     ) : (
                                                         <i className="fa-solid fa-folder " style={{ fontSize: '20px', color: '#2a68af' }}></i>
                                                     )}
-                                                    <span style={{ marginLeft: '8px' }}>{item.title} </span>
+                                                    <span style={{ marginLeft: '8px', fontWeight: 'lighter' }}>{item.title}  </span>
                                                     {item.objectTypeId === 0 ? (
                                                         <>
                                                             <FileExtText
@@ -551,11 +558,28 @@ const ViewsList = (props) => {
                 <>
                     {filteredCommonViews.length > 0 && (
                         <div className='bg-white'>
-                            <h6 onClick={toggleCommonViewSublist} className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Common Views <small style={{ color: '#2a68af' }}>({filteredCommonViews.length})</small>
+                            <h6
+                                onClick={toggleCommonViewSublist}
+                                className="p-2 text-dark d-flex align-items-center justify-content-between"
+                                style={{
+                                    fontSize: '11px',
+                                    backgroundColor: '#ecf4fc',
+                                    cursor: 'pointer',
+                                    display: 'flex'
+                                }}
+                            >
+                                {/* List Icon and Text */}
+                                <span className="d-flex align-items-center">
+                                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
+                                    Common Views
+                                </span>
+
+                                {/* Count in Small Tag */}
+                                <small style={{ color: '#2a68af' , fontSize:'12px'}}>({filteredCommonViews.length})</small>
                             </h6>
+
                             {showCommonViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto', marginLeft: '20px' }} className=' text-dark bg-white '>
+                                <div style={{ height: '30vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -595,11 +619,28 @@ const ViewsList = (props) => {
                     )}
                     {otherviews.length > 0 && (
                         <div className='bg-white'>
-                            <h6 onClick={toggleOtherViewSublist} className=' p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc', cursor: 'pointer' }}>
-                                <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> Other Views <small style={{ color: '#2a68af' }}>({otherviews.length})</small>
+                            <h6
+                                onClick={toggleOtherViewSublist}
+                                className="p-2 text-dark d-flex align-items-center justify-content-between"
+                                style={{
+                                    fontSize: '11px',
+                                    backgroundColor: '#ecf4fc',
+                                    cursor: 'pointer',
+                                    display: 'flex'
+                                }}
+                            >
+                                {/* List Icon and Text */}
+                                <span className="d-flex align-items-center">
+                                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
+                                    Other Views
+                                </span>
+
+                                {/* Count in Small Tag */}
+                                <small style={{ color: '#2a68af', fontSize:'12px' }}>({otherviews.length})</small>
                             </h6>
+
                             {showOtherViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto', marginLeft: '20px' }} className=' text-dark bg-white'>
+                                <div style={{ height: '30vh', overflowY: 'auto' }} className=' text-dark bg-white'>
                                     {otherviews.map((view, index) => (
 
                                         <SimpleTreeView>

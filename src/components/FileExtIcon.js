@@ -44,10 +44,11 @@ const FileExtIcon = (props) => {
 
   if (error) {
     return (
-      <i
-        className="fas fa-layer-group "
-        style={{ fontSize: props.fontSize || '20px', color: '#2a68af' }}
-      ></i>
+      props.objectId === 0 ? (
+        <i className="fas fa-folder " style={{ fontSize: props.fontSize || '20px', color: "#2a68af" }}></i>
+      ) : (
+        <i className="fas fa-file " style={{ fontSize: props.fontSize || '20px', color: "#2a68af" }}></i>
+      )
     );
   }
 

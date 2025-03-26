@@ -64,7 +64,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor:'#fff' }}>
+        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#fff' }}>
           {children}
         </Box>
       )}
@@ -418,11 +418,11 @@ const DocumentList = (props) => {
     // console.log(item.objectTypeId)
 
     // Handle document fetching if item is a document
-    if (item.objectTypeId  === 0 || item.objectID === 0) {
-      
+    if (item.objectTypeId === 0 || item.objectID === 0) {
+
 
       setLoadingFile(true);
-      
+
       let url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId ?? item.objectID)}`;
 
       // console.log(url)
@@ -447,7 +447,7 @@ const DocumentList = (props) => {
           setLoadingClick(false)
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
-          let ext=downloadResponse.data.extension.replace('.', '')
+          let ext = downloadResponse.data.extension.replace('.', '')
           console.log(ext)
         } catch (downloadError) {
           console.error('Error downloading file:', downloadError);
@@ -528,7 +528,7 @@ const DocumentList = (props) => {
   const getObjectComments = async (item) => {
     setLoadingComments(true)
     // Define the API URL
- 
+
     const url = `${constants.mfiles_api}/api/Comments?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${(item.objectID ?? item.objectTypeId)}`;
 
     // Fetch the comments using Axios
@@ -674,7 +674,7 @@ const DocumentList = (props) => {
 
   function openApp(item) {
     const fetchExtension = async () => {
-      
+
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
       //   console.log(url)
       try {
@@ -954,11 +954,21 @@ const DocumentList = (props) => {
           </Box>
 
 
-          <div className=" p-2 d-flex justify-content-center" style={{ backgroundColor: '#dedddd' }}>
-            <form onSubmit={handleSearch} className="input-group" style={{ maxWidth: '600px', width: '100%' }}>
-              <div className='p-1' style={{ display: 'flex', alignItems: 'center' }}>
-
-                <Tooltip title='Go back home'>
+          <div
+            className="p-2 d-flex justify-content-center shadow-sm"
+            style={{ backgroundColor: '#ecf4fc' }}
+          >
+            <form
+              onSubmit={handleSearch}
+              className="input-group"
+              style={{ maxWidth: '600px', width: '100%' }}
+            >
+              {/* Icon Section */}
+              <div
+                className="p-1 d-flex align-items-center"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <Tooltip title="Go back home">
                   <i
                     onClick={reloadPage}
                     className="fas fa-home mx-2"
@@ -967,12 +977,12 @@ const DocumentList = (props) => {
                       cursor: 'pointer',
                       color: '#1C4690',
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                      transform: 'translateZ(0)',
-                      transition: 'transform 0.2s'
+                      transition: 'transform 0.2s',
                     }}
                   ></i>
                 </Tooltip>
-                <Tooltip title='Create/ Add new object or document'>
+
+                <Tooltip title="Create/Add new object or document">
                   <i
                     onClick={props.getVaultObjects}
                     className="fas fa-plus mx-3"
@@ -981,23 +991,15 @@ const DocumentList = (props) => {
                       cursor: 'pointer',
                       color: '#1C4690',
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                      transform: 'translateZ(0)',
-                      transition: 'transform 0.2s'
+                      transition: 'transform 0.2s',
                     }}
-
-                  // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                   ></i>
                 </Tooltip>
-                {/* <i
-            onClick={props.getVaultObjects}
-            className="fas fa-plus mx-3"
-            style={{ fontSize: '25px', cursor: 'pointer', color: '#1C4690' }}
-        ></i> */}
               </div>
 
+              {/* Search Input */}
               <input
-                className="form-control form-control-md  mx-1 rounded"
+                className="form-control form-control-md mx-1 rounded"
                 type="text"
                 required
                 placeholder="Search ..."
@@ -1006,24 +1008,24 @@ const DocumentList = (props) => {
                 style={{ borderRadius: '0px' }}
               />
 
+              {/* Search Button */}
               <button
                 type="submit"
-                className="btn btn-md  shadow rounded"
+                className="btn btn-md shadow rounded d-flex align-items-center"
                 style={{
                   fontSize: '13px',
                   color: '#fff',
                   backgroundColor: '#2757aa',
-                  // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19)',
-                  // transition: 'transform 0.2s',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
-                // onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                // onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
                 <span className="mx-2">Search</span>
               </button>
 
+              {/* Alerts */}
               <TransitionAlerts
                 setOpen={setOpenAlert}
                 open={openAlert}
@@ -1031,7 +1033,6 @@ const DocumentList = (props) => {
                 alertmsg={alertMsg}
               />
             </form>
-
           </div>
 
 
@@ -1040,8 +1041,9 @@ const DocumentList = (props) => {
             value={value}
             onChange={handleChange}
             aria-label="Horizontal tabs example"
-            sx={{ borderColor: 'divider'}}
-            className='bg-white'
+            sx={{ borderColor: 'divider', backgroundColor: '#fff' }}
+            className='shadow-lg'
+
           >
             <Tab
               style={{ textTransform: 'none' }}
@@ -1049,19 +1051,21 @@ const DocumentList = (props) => {
                 fontSize: '12px',
                 width: 'auto',
                 minWidth: 'auto',
-                height: 'auto'
-                // Adjust the width to fit the label text
+                height: 'auto',
+                backgroundColor: '#fff'
+
               }}
               onClick={() => setSearched(false)}
               label="All"
               {...a11yProps(0)}
             />
             <Tab
-              style={{ textTransform: 'none'}}
+              style={{ textTransform: 'none' }}
               sx={{
                 height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
                 fontSize: '12px',
+                backgroundColor: '#fff'
               }}
               label={`Recent`}
               // label={`Recent (${props.recentData ? props.recentData.length : <></>})`}
@@ -1072,7 +1076,8 @@ const DocumentList = (props) => {
               style={{ textTransform: 'none' }}
               sx={{
                 fontSize: '13px',
-                minWidth: 'auto',      // Adjust the width to fit the label text
+                minWidth: 'auto',
+                backgroundColor: '#fff'      // Adjust the width to fit the label text
               }}
               label={`Assigned `}
               // label={`Assigned (${props.assignedData ? props.assignedData.length : <></>})`}
@@ -1084,7 +1089,8 @@ const DocumentList = (props) => {
               sx={{
                 fontSize: '12px',
                 height: 'auto',
-                minWidth: 'auto',      // Adjust the width to fit the label text
+                minWidth: 'auto',
+                backgroundColor: '#fff'      // Adjust the width to fit the label text
               }}
               label={`Deleted `}
               // label={`Deleted (${props.deletedData ? props.deletedData.length : <></>})`}
@@ -1688,7 +1694,7 @@ const DocumentList = (props) => {
                             }}
                             label={
                               <Box display="flex" alignItems="center">
-                                {item.objectTypeId  === 0 || item.objectID === 0? (
+                                {item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtIcon
                                       guid={props.selectedVault.guid}
@@ -1700,7 +1706,7 @@ const DocumentList = (props) => {
                                   <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                 )}
                                 <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                {item.objectTypeId  === 0 || item.objectID === 0? (
+                                {item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtText
                                       guid={props.selectedVault.guid}
@@ -1714,7 +1720,7 @@ const DocumentList = (props) => {
                             }
                           >
 
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId ||item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
                           </TreeItem>
                         </SimpleTreeView>
 
@@ -1958,7 +1964,7 @@ const DocumentList = (props) => {
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
                             onClick={() =>
-                              item.objectTypeId  === 0 || item.objectID === 0
+                              item.objectTypeId === 0 || item.objectID === 0
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
                             }
@@ -1992,7 +1998,7 @@ const DocumentList = (props) => {
                                   <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                 )}
                                 <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                {item.objectTypeId  === 0 || item.objectID === 0 ? (
+                                {item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtText
                                       guid={props.selectedVault.guid}
@@ -2145,46 +2151,46 @@ const DocumentList = (props) => {
                             }}
                             label={
                               <Box display="flex" alignItems="center" justifyContent="space-between">
-                              <Box display="flex" alignItems="center">
-                                {item.objectTypeId || item.objectID === 0 ? (
-                                  <FileExtIcon
-                                    guid={props.selectedVault.guid}
-                                    objectId={item.id}
-                                    classId={item.classId || item.classID}
+                                <Box display="flex" alignItems="center">
+                                  {item.objectTypeId || item.objectID === 0 ? (
+                                    <FileExtIcon
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  ) : (
+                                    <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                  )}
+                                  <span style={{ marginLeft: '8px' }}>{item.title}</span>
+                                  {item.objectTypeId || item.objectID === 0 && (
+                                    <FileExtText
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId}
+                                    />
+                                  )}
+                                </Box>
+
+                                {/* Button at the right */}
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  color="warning"
+                                  onClick={() => restoreObject(item)}
+                                  sx={{ textTransform: 'none' }}
+                                >
+                                  <i
+                                    className="fas fa-trash-restore"
+                                    style={{
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      marginRight: '4px'
+                                    }}
                                   />
-                                ) : (
-                                  <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                )}
-                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                {item.objectTypeId || item.objectID === 0 && (
-                                  <FileExtText
-                                    guid={props.selectedVault.guid}
-                                    objectId={item.id}
-                                    classId={item.classId}
-                                  />
-                                )}
+                                  <small>Restore</small>
+                                </Button>
                               </Box>
-                            
-                              {/* Button at the right */}
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="warning"
-                                onClick={() => restoreObject(item)}
-                                sx={{ textTransform: 'none' }}
-                              >
-                                <i
-                                  className="fas fa-trash-restore"
-                                  style={{
-                                    fontSize: '11px',
-                                    cursor: 'pointer',
-                                    marginRight: '4px'
-                                  }}
-                                />
-                                <small>Restore</small>
-                              </Button>
-                            </Box>
-                            
+
                             }
                           >
 
