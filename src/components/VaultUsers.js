@@ -54,7 +54,7 @@ function VaultUsersTable(props) {
         </Button>
       
 
-        <TableContainer component={Paper} style={{ height: '60%', overflowY: 'auto', fontSize: '5px' }}>
+        <TableContainer component={Paper} style={{ height: '70vh', overflowY: 'auto', fontSize: '5px' }}>
           <Table className='table table-sm table-responsive p-2' style={{ fontSize: '5px' }}>
             <TableHead>
               <TableRow>

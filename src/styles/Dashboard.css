@@ -25,6 +25,7 @@
   transition: width 0.0s;
   overflow: hidden; /* Hide excess content when sidebar is closed */
   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
+  overflow-y: hidden;
  
 
 }
@@ -126,10 +127,12 @@
   flex-grow: 1;
   transition: margin-left 0.0s ease-in-out;
   width: 20vh;
-  background-color: var(--secondary-color); /* Keep this as part of content-specific styling */
-  color: '#555';
-  height:'100vh';
+  background-color: var(--secondary-color);
+  color: #555;  /* Remove single quotes */
+  height: 100vh; /* Make it fill the full screen height */
+  overflow: hidden; /* Prevent scrolling */
 }
+
 
 .content.full-width {
   margin-left: 0;
@@ -163,5 +166,13 @@ body{
   margin-bottom: 5%;
 }
 
+
+body {
+  font-family: "YourFont", sans-serif; /* Replace 'YourFont' with your desired font */
+}
+
+* {
+  font-family: inherit; /* Ensures all elements use the same font */
+}
 
 

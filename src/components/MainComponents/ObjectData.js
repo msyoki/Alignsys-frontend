@@ -475,7 +475,7 @@ export default function ObjectData(props) {
                     ))}
                   </Box>
                 </Box>
-                <Box className="p-3 " display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '8px' }}>
+                <Box className="p-1 my-1" display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '8px' }}>
                   <Box
                     className="input-group"
                     sx={{
@@ -509,7 +509,7 @@ export default function ObjectData(props) {
                           <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                             <i
                               className="fas fa-comment-alt"
-                              style={{ fontSize: '20px', cursor: 'pointer' }}
+                              style={{ fontSize: '18px', cursor: 'pointer' }}
                               onClick={navigateToComments}
                             />
                             <Box
@@ -540,7 +540,7 @@ export default function ObjectData(props) {
                           <i
                             className="fas fa-download"
                             onClick={() => downloadBase64File(props.base64, props.extension, props.selectedObject.title)}
-                            style={{ fontSize: '20px', cursor: 'pointer' }}
+                            style={{ fontSize: '18px', cursor: 'pointer' }}
                           />
                         </Tooltip>
                       )}
@@ -551,7 +551,7 @@ export default function ObjectData(props) {
                           <i
                             className="fas fa-trash"
                             onClick={() => setDeleteDialogOpen(true)}
-                            style={{ fontSize: '20px', cursor: 'pointer' }}
+                            style={{ fontSize: '18px', cursor: 'pointer' }}
                           />
                         </Tooltip>
                       )}
@@ -575,7 +575,7 @@ export default function ObjectData(props) {
 
                   <List sx={{
                     p: 3,
-                    height: '55vh',
+                    height: '50vh',
                     overflowY: 'auto'
 
                   }}>

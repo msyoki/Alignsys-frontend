@@ -902,7 +902,7 @@ const DocumentList = (props) => {
                 <Tooltip title='Switch to a different vault'>
                   <VaultSelectForm activeVault={props.selectedVault} />
                 </Tooltip>
-                {/* <NetworkIcon /> */}
+              
                 <Box style={{
 
                   cursor: 'pointer',
