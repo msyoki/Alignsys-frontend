@@ -704,7 +704,7 @@ function Dashboard() {
                       backgroundColor: "#2757aa",
 
                       // Move scrollbar to the left
-                      direction: "rtl",
+                      direction: "[ltl]",
 
                       // Keep content aligned normally
                       "& *": {

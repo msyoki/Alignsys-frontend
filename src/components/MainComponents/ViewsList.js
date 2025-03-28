@@ -460,7 +460,7 @@ const ViewsList = (props) => {
                                                     ) : (
                                                         <i className="fa-solid fa-folder " style={{ fontSize: '20px', color: '#2a68af' }}></i>
                                                     )}
-                                                    <span style={{ marginLeft: '8px', fontWeight: 'lighter' }}>{item.title}  </span>
+                                                    <span style={{ marginLeft: '8px' }}>{item.title}  </span>
                                                     {item.objectTypeId === 0 ? (
                                                         <>
                                                             <FileExtText

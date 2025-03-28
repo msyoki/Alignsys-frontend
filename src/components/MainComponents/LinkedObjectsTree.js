@@ -142,7 +142,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                             style={{ fontSize: "15px", color: "#2757aa" }}
                           ></i>
                         )}
-                        <span style={{fontWeight:'lighter', fontSize:'12px'}}>{subItem.title}</span>
+                        <span style={{ fontSize:'12px'}}>{subItem.title}</span>
                         {subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
@@ -218,7 +218,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                             style={{ fontSize: "15px", color: "#fff" }}
                           ></i>
                         )}
-                        <span style={{marginLeft:'8px', fontWeight:'lighter', fontSize:'12px'}}>{subItem.title}</span>
+                        <span style={{marginLeft:'8px',  fontSize:'12px'}}>{subItem.title}</span>
                         {subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}

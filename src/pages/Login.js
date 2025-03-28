@@ -73,7 +73,7 @@ const Login = () => {
               {/* <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
         Welcome back
       </p> */}
-              <h6 className="my-3 p-2 shadow-lg">SIGN IN</h6>
+              <h6 className="my-3 p-2 ">SIGN IN</h6>
 
             </div>
 
@@ -82,11 +82,11 @@ const Login = () => {
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="email">Username*</InputLabel>
+                <InputLabel htmlFor="Username">Email*</InputLabel>
                 <Input
                   id="email"
                   name="email"
-                  type="text"
+                  type="email"
                   required
                   placeholder="Username"
                   startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
