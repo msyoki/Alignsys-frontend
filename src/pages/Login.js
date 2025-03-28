@@ -82,13 +82,13 @@ const Login = () => {
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="Username">Email*</InputLabel>
+                <InputLabel htmlFor="email">Email*</InputLabel>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   required
-                  placeholder="Username"
+                  placeholder="Email"
                   startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
                   style={{ fontSize: '14px' }}
                 />
