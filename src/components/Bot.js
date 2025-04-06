@@ -38,7 +38,7 @@ function Bot(props) {
 
         try {
             const filename = uploadedFileName || 'Individual-Sanlam Unit Trust Investment Application form[1]-SHERRY KISILUII.pdf';
-            const response = await axios.post('http://192.236.194.251:9000//query-topic-base64', new URLSearchParams({
+            const response = await axios.post('https://chatbotapi.techedge.dev/query-topic-base64', new URLSearchParams({
                 topic: msg,
                 base64_data: props.base64
             }), {
@@ -72,38 +72,7 @@ function Bot(props) {
         }
     };
 
-    const onDrop = async (acceptedFiles) => {
-        const file = acceptedFiles[0];
-        if (file && file.type === 'application/pdf') {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await axios.post('http://192.236.194.251:9000/upload-file/', formData, {
-                    headers: {
-                        'accept': 'application/json',
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-                if (response.status === 200) {
-                    setUploadedFileName(file.name);
-                    generateMessage(`File "${file.name}" uploaded successfully.`, 'user');
-                }
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                generateMessage("File upload failed. Please try again.", 'user');
-            }
-        } else {
-            generateMessage("Please upload a valid PDF file.", 'user');
-        }
-    };
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
-        accept: 'application/pdf',
-        multiple: false
-    });
+ 
 
     useEffect(() => {
         chatLogsEndRef.current?.scrollIntoView({ behavior: 'smooth' });

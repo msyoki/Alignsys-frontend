@@ -277,8 +277,8 @@ const PDFViewerPreview = (props) => {
 
   return (
     <>
-      <div className="controls bg-white shadow-lg text-dark d-flex align-items-center justify-content-between px-3 py-2">
-        <div className="d-flex align-items-center flex-wrap gap-3">
+      <div style={{backgroundColor: '#ecf4fc', minHeight:'53px'}} className="controls text-dark d-flex align-items-center justify-content-between px-1 py-1">
+        <div className="d-flex align-items-center flex-wrap gap-2 p-1">
 
           {/* Toggle Sidebar Button */}
           <span className="d-flex align-items-center cursor-pointer" onClick={toggleAside}>
@@ -332,7 +332,7 @@ const PDFViewerPreview = (props) => {
       </div>
 
 
-      <div className="pdfrender" style={{ display: 'flex', height: '100vh', backgroundColor: '#e5e6e4' }}>
+      <div className="pdfrender" style={{ display: 'flex', height: '75vh', backgroundColor: '#e5e6e4' }}>
         {isAsideOpen && (
           <aside style={{
             position: 'relative',
@@ -347,7 +347,7 @@ const PDFViewerPreview = (props) => {
             <div ref={containerRef} style={{
               position: 'relative',
               overflowY: 'auto',
-              height: '85%',
+              height: '100%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -393,7 +393,7 @@ const PDFViewerPreview = (props) => {
         <div ref={mainContainerRef} style={{
           position: 'relative',
           overflowY: 'auto',
-          height: '85%',
+          height: '100%',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',

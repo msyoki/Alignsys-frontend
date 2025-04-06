@@ -191,6 +191,7 @@ const ViewsList = (props) => {
                 }
             );
             setLoading(false)
+            console.log("fetchMainViewObjects")
             console.log(response.data)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
@@ -228,6 +229,7 @@ const ViewsList = (props) => {
                     }
                 }
             );
+            console.log("fetchMainViewObjects2")
             console.log(response.data)
             setLoading(false)
             setSelectedViewObjects(response.data);
@@ -379,7 +381,7 @@ const ViewsList = (props) => {
                     <h6
                         className="p-2 text-dark d-flex align-items-center flex-wrap"
                         style={{
-                            fontSize: '11px',
+                            fontSize: '12px',
                             backgroundColor: '#ecf4fc',
                             cursor: 'pointer',
                             display: 'flex',
@@ -431,8 +433,11 @@ const ViewsList = (props) => {
                                                     ? props.previewSublistObject(item, true)
                                                     : props.previewObject(item, true)
                                             }
+                                            className='my-1 '
+
 
                                             sx={{
+                                                marginLeft:'10px',
                                                 fontSize: "12.5px", // Apply directly to TreeItem
                                                 "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
                                                 "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
@@ -458,7 +463,7 @@ const ViewsList = (props) => {
                                                             />
                                                         </>
                                                     ) : (
-                                                        <i className="fa-solid fa-folder " style={{ fontSize: '20px', color: '#2a68af' }}></i>
+                                                        <i className="fa-solid fa-folder  mx-2" style={{ fontSize: '20px', color: '#2a68af' }}></i>
                                                     )}
                                                     <span style={{ marginLeft: '8px' }}>{item.title}  </span>
                                                     {item.objectTypeId === 0 ? (
@@ -523,6 +528,7 @@ const ViewsList = (props) => {
                                             key={`${index}`} // Unique key
                                             itemId={`${index}`} // Unique itemId
                                             onClick={() => fetchMainViewObjects2(item)}
+                                            className='my-1'
 
                                             sx={{
                                                 fontSize: "12.5px", // Apply directly to TreeItem
@@ -562,7 +568,7 @@ const ViewsList = (props) => {
                                 onClick={toggleCommonViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
-                                    fontSize: '11px',
+                                    fontSize: '12px',
                                     backgroundColor: '#ecf4fc',
                                     cursor: 'pointer',
                                     display: 'flex'
@@ -587,6 +593,7 @@ const ViewsList = (props) => {
                                                 key={`${index}`} // Unique key
                                                 itemId={`${index}`} // Unique itemId
                                                 onClick={() => fetchMainViewObjects(view, "Common Views")}
+                                                className='my-1'
 
                                                 sx={{
                                                     fontSize: "12.5px", // Apply directly to TreeItem
@@ -623,7 +630,7 @@ const ViewsList = (props) => {
                                 onClick={toggleOtherViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
-                                    fontSize: '11px',
+                                    fontSize: '12px',
                                     backgroundColor: '#ecf4fc',
                                     cursor: 'pointer',
                                     display: 'flex'
@@ -648,6 +655,7 @@ const ViewsList = (props) => {
                                                 key={`${index}`} // Unique key
                                                 itemId={`${index}`} // Unique itemId
                                                 onClick={() => fetchMainViewObjects(view, "Other Views")}
+                                                className='my-1'
 
                                                 sx={{
                                                     fontSize: "12.5px", // Apply directly to TreeItem

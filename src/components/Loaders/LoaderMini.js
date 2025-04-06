@@ -3,7 +3,7 @@ import loading from "../../images/loading.svg";
 import logo from "../../images/ZFBLU.webp";
 import Box from '@mui/material/Box';
 import PropTypes from 'prop-types';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 
 
@@ -15,10 +15,11 @@ const LoadingMini = (props) => (
           <div className="spinner ">
          
          
-            <img className="my-3" src={logo} alt="Loading" width='100px' />
+            <img className="my-3" src={logo} alt="Loading" width='150px' />
          
             <Box  className='d-flex justify-content-center main-loader'>
-              <LinearProgress sx={{ width: '60%' }}/>
+             
+              <CircularProgress size="40px" style={{ color: "#2757aa" }} />
             
             </Box>
             <p className="my-2 text-dark" style={{fontSize:'12px'}}>{props.msg?<>{props.msg}</>:<>Please wait, processing request ...</>}</p>

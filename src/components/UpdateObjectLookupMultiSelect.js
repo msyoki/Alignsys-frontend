@@ -74,11 +74,33 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
   const selectedOptions = options.filter(option => value.includes(option.value));
 
   const customStyles = {
-    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // Ensures dropdown is always on top
-    control: (provided) => ({
-      ...provided,
-      borderColor: error ? 'red' : provided.borderColor, // Handles error state
-       fontSize:'12px'
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+  
+    control: (base, state) => ({
+      ...base,
+      borderColor: error ? 'red' : base.borderColor,
+      fontSize: '13px',
+      color: '#555',              // Text color in the control (selected)
+      backgroundColor: disabled ? '#f5f5f5' : 'white',
+    }),
+  
+    singleValue: (base) => ({
+      ...base,
+      color: '#555',              // Color of selected option text
+      fontSize: '13px',
+    }),
+  
+    option: (base, state) => ({
+      ...base,
+      color: '#555',              // Color of dropdown option text
+      fontSize: '13px',
+      backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
+    }),
+  
+    placeholder: (base) => ({
+      ...base,
+      color: '#555',              // Placeholder color
+      fontSize: '13px',
     }),
   };
 
@@ -100,6 +122,7 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
         disabled={disabled}
         menuPortalTarget={document.body}  // Fix overflow issue
         menuPosition="absolute"  // Ensures dropdown is positioned correctly
+      
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

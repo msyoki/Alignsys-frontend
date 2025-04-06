@@ -665,6 +665,9 @@ function Dashboard() {
                 </div>
 
 
+                
+
+
                 {/* Menu Items */}
                 <ul className="menu-items">
                   <li
@@ -790,7 +793,7 @@ function Dashboard() {
                           >
                             <ListItemText
                               primary={item.namesingular}
-                              primaryTypographyProps={{ fontSize: "10px" }} // Smaller text size
+                              primaryTypographyProps={{ fontSize: "12px" }} // Smaller text size
                               sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
                             />
                           </ListItem>
@@ -846,6 +849,7 @@ function Dashboard() {
             viewableobjects={viewableobjects}
             toggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
+        
             recentData={recentData}
             setRecentData={setRecentData}
             getRecent={getRecent}
@@ -857,6 +861,8 @@ function Dashboard() {
             deletedData={deletedData}
             resetViews={resetViews}
             stringAvatar={stringAvatar}
+            setSidebarOpen={setSidebarOpen}
+          
           />
         </main >
       </div >

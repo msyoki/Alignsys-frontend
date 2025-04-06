@@ -24,9 +24,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handlePasswordReset=()=>{
+  const handlePasswordReset = () => {
     navigate('/password-reset');
-    
+
   }
 
 
@@ -70,15 +70,8 @@ const Login = () => {
           <form onSubmit={loginUser} className="text-center text-dark p-3">
             <div>
               <img src={image} alt="Sample logo" style={{ width: '200px' }} />
-              {/* <p className="text-center responsive-font my-3" style={{ fontSize: '14px' }}>
-        Welcome back
-      </p> */}
-              <h6 className="my-3 p-2 ">SIGN IN</h6>
-
+              <h6 className="my-3 p-2">SIGN IN</h6>
             </div>
-
-
-
 
             <div className="form-group my-2">
               <FormControl variant="standard" fullWidth>
@@ -119,11 +112,11 @@ const Login = () => {
               </FormControl>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center  my-3">
-              <p className="small">
+            <div className="d-flex justify-content-end align-items-center my-3">
+              <p className="small mb-0">
                 <a
                   onClick={handlePasswordReset}
-                  style={{ textDecoration: 'none', color: '#1C4690', cursor:'pointer', fontSize:'13px' }}
+                  style={{ textDecoration: 'none', color: '#1C4690', cursor: 'pointer', fontSize: '13px' }}
                 >
                   Forgot password?
                 </a>
@@ -144,8 +137,24 @@ const Login = () => {
               </div>
             </div>
 
+            <div className="mt-3">
+              <p>
+                Go to{' '}
+                <a
+                  href="https://edms.alignsys.tech"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none', color: '#1C4690', fontSize: '12px' }}
+                >
+                  <span>
+                    <small className="mx-1" style={{ fontSize: '12px' }}>DSS - Digital Signing Service</small>
+                  </span>
+                </a>
+              </p>
+            </div>
           </form>
         </div>
+
 
         <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
           <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -155,7 +164,7 @@ const Login = () => {
               <span>EDMS</span> Software Solution
             </p>
           </div>
-         
+
           <div className="text-center" style={{ marginTop: 'auto' }}>
             {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
               <b>EMDS</b> Software Solution

@@ -857,7 +857,7 @@ const DocumentList = (props) => {
 
       <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '35%' }}>
           <Box
             style={{
               display: 'flex',
@@ -872,7 +872,7 @@ const DocumentList = (props) => {
             }}
 
           >
-            <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-2 ">
+            {/* <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-2 ">
               <img style={{
 
                 cursor: 'pointer',
@@ -886,6 +886,20 @@ const DocumentList = (props) => {
 
 
 
+            </Box> */}
+
+            {/* Logo Section */}
+            <Box display="flex" alignItems="center" className="mx-1 p-1">
+              {props.sidebarOpen ? <></> : <i onClick={() => props.setSidebarOpen(true)} class="fa-solid fa-bars" style={{ fontSize: '20px', marginRight: '20px' }}></i>}
+              <img
+                src={logo}
+                alt="Logo"
+                width="150px"
+                style={{
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                }}
+              />
             </Box>
 
 
@@ -902,7 +916,7 @@ const DocumentList = (props) => {
                 <Tooltip title='Switch to a different vault'>
                   <VaultSelectForm activeVault={props.selectedVault} />
                 </Tooltip>
-              
+
                 <Box style={{
 
                   cursor: 'pointer',
@@ -1048,7 +1062,7 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-                fontSize: '12px',
+
                 width: 'auto',
                 minWidth: 'auto',
                 height: 'auto',
@@ -1064,7 +1078,7 @@ const DocumentList = (props) => {
               sx={{
                 height: 'auto',
                 minWidth: 'auto',      // Adjust the width to fit the label text
-                fontSize: '12px',
+
                 backgroundColor: '#fff'
               }}
               label={`Recent`}
@@ -1075,7 +1089,7 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-                fontSize: '13px',
+
                 minWidth: 'auto',
                 backgroundColor: '#fff'      // Adjust the width to fit the label text
               }}
@@ -1087,7 +1101,7 @@ const DocumentList = (props) => {
             <Tab
               style={{ textTransform: 'none' }}
               sx={{
-                fontSize: '12px',
+
                 height: 'auto',
                 minWidth: 'auto',
                 backgroundColor: '#fff'      // Adjust the width to fit the label text
@@ -1117,7 +1131,7 @@ const DocumentList = (props) => {
                   <>
                     {props.data.length > 0 ? (
                       <div>
-                        <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
+                        <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
                           <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
                           <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
@@ -1329,8 +1343,11 @@ const DocumentList = (props) => {
                                     ? previewSublistObject(item, true)
                                     : previewObject(item, true)
                                 }
+                                className='my-1'
+
 
                                 sx={{
+                                  marginLeft: '10px',
                                   fontSize: "12.5px", // Apply directly to TreeItem
                                   "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
                                   "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
@@ -1465,7 +1482,7 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
@@ -1676,8 +1693,11 @@ const DocumentList = (props) => {
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
                             }
+                            className='my-1'
+
 
                             sx={{
+                              marginLeft: '10px',
                               fontSize: "12.5px", // Apply directly to TreeItem
                               "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
@@ -1757,7 +1777,7 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
@@ -1968,8 +1988,11 @@ const DocumentList = (props) => {
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
                             }
+                            className='my-1'
+
 
                             sx={{
+                              marginLeft: '10px',
                               fontSize: "12.5px", // Apply directly to TreeItem
                               "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
@@ -2047,7 +2070,7 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '11px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
@@ -2133,8 +2156,11 @@ const DocumentList = (props) => {
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
                             }
+                            className='my-1'
+
 
                             sx={{
+                              marginLeft: '10px',
                               fontSize: "12.5px", // Apply directly to TreeItem
                               "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
@@ -2219,12 +2245,12 @@ const DocumentList = (props) => {
         </div>
 
         {!isMobile && (
-          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
+          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#dedddd', height: '100vh' }}></div>
         )}
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '35%' }}>
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
         </div>
       </div>
