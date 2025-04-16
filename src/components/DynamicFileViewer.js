@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import mammoth from 'mammoth';
 import styled from 'styled-components';
@@ -14,115 +14,54 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import * as constants from './Auth/configs'
+import DownloadIcon from '@mui/icons-material/Download'; // optional icon
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-`;
+
 
 const FileViewerContainer = styled.div`
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  background-color: #ffffff;
+  overflow-x: hidden; /* prevent horizontal scroll */
+  background-color: #555;
   border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 20px;
-`;
-
-const ImageViewerContainer = styled.div`
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  height: calc(100vh - 40px); /* Adjust for padding */
-  overflow: hidden;
-`;
-
-const ImageControls = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  background-color: white;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-`;
-
-const ImageWrapper = styled.div`
-  position: relative;
-  max-width: 100%;
-  max-height: calc(100% - 80px); /* Account for controls height */
-  margin: 0 auto;
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  overflow: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const StyledImage = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  transition: transform 0.3s ease;
-  transform: ${props => `scale(${props.zoom}) rotate(${props.rotation}deg)`};
-`;
-
-const ImageButton = styled(IconButton)`
-  &:hover {
-    background-color: rgba(0,0,0,0.1);
-  }
-`;
-
-const ZoomControls = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 10px;
 `;
 
 const ControlsContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 const Button = styled.button`
-  padding: 5px 10px;
-  margin: 0 5px;
+  padding: 4px 10px;
   border: none;
   border-radius: 4px;
   background-color: #2a68af;
   color: #ffffff;
   cursor: pointer;
-  transition: background-color 0.3s;
   font-size: 12px;
+  transition: background-color 0.3s;
 
   &:disabled {
-    background-color: #6c757d;
+    background-color: #adb5bd;
     cursor: not-allowed;
   }
 
@@ -131,11 +70,65 @@ const Button = styled.button`
   }
 `;
 
-const ImageViewer = ({ src }) => {
-  const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
+const ImageViewerContainer = styled.div`
+  width: 100%;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: #555; /* to match FileViewerContainer */
+  border: 1px solid #dee2e6;
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 3));
+  overflow: hidden;
+`;
+
+const ImageControls = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+`;
+
+const ImageWrapper = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #555;
+  cursor: grab;
+  padding: 1rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Ensure the container can grow to fit zoomed image height */
+  min-height: 0;
+`;
+
+
+const StyledImage = styled.img`
+  transform: ${({ zoom, rotation }) => `scale(${zoom}) rotate(${rotation}deg)`};
+  transition: transform 0.2s ease;
+  transform-origin: center center;
+
+  /* Allow full image to be visible and scrollable */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+`;
+
+
+
+
+const ImageViewer = ({ src }) => {
+  const [zoom, setZoom] = useState(0.8);
+  const [rotation, setRotation] = useState(0);
+  const imageRef = useRef(null);
+
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.1));
   const handleRotateLeft = () => setRotation(prev => prev - 90);
   const handleRotateRight = () => setRotation(prev => prev + 90);
@@ -144,33 +137,56 @@ const ImageViewer = ({ src }) => {
     setRotation(0);
   };
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = src;
+    link.download = 'image.jpg';
+    link.click();
+  };
+
   return (
     <ImageViewerContainer>
       <ImageControls>
-        <Tooltip title="Zoom In">
-          <ImageButton onClick={handleZoomIn}>
-            <ZoomInIcon />
-          </ImageButton>
+
+        <div className="d-flex align-items-center gap-2 mx-1">
+          <span className='mx-2'>
+          <i onClick={handleZoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+          <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '11px', color: '#333' }}>
+            {Math.round(zoom * 100)}%
+
+          </span>
+          <i onClick={handleZoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+          </span>
+          <Tooltip title="Reset Zoom">
+            <button onClick={handleReset} className="btn btn-light px-1 py-0" style={{ fontSize: '11px', border: '1px solid #2757aa', color: '#2757aa' }}>
+              <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '12px' }} />
+              Reset
+            </button>
+          </Tooltip>
+          <Tooltip title="Rotate Left">
+          <RotateLeftIcon sx={{color:'#2757aa', fontSize:'20px'}} onClick={handleRotateLeft} />
+          </Tooltip> 
+
+          <Tooltip title="Rotate Right">
+          <RotateRightIcon sx={{color:'#2757aa',fontSize:'20px'}} onClick={handleRotateRight} />
+          </Tooltip> 
+     
+        </div>
+
+        {/* Download PDF */}
+        <Tooltip title="Download PDF">
+          <i onClick={handleDownload} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
         </Tooltip>
-        <Tooltip title="Zoom Out">
-          <ImageButton onClick={handleZoomOut}>
-            <ZoomOutIcon />
-          </ImageButton>
-        </Tooltip>
-        <Tooltip title="Rotate Left">
-          <ImageButton onClick={handleRotateLeft}>
-            <RotateLeftIcon />
-          </ImageButton>
-        </Tooltip>
-        <Tooltip title="Rotate Right">
-          <ImageButton onClick={handleRotateRight}>
-            <RotateRightIcon />
-          </ImageButton>
-        </Tooltip>
-        <Button onClick={handleReset}>Reset</Button>
+
       </ImageControls>
       <ImageWrapper>
-        <StyledImage src={src} zoom={zoom} rotation={rotation} alt="Loaded content" />
+        <StyledImage
+          ref={imageRef}
+          src={src}
+          zoom={zoom}
+          rotation={rotation}
+          alt="Loaded content"
+        />
       </ImageWrapper>
     </ImageViewerContainer>
   );
@@ -379,7 +395,7 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName }) => {
+const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName, selectedObject }) => {
   const [fileUrl, setFileUrl] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [numPages, setNumPages] = useState(null);
@@ -470,7 +486,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     }
 
     if (ext === 'pdf') {
-      return <PDFViewerPreview document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email}  base64Content={base64Content} fileExtension={fileExtension} fileName={fileName}  />;
+      return <PDFViewerPreview document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email} base64Content={base64Content} fileExtension={fileExtension} fileName={fileName} selectedObject={selectedObject} />;
     }
 
     if (ext === 'txt') {
@@ -478,7 +494,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     }
 
     if (ext === 'docx' || ext === 'doc' || ext === 'xlsx') {
- 
+
       return (
         <iframe
           src={`https://view.officeapps.live.com/op/embed.aspx?src=${constants.tempfilesurl}${tempUrl}`}
@@ -500,7 +516,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
 
   useEffect(() => {
     const uploadData = async () => {
- 
+
       try {
         const response = await axios.post(
           `${constants.tempfilesurl}`,
@@ -515,11 +531,11 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
             }
           }
         );
-        if (response.data){
-  
+        if (response.data) {
+
           console.log(response.data.url)
         }
-        
+
         setTempUrl(response.data.url);
 
       } catch (error) {
@@ -528,7 +544,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
       }
     };
 
-    if (['xlsx', 'docx','doc'].includes(fileExtension?.toLowerCase())) {
+    if (['xlsx', 'docx', 'doc'].includes(fileExtension?.toLowerCase())) {
       uploadData();
     }
 

@@ -2,40 +2,24 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
 import { Avatar, Button } from '@mui/material';
-import { LinearProgress, Typography } from '@mui/material';
-import Accordion from '@mui/material/Accordion';
-import CircularProgress from '@mui/material/CircularProgress';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Box from '@mui/material/Box';
-import ObjectPropValue from '../ObjectPropValue';
-import { faTable } from '@fortawesome/free-solid-svg-icons';
+import { Typography } from '@mui/material';
 
-import GetIcon from '../GetIcon'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  // Accordion,
-  // AccordionItem,
-  // AccordionButton,
-  // AccordionPanel,
-  // AccordionIcon,
-  // Box
-} from '@chakra-ui/react'
+import Box from '@mui/material/Box';
+
 import FileUpdateModal from '../UpdateFile';
 
 import { Spinner } from '@chakra-ui/react'
 import TransitionAlerts from '../Alert';
 import ObjectData from './ObjectData';
 import NetworkIcon from '../NetworkStatus';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
-import GridViewIcon from '@mui/icons-material/GridView';
+
+
 import ViewsList from './ViewsList';
 import VaultSelectForm from '../SelectVault';
 import FileExtIcon from '../FileExtIcon';
 import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObjectDialog';
 import TimedAlert from '../TimedAlert';
-import { UTurnLeft } from '@mui/icons-material';
+
 import OfficeApp from '../Modals/OfficeAppDialog';
 import * as constants from '../Auth/configs'
 import LoadingDialog from '../Loaders/LoaderDialog';
@@ -97,7 +81,6 @@ const DocumentList = (props) => {
   let [selectedFile, setSelectedFile] = useState({});
   let [loadingobjects, setLoadingObjects] = useState(false)
   let [selectedFileId, setSelectedFileId] = useState(null)
-  let [preparingforsigning, setPreparingForSigning] = useState(false)
 
   const [openAlert, setOpenAlert] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('');
@@ -106,7 +89,7 @@ const DocumentList = (props) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [linkedObjects, setLinkedObjects] = useState([])
   const [tabIndex, setTabIndex] = useState(0);
-  const [isModalOpenUpdateFile, setIsModalOpenUpdateFile] = useState(false);
+
   const [previewObjectProps, setPreviewObjectProps] = useState([])
   const [formValues, setFormValues] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -128,12 +111,9 @@ const DocumentList = (props) => {
 
 
 
-  const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
 
 
-  const relatedObjects = linkedObjects.filter(item => (item.objectID || item.objectTypeId) !== 0);
-  const relatedDocuments = linkedObjects.filter(item => (item.objectID || item.objectTypeId) === 0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -185,9 +165,6 @@ const DocumentList = (props) => {
         { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
       );
 
-      // if (!selectedState) {
-      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
-      // }
 
 
       setAlertPopOpen(true);
@@ -201,9 +178,9 @@ const DocumentList = (props) => {
 
       setTimeout(() => {
         if (selectedObject.id !== 0) {
-          previewObject();
+          previewObject(selectedObject, false);
         } else {
-          previewSublistObject();
+          previewSublistObject(selectedObject, false);
         }
       }, 5000);
 
@@ -231,10 +208,19 @@ const DocumentList = (props) => {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
 
-      setSelectedState({});
-      if (!formValues) {
-        await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
-      }
+      // setSelectedState({});
+      // if (!formValues) {
+      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
+      // }
+
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject, false);
+        } else {
+          previewSublistObject(selectedObject, false);
+        }
+      }, 5000);
+
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
       setAlertPopMessage("Updated successfully!");
@@ -327,6 +313,7 @@ const DocumentList = (props) => {
 
   const previewObject = async (item, getLinkedItems) => {
 
+
     setComments([])
 
     // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
@@ -345,12 +332,14 @@ const DocumentList = (props) => {
 
     setSelectedObject(item)
 
-    console.log(item)
+
     getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id)
+
+
 
     try {
       const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`);
-      // console.log(propsResponse.data)
+      console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
       setLoadingObject(false)
       setLoadingClick(false)
@@ -401,7 +390,7 @@ const DocumentList = (props) => {
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
-      // console.log(propsResponse.data)
+      console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       setLoadingClick(false)
@@ -863,34 +852,22 @@ const DocumentList = (props) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px',
-
-              fontSize: '12px !important',
+              padding: '6px 10px',
+              fontSize: '12px',
               backgroundColor: '#fff',
               color: '#1C4690',
-
             }}
-
+            className='p-2'
           >
-            {/* <Box style={{ display: 'flex', alignItems: 'center' }} className="mx-2 ">
-              <img style={{
-
-                cursor: 'pointer',
-                color: '#fff',
-                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                transform: 'translateZ(0)',
-                transition: 'transform 0.2s'
-              }} onClick={reloadPage} src={logo} width='150px' />
-
-
-
-
-
-            </Box> */}
-
             {/* Logo Section */}
-            <Box display="flex" alignItems="center" className="mx-1 p-1">
-              {props.sidebarOpen ? <></> : <i onClick={() => props.setSidebarOpen(true)} class="fa-solid fa-bars" style={{ fontSize: '20px', marginRight: '20px' }}></i>}
+            <Box display="flex" alignItems="center" className="mx-1 pe-2">
+              {!props.sidebarOpen && (
+                <i
+                  onClick={() => props.setSidebarOpen(true)}
+                  className="fa-solid fa-bars"
+                  style={{ fontSize: '18px', marginRight: '12px', cursor: 'pointer' }}
+                />
+              )}
               <img
                 src={logo}
                 alt="Logo"
@@ -899,73 +876,45 @@ const DocumentList = (props) => {
                   cursor: 'pointer',
                   transition: 'transform 0.2s',
                 }}
+                className='mx-3'
               />
             </Box>
 
+            {/* Right Section */}
+            <Box display="flex" alignItems="center">
+              <Tooltip title="Switch to a different vault">
+                <VaultSelectForm activeVault={props.selectedVault} />
+              </Tooltip>
 
-            <Box style={{ display: 'flex', alignItems: 'center' }}>
               <Box
-                display="flex"
-                justifyContent="flex-end"
-                alignItems="center"
-                color="text.white"
-                fontSize="11.5px"
-              >
-
-
-                <Tooltip title='Switch to a different vault'>
-                  <VaultSelectForm activeVault={props.selectedVault} />
-                </Tooltip>
-
-                <Box style={{
-
+                className="mx-2"
+                style={{
                   cursor: 'pointer',
                   color: '#1C4690',
                   textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                  transform: 'translateZ(0)',
-                  transition: 'transform 0.2s'
+                  transition: 'transform 0.2s',
                 }}
-                  className='mx-3'
-                >
-
-                  <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
-
-                    <Avatar
-                      alt={
-                        props.user.first_name && props.user.last_name
-                          ? `${props.user.first_name} ${props.user.last_name}`
-                          : props.user.first_name
-                            ? props.user.first_name
-                            : props.user.last_name
-                              ? props.user.last_name
-                              : props.user.username
-                      }
-                      {...props.stringAvatar(
-                        props.user.first_name && props.user.last_name
-                          ? `${props.user.first_name} ${props.user.last_name}`
-                          : props.user.first_name
-                            ? props.user.first_name
-                            : props.user.last_name
-                              ? props.user.last_name
-                              : props.user.username
-                      )}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        backgroundColor: '#2757aa',
-                        fontSize: '12px'
-
-                      }}
-                      className='p-3'
-
-                    />
-                  </Tooltip>
-
-                </Box>
-
+              >
+                <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
+                  <Avatar
+                    alt={`${props.user.first_name} ${props.user.last_name}`}
+                    {...props.stringAvatar(
+                      props.user.first_name && props.user.last_name
+                        ? `${props.user.first_name} ${props.user.last_name}`
+                        : props.user.first_name || props.user.last_name || props.user.username
+                    )}
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      backgroundColor: '#2757aa',
+                      fontSize: '12px',
+                    }}
+                  />
+                </Tooltip>
               </Box>
             </Box>
           </Box>
+
 
 
           <div
@@ -1027,7 +976,7 @@ const DocumentList = (props) => {
                 type="submit"
                 className="btn btn-md shadow rounded d-flex align-items-center"
                 style={{
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   color: '#fff',
                   backgroundColor: '#2757aa',
                   cursor: 'pointer',
@@ -1051,66 +1000,40 @@ const DocumentList = (props) => {
 
 
           <Tabs
-            variant="scrollable"
-            value={value}
-            onChange={handleChange}
-            aria-label="Horizontal tabs example"
-            sx={{ borderColor: 'divider', backgroundColor: '#fff' }}
-            className='shadow-lg'
+  variant="scrollable"
+  value={value}
+  onChange={handleChange}
+  aria-label="Horizontal tabs example"
+  className="shadow-lg"
+  sx={{
+    borderColor: 'divider',
+    backgroundColor: '#fff',
+    minHeight: '36px',  // Reduced overall tab bar height
+  }}
+>
+  {['All', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
+    <Tab
+      key={index}
+      style={{ textTransform: 'none' }}
+      label={label}
+      onClick={() => {
+        if (label === 'All') setSearched(false);
+        if (label === 'Recent') props.getRecent?.();
+        if (label === 'Assigned') props.getAssigned?.();
+      }}
+      {...a11yProps(index)}
+      sx={{
+        minHeight: '36px',
+        height: '36px',
+        padding: '4px 12px',
+        fontSize: '13px',
+        backgroundColor: '#fff',
+        minWidth: 'auto',
+      }}
+    />
+  ))}
+</Tabs>
 
-          >
-            <Tab
-              style={{ textTransform: 'none' }}
-              sx={{
-
-                width: 'auto',
-                minWidth: 'auto',
-                height: 'auto',
-                backgroundColor: '#fff'
-
-              }}
-              onClick={() => setSearched(false)}
-              label="All"
-              {...a11yProps(0)}
-            />
-            <Tab
-              style={{ textTransform: 'none' }}
-              sx={{
-                height: 'auto',
-                minWidth: 'auto',      // Adjust the width to fit the label text
-
-                backgroundColor: '#fff'
-              }}
-              label={`Recent`}
-              // label={`Recent (${props.recentData ? props.recentData.length : <></>})`}
-              {...a11yProps(1)}
-              onClick={props.getRecent}
-            />
-            <Tab
-              style={{ textTransform: 'none' }}
-              sx={{
-
-                minWidth: 'auto',
-                backgroundColor: '#fff'      // Adjust the width to fit the label text
-              }}
-              label={`Assigned `}
-              // label={`Assigned (${props.assignedData ? props.assignedData.length : <></>})`}
-              {...a11yProps(2)}
-              onClick={props.getAssigned}
-            />
-            <Tab
-              style={{ textTransform: 'none' }}
-              sx={{
-
-                height: 'auto',
-                minWidth: 'auto',
-                backgroundColor: '#fff'      // Adjust the width to fit the label text
-              }}
-              label={`Deleted `}
-              // label={`Deleted (${props.deletedData ? props.deletedData.length : <></>})`}
-              {...a11yProps(3)}
-            />
-          </Tabs>
           <CustomTabPanel
             value={value}
             index={0}
@@ -1131,7 +1054,7 @@ const DocumentList = (props) => {
                   <>
                     {props.data.length > 0 ? (
                       <div>
-                        <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
+                        <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                           <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
                           <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
@@ -1140,200 +1063,7 @@ const DocumentList = (props) => {
 
                         <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                           {props.data.map((item, index) => (
-                            // <Accordion
-                            //   expanded={selectedIndex === index}
-                            //   onChange={handleAccordionChange(index)}
-                            //   sx={{
-                            //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            //     '&:not(:last-child)': {
-                            //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                            //     },
-                            //     '&::before': { display: 'none' },
-                            //   }}
-                            // >
-                            //   {item.objectID === 0 ? (
-                            //     <AccordionSummary
-                            //       onClick={() => previewSublistObject(item, true)}
 
-                            //       expandIcon={<ExpandMoreIcon />}
-                            //       aria-controls={`panel${index}a-content`}
-                            //       id={`panel${index}a-header`}
-                            //       sx={{
-                            //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                            //         padding: 0, // Removes all padding
-                            //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                            //       }}
-                            //       className="shadow-sm"
-                            //     >
-                            //       <Typography
-                            //         variant="body1"
-                            //         style={{
-                            //           fontSize: '11px',
-                            //           margin: 0, // Removes any extra margin
-                            //         }}
-                            //       >
-
-                            //         <span className='mx-2'> <FileExtIcon
-                            //           guid={props.selectedVault.guid}
-                            //           objectId={item.id}
-                            //           classId={item.classID}
-                            //         /></span>
-
-                            //         {trimTitle2(item.title)}
-                            //         <FileExtText
-                            //           guid={props.selectedVault.guid}
-                            //           objectId={item.id}
-                            //           classId={item.classID}
-                            //         />
-                            //       </Typography>
-                            //     </AccordionSummary>
-
-                            //   ) : (
-                            //     <AccordionSummary
-                            //       onClick={() => previewObject(item, true)}
-                            //       expandIcon={<ExpandMoreIcon />}
-                            //       aria-controls={`panel${index}a-content`}
-                            //       id={`panel${index}a-header`}
-                            //       sx={{
-                            //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                            //         padding: 0, // Removes all padding
-                            //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                            //       }}
-                            //       className="shadow-sm"
-                            //     >
-                            //       <Typography variant="body1" style={{ fontSize: '11px' }}>
-                            //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                            //         {trimTitle2(item.title)}
-                            //       </Typography>
-                            //     </AccordionSummary>
-                            //   )}
-                            //   {linkedObjects && (
-                            //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                            //       {props.loadingobjects ? (
-                            //         <div className="text-center">
-                            //           <CircularProgress style={{ width: '20px', height: '20px' }} />
-                            //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                            //         </div>
-                            //       ) : (
-                            //         <>
-                            //           {linkedObjects.length > 0 ? (
-                            //             <>
-                            //               {/* Render Other Objects */}
-                            //               {otherObjects.map((item, index) => (
-                            //                 <div key={index}>
-                            //                   <Typography
-                            //                     variant="body2"
-                            //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                            //                     className="p-1"
-                            //                   >
-                            //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                            //                   </Typography>
-
-                            //                   <table
-                            //                     id="createdByMe"
-                            //                     className="table table-hover"
-                            //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                            //                   >
-                            //                     <tbody>
-                            //                       {item.items.map((subItem, subIndex) => (
-                            //                         <tr
-                            //                           key={subIndex}
-                            //                           onClick={() => handleRowClick(subItem)}
-                            //                           onDoubleClick={() => openApp(subItem)}
-                            //                           style={{ cursor: 'pointer' }}
-                            //                         >
-                            //                           <td>
-                            //                             {subItem.objectID === 0 ? (
-                            //                               <>
-                            //                                 <FileExtIcon
-                            //                                   guid={props.selectedVault.guid}
-                            //                                   objectId={subItem.id}
-                            //                                   classId={subItem.classID}
-                            //                                 />
-                            //                                 {subItem.title}
-                            //                                 <FileExtText
-                            //                                   guid={props.selectedVault.guid}
-                            //                                   objectId={subItem.id}
-                            //                                   classId={subItem.classID}
-                            //                                 />
-                            //                               </>
-                            //                             ) : (
-                            //                               <>
-                            //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                            //                                 {subItem.title}
-                            //                               </>
-                            //                             )}
-                            //                           </td>
-                            //                         </tr>
-                            //                       ))}
-                            //                     </tbody>
-                            //                   </table>
-                            //                 </div>
-                            //               ))}
-
-                            //               {/* Render Documents Together */}
-                            //               {documents.length > 0 && (
-                            //                 <>
-                            //                   <Typography
-                            //                     variant="body2"
-                            //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                            //                     className="p-1"
-                            //                   >
-                            //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                            //                   </Typography>
-
-                            //                   <table
-                            //                     id="createdByMe"
-                            //                     className="table table-hover"
-                            //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                            //                   >
-                            //                     <tbody>
-                            //                       {documents.flatMap(item => item.items).map((subItem, index) => (
-                            //                         <tr
-                            //                           key={index}
-                            //                           onClick={() => handleRowClick(subItem)}
-                            //                           onDoubleClick={() => openApp(subItem)}
-                            //                           style={{ cursor: 'pointer' }}
-                            //                         >
-                            //                           <td>
-                            //                             {subItem.objectID === 0 ? (
-                            //                               <>
-                            //                                 <FileExtIcon
-                            //                                   guid={props.selectedVault.guid}
-                            //                                   objectId={subItem.id}
-                            //                                   classId={subItem.classID}
-                            //                                 />
-                            //                                 {subItem.title}
-                            //                                 <FileExtText
-                            //                                   guid={props.selectedVault.guid}
-                            //                                   objectId={subItem.id}
-                            //                                   classId={subItem.classID}
-                            //                                 />
-                            //                               </>
-                            //                             ) : (
-                            //                               <>
-                            //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                            //                                 {subItem.title}
-                            //                               </>
-                            //                             )}
-                            //                           </td>
-                            //                         </tr>
-                            //                       ))}
-                            //                     </tbody>
-                            //                   </table>
-                            //                 </>
-                            //               )}
-                            //             </>
-                            //           ) : (
-                            //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                            //               No Relationships Found
-                            //             </p>
-                            //           )}
-                            //         </>
-                            //       )}
-                            //     </AccordionDetails>
-                            //   )}
-                            // </Accordion>
                             <SimpleTreeView>
                               <TreeItem
                                 key={`tree-item-${index}`} // Unique key
@@ -1375,8 +1105,7 @@ const DocumentList = (props) => {
                                     ) : (
                                       <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                     )}
-                                    <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                    {item.objectTypeId || item.objectID === 0 ? (
+                                    <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 ? (
                                       <>
                                         <FileExtText
                                           guid={props.selectedVault.guid}
@@ -1384,7 +1113,8 @@ const DocumentList = (props) => {
                                           classId={item.classId || item.classID}
                                         />
                                       </>
-                                    ) : null}
+                                    ) : null}</span>
+                                   
 
                                   </Box>
                                 }
@@ -1426,7 +1156,7 @@ const DocumentList = (props) => {
                           <Typography
                             variant="body2"
                             className='text-dark'
-                            sx={{ textAlign: 'center', fontSize: '12px' }}
+                            sx={{ textAlign: 'center', fontSize: '12.5px' }}
                           >
                             Please try a different search paramenter
                           </Typography>
@@ -1482,7 +1212,7 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
@@ -1490,200 +1220,7 @@ const DocumentList = (props) => {
 
                     <div className=' text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.recentData.map((item, index) => (
-                        // <Accordion
-                        //   expanded={selectedIndex === index}
-                        //   onChange={handleAccordionChange(index)}
-                        //   sx={{
-                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     '&:not(:last-child)': {
-                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     },
-                        //     '&::before': { display: 'none' },
-                        //   }}
-                        // >
-                        //   {item.objectID === 0 ? (
-                        //     <AccordionSummary
-                        //       onClick={() => previewSublistObject(item, true)}
 
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography
-                        //         variant="body1"
-                        //         style={{
-                        //           fontSize: '11px',
-                        //           margin: 0, // Removes any extra margin
-                        //         }}
-                        //       >
-
-                        //         <span className='mx-2'> <FileExtIcon
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         /></span>
-
-                        //         {trimTitle2(item.title)}
-                        //         <FileExtText
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         />
-                        //       </Typography>
-                        //     </AccordionSummary>
-
-                        //   ) : (
-                        //     <AccordionSummary
-                        //       onClick={() => previewObject(item, true)}
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
-                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                        //         {trimTitle2(item.title)}
-                        //       </Typography>
-                        //     </AccordionSummary>
-                        //   )}
-                        //   {linkedObjects && (
-                        //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                        //       {props.loadingobjects ? (
-                        //         <div className="text-center">
-                        //           <CircularProgress style={{ width: '20px', height: '20px' }} />
-                        //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                        //         </div>
-                        //       ) : (
-                        //         <>
-                        //           {linkedObjects.length > 0 ? (
-                        //             <>
-                        //               {/* Render Other Objects */}
-                        //               {otherObjects.map((item, index) => (
-                        //                 <div key={index}>
-                        //                   <Typography
-                        //                     variant="body2"
-                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                        //                     className="p-1"
-                        //                   >
-                        //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                        //                   </Typography>
-
-                        //                   <table
-                        //                     id="createdByMe"
-                        //                     className="table table-hover"
-                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                        //                   >
-                        //                     <tbody>
-                        //                       {item.items.map((subItem, subIndex) => (
-                        //                         <tr
-                        //                           key={subIndex}
-                        //                           onClick={() => handleRowClick(subItem)}
-                        //                           onDoubleClick={() => openApp(subItem)}
-                        //                           style={{ cursor: 'pointer' }}
-                        //                         >
-                        //                           <td>
-                        //                             {subItem.objectID === 0 ? (
-                        //                               <>
-                        //                                 <FileExtIcon
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                                 {subItem.title}
-                        //                                 <FileExtText
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                               </>
-                        //                             ) : (
-                        //                               <>
-                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                        //                                 {subItem.title}
-                        //                               </>
-                        //                             )}
-                        //                           </td>
-                        //                         </tr>
-                        //                       ))}
-                        //                     </tbody>
-                        //                   </table>
-                        //                 </div>
-                        //               ))}
-
-                        //               {/* Render Documents Together */}
-                        //               {documents.length > 0 && (
-                        //                 <>
-                        //                   <Typography
-                        //                     variant="body2"
-                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                        //                     className="p-1"
-                        //                   >
-                        //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                        //                   </Typography>
-
-                        //                   <table
-                        //                     id="createdByMe"
-                        //                     className="table table-hover"
-                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                        //                   >
-                        //                     <tbody>
-                        //                       {documents.flatMap(item => item.items).map((subItem, index) => (
-                        //                         <tr
-                        //                           key={index}
-                        //                           onClick={() => handleRowClick(subItem)}
-                        //                           onDoubleClick={() => openApp(subItem)}
-                        //                           style={{ cursor: 'pointer' }}
-                        //                         >
-                        //                           <td>
-                        //                             {subItem.objectID === 0 ? (
-                        //                               <>
-                        //                                 <FileExtIcon
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                                 {subItem.title}
-                        //                                 <FileExtText
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                               </>
-                        //                             ) : (
-                        //                               <>
-                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                        //                                 {subItem.title}
-                        //                               </>
-                        //                             )}
-                        //                           </td>
-                        //                         </tr>
-                        //                       ))}
-                        //                     </tbody>
-                        //                   </table>
-                        //                 </>
-                        //               )}
-                        //             </>
-                        //           ) : (
-                        //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                        //               No Relationships Found
-                        //             </p>
-                        //           )}
-                        //         </>
-                        //       )}
-                        //     </AccordionDetails>
-                        //   )}
-                        // </Accordion>
                         <SimpleTreeView>
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
@@ -1725,8 +1262,7 @@ const DocumentList = (props) => {
                                 ) : (
                                   <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                 )}
-                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                {item.objectTypeId === 0 || item.objectID === 0 ? (
+                                <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtText
                                       guid={props.selectedVault.guid}
@@ -1734,7 +1270,8 @@ const DocumentList = (props) => {
                                       classId={item.classId || item.classID}
                                     />
                                   </>
-                                ) : null}
+                                ) : null}</span>
+                               
 
                               </Box>
                             }
@@ -1777,7 +1314,7 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
@@ -1785,200 +1322,7 @@ const DocumentList = (props) => {
 
                     <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.assignedData.map((item, index) => (
-                        // <Accordion
-                        //   expanded={selectedIndex === index}
-                        //   onChange={handleAccordionChange(index)}
-                        //   sx={{
-                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     '&:not(:last-child)': {
-                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     },
-                        //     '&::before': { display: 'none' },
-                        //   }}
-                        // >
-                        //   {item.objectID === 0 ? (
-                        //     <AccordionSummary
-                        //       onClick={() => previewSublistObject(item, true)}
 
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography
-                        //         variant="body1"
-                        //         style={{
-                        //           fontSize: '11px',
-                        //           margin: 0, // Removes any extra margin
-                        //         }}
-                        //       >
-
-                        //         <span className='mx-2'> <FileExtIcon
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         /></span>
-
-                        //         {trimTitle2(item.title)}
-                        //         <FileExtText
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         />
-                        //       </Typography>
-                        //     </AccordionSummary>
-
-                        //   ) : (
-                        //     <AccordionSummary
-                        //       onClick={() => previewObject(item, true)}
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
-                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                        //         {trimTitle2(item.title)}
-                        //       </Typography>
-                        //     </AccordionSummary>
-                        //   )}
-                        //   {linkedObjects && (
-                        //     <AccordionDetails style={{ backgroundColor: '#2a68af' }} className="">
-                        //       {props.loadingobjects ? (
-                        //         <div className="text-center">
-                        //           <CircularProgress style={{ width: '20px', height: '20px' }} />
-                        //           <p className="text-dark" style={{ fontSize: '11px' }}>Searching relationships...</p>
-                        //         </div>
-                        //       ) : (
-                        //         <>
-                        //           {linkedObjects.length > 0 ? (
-                        //             <>
-                        //               {/* Render Other Objects */}
-                        //               {otherObjects.map((item, index) => (
-                        //                 <div key={index}>
-                        //                   <Typography
-                        //                     variant="body2"
-                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                        //                     className="p-1"
-                        //                   >
-                        //                     <span>{item.objectTitle} <small>( {item.items.length} )</small></span>
-                        //                   </Typography>
-
-                        //                   <table
-                        //                     id="createdByMe"
-                        //                     className="table table-hover"
-                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff' }}
-                        //                   >
-                        //                     <tbody>
-                        //                       {item.items.map((subItem, subIndex) => (
-                        //                         <tr
-                        //                           key={subIndex}
-                        //                           onClick={() => handleRowClick(subItem)}
-                        //                           onDoubleClick={() => openApp(subItem)}
-                        //                           style={{ cursor: 'pointer' }}
-                        //                         >
-                        //                           <td>
-                        //                             {subItem.objectID === 0 ? (
-                        //                               <>
-                        //                                 <FileExtIcon
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                                 {subItem.title}
-                        //                                 <FileExtText
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                               </>
-                        //                             ) : (
-                        //                               <>
-                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                        //                                 {subItem.title}
-                        //                               </>
-                        //                             )}
-                        //                           </td>
-                        //                         </tr>
-                        //                       ))}
-                        //                     </tbody>
-                        //                   </table>
-                        //                 </div>
-                        //               ))}
-
-                        //               {/* Render Documents Together */}
-                        //               {documents.length > 0 && (
-                        //                 <>
-                        //                   <Typography
-                        //                     variant="body2"
-                        //                     style={{ fontSize: '11.5px', color: "#fff", backgroundColor: '#2a68af' }}
-                        //                     className="p-1"
-                        //                   >
-                        //                     <span>Document{documents.length > 0 ? <>s</> : <></>}</span> <small>( {documents.length} )</small>
-                        //                   </Typography>
-
-                        //                   <table
-                        //                     id="createdByMe"
-                        //                     className="table table-hover"
-                        //                     style={{ fontSize: '11px', backgroundColor: '#ffff', margin: '0%' }}
-                        //                   >
-                        //                     <tbody>
-                        //                       {documents.flatMap(item => item.items).map((subItem, index) => (
-                        //                         <tr
-                        //                           key={index}
-                        //                           onClick={() => handleRowClick(subItem)}
-                        //                           onDoubleClick={() => openApp(subItem)}
-                        //                           style={{ cursor: 'pointer' }}
-                        //                         >
-                        //                           <td>
-                        //                             {subItem.objectID === 0 ? (
-                        //                               <>
-                        //                                 <FileExtIcon
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                                 {subItem.title}
-                        //                                 <FileExtText
-                        //                                   guid={props.selectedVault.guid}
-                        //                                   objectId={subItem.id}
-                        //                                   classId={subItem.classID}
-                        //                                 />
-                        //                               </>
-                        //                             ) : (
-                        //                               <>
-                        //                                 <i className="fas fa-layer-group mx-2" style={{ fontSize: '14px', color: '#2a68af' }}></i>
-                        //                                 {subItem.title}
-                        //                               </>
-                        //                             )}
-                        //                           </td>
-                        //                         </tr>
-                        //                       ))}
-                        //                     </tbody>
-                        //                   </table>
-                        //                 </>
-                        //               )}
-                        //             </>
-                        //           ) : (
-                        //             <p className="my-1 mx-1 text-center text-white" style={{ fontSize: '11px' }}>
-                        //               No Relationships Found
-                        //             </p>
-                        //           )}
-                        //         </>
-                        //       )}
-                        //     </AccordionDetails>
-                        //   )}
-                        // </Accordion>
                         <SimpleTreeView>
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
@@ -2020,8 +1364,7 @@ const DocumentList = (props) => {
                                 ) : (
                                   <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                 )}
-                                <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                {item.objectTypeId === 0 || item.objectID === 0 ? (
+                                <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtText
                                       guid={props.selectedVault.guid}
@@ -2029,7 +1372,8 @@ const DocumentList = (props) => {
                                       classId={item.classId || item.classID}
                                     />
                                   </>
-                                ) : null}
+                                ) : null}</span>
+                               
 
                               </Box>
                             }
@@ -2070,7 +1414,7 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
@@ -2078,75 +1422,7 @@ const DocumentList = (props) => {
 
                     <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.deletedData.map((item, index) => (
-                        // <Accordion
-                        //   expanded={selectedIndex === index}
-                        //   onChange={handleAccordionChange(index)}
-                        //   sx={{
-                        //     border: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     '&:not(:last-child)': {
-                        //       borderBottom: selectedIndex === index ? '2px solid #0077b6' : '1px solid rgba(0, 0, 0, .125)',
-                        //     },
-                        //     '&::before': { display: 'none' },
-                        //   }}
-                        // >
-                        //   {item.objectID === 0 ? (
-                        //     <AccordionSummary
-                        //       onClick={() => previewSublistObject(item, true)}
-
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography
-                        //         variant="body1"
-                        //         style={{
-                        //           fontSize: '11px',
-                        //           margin: 0, // Removes any extra margin
-                        //         }}
-                        //       >
-
-                        //         <span className='mx-2'> <FileExtIcon
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         /></span>
-
-                        //         {trimTitle2(item.title)}
-                        //         <FileExtText
-                        //           guid={props.selectedVault.guid}
-                        //           objectId={item.id}
-                        //           classId={item.classID}
-                        //         />
-                        //       </Typography>
-                        //     </AccordionSummary>
-
-                        //   ) : (
-                        //     <AccordionSummary
-                        //       onClick={() => previewObject(item, true)}
-                        //       expandIcon={<ExpandMoreIcon />}
-                        //       aria-controls={`panel${index}a-content`}
-                        //       id={`panel${index}a-header`}
-                        //       sx={{
-                        //         bgcolor: selectedIndex === index ? '#f8f9f' : 'inherit',
-                        //         padding: 0, // Removes all padding
-                        //         minHeight: 'unset', // Ensures the height is not restricted by default styles
-                        //       }}
-                        //       className="shadow-sm"
-                        //     >
-                        //       <Typography variant="body1" style={{ fontSize: '11px' }}>
-                        //         <i className="fas fa-layer-group mx-3" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                        //         {trimTitle2(item.title)}
-                        //       </Typography>
-                        //     </AccordionSummary>
-                        //   )}
-
-                        // </Accordion>
+                      
                         <SimpleTreeView>
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
@@ -2187,14 +1463,14 @@ const DocumentList = (props) => {
                                   ) : (
                                     <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                   )}
-                                  <span style={{ marginLeft: '8px' }}>{item.title}</span>
-                                  {item.objectTypeId || item.objectID === 0 && (
+                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 && (
                                     <FileExtText
                                       guid={props.selectedVault.guid}
                                       objectId={item.id}
                                       classId={item.classId}
                                     />
-                                  )}
+                                  )}</span>
+                                 
                                 </Box>
 
                                 {/* Button at the right */}

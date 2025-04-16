@@ -3,11 +3,15 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import Draggable from 'react-draggable';
 import '../styles/PDFViewerTechedge.css'
-import { Tooltip } from '@mui/material';
+import { Tooltip, Box } from '@mui/material';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import LoadingDialog from './Loaders/LoaderDialog';
 import SignButton from './SignDocument';
 import { ZoomOut } from '@mui/icons-material';
+import FileExtIcon from './FileExtIcon';
+import FileExtText from './FileExtText';
+
+
 
 
 // Configure PDF.js worker
@@ -15,8 +19,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const PDFViewerPreview = (props) => {
   const [numPages, setNumPages] = useState(null);
-  const [zoom, setZoom] = useState(1);
-  const [pageNumber, setPageNumber] = useState(0.9);
+  const [zoom, setZoom] = useState(0.9);
+  const [pageNumber, setPageNumber] = useState(1);
   const containerRef = useRef(null);
   const mainContainerRef = useRef(null);
   const [pageDimensions, setPageDimensions] = useState([]);
@@ -29,8 +33,8 @@ const PDFViewerPreview = (props) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // Add zoom controls
-  const zoomIn = () =>{ setZoom(prev => Math.min(prev + 0.1, 2))}
-  const zoomOut = () => {setZoom(prev => Math.max(prev - 0.1, 0.5))}
+  const zoomIn = () => { setZoom(prev => Math.min(prev + 0.1, 2)) }
+  const zoomOut = () => { setZoom(prev => Math.max(prev - 0.1, 0.5)) }
   const resetZoom = () => setZoom(0.9);
 
   // Handle pinch zoom
@@ -129,23 +133,33 @@ const PDFViewerPreview = (props) => {
     const pageElement = mainContainerRef.current?.querySelector(`#page_${pageNumber}`);
     const thumbnailElement = containerRef.current?.querySelector(`#thumbnail_${pageNumber}`);
 
-    if (pageElement && thumbnailElement) {
-      // First scroll the thumbnail into view
-      thumbnailElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
+    if (!pageElement || !thumbnailElement) return;
 
-      // Then smoothly scroll the main page with a slight delay for visual flow
-      setTimeout(() => {
-        pageElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-        setPageNumber(pageNumber);
-      }, 100);
+    const scrollOptions = {
+      behavior: 'smooth',
+      block: 'center'
+    };
+
+    // Scroll the thumbnail only if it's not already mostly visible
+    const thumbRect = thumbnailElement.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+
+    const isThumbnailVisible = (
+      thumbRect.top >= containerRect.top &&
+      thumbRect.bottom <= containerRect.bottom
+    );
+
+    if (!isThumbnailVisible) {
+      thumbnailElement.scrollIntoView(scrollOptions);
     }
+
+    // Scroll the main page with less delay for better responsiveness
+    requestAnimationFrame(() => {
+      pageElement.scrollIntoView(scrollOptions);
+      setPageNumber(pageNumber);
+    });
   };
+
 
   // Function to calculate the scale based on page number
   const getScaleForPage = (pageNumber) => {
@@ -171,7 +185,7 @@ const PDFViewerPreview = (props) => {
 
   const getScaleForPageThumbnail = (pageNumber) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
-    return pageDim && pageDim.width > pageDim.height ? 0.08 : 0.17; // Adjust the scale as needed
+    return pageDim && pageDim.width > pageDim.height ? 0.08 : 0.15; // Adjust the scale as needed
   };
 
 
@@ -275,133 +289,116 @@ const PDFViewerPreview = (props) => {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [numPages]);
 
+
+  const trimTitle = (title) => {
+    const maxLength = 65; // Set your desired max length
+    // if (title.length > maxLength) {
+    //   return title.substring(0, maxLength) + '...';
+
+    // }
+    return title;
+  };
+
   return (
     <>
-      <div style={{backgroundColor: '#ecf4fc', minHeight:'53px'}} className="controls text-dark d-flex align-items-center justify-content-between px-1 py-1">
-        <div className="d-flex align-items-center flex-wrap gap-2 p-1">
+
+      {/* File Info Bar */}
+      <div className='px-2 py-3' style={{ backgroundColor: '#ecf4fc', display: 'flex', alignItems: 'center' }}>
+        <Tooltip title={props.selectedObject?.title}>
+          <Box display="flex" alignItems="center" sx={{ color: '#1d3557' }}>
+            <i style={{ fontSize: '16px' }} className='fas fa-file-pdf text-danger mx-2'></i>
+            <span style={{ fontSize: '12px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
+          </Box>
+        </Tooltip>
+      </div>
+      {/* Top Controls Bar */}
+      <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
+        <div className="d-flex align-items-center flex-wrap gap-2">
 
           {/* Toggle Sidebar Button */}
           <span className="d-flex align-items-center cursor-pointer" onClick={toggleAside}>
             <Tooltip title={isAsideOpen ? "Close thumbnail view" : "Open thumbnail view"}>
-              <i className={`mx-1 fas ${isAsideOpen ? "fa-clone" : "fa-bars"} `} style={{ fontSize: isMobile ? '16px' : '20px' , color:'#2757aa'}} />
+              <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
+              <span className="text-muted ms-1" style={{ fontSize: '11px', cursor: 'pointer' }}>
+                <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Close" : "Open"} thumbnail</span>
+              </span>
             </Tooltip>
-            <span className="text-muted ms-2" style={{ fontSize: isMobile ? '10px' : '12px' }}>
-              {isAsideOpen ? "Close" : "Open"} Snapshot View
-            </span>
+
           </span>
 
           {/* Page Navigation */}
-          <span className="d-flex align-items-center text-dark" style={{ fontSize: isMobile ? '10px' : '12px' }}>
+          <span className="d-flex align-items-center text-dark" style={{ fontSize: '11px' }}>
             Page
             <input
               type="number"
               value={pageNumber}
               onChange={handlePageInputChange}
-              className="mx-2 page-input "
+              className="mx-2 form-control form-control-sm"
+              style={{ width: '50px', padding: '2px 6px', fontSize: '11px' }}
             />
             / {numPages}
           </span>
 
           {/* Zoom Controls */}
-          <div className="d-flex align-items-center">
-            <i style={{color:'#2757aa', fontSize:'20px'}} onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus mx-2 zoom-icon" />
-            <i  style={{color:'#2757aa',fontSize:'20px'}} onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus mx-2 zoom-icon" />
-               {/* Reset Zoom Button */}
-               <Tooltip title="Reset Zoom">
-            <button style={{fontSize:'12px'}} onClick={resetZoom} className="btn btn-sm btn-light ">Reset Zoom</button>
-          </Tooltip>
-
+          <div className="d-flex align-items-center gap-2 mx-1">
+            <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '11px', color: '#333' }}>
+              {Math.round(zoom * 100)}%
+            </span>
+            <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+            <Tooltip title="Reset Zoom">
+              <button onClick={resetZoom} className="btn btn-light px-1 py-0" style={{ fontSize: '11px', border: '1px solid #2757aa', color: '#2757aa' }}>
+                <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '12px' }} />
+                Reset
+              </button>
+            </Tooltip>
           </div>
 
-     
-          {/* Download Button */}
+          {/* Download PDF */}
           <Tooltip title="Download PDF">
-          
-              <i onClick={() => handleDownload(props.base64Content, props.fileExtension, props.fileName)} className="fas fa-download " style={{ fontSize: isMobile ? '16px' : '20px', color:'#2757aa' }}></i>
-       
+            <i onClick={() => handleDownload(props.base64Content, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
           </Tooltip>
 
-          {/* Sign Button */}
+          {/* Sign PDF */}
           <Tooltip title="Digitally Sign Copy">
-            <span>
+            <span className='mx-1'>
               <SignButton {...props} />
             </span>
           </Tooltip>
-
         </div>
       </div>
 
 
-      <div className="pdfrender" style={{ display: 'flex', height: '75vh', backgroundColor: '#e5e6e4' }}>
+
+
+
+      <div className="pdf-render-wrapper">
+
+
         {isAsideOpen && (
-          <aside style={{
-            position: 'relative',
-            height: '100%',
-            width: isMobile ? '80px' : '120px',
-            backgroundColor: '#e5e6e4',
-            color: 'black',
-            zIndex: 1000,
-            flexShrink: 0,
-            borderRight: '1px solid #e5e6e4',
-          }}>
-            <div ref={containerRef} style={{
-              position: 'relative',
-              overflowY: 'auto',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              width: '100%',
-            }}>
-              <Document className="pdf-container" file={props.document}>
-                {[...Array(numPages).keys()].map((pageIndex) => (
-                  <div
-                    key={`thumbnail_${pageIndex + 1}`}
-                    id={`thumbnail_${pageIndex + 1}`}
-                    className="text-center shadow-sm"
-                    onClick={() => thumbnailNavigation(pageIndex)}
-                    style={{
-                      width: '100%',
-                      marginBottom: '25px',
-                      padding: '0',
-                      borderWidth: pageNumber === pageIndex + 1 ? '3.5px' : '0.5px',
-                      borderStyle: pageNumber === pageIndex + 1 ? 'solid' : 'none',
-                      borderColor: pageNumber === pageIndex + 1 ? '#f58549' : '#fff',
-                      backgroundColor: pageNumber === pageIndex + 1 ? '#f58549' : 'white',
-                      color: pageNumber === pageIndex + 1 ? '#fff' : '#003049',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Page
-                      pageNumber={pageIndex + 1}
-                      scale={getScaleForPageThumbnail(pageIndex + 1)}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      className="page-container"
-                    />
-                    <span className='my-2' style={{ fontSize: '10px' }}>
-                      {`${pageIndex + 1}`}
-                    </span>
-                  </div>
-                ))}
-              </Document>
-            </div>
+          <aside className={`thumbnail-sidebar ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
+            <Document className="pdf-container" file={props.document}>
+              {[...Array(numPages).keys()].map((pageIndex) => (
+                <div
+                  key={`thumbnail_${pageIndex + 1}`}
+                  id={`thumbnail_${pageIndex + 1}`}
+                  className={`thumbnail ${pageNumber === pageIndex + 1 ? 'active' : ''}`}
+                  onClick={() => thumbnailNavigation(pageIndex)}
+                >
+                  <Page
+                    pageNumber={pageIndex + 1}
+                    scale={getScaleForPageThumbnail(pageIndex + 1)}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="page-container"
+                  />
+                  <span className="page-number">{`${pageIndex + 1}`}</span>
+                </div>
+              ))}
+            </Document>
           </aside>
         )}
-
-        <div ref={mainContainerRef} style={{
-          position: 'relative',
-          overflowY: 'auto',
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          flex: 1,
-          backgroundColor: '#e5e6e4',
-          padding: isMobile ? '5px' : '10px'
-        }}>
+        <main className="pdf-main scrollbar-custom" ref={mainContainerRef}>
           <Document
             className="pdf-container"
             file={props.document}
@@ -410,37 +407,22 @@ const PDFViewerPreview = (props) => {
             error={<div>Error loading PDF!</div>}
           >
             {[...Array(numPages).keys()].map((pageIndex) => (
-              <div
-                key={`page_${pageIndex + 1}`}
-                id={`page_${pageIndex + 1}`}
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  marginBottom: '10px',
-                }}
-              >
+              <div key={`page_${pageIndex + 1}`} id={`page_${pageIndex + 1}`} className="pdf-page-wrapper">
                 <Page
                   pageNumber={pageIndex + 1}
                   scale={zoom}
-
-                  key={`page_${pageNumber}`}
-
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                   className="page-container shadow-sm"
                   onLoadSuccess={onPageLoadSuccess}
-                  style={{
-
-                    transformOrigin: 'top left',
-                    position: 'relative',
-                    zIndex: 1,
-                  }}
                 />
               </div>
             ))}
           </Document>
-        </div>
+        </main>
+
       </div>
+
     </>
   );
 };

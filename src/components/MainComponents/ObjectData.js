@@ -247,6 +247,7 @@ export default function ObjectData(props) {
 
 
   const filteredProps = props.previewObjectProps.filter(
+    
     item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class', 'State', 'Workflow'].includes(item.propName)
   );
 
@@ -411,7 +412,7 @@ export default function ObjectData(props) {
 
                 <Typography
                   variant="body2"
-                  sx={{ textAlign: 'center', fontSize: '12px' }}
+                  sx={{ textAlign: 'center', fontSize: '12.5px' }}
                 >
                   Please select an object to view its metadata
                 </Typography>
@@ -439,7 +440,7 @@ export default function ObjectData(props) {
                                 classId={props.selectedObject.classId ?? props.selectedObject.classID}
                                 sx={{ fontSize: '25px !important', marginRight: '10px' }}
                               />
-                              <span style={{ fontSize: '15px', marginLeft: '8px' }}>
+                              <span style={{ fontSize: '14px', marginLeft: '8px' }}>
                                 {trimTitle(props.selectedObject.title)}
                                 <FileExtText
                                   guid={props.vault.guid}
@@ -451,7 +452,7 @@ export default function ObjectData(props) {
                           ) : (
                             <>
                               <i className="fas fa-folder" style={{ fontSize: '25px', color: '#2757aa', marginRight: '10px' }}></i>
-                              <span style={{ fontSize: '15px' }}>{trimTitle(props.selectedObject.title)}</span>
+                              <span style={{ fontSize: '14px' }}>{trimTitle(props.selectedObject.title)}</span>
                             </>
                           )}
                         </Box>
@@ -489,14 +490,14 @@ export default function ObjectData(props) {
                 <Box className="p-1" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   {/* Left Section */}
                   <Box
-                    sx={{ textAlign: 'start', fontSize: '12px', width: '50%' }}
+                    sx={{ textAlign: 'start', fontSize: '12.5px', width: '50%' }}
                     className="mx-2"
                   >
 
                     <p className="my-0" >
 
                       <Box
-                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
+                        sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
                         className=""
                       >
                         {props.selectedObject.objectTypeName || getPropValue('Class')}
@@ -506,7 +507,7 @@ export default function ObjectData(props) {
                     <p className="my-0" >
 
                       <Box
-                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
+                        sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
                         className=""
                       >
                         ID: {props.selectedObject.id}   Version : {props.selectedObject.versionId}
@@ -541,7 +542,7 @@ export default function ObjectData(props) {
                   sx={{
 
                     backgroundColor: '#fff',
-                    fontSize: '12px',
+                    fontSize: '12.5px',
 
                   }}
                 >
@@ -563,7 +564,7 @@ export default function ObjectData(props) {
                               color: '#555',
 
                               flexBasis: '35%',
-                              fontSize: '13px',
+                              fontSize: '12.5px',
                               textAlign: 'end'
                             }}
                           >
@@ -576,144 +577,8 @@ export default function ObjectData(props) {
                           </Box>
                         </Box>
                       </ListItem>
-                      {/* <Box sx={{ fontSize: '12px' }}> 
-                        {filteredProps.map((item, index) => (
-                          <ListItem key={index} sx={{ p: 0 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                              <Typography
-                                className='my-2 '
-                                variant="body2"
-                                sx={{
-                                  color: '#555',
-
-                                  flexBasis: '35%',
-                                  fontSize: '13px',
-                                  textAlign: 'end'
-                                }}
-                              >
-                                {item.propName} {item.isRequired && <span className="text-danger"> *</span>} :
-                              </Typography>
-                              <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1 }}>
-                                <>
-                                  {item.isAutomatic || !item.userPermission.editPermission ?
-                                    <>
-                                      <Typography
-                                        className='my-2'
-                                        variant="body2"
-                                        sx={{
-                                          fontSize: '11px'
-                                        }}
-
-                                      >
-                                        {item.value}
-                                      </Typography>
-                                    </> :
-                                    <>
-                                      {item.propName === 'Class' && <>{item.value}</>}
-
-                                      {(item.datatype === 'MFDatatypeText' || item.datatype === 'MFDatatypeFloating' || item.datatype === 'MFDatatypeInteger') && !item.isHidden && (
-                                        <input
-                                          value={props.formValues?.[item.id]?.value || ''}
-                                          placeholder={item.value}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          className='form-control form-control-sm my-1'
-                                          disabled={item.isAutomatic}
-                                          style={{ fontSize: 'inherit' }}
-                                        />
-                                      )}
-
-                                      {item.datatype === "MFDatatypeMultiLineText" && !item.isHidden && (
-                                        <textarea
-                                          placeholder={item.value}
-                                          value={props.formValues?.[item.id]?.value || ''}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          rows={2}
-                                          className="form-control form-control-sm my-1"
-                                          disabled={item.isAutomatic}
-                                          style={{ fontSize: 'inherit' }}
-                                        />
-                                      )}
-
-                                      {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
-                                        <input
-                                          placeholder={item.value}
-                                          type="date"
-                                          value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          className='form-control form-control-sm my-1'
-                                          disabled={item.isAutomatic}
-                                          style={{ fontSize: 'inherit' }}
-                                        />
-                                      )}
-
-                                      {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
-                                        <div className="cs-form">
-                                          <input
-                                            type="time"
-                                            className="form-control"
-                                            value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                            onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                            disabled={item.isAutomatic}
-                                            style={{ fontSize: 'inherit' }}
-                                          />
-                                        </div>
-                                      )}
-
-                                      {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                                        <Select
-                                          size='small'
-                                          value={props.formValues?.[item.id]?.value ?? (item.value === "Yes" ? true : (item.value === "No" ? false : ''))}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          displayEmpty
-                                          fullWidth
-                                          disabled={item.isAutomatic}
-                                          sx={{
-                                            fontSize: 'inherit',
-                                            padding: '4px',
-                                            backgroundColor: 'white',
-                                            marginY: '8px'
-                                          }}
-                                          className='form-control form-control-sm'
-                                        >
-                                          <MenuItem value=""><em>None</em></MenuItem>
-                                          <MenuItem value={true}>Yes</MenuItem>
-                                          <MenuItem value={false}>No</MenuItem>
-                                        </Select>
-                                      )}
-
-                                      {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
-                                        <LookupMultiSelect
-                                          propId={item.id}
-                                          onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                          value={props.formValues?.[item.id]?.value || []}
-                                          selectedVault={props.vault}
-                                          label={item.propName}
-                                          itemValue={item.value}
-                                          disabled={item.isAutomatic}
-                                        />
-                                      )}
-
-                                      {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
-                                        <LookupSelect
-                                          propId={item.id}
-                                          label={item.propName}
-                                          onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
-                                          value={props.formValues?.[item.id]?.value || ''}
-                                          selectedVault={props.vault}
-                                          itemValue={item.value}
-                                          disabled={item.isAutomatic}
-                                        />
-                                      )}
-                                    </>}
-                                </>
-
-
-                              </Box>
-                            </Box>
-                          </ListItem>
-                        ))}
-                      </Box> */}
-                      <Box sx={{ fontSize: '12px' }}>
+     
+                      <Box sx={{ fontSize: '12.5px' }}>
                         {filteredProps.map((item, index) => (
                           <ListItem key={index} sx={{ p: 0 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
@@ -725,7 +590,7 @@ export default function ObjectData(props) {
                                 sx={{
                                   color: '#555',
                                   flexBasis: '35%',
-                                  fontSize: '13px',
+                                  fontSize: '12.5px',
                                   textAlign: 'end',
                                 }}
                               >
@@ -742,7 +607,7 @@ export default function ObjectData(props) {
                                   <>
                                     {/* Display Class Value */}
                                     {item.propName === 'Class' && (
-                                      <span style={{ fontSize: '13px', color: '#555' }}>{item.value}</span>
+                                      <span style={{ fontSize: '12.5px', color: '#555' }}>{item.value}</span>
                                     )}
 
                                     {/* Text Input */}
@@ -756,7 +621,7 @@ export default function ObjectData(props) {
                                           onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                           className="form-control form-control-sm my-1"
                                           disabled={item.isAutomatic}
-                                          style={{ fontSize: '13px', color: '#555' }}
+                                          style={{ fontSize: '12.5px', color: '#555' }}
                                         />
                                       )}
 
@@ -769,7 +634,7 @@ export default function ObjectData(props) {
                                         rows={2}
                                         className="form-control form-control-sm my-1"
                                         disabled={item.isAutomatic}
-                                        style={{ fontSize: '13px', color: '#555' }}
+                                        style={{ fontSize: '12.5px', color: '#555' }}
                                       />
                                     )}
 
@@ -782,7 +647,7 @@ export default function ObjectData(props) {
                                         onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                         className="form-control form-control-sm my-1"
                                         disabled={item.isAutomatic}
-                                        style={{ fontSize: '13px', color: '#555' }}
+                                        style={{ fontSize: '12.5px', color: '#555' }}
                                       />
                                     )}
 
@@ -794,60 +659,60 @@ export default function ObjectData(props) {
                                         value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
                                         onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                         disabled={item.isAutomatic}
-                                        style={{ fontSize: '13px', color: '#555' }}
+                                        style={{ fontSize: '12.5px', color: '#555' }}
                                       />
                                     )}
 
                                     {/* Boolean Select Dropdown */}
                                     {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                                <Select
-                                size="small"
-                                value={
-                                  props.formValues?.[item.id]?.value ??
-                                  (item.value === "Yes" ? true : item.value === "No" ? false : '')
-                                }
-                                onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                displayEmpty
-                                fullWidth
-                                disabled={item.isAutomatic}
-                                className="form-control form-control-sm"
-                                sx={{
-                                  backgroundColor: 'white',
-                                  marginY: '8px',
-                                  fontSize: '13px',
-                                  '& .MuiSelect-select': {
-                                    fontSize: '13px',
-                                    color: '#555',
-                                    paddingTop: '6px',
-                                    paddingBottom: '6px',
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px',
-                                    minHeight: 'unset',
-                                  },
-                                  '& .MuiInputBase-root': {
-                                    minHeight: '32px',
-                                  },
-                                  '& .MuiOutlinedInput-input': {
-                                    padding: '6px 10px',
-                                    fontSize: '13px',
-                                  },
-                                  '& .MuiMenuItem-root': {
-                                    fontSize: '13px',
-                                    color: '#555',
-                                  },
-                                }}
-                              >
-                                <MenuItem value="" sx={{ fontSize: '13px', color: '#555' }}>
-                                  <em>None</em>
-                                </MenuItem>
-                                <MenuItem value={true} sx={{ fontSize: '13px', color: '#555' }}>
-                                  Yes
-                                </MenuItem>
-                                <MenuItem value={false} sx={{ fontSize: '13px', color: '#555' }}>
-                                  No
-                                </MenuItem>
-                              </Select>
-                              
+                                      <Select
+                                        size="small"
+                                        value={
+                                          props.formValues?.[item.id]?.value ??
+                                          (item.value === "Yes" ? true : item.value === "No" ? false : '')
+                                        }
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        displayEmpty
+                                        fullWidth
+                                        disabled={item.isAutomatic}
+                                        className="form-control form-control-sm"
+                                        sx={{
+                                          backgroundColor: 'white',
+                                          marginY: '8px',
+                                          fontSize: '12.5px',
+                                          '& .MuiSelect-select': {
+                                            fontSize: '12.5px',
+                                            color: '#555',
+                                            paddingTop: '6px',
+                                            paddingBottom: '6px',
+                                            paddingLeft: '10px',
+                                            paddingRight: '10px',
+                                            minHeight: 'unset',
+                                          },
+                                          '& .MuiInputBase-root': {
+                                            minHeight: '32px',
+                                          },
+                                          '& .MuiOutlinedInput-input': {
+                                            padding: '6px 10px',
+                                            fontSize: '12.5px',
+                                          },
+                                          '& .MuiMenuItem-root': {
+                                            fontSize: '12.5px',
+                                            color: '#555',
+                                          },
+                                        }}
+                                      >
+                                        <MenuItem value="" sx={{ fontSize: '12.5px', color: '#555' }}>
+                                          <em>None</em>
+                                        </MenuItem>
+                                        <MenuItem value={true} sx={{ fontSize: '12.5px', color: '#555' }}>
+                                          Yes
+                                        </MenuItem>
+                                        <MenuItem value={false} sx={{ fontSize: '12.5px', color: '#555' }}>
+                                          No
+                                        </MenuItem>
+                                      </Select>
+
 
 
                                     )}
@@ -964,9 +829,9 @@ export default function ObjectData(props) {
                   <Box
                     className="p-2"
                     sx={{
-                      fontSize: '12px',
+                      fontSize: '12.5px',
                       '*': {
-                        fontSize: '12px !important', // Force font size on all nested elements
+                        fontSize: '12.5px !important', // Force font size on all nested elements
                       },
                     }}
                   >
@@ -992,11 +857,11 @@ export default function ObjectData(props) {
                               onChange={handleStateChange}
                               size="small"
                               sx={{
-                                fontSize: '12px !important',
+                                fontSize: '12.5px !important',
                                 height: '24px',
                                 marginLeft: '0.5rem',
                                 '.MuiSelect-select': {
-                                  fontSize: '12px !important',
+                                  fontSize: '12.5px !important',
                                 },
                               }}
                             >
@@ -1004,7 +869,7 @@ export default function ObjectData(props) {
                                 <MenuItem
                                   key={state.id}
                                   value={state.title}
-                                  sx={{ fontSize: '12px !important' }}
+                                  sx={{ fontSize: '12.5px !important' }}
                                 >
                                   <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
                                   {state.title}
@@ -1045,6 +910,7 @@ export default function ObjectData(props) {
             }}
           >
             {props.base64 ? (
+     
               <DynamicFileViewer
                 base64Content={props.base64}
                 fileExtension={props.extension}
@@ -1053,8 +919,10 @@ export default function ObjectData(props) {
                 vault={props.vault.guid}
                 email={props.email}
                 fileName={props.selectedObject.title}
+                selectedObject={props.selectedObject}
 
               />
+          
             ) : (
               <Box
                 sx={{
@@ -1086,7 +954,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
                     >
                       Please wait as we load the document
                     </Typography>
@@ -1102,7 +970,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
                     >
                       Please select a document to view its content
                     </Typography>
@@ -1155,7 +1023,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
                     >
                       Please wait as we load the resources
                     </Typography>
@@ -1171,7 +1039,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12px' }}
+                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
                     >
                       Please select a PDF to interact with the chatbot
                     </Typography>

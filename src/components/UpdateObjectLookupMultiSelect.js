@@ -79,7 +79,7 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
     control: (base, state) => ({
       ...base,
       borderColor: error ? 'red' : base.borderColor,
-      fontSize: '13px',
+      fontSize: '12.5px',
       color: '#555',              // Text color in the control (selected)
       backgroundColor: disabled ? '#f5f5f5' : 'white',
     }),
@@ -87,20 +87,20 @@ const LookupMultiSelect = ({ propId, label, onChange, value, required, error, he
     singleValue: (base) => ({
       ...base,
       color: '#555',              // Color of selected option text
-      fontSize: '13px',
+      fontSize: '12.5px',
     }),
   
     option: (base, state) => ({
       ...base,
       color: '#555',              // Color of dropdown option text
-      fontSize: '13px',
+      fontSize: '12.5px',
       backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
     }),
   
     placeholder: (base) => ({
       ...base,
       color: '#555',              // Placeholder color
-      fontSize: '13px',
+      fontSize: '12.5px',
     }),
   };
 

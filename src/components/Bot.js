@@ -89,6 +89,7 @@ function Bot(props) {
                     fontSize: 'important 12px',
                     backgroundColor: '#ecf4fc',
                     height: '53px',
+                    color: '#1d3557' 
 
                 }}
             >

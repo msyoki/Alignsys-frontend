@@ -1,131 +1,119 @@
-/* Container for the PDF annotation viewer */
-.pdf-annotate-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden; /* Keep this hidden to avoid scrollbars on the container */
-  }
-  
-  /* Controls section at the top of the viewer */
+.pdf-render-wrapper {
+  display: flex;
+  height: 70vh;
+}
 
-  
-  /* Wrapper to center the PDF page and allow scrolling */
-  .page-wrapper {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Align pages to the top */
-    width: 100%;
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding: 10px;
-    /* Set a height to allow scrolling */
-    max-height: calc(100% - 50px); /* Adjust this value based on your controls height */
-  }
-  
-  /* Each PDF page styling */
-  .pdf-page {
-    border: 1px solid #ccc; /* Add a light gray border */
-    margin: 10px 0; /* Space between pages */
-    padding: 10px; /* Space inside the page */
-    background-color: #f9f9f9; /* Light background color for contrast */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for a raised effect */
-    width: 100%; /* Ensure each page takes full width */
-    max-width: 800px; /* Set a max width for pages */
-  }
-  
-  /* Page container for rendering the PDF page and annotations */
-  .page-container {
-    position: relative;
-    background: #f0f0f0;
-    padding: 0;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 100%; /* Full width to allow for responsiveness */
-  }
-  
-  /* Overlay canvas for annotations */
-  .annotation-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  
-  /* Individual annotation styling */
-  .annotation {
-    position: absolute;
-    border: 2px dashed rgba(0, 0, 0, 0.3);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    cursor: move;
-    pointer-events: all;
-  }
-  
-  .annotation.selected {
-    border: 2px solid #007bff;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
-  }
-  
-  /* Styling for text annotations */
-  .annotation textarea {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
-    resize: none;
-    outline: none;
-    font-family: Arial, sans-serif;
-    font-size: inherit;
-    color: inherit;
-  }
-  
-  /* Styling for image annotations */
-  .annotation img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  
-  /* Delete icon styling */
-  .delete-icon {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background: #ff4d4f;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    line-height: 20px;
-    text-align: center;
-    cursor: pointer;
-    z-index: 1;
-  }
-  
-  .delete-icon:hover {
-    background: #ff1a1c;
-  }
-  
-  /* Resize corner for resizing annotations */
-  .resize-corner {
-    width: 16px;
-    height: 16px;
-    background-color: rgba(0, 0, 0, 0.5);
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    cursor: nwse-resize;
-    z-index: 10;
-  }
-  
- 
+.thumbnail-sidebar {
+  position: relative;
+  height: 100%;
+  width: 130px;
+  background-color: #555;
+  color: black;
+  z-index: 1000;
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding:10px
+}
 
+.thumbnail-sidebar.mobile {
+  width: 80px;
+}
+
+.thumbnail {
+  width: 100%;
+  margin-bottom: 25px;
+  border-width: 0.5px;
+  border-style: none;
+  /* background-color: #bfc0be; */
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
   
+}
+
+.thumbnail.active {
+  border-width: 3.5px;
+  border-style: solid;
+  border-color: #C0DCF5 ;
+  background-color: #C0DCF5 ;
+  color: black;
+}
+
+.page-number {
+  display: block;
+  font-size: 10px;
+  margin: 3px 0 0;
+  background-color: inherit;
+}
+
+.pdf-main {
+  position: relative;
+  overflow-y: auto;
+  height: 100%;
+  flex: 1;
+  background-color: #bfc0be;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+.pdf-main.mobile {
+  padding: 5px;
+}
+
+.pdf-page-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+
+
+
+  /* Applies to WebKit browsers (Chrome, Safari, Edge) */
+  .scrollbar-custom1::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-custom1::-webkit-scrollbar-track {
+    background: #555; /* Track color */
+  }
+  
+  .scrollbar-custom1::-webkit-scrollbar-thumb {
+    background-color: #e5e6e4; /* Scrollbar handle */
+    border-radius: 4px;
+  }
+  
+  /* Optional: Firefox support */
+  .scrollbar-custom1 {
+    scrollbar-width: thin;
+    scrollbar-color: #e5e6e4 #555;
+  }
+  
+  
+  
+    /* Applies to WebKit browsers (Chrome, Safari, Edge) */
+    .scrollbar-custom::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollbar-custom::-webkit-scrollbar-track {
+      background: #bfc0be; /* Track color */
+    }
+    
+    .scrollbar-custom::-webkit-scrollbar-thumb {
+      background-color: #555; /* Scrollbar handle */
+      border-radius: 4px;
+    }
+    
+    /* Optional: Firefox support */
+    .scrollbar-custom {
+      scrollbar-width: thin;
+      scrollbar-color: #555 #bfc0be;
+    }
+    

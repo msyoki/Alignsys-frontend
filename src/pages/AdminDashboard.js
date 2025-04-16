@@ -810,7 +810,7 @@ function AdminDashboard() {
                     </Tooltip>
                     <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
 
-                        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
+                        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '30%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
                             {/* Header Box */}
                             <Box
                                 sx={{
@@ -879,7 +879,7 @@ function AdminDashboard() {
                         )}
 
 
-                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '50%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
+                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '80%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
                             {viewCreateObject ?
                                 <div id="newobject" style={{ fontSize: '12px', marginBottom: '20px' }}>
                                     <div>

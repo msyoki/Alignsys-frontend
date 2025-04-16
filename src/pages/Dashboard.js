@@ -219,7 +219,7 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        // console.log(response.data);
+        console.log(response.data);
         setOpenObjectModal(true);
       })
       .catch((error) => {
@@ -643,11 +643,11 @@ function Dashboard() {
               <>
                 {/* Logo Section */}
                 <div
-                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg"
+                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg p-1"
                   style={{
-                    height: "60px", // Fixed height (adjust as needed)
-                    minHeight: "61px", // Prevent shrinking
-                    maxHeight: "61px", // Prevent expansion
+                    height: "58px", // Fixed height (adjust as needed)
+                    minHeight: "58px", // Prevent shrinking
+                    maxHeight: "58px", // Prevent expansion
                     overflow: "hidden", // Prevent content from affecting height
                   }}
                 >
@@ -862,6 +862,7 @@ function Dashboard() {
             resetViews={resetViews}
             stringAvatar={stringAvatar}
             setSidebarOpen={setSidebarOpen}
+            setTemplateIsTrue={setTemplateIsTrue}
           
           />
         </main >
