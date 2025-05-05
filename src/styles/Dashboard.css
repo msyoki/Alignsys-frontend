@@ -11,6 +11,7 @@
   display: flex;
   position: relative;
   width: 100%;
+  overflow-y: hidden;
 
   color:var(--primary-color)
 }
@@ -126,13 +127,14 @@
 .content {
   flex-grow: 1;
   transition: margin-left 0.0s ease-in-out;
-  width: 20vh;
+  width: 100%; /* Make the content width flexible */
   background-color: var(--secondary-color);
-  color: #555;  /* Remove single quotes */
-  height: 100vh; /* Make it fill the full screen height */
-  overflow: auto; /* Prevent scrolling */
+  color: #555; /* Remove single quotes */
+  height: 100%; /* Let it fill the height of its parent container */
+  overflow: hidden; /* Prevent unnecessary scroll */
   background-color: #fff;
 }
+
 
 
 .content.full-width {

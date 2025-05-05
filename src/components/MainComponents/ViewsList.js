@@ -28,18 +28,62 @@ import LinkedObjectsTree from './LinkedObjectsTree';
 
 
 const ViewsList = (props) => {
-    const [otherviews, setOtherViews] = useState([]);
-    const [commonviews, setCommonViews] = useState([]);
-    const [selectedViewObjects, setSelectedViewObjects] = useState([]);
-    const [selectedViewName, setSelectedViewName] = useState('');
-    const [selectedViewCategory, setSelectedViewCategory] = useState([]);
-    const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
-    const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
-    const [selectedIndex, setSelectedIndex] = useState(null);
-    const [viewNavigation, setViewNavigation] = useState([]);
-    const [openOfficeApp, setOpenOfficeApp] = useState(false);
-    const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({});
-    const [loading, setLoading] = useState(false);
+
+    function useSessionState(key, defaultValue) {
+        const getInitialValue = () => {
+            try {
+                const stored = sessionStorage.getItem(key);
+                if (stored === null || stored === 'undefined') {
+                    return defaultValue;
+                }
+                return JSON.parse(stored);
+            } catch (e) {
+                console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+                return defaultValue;
+            }
+        };
+
+        const [value, setValue] = useState(getInitialValue);
+
+        useEffect(() => {
+            try {
+                sessionStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+            }
+        }, [key, value]);
+
+        return [value, setValue];
+    }
+
+    const [otherviews, setOtherViews] = useSessionState('ss_otherviews', []);
+    const [commonviews, setCommonViews] = useSessionState('ss_commonviews', []);
+    const [selectedViewObjects, setSelectedViewObjects] = useSessionState('ss_selectedViewObjects', []);
+    const [selectedViewName, setSelectedViewName] = useSessionState('ss_selectedViewName', '');
+    const [selectedViewCategory, setSelectedViewCategory] = useSessionState('ss_selectedViewCategory', []);
+    const [showOtherViewSublist, setshowOtherViewSublist] = useSessionState('ss_showOtherViewSublist', true);
+    const [showCommonViewSublist, setshowCommonViewSublist] = useSessionState('ss_showCommonViewSublist', true);
+    const [selectedIndex, setSelectedIndex] = useSessionState('ss_selectedIndex', null);
+    const [viewNavigation, setViewNavigation] = useSessionState('ss_viewNavigation', []);
+    const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
+    const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
+    const [loading, setLoading] = useSessionState('ss_loading', false);
+
+
+
+    // const [otherviews, setOtherViews] = useState([]);
+    // const [commonviews, setCommonViews] = useState([]);
+    // const [selectedViewObjects, setSelectedViewObjects] = useState([]);
+    // const [selectedViewName, setSelectedViewName] = useState('');
+    // const [selectedViewCategory, setSelectedViewCategory] = useState([]);
+    // const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
+    // const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
+    // const [selectedIndex, setSelectedIndex] = useState(null);
+    // const [viewNavigation, setViewNavigation] = useState([]);
+    // const [openOfficeApp, setOpenOfficeApp] = useState(false);
+    // const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({});
+    // const [loading, setLoading] = useState(false);
+
 
 
     const relatedObjects = props.linkedObjects.filter(item => item.objectID !== 0);
@@ -423,7 +467,7 @@ const ViewsList = (props) => {
                     </h6>
 
 
-                    <div className='p-2 text-dark' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+                    <div className='p-2 text-dark' style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
@@ -592,7 +636,7 @@ const ViewsList = (props) => {
                             </h6>
 
                             {showCommonViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '26vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -654,7 +698,7 @@ const ViewsList = (props) => {
                             </h6>
 
                             {showOtherViewSublist && (
-                                <div style={{ height: '30vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '26vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {otherviews.map((view, index) => (
 
                                         <SimpleTreeView>

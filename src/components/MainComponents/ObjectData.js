@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import DynamicFileViewer from '../DynamicFileViewer';
 import SignButton from '../SignDocument';
@@ -62,7 +62,35 @@ const formatDateForInput = (dateString) => {
 
 
 export default function ObjectData(props) {
-  const [value, setValue] = useState(0);
+
+  function useSessionState(key, defaultValue) {
+    const getInitialValue = () => {
+      try {
+        const stored = sessionStorage.getItem(key);
+        if (stored === null || stored === 'undefined') {
+          return defaultValue;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
+        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+        return defaultValue;
+      }
+    };
+
+    const [value, setValue] = useState(getInitialValue);
+
+    useEffect(() => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      }
+    }, [key, value]);
+
+    return [value, setValue];
+  }
+
+  const [value, setValue] = useSessionState('ss_viewTabIndex_ObjData', 0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [openAlert, setOpenAlert] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('');
@@ -247,7 +275,7 @@ export default function ObjectData(props) {
 
 
   const filteredProps = props.previewObjectProps.filter(
-    
+
     item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class', 'State', 'Workflow'].includes(item.propName)
   );
 
@@ -577,7 +605,7 @@ export default function ObjectData(props) {
                           </Box>
                         </Box>
                       </ListItem>
-     
+
                       <Box sx={{ fontSize: '12.5px' }}>
                         {filteredProps.map((item, index) => (
                           <ListItem key={index} sx={{ p: 0 }}>
@@ -910,7 +938,7 @@ export default function ObjectData(props) {
             }}
           >
             {props.base64 ? (
-     
+
               <DynamicFileViewer
                 base64Content={props.base64}
                 fileExtension={props.extension}
@@ -920,9 +948,10 @@ export default function ObjectData(props) {
                 email={props.email}
                 fileName={props.selectedObject.title}
                 selectedObject={props.selectedObject}
+                windowWidth={props.windowWidth}
 
               />
-          
+
             ) : (
               <Box
                 sx={{

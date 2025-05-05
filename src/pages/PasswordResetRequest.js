@@ -6,7 +6,7 @@ import Logo from '../images/ZFBLU.webp';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import * as constants from '../components/Auth/configs'
 import TimedAlert from '../components/TimedAlert';
-
+import { Button } from '@mui/material';
 const PasswordResetRequest = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
@@ -35,10 +35,13 @@ const PasswordResetRequest = () => {
             );
             setMessage(response.data.message);
             setLinkSent(true);
+            setOpenAlert(true);
+            setAlertSeverity('success');
+            setAlertMsg('Password reset mail sent successfully!'); // Ensure it's a string
         } catch (error) {
             setOpenAlert(true);
             setAlertSeverity('error');
-
+           
             // Extract meaningful error message
             const errorMsg = error.response?.data?.error || error.message || 'An error occurred';
 
@@ -115,7 +118,7 @@ const PasswordResetRequest = () => {
                                     required
                                 />
                             </Box>
-                            <ButtonComponent
+                            {/* <ButtonComponent
                                 type="submit"
                                 className='p-2'
                                 cssClass="e-custom-success"
@@ -124,7 +127,26 @@ const PasswordResetRequest = () => {
                                 disabled={loading}
                             >
                                 {loading ? <CircularProgress size={12} className="text-white " /> : 'Send Reset Link'}
-                            </ButtonComponent>
+                            </ButtonComponent> */}
+
+                            <Button
+                                // color="success"
+                                 type="submit"
+                                className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                                style={{
+                                    fontSize: '12.5px',
+                                    color: '#fff',
+                                    backgroundColor:'#2CB34A',
+                                    cursor: 'pointer',
+                                    width: 'auto',
+                                    padding: '10px',
+                                    textTransform: 'none',
+                                }}
+                                disabled={loading? true : false}
+                                variant="contained"
+                            >
+                               <span className='mx-3'> {loading ? <>Sending email ... <CircularProgress size={12} className="text-white mx-2" /> </>: 'Send Reset Link'}</span>
+                            </Button>
                         </form>
                     ) : (
                         <Box mt={2}>
@@ -134,7 +156,7 @@ const PasswordResetRequest = () => {
                             <Typography variant="body1" color="textDark" className="my-2">
                                 OR
                             </Typography>
-                            <ButtonComponent
+                            {/* <ButtonComponent
                                 cssClass="e-custom-warning"
                                 className="mb-2 p-2"
 
@@ -142,12 +164,31 @@ const PasswordResetRequest = () => {
                                 onClick={handleTryAgain}
                             >
                                 Try Again
-                            </ButtonComponent>
+                            </ButtonComponent> */}
+
+                            <Button
+                                // color="success"
+                                onClick={handleTryAgain}
+                                className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                                style={{
+                                    fontSize: '12.5px',
+                                    color:linksent ? '#30343f' : '#fff',
+                                    backgroundColor: linksent ? '#ffda75' : '#2757aa',
+                                    cursor: 'pointer',
+                                    width: '40%',
+                                    padding: '10px',
+                                    textTransform: 'none',
+                                }}
+                                disabled={false}
+                                variant="contained"
+                            >
+                                Try Again
+                            </Button>
                         </Box>
                     )}
 
                     <Box mt={2}>
-                        <ButtonComponent
+                        {/* <ButtonComponent
                             type="button"
                             cssClass="e-custom-primary"
                             className="mb-3 m-2 p-2"
@@ -156,7 +197,28 @@ const PasswordResetRequest = () => {
                             onClick={handleRedirect}
                         >
                             {linksent ? 'Go to Login' : 'Cancel Reset'}
-                        </ButtonComponent>
+                        </ButtonComponent> */}
+
+                        <Button
+                           
+                            onClick={handleRedirect}
+                            className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                            style={{
+                                fontSize: '12.5px',
+                                color:linksent ? '#fff' : '#30343f',
+                                backgroundColor: linksent ? '#2757aa' : '#ffda75',
+                                cursor: 'pointer',
+                                width: '40%',
+                                padding: '10px',
+                                textTransform: 'none',
+                            }}
+                            disabled={false}
+                            variant="contained"
+                        >
+                            {linksent ? 'Go to Login' : 'Cancel Reset'}
+                        </Button>
+
+
                     </Box>
                 </Box>
             </Box>

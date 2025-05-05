@@ -12,7 +12,7 @@ import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 
 function App() {
-  registerLicense('Mgo+DSMBPh8sVXJ0S0J+XE9HflRDX3xKf0x/TGpQb19xflBPallYVBYiSV9jS31TckVnWHlbcXFWT2NbVA==');
+  registerLicense('NDAxNEAzMjM4MkUzMTJFMzlMeXJkaVJFV2Z5R3o5ZXNEVnNOQjFqUmx2MW0xZkR2TGdud2MrVGNJRlBzPQ==');
   return (
     <Router>
       <AuthProvider>

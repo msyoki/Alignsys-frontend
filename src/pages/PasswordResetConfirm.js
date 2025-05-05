@@ -5,7 +5,7 @@ import { TextField, Container, Typography, Box, CircularProgress, InputLabel } f
 import Logo from '../images/ZFBLU.webp';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import * as constants from '../components/Auth/configs'
-
+import { Button } from '@mui/material';
 const PasswordResetConfirm = () => {
     const { uid, token } = useParams();
     const navigate = useNavigate();
@@ -111,32 +111,71 @@ const PasswordResetConfirm = () => {
                                 </Typography>
                             )}
                             <Box mt={2}>
-                                <ButtonComponent
+                                {/* <ButtonComponent
                                     type="submit"
                                     cssClass="e-custom-success"
                                     style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
                                 >
                                     {loading ? <CircularProgress size={12} className="text-white" /> : 'Reset Password'}
-                                </ButtonComponent>
+                                </ButtonComponent> */}
+
+                                <Button
+
+                                    type="submit"
+                                    className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                                    style={{
+                                        fontSize: '12.5px',
+                                        color: '#fff',
+
+                                        cursor: 'pointer',
+                                        width: '40%',
+                                        padding: '10px',
+                                        textTransform: 'none',
+                                    }}
+                                    disabled={false}
+                                    variant="contained"
+                                >
+                                   {loading ? <CircularProgress size={12} className="text-white" /> : 'Reset Password'}
+                                </Button>
                             </Box>
                         </form>
                     ) : (
                         <Typography m={2} variant="body1" color="textSecondary">
-                           
-                            <p className='p-4' style={{ backgroundColor: '#fff', color: '#555', margin: '10px ', fontSize:'13px' }} >
-                            {message}
+
+                            <p className='p-4' style={{ backgroundColor: '#fff', color: '#555', margin: '10px ', fontSize: '13px' }} >
+                                {message}
                             </p>
                         </Typography>
                     )}
 
                     <Box mt={2}>
-                        <ButtonComponent
+                        {/* <ButtonComponent
                             cssClass={resetSuccessful ? 'e-custom-success' : 'e-custom-primary'}
                             style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
                             onClick={handleRedirect}
                         >
                             {resetSuccessful ? 'Go to Login' : 'Cancel'}
-                        </ButtonComponent>
+                        </ButtonComponent> */}
+
+
+                        <Button
+
+                            onClick={handleRedirect}
+                            className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                            style={{
+                                fontSize: '12.5px',
+                                color: !resetSuccessful ? '#30343f' : '#fff',
+                                backgroundColor: !resetSuccessful ? '#ffda75' : '#2757aa',
+                                cursor: 'pointer',
+                                width: '40%',
+                                padding: '10px',
+                                textTransform: 'none',
+                            }}
+                            disabled={false}
+                            variant="contained"
+                        >
+                            {resetSuccessful ? 'Go to Login' : 'Cancel'}
+                        </Button>
                     </Box>
                 </Box>
             </Container>

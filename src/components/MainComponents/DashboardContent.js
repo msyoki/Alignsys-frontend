@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
 import { Avatar, Button } from '@mui/material';
@@ -72,42 +72,110 @@ function a11yProps(index) {
 
 
 const DocumentList = (props) => {
-  const [value, setValue] = useState(0);
+  // const [value, setValue] = useState(0);
 
-  const [loading, setLoading] = useState(false)
-  let [requisitionProps, setRequisitionProps] = useState({})
-  let [docProps, setDocProps] = useState({})
-  let [selectedObject, setSelectedObject] = useState({})
-  let [selectedFile, setSelectedFile] = useState({});
-  let [loadingobjects, setLoadingObjects] = useState(false)
-  let [selectedFileId, setSelectedFileId] = useState(null)
+  // const [loading, setLoading] = useState(false)
+  // let [requisitionProps, setRequisitionProps] = useState({})
+  // let [docProps, setDocProps] = useState({})
+  // let [selectedObject, setSelectedObject] = useState({})
+  // let [selectedFile, setSelectedFile] = useState({});
+  // let [loadingobjects, setLoadingObjects] = useState(false)
+  // let [selectedFileId, setSelectedFileId] = useState(null)
 
-  const [openAlert, setOpenAlert] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState('');
-  const [alertMsg, setAlertMsg] = useState('');
-  const [loadingPreviewObject, setLoadingPreviewObject] = useState(false)
-  const [pageNumber, setPageNumber] = useState(1);
-  const [linkedObjects, setLinkedObjects] = useState([])
-  const [tabIndex, setTabIndex] = useState(0);
+  // const [openAlert, setOpenAlert] = useState(false);
+  // const [alertSeverity, setAlertSeverity] = useState('');
+  // const [alertMsg, setAlertMsg] = useState('');
+  // const [loadingPreviewObject, setLoadingPreviewObject] = useState(false)
+  // const [pageNumber, setPageNumber] = useState(1);
+  // const [linkedObjects, setLinkedObjects] = useState([])
+  // const [tabIndex, setTabIndex] = useState(0);
 
-  const [previewObjectProps, setPreviewObjectProps] = useState([])
-  const [formValues, setFormValues] = useState({});
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [base64, setBase64] = useState('')
-  const [extension, setExtension] = useState('')
-  const [loadingfile, setLoadingFile] = useState(false)
-  const [loadingobject, setLoadingObject] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [uptatingObject, setUpdatingObject] = useState(false)
-  const [selectedObkjWf, setSelectedObjWf] = useState({})
-  const [currentState, setCurrentState] = useState({})
-  const [selectedState, setSelectedState] = useState({});
-  const [comments, setComments] = useState([]);
-  const [loadingcomments, setLoadingComments] = useState(false);
-  const [openOfficeApp, setOpenOfficeApp] = useState(false)
-  const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
-  const [loadingClick, setLoadingClick] = useState(false);
-  const [searched, setSearched] = useState(false)
+  // const [previewObjectProps, setPreviewObjectProps] = useState([])
+  // const [formValues, setFormValues] = useState({});
+  // const [selectedIndex, setSelectedIndex] = useState(null);
+  // const [base64, setBase64] = useState('')
+  // const [extension, setExtension] = useState('')
+  // const [loadingfile, setLoadingFile] = useState(false)
+  // const [loadingobject, setLoadingObject] = useState(false)
+  // const [dialogOpen, setDialogOpen] = useState(false);
+  // const [uptatingObject, setUpdatingObject] = useState(false)
+  // const [selectedObkjWf, setSelectedObjWf] = useState({})
+  // const [currentState, setCurrentState] = useState({})
+  // const [selectedState, setSelectedState] = useState({});
+  // const [comments, setComments] = useState([]);
+  // const [loadingcomments, setLoadingComments] = useState(false);
+  // const [openOfficeApp, setOpenOfficeApp] = useState(false)
+  // const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
+  // const [loadingClick, setLoadingClick] = useState(false);
+  // const [searched, setSearched] = useState(false)
+
+
+  function useSessionState(key, defaultValue) {
+    const getInitialValue = () => {
+      try {
+        const stored = sessionStorage.getItem(key);
+        if (stored === null || stored === 'undefined') {
+          return defaultValue;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
+        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+        return defaultValue;
+      }
+    };
+
+    const [value, setValue] = useState(getInitialValue);
+
+    useEffect(() => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      }
+    }, [key, value]);
+
+    return [value, setValue];
+  }
+
+  const [value, setValue] = useSessionState('ss_value', 0);
+
+  const [loading, setLoading] = useSessionState('ss_loading', false);
+  let [requisitionProps, setRequisitionProps] = useSessionState('ss_requisitionProps', {});
+  let [docProps, setDocProps] = useSessionState('ss_docProps', {});
+  let [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
+  let [selectedFile, setSelectedFile] = useSessionState('ss_selectedFile', {});
+  let [loadingobjects, setLoadingObjects] = useSessionState('ss_loadingObjects', false);
+  let [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
+
+  const [openAlert, setOpenAlert] = useSessionState('ss_openAlert', false);
+  const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
+  const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
+  const [loadingPreviewObject, setLoadingPreviewObject] = useSessionState('ss_loadingPreviewObject', false);
+  const [pageNumber, setPageNumber] = useSessionState('ss_pageNumber', 1);
+  const [linkedObjects, setLinkedObjects] = useSessionState('ss_linkedObjects', []);
+  const [tabIndex, setTabIndex] = useSessionState('ss_tabIndex', 0);
+
+  const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
+  const [formValues, setFormValues] = useSessionState('ss_formValues', {});
+  const [selectedIndex, setSelectedIndex] = useSessionState('ss_selectedIndex', null);
+  const [base64, setBase64] = useSessionState('ss_base64', '');
+  const [extension, setExtension] = useSessionState('ss_extension', '');
+  const [loadingfile, setLoadingFile] = useSessionState('ss_loadingFile', false);
+  const [loadingobject, setLoadingObject] = useSessionState('ss_loadingObject', false);
+  const [dialogOpen, setDialogOpen] = useSessionState('ss_dialogOpen', false);
+  const [uptatingObject, setUpdatingObject] = useSessionState('ss_updatingObject', false);
+  const [selectedObkjWf, setSelectedObjWf] = useSessionState('ss_selectedObjWf', {});
+  const [currentState, setCurrentState] = useSessionState('ss_currentState', {});
+  const [selectedState, setSelectedState] = useSessionState('ss_selectedState', {});
+  const [comments, setComments] = useSessionState('ss_comments', []);
+  const [loadingcomments, setLoadingComments] = useSessionState('ss_loadingComments', false);
+  const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
+  const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
+  const [loadingClick, setLoadingClick] = useSessionState('ss_loadingClick', false);
+  const [searched, setSearched] = useSessionState('ss_searched', false);
+  const [previewWindowWidth, setPreviewWindowWidth] = useSessionState('ss_previewWindowWidth', 40);
+
+
 
 
 
@@ -119,6 +187,7 @@ const DocumentList = (props) => {
     setValue(newValue);
   };
   const transformFormValues = async () => {
+    alert("called")
     try {
       setUpdatingObject(true);
 
@@ -159,30 +228,30 @@ const DocumentList = (props) => {
       // console.log(requestData);
 
 
-      await axios.put(
-        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
-        requestData,
-        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
-      );
+      // await axios.put(
+      //   `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+      //   requestData,
+      //   { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+      // );
 
 
 
-      setAlertPopOpen(true);
-      setAlertPopSeverity("success");
-      setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
-      setFormValues({});
+      // setAlertPopOpen(true);
+      // setAlertPopSeverity("success");
+      // setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
+      // setFormValues({});
 
-      // console.log(selectedObject)
-      setPreviewObjectProps([])
-      setSelectedObject({})
+      // // console.log(selectedObject)
+      // setPreviewObjectProps([])
+      // setSelectedObject({})
 
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject, false);
-        } else {
-          previewSublistObject(selectedObject, false);
-        }
-      }, 5000);
+      // setTimeout(() => {
+      //   if (selectedObject.id !== 0) {
+      //     previewObject(selectedObject, false);
+      //   } else {
+      //     previewSublistObject(selectedObject, false);
+      //   }
+      // }, 5000);
 
     } catch (error) {
       console.error('Error updating object props:', error);
@@ -296,7 +365,7 @@ const DocumentList = (props) => {
       const response = await axios.get(url);
 
       setLinkedObjects(response.data)
-      console.log(response.data)
+      // console.log(response.data)
 
       setLoadingObjects(false)
     }
@@ -390,7 +459,7 @@ const DocumentList = (props) => {
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
-      console.log(propsResponse.data)
+      // console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       setLoadingClick(false)
@@ -437,7 +506,7 @@ const DocumentList = (props) => {
           setBase64(downloadResponse.data.base64);
           setExtension(downloadResponse.data.extension.replace('.', ''));
           let ext = downloadResponse.data.extension.replace('.', '')
-          console.log(ext)
+          // console.log(ext)
         } catch (downloadError) {
           console.error('Error downloading file:', downloadError);
         } finally {
@@ -500,7 +569,7 @@ const DocumentList = (props) => {
       .then(response => {
 
         setSelectedObjWf(response.data)
-        console.log(response.data)
+        // console.log(response.data)
         setCurrentState({
           stateTitle: response.data.currentStateTitle,
           stateId: response.data.currentStateid
@@ -714,32 +783,84 @@ const DocumentList = (props) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // useEffect(() => {
+  //   if (isMobile) return;
+
+  //   const handleMouseMove = (e) => {
+  //     if (!isDragging) return;
+  //     const containerWidth = containerRef.current.getBoundingClientRect().width;
+  //     let newCol1Width = (e.clientX / containerWidth) * 100;
+  //     if (newCol1Width < 10) newCol1Width = 10;
+  //     if (newCol1Width > 90) newCol1Width = 90;
+  //     col1Ref.current.style.width = `${newCol1Width}%`;
+  //     col2Ref.current.style.width = `${100 - newCol1Width}%`;
+  //     setPreviewWindowWidth(col2Ref.current.style.width)
+
+  //   };
+
+  //   const handleMouseUp = () => setIsDragging(false);
+
+  //   document.addEventListener('mousemove', handleMouseMove);
+  //   document.addEventListener('mouseup', handleMouseUp);
+  //   return () => {
+  //     document.removeEventListener('mousemove', handleMouseMove);
+  //     document.removeEventListener('mouseup', handleMouseUp);
+  //   };
+  // }, [isDragging, isMobile]);
+
+  // const handleMouseDown = () => {
+  //   if (!isMobile) setIsDragging(true);
+  // };
+
+  const handleMouseDown = useCallback((e) => {
+    // Only start dragging if the left mouse button is pressed (button 0)
+    if (e.button === 0 && !isMobile) {
+      setIsDragging(true);
+    }
+  }, [isMobile]);
+
   useEffect(() => {
     if (isMobile) return;
 
+    let animationFrameId;
+
     const handleMouseMove = (e) => {
       if (!isDragging) return;
-      const containerWidth = containerRef.current.getBoundingClientRect().width;
-      let newCol1Width = (e.clientX / containerWidth) * 100;
-      if (newCol1Width < 10) newCol1Width = 10;
-      if (newCol1Width > 90) newCol1Width = 90;
-      col1Ref.current.style.width = `${newCol1Width}%`;
-      col2Ref.current.style.width = `${100 - newCol1Width}%`;
+
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      animationFrameId = requestAnimationFrame(() => {
+        const containerWidth = containerRef.current?.getBoundingClientRect().width;
+        if (!containerWidth) return;
+
+        let newCol1Width = (e.clientX / containerWidth) * 100;
+
+        // Clamp width to avoid layout breaking
+        newCol1Width = Math.min(90, Math.max(10, newCol1Width));
+        const newCol2Width = 100 - newCol1Width;
+
+        // Apply widths
+        if (col1Ref.current) col1Ref.current.style.width = `${newCol1Width}%`;
+        if (col2Ref.current) col2Ref.current.style.width = `${newCol2Width}%`;
+
+        setPreviewWindowWidth(`${newCol2Width}%`);
+      });
     };
 
-    const handleMouseUp = () => setIsDragging(false);
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [isDragging, isMobile]);
-
-  const handleMouseDown = () => {
-    if (!isMobile) setIsDragging(true);
-  };
 
 
   const trimTitle2 = (title) => {
@@ -846,7 +967,7 @@ const DocumentList = (props) => {
 
       <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
         {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '35%' }}>
+        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '25%' }}>
           <Box
             style={{
               display: 'flex',
@@ -972,7 +1093,7 @@ const DocumentList = (props) => {
               />
 
               {/* Search Button */}
-              <button
+              {/* <button
                 type="submit"
                 className="btn btn-md shadow rounded d-flex align-items-center"
                 style={{
@@ -986,7 +1107,26 @@ const DocumentList = (props) => {
               >
                 <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
                 <span className="mx-2">Search</span>
-              </button>
+              </button> */}
+
+              <Button
+                type="submit"
+                className="mb-3 m-2 rounded-pill" // Retaining the same classes as in the original code
+                style={{
+                  fontSize: '12.5px',
+                  color: '#fff',
+                  backgroundColor: '#2757aa',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  textTransform: 'none',
+                }}
+                disabled={false}
+                variant="contained"
+              >
+                <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
+                <span className="mx-2">Search</span>
+              </Button>
 
               {/* Alerts */}
               <TransitionAlerts
@@ -1000,39 +1140,39 @@ const DocumentList = (props) => {
 
 
           <Tabs
-  variant="scrollable"
-  value={value}
-  onChange={handleChange}
-  aria-label="Horizontal tabs example"
-  className="shadow-lg"
-  sx={{
-    borderColor: 'divider',
-    backgroundColor: '#fff',
-    minHeight: '36px',  // Reduced overall tab bar height
-  }}
->
-  {['All', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
-    <Tab
-      key={index}
-      style={{ textTransform: 'none' }}
-      label={label}
-      onClick={() => {
-        if (label === 'All') setSearched(false);
-        if (label === 'Recent') props.getRecent?.();
-        if (label === 'Assigned') props.getAssigned?.();
-      }}
-      {...a11yProps(index)}
-      sx={{
-        minHeight: '36px',
-        height: '36px',
-        padding: '4px 12px',
-        fontSize: '13px',
-        backgroundColor: '#fff',
-        minWidth: 'auto',
-      }}
-    />
-  ))}
-</Tabs>
+            variant="scrollable"
+            value={value}
+            onChange={handleChange}
+            aria-label="Horizontal tabs example"
+            className="shadow-lg"
+            sx={{
+              borderColor: 'divider',
+              backgroundColor: '#fff',
+              minHeight: '36px',  // Reduced overall tab bar height
+            }}
+          >
+            {['All', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
+              <Tab
+                key={index}
+                style={{ textTransform: 'none' }}
+                label={label}
+                onClick={() => {
+                  if (label === 'All') setSearched(false);
+                  if (label === 'Recent') props.getRecent?.();
+                  if (label === 'Assigned') props.getAssigned?.();
+                }}
+                {...a11yProps(index)}
+                sx={{
+                  minHeight: '36px',
+                  height: '36px',
+                  padding: '4px 12px',
+                  fontSize: '13px',
+                  backgroundColor: '#fff',
+                  minWidth: 'auto',
+                }}
+              />
+            ))}
+          </Tabs>
 
           <CustomTabPanel
             value={value}
@@ -1114,7 +1254,7 @@ const DocumentList = (props) => {
                                         />
                                       </>
                                     ) : null}</span>
-                                   
+
 
                                   </Box>
                                 }
@@ -1271,7 +1411,7 @@ const DocumentList = (props) => {
                                     />
                                   </>
                                 ) : null}</span>
-                               
+
 
                               </Box>
                             }
@@ -1373,7 +1513,7 @@ const DocumentList = (props) => {
                                     />
                                   </>
                                 ) : null}</span>
-                               
+
 
                               </Box>
                             }
@@ -1422,7 +1562,7 @@ const DocumentList = (props) => {
 
                     <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
                       {props.deletedData.map((item, index) => (
-                      
+
                         <SimpleTreeView>
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
@@ -1470,7 +1610,7 @@ const DocumentList = (props) => {
                                       classId={item.classId}
                                     />
                                   )}</span>
-                                 
+
                                 </Box>
 
                                 {/* Button at the right */}
@@ -1521,13 +1661,55 @@ const DocumentList = (props) => {
         </div>
 
         {!isMobile && (
-          <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#dedddd', height: '100vh' }}></div>
+          // <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#dedddd', height: '100vh' }}></div>
+          <div
+            style={{
+              width: '5px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#ddd',
+              cursor: 'ew-resize',
+              transition: 'width 0.2s ease',
+              height: '100vh'
+            }}
+            // onMouseEnter={(e) => (e.currentTarget.style.width = '10px')}
+            // onMouseLeave={(e) => (e.currentTarget.style.width = '5px')}
+            onMouseDown={handleMouseDown}
+          >
+            {/* <button
+            onMouseDown={handleMouseDown}
+            style={{
+              width: '4px',
+              height: '50px',
+              background: '#2757aa',
+              border: 'none',
+              cursor: 'ew-resize',
+              borderRadius: '4px',
+              boxShadow: '0 0 4px rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.2s ease',
+            }}
+            title="Drag to resize"
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#1e4b96')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#2757aa')}
+          >
+            <i
+              className="fa-solid fa-bars"
+              style={{ fontSize: '10px', color: '#fff' }}
+            ></i>
+          </button> */}
+          </div>
+
+
         )}
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '35%' }}>
-          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} />
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%' }}>
+          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} />
         </div>
       </div>
 

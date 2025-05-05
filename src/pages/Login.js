@@ -4,7 +4,6 @@ import '../styles/Login.css';
 import logo from '../images/m.png';
 import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Custombuttons.css';
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { Link } from "react-router-dom";
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -18,6 +17,8 @@ import image from '../images/ZFBLU.webp';
 import logo2 from '../images/ZFWHITE.webp';
 import TimedAlert from '../components/TimedAlert';
 import { useNavigate } from 'react-router-dom';
+
+import { Button } from '@mui/material';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -125,7 +126,7 @@ const Login = () => {
 
             <div className="text-center text-lg-start mt-1 row">
               <div className="col-lg-12 text-center">
-                <ButtonComponent
+                {/* <ButtonComponent
                   type="submit"
                   cssClass="e-custom-primary"
                   className="mb-3 m-2"
@@ -133,7 +134,24 @@ const Login = () => {
                   disabled={false}
                 >
                   Login
-                </ButtonComponent>
+                </ButtonComponent> */}
+                <Button
+                  type="submit"
+                  className="mb-3 m-2 rounded-pill" // Retaining the same classes as in the original code
+                  style={{
+                    fontSize: '12.5px',
+                    color: '#fff',
+                    backgroundColor: '#2757aa',
+                    cursor: 'pointer',
+                    width: '40%',
+                    padding: '10px',
+                    textTransform: 'none',
+                  }}
+                  disabled={false}
+                  variant="contained"
+                >
+                  Login
+                </Button>
               </div>
             </div>
 

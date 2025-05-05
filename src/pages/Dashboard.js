@@ -22,6 +22,7 @@ import Stack from '@mui/material/Stack';
 import pic from '../images/R.png'
 import { useLocation } from 'react-router-dom';
 
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -96,46 +97,117 @@ function Dashboard() {
   const { user, authTokens, departments, logoutUser } = useContext(Authcontext);
   const navigate = useNavigate();
 
+
+
+
+
+
   // 2. State Declarations
-  const [openObjectModal, setOpenObjectModal] = useState(false);
-  const [viewableobjects, setViewableObjects] = useState([]);
-  const [data, setData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searched, setSearched] = useState(false);
-  const [allrequisitions, setRequisitions] = useState([]);
-  const [selectedVault, setSelectedVault] = useState(null);
-  const [vaultObjectsList, setVaultObjectsList] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [templateIsTrue, setTemplateIsTrue] = useState(false);
-  const [templates, setTemplates] = useState([]);
-  const [selectedClassName, setSelectedClassName] = useState('');
-  const [selectedObjectId, setSelectedObjectId] = useState(null);
-  const [selectedObjectName, setSelectedObjectName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedClassId, setSelectedClassId] = useState(null);
-  const [groupedItems, setGroupedItems] = useState([]);
-  const [ungroupedItems, setUngroupedItems] = useState([]);
-  const [isDataOpen, setIsDataOpen] = useState(false);
-  const [formProperties, setFormProperties] = useState([]);
-  const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  const [formValues, setFormValues] = useState({});
-  const [value, setValue] = useState(0);
-  const [isSublistVisible, setIsSublistVisible] = useState(false);
-  let [docClasses, setDocClasses] = useState([]); // Document classes
-  const [recentData, setRecentData] = useState([]);
-  const [assignedData, setAssignedData] = useState([]);
+  // const [openObjectModal, setOpenObjectModal] = useState(false);
+  // const [viewableobjects, setViewableObjects] = useState([]);
+  // const [data, setData] = useState([]);
+  // const [searchTerm, setSearchTerm] = useState('');
+  // const [searched, setSearched] = useState(false);
+  // const [allrequisitions, setRequisitions] = useState([]);
+  // const [selectedVault, setSelectedVault] = useState(null);
+  // const [vaultObjectsList, setVaultObjectsList] = useState(null);
+  // const [sidebarOpen, setSidebarOpen] = useState(false);
+  // const [menuOpen, setMenuOpen] = useState(false);
+  // const [isFormOpen, setIsFormOpen] = useState(false);
+  // const [templateIsTrue, setTemplateIsTrue] = useState(false);
+  // const [templates, setTemplates] = useState([]);
+  // const [selectedClassName, setSelectedClassName] = useState('');
+  // const [selectedObjectId, setSelectedObjectId] = useState(null);
+  // const [selectedObjectName, setSelectedObjectName] = useState('');
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [selectedClassId, setSelectedClassId] = useState(null);
+  // const [groupedItems, setGroupedItems] = useState([]);
+  // const [ungroupedItems, setUngroupedItems] = useState([]);
+  // const [isDataOpen, setIsDataOpen] = useState(false);
+  // const [formProperties, setFormProperties] = useState([]);
+  // const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  // const [formValues, setFormValues] = useState({});
+  // const [value, setValue] = useState(0);
+  // const [isSublistVisible, setIsSublistVisible] = useState(false);
+  // let [docClasses, setDocClasses] = useState([]); // Document classes
+  // const [recentData, setRecentData] = useState([]);
+  // const [assignedData, setAssignedData] = useState([]);
 
-  const [deletedData, setDeletedData] = useState([]);
+  // const [deletedData, setDeletedData] = useState([]);
 
-  const [alertOpen, setOpenAlert] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState('');
-  const [alertMsg, setAlertMsg] = useState('');
-  const [mfilesId, setMfilesId] = useState(null);
-  const [loadingDialog, setLoadingDialog] = useState(false)
+  // const [alertOpen, setOpenAlert] = useState(false);
+  // const [alertSeverity, setAlertSeverity] = useState('');
+  // const [alertMsg, setAlertMsg] = useState('');
+  // const [mfilesId, setMfilesId] = useState(null);
+  // const [loadingDialog, setLoadingDialog] = useState(false)
 
-  const [hoveredItem, setHoveredItem] = useState(null);
+  // const [hoveredItem, setHoveredItem] = useState(null);
+
+  function useSessionState(key, defaultValue) {
+    const getInitialValue = () => {
+      try {
+        const stored = sessionStorage.getItem(key);
+        if (stored === null || stored === 'undefined') {
+          return defaultValue;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
+        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+        return defaultValue;
+      }
+    };
+  
+    const [value, setValue] = useState(getInitialValue);
+  
+    useEffect(() => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      }
+    }, [key, value]);
+  
+    return [value, setValue];
+  }
+
+
+  const [openObjectModal, setOpenObjectModal] = useSessionState('ss_openObjectModal', false);
+  const [viewableobjects, setViewableObjects] = useSessionState('ss_viewableObjects', []);
+  const [data, setData] = useSessionState('ss_data', []);
+  const [searchTerm, setSearchTerm] = useSessionState('ss_searchTerm', '');
+  const [searched, setSearched] = useSessionState('ss_searched', false);
+  const [allrequisitions, setRequisitions] = useSessionState('ss_allRequisitions', []);
+  const [selectedVault, setSelectedVault] = useSessionState('ss_selectedVault', null);
+  const [vaultObjectsList, setVaultObjectsList] = useSessionState('ss_vaultObjectsList', null);
+  const [sidebarOpen, setSidebarOpen] = useSessionState('ss_sidebarOpen', false);
+  const [menuOpen, setMenuOpen] = useSessionState('ss_menuOpen', false);
+  const [isFormOpen, setIsFormOpen] = useSessionState('ss_isFormOpen', false);
+  const [templateIsTrue, setTemplateIsTrue] = useSessionState('ss_templateIsTrue', false);
+  const [templates, setTemplates] = useSessionState('ss_templates', []);
+  const [selectedClassName, setSelectedClassName] = useSessionState('ss_selectedClassName', '');
+  const [selectedObjectId, setSelectedObjectId] = useSessionState('ss_selectedObjectId', null);
+  const [selectedObjectName, setSelectedObjectName] = useSessionState('ss_selectedObjectName', '');
+  const [isLoading, setIsLoading] = useSessionState('ss_isLoading', false);
+  const [selectedClassId, setSelectedClassId] = useSessionState('ss_selectedClassId', null);
+  const [groupedItems, setGroupedItems] = useSessionState('ss_groupedItems', []);
+  const [ungroupedItems, setUngroupedItems] = useSessionState('ss_ungroupedItems', []);
+  const [isDataOpen, setIsDataOpen] = useSessionState('ss_isDataOpen', false);
+  const [formProperties, setFormProperties] = useSessionState('ss_formProperties', []);
+  const [templateModalOpen, setTemplateModalOpen] = useSessionState('ss_templateModalOpen', false);
+  const [formValues, setFormValues] = useSessionState('ss_formValues', {});
+  const [value, setValue] = useSessionState('ss_value', 0);
+  const [isSublistVisible, setIsSublistVisible] = useSessionState('ss_isSublistVisible', false);
+  const [docClasses, setDocClasses] = useSessionState('ss_docClasses', []);
+  const [recentData, setRecentData] = useSessionState('ss_recentData', []);
+  const [assignedData, setAssignedData] = useSessionState('ss_assignedData', []);
+  const [deletedData, setDeletedData] = useSessionState('ss_deletedData', []);
+  const [alertOpen, setOpenAlert] = useSessionState('ss_alertOpen', false);
+  const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
+  const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
+  const [mfilesId, setMfilesId] = useSessionState('ss_mfilesId', null);
+  const [loadingDialog, setLoadingDialog] = useSessionState('ss_loadingDialog', false);
+  const [hoveredItem, setHoveredItem] = useSessionState('ss_hoveredItem', null);
+
 
   // 3. Helper Functions / API Calls
 
@@ -161,7 +233,7 @@ function Dashboard() {
       const response = await axios.get(
         `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
       );
-      console.log(response.data)
+      // console.log(response.data)
       setRecentData(response.data)
       return response.data;
     } catch (error) {
@@ -219,7 +291,7 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        console.log(response.data);
+        // console.log(response.data);
         setOpenObjectModal(true);
       })
       .catch((error) => {
@@ -447,10 +519,10 @@ function Dashboard() {
           { headers: { accept: '*/*' } }
         );
         // console.log('Templates response:', response.data);
-        console.log(response.data)
+        // console.log(response.data)
         setTemplates(response.data);
 
-      
+
         setTemplateModalOpen(true); // Opens the template modal
         setLoadingDialog(false)
       } catch (error) {
@@ -665,7 +737,7 @@ function Dashboard() {
                 </div>
 
 
-                
+
 
 
                 {/* Menu Items */}
@@ -849,7 +921,7 @@ function Dashboard() {
             viewableobjects={viewableobjects}
             toggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
-        
+
             recentData={recentData}
             setRecentData={setRecentData}
             getRecent={getRecent}
@@ -863,7 +935,7 @@ function Dashboard() {
             stringAvatar={stringAvatar}
             setSidebarOpen={setSidebarOpen}
             setTemplateIsTrue={setTemplateIsTrue}
-          
+
           />
         </main >
       </div >

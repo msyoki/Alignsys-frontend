@@ -15,10 +15,11 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import * as constants from './Auth/configs'
 import DownloadIcon from '@mui/icons-material/Download'; // optional icon
-
+import { DocumentEditorContainerComponent, Toolbar } from '@syncfusion/ej2-react-documenteditor';
+import SyncfusionViewer from './SyncfusionViewer';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-
+DocumentEditorContainerComponent.Inject(Toolbar);
 
 const FileViewerContainer = styled.div`
   width: 100%;
@@ -150,12 +151,12 @@ const ImageViewer = ({ src }) => {
 
         <div className="d-flex align-items-center gap-2 mx-1">
           <span className='mx-2'>
-          <i onClick={handleZoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
-          <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '11px', color: '#333' }}>
-            {Math.round(zoom * 100)}%
+            <i onClick={handleZoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '11px', color: '#333' }}>
+              {Math.round(zoom * 100)}%
 
-          </span>
-          <i onClick={handleZoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+            </span>
+            <i onClick={handleZoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
           </span>
           <Tooltip title="Reset Zoom">
             <button onClick={handleReset} className="btn btn-light px-1 py-0" style={{ fontSize: '11px', border: '1px solid #2757aa', color: '#2757aa' }}>
@@ -164,13 +165,13 @@ const ImageViewer = ({ src }) => {
             </button>
           </Tooltip>
           <Tooltip title="Rotate Left">
-          <RotateLeftIcon sx={{color:'#2757aa', fontSize:'20px'}} onClick={handleRotateLeft} />
-          </Tooltip> 
+            <RotateLeftIcon sx={{ color: '#2757aa', fontSize: '20px' }} onClick={handleRotateLeft} />
+          </Tooltip>
 
           <Tooltip title="Rotate Right">
-          <RotateRightIcon sx={{color:'#2757aa',fontSize:'20px'}} onClick={handleRotateRight} />
-          </Tooltip> 
-     
+            <RotateRightIcon sx={{ color: '#2757aa', fontSize: '20px' }} onClick={handleRotateRight} />
+          </Tooltip>
+
         </div>
 
         {/* Download PDF */}
@@ -395,58 +396,133 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName, selectedObject }) => {
-  const [fileUrl, setFileUrl] = useState('');
-  const [htmlContent, setHtmlContent] = useState('');
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [zoomLevel, setZoomLevel] = useState(0.8);
-  const [csvContent, setCSVContent] = useState([]);
-  const [tempUrl, setTempUrl] = useState('');
+const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName, selectedObject, windowWidth }) => {
 
-  const mimeTypes = useMemo(() => ({
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    pdf: 'application/pdf',
-    txt: 'text/plain',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  }), []);
+
+  function useSessionState(key, defaultValue) {
+    const getInitialValue = () => {
+      try {
+        const stored = sessionStorage.getItem(key);
+        if (stored === null || stored === 'undefined') {
+          return defaultValue;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
+        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+        return defaultValue;
+      }
+    };
+
+    const [value, setValue] = useState(getInitialValue);
+
+    useEffect(() => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      }
+    }, [key, value]);
+
+    return [value, setValue];
+  }
+  const [fileUrl, setFileUrl] = useSessionState('ss_fileUrl', '');
+  const [csvContent, setCSVContent] = useState([]);
+
 
   const handleViewFile = async () => {
     if (!base64Content || !fileExtension) return;
-
+  
     const ext = fileExtension.toLowerCase();
     let src = '';
-    let blob;
-
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-      src = `data:image/${ext};base64,${base64Content}`;
-    } else if (ext === 'pdf') {
-      src = `data:application/pdf;base64,${base64Content}`;
-    } else if (ext === 'txt') {
-      src = `data:text/plain;base64,${base64Content}`;
-    } else if (ext === 'docx') {
-      blob = base64ToBlob(base64Content, ext);
-      const arrayBuffer = await blob.arrayBuffer();
-      const result = await mammoth.convertToHtml({ arrayBuffer });
-      setHtmlContent(result.value);
-      return;
-    } else if (ext === 'xlsx') {
-      blob = base64ToBlob(base64Content, ext);
-      const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      setCSVContent(parseCSV(XLSX.utils.sheet_to_csv(worksheet)));
-      return;
+  
+    // Helper function to handle base64 conversion
+    const generateBase64Url = (base64Content, ext) => {
+      const mimeTypeMap = {
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+        gif: 'image/gif',
+        pdf: 'application/pdf',
+        txt: 'text/plain',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        doc: 'application/msword',
+        // Add more types as needed
+      };
+  
+      if (mimeTypeMap[ext]) {
+        return `data:${mimeTypeMap[ext]};base64,${base64Content}`;
+      }
+      return '';
+    };
+  
+    // Function to handle file upload and generate download URL
+    const uploadBase64WithExtension = async (base64String, extension) => {
+      const mimeTypeMap = {
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pdf: 'application/pdf',
+        txt: 'text/plain',
+        png: 'image/png',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        // Add more as needed
+      };
+  
+      try {
+        const mimeType = mimeTypeMap[extension.toLowerCase()] || 'application/octet-stream';
+  
+        // Strip base64 header if present
+        const base64Data = base64String.split(',').pop();
+        const byteCharacters = atob(base64Data);
+        const byteArray = new Uint8Array([...byteCharacters].map(char => char.charCodeAt(0)));
+        const blob = new Blob([byteArray], { type: mimeType });
+  
+        const formData = new FormData();
+        formData.append('file', blob, `file.${extension}`);
+  
+        const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData);
+  
+        const fileUrl = response.data?.data?.url;
+        if (fileUrl) {
+          const downloadUrl = transformToDownloadUrl(fileUrl);
+          return downloadUrl;
+        }
+  
+        return null;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        return null;
+      }
+    };
+  
+    // Helper function to transform the URL for downloading
+    const transformToDownloadUrl = (url) => {
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/');
+      pathParts.splice(1, 0, 'dl'); // Insert 'dl' after the domain and before the file path
+      urlObj.pathname = pathParts.join('/');
+      return urlObj.toString();
+    };
+  
+    // Handle the file extension logic
+    if (['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt'].includes(ext)) {
+      src = generateBase64Url(base64Content, ext);
+    } else if (['docx', 'xlsx', 'doc'].includes(ext)) {
+      // Wait for the upload to finish before setting the file URL
+      src = await uploadBase64WithExtension(base64Content, ext);
     } else if (ext === 'csv') {
       setCSVContent(parseCSV(atob(base64Content)));
-      return;
+      return; // Return early for CSV, no need to set fileUrl
     }
-
-    setFileUrl(src);
+  
+    if (src) {
+      setFileUrl(src);
+    } else {
+      console.error('Unsupported file type or error occurred.');
+    }
   };
+  
 
   const parseCSV = (csvContent) => {
     const rows = csvContent.split('\n');
@@ -456,14 +532,6 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     });
   };
 
-  const base64ToBlob = (base64, extension) => {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return new Blob([bytes], { type: mimeTypes[extension] || 'application/octet-stream' });
-  };
 
   const renderContent = () => {
     if (!base64Content || !fileExtension) {
@@ -486,23 +554,26 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
     }
 
     if (ext === 'pdf') {
-      return <PDFViewerPreview document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email} base64Content={base64Content} fileExtension={fileExtension} fileName={fileName} selectedObject={selectedObject} />;
+      return <PDFViewerPreview windowWidth={windowWidth} document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email} base64Content={base64Content} fileExtension={fileExtension} fileName={fileName} selectedObject={selectedObject} />;
     }
 
     if (ext === 'txt') {
       return <TextViewer content={atob(base64Content)} />;
+
+      <DocumentEditorContainerComponent id="container" style={{ 'height': '590px' }} serviceUrl="https://services.syncfusion.com/vue/production/api/documenteditor/" enableToolbar={true} />
     }
 
     if (ext === 'docx' || ext === 'doc' || ext === 'xlsx') {
-
+  
       return (
         <iframe
-          src={`https://view.officeapps.live.com/op/embed.aspx?src=${constants.tempfilesurl}${tempUrl}`}
+          src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
           width="100%"
           height="500px"
           frameBorder="0"
         />
-
+        // <SyncfusionViewer base64File={fileUrl} fileType={ext} />
+     
 
       );
     }
@@ -515,46 +586,50 @@ const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vau
   };
 
   useEffect(() => {
-    const uploadData = async () => {
+    // const uploadData = async () => {
 
-      try {
-        const response = await axios.post(
-          `${constants.tempfilesurl}`,
-          {
-            base64_content: base64Content,
-            file_extension: fileExtension
-          },
-          {
-            headers: {
-              'accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        if (response.data) {
+    //   try {
+    //     const response = await axios.post(
+    //       `${constants.tempfilesurl}`,
+    //       {
+    //         base64_content: base64Content,
+    //         file_extension: fileExtension
+    //       },
+    //       {
+    //         headers: {
+    //           'accept': 'application/json',
+    //           'Content-Type': 'application/json'
+    //         }
+    //       }
+    //     );
+    //     if (response.data) {
 
-          console.log(response.data.url)
-        }
+    //       console.log(response.data.url)
+    //     }
 
-        setTempUrl(response.data.url);
+    //     setTempUrl(response.data.url);
 
-      } catch (error) {
-        alert(error)
-        console.error("Error uploading data:", error);
-      }
-    };
+    //   } catch (error) {
+    //     // alert(error)
+    //     console.error("Error uploading data:", error);
+    //   }
+    // };
 
-    if (['xlsx', 'docx', 'doc'].includes(fileExtension?.toLowerCase())) {
-      uploadData();
-    }
+    // if (['xlsx', 'docx', 'doc'].includes(fileExtension?.toLowerCase())) {
+    //   uploadData();
+    // }
 
     if (base64Content && fileExtension) {
       handleViewFile();
     }
   }, [base64Content, fileExtension]);
 
+
+
+
+
   return (
-    <div style={{ height: "100%" }}>
+    <div >
       {renderContent()}
     </div>
   );

@@ -851,6 +851,7 @@ const ObjectStructureList = (props) => {
                                                                 <>
                                                                     {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
                                                                         <LookupSelect
+                                                                            userId={parseInt(props.mfilesId, 10)}
                                                                             propId={prop.propId}
                                                                             label={prop.title}
                                                                             onChange={handleInputChange}
@@ -870,6 +871,7 @@ const ObjectStructureList = (props) => {
                                                                 <>
                                                                     {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
                                                                         <LookupMultiSelect
+                                                                            userId={parseInt(props.mfilesId, 10)}
                                                                             propId={prop.propId}
                                                                             label={prop.title}
                                                                             onChange={handleInputChange}

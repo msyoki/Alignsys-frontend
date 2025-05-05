@@ -18,7 +18,7 @@ import image from '../images/logo2.png';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 import * as constants from '../components/Auth/configs';
 import logo2 from '../images/ZFBLU.webp';
-
+import { Button } from '@mui/material';
 const Register = () => {
   const [companyName, setCompanyName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');

@@ -19,7 +19,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const PDFViewerPreview = (props) => {
   const [numPages, setNumPages] = useState(null);
-  const [zoom, setZoom] = useState(0.9);
+  const [zoom, setZoom] = useState(1);
+  const [isAsideOpen, setIsAsideOpen] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const containerRef = useRef(null);
   const mainContainerRef = useRef(null);
@@ -28,9 +29,11 @@ const PDFViewerPreview = (props) => {
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isRotated, setIsRotated] = useState(false);
   const [loadingPercentage, setLoadingPercentage] = useState(0);
-  const [isAsideOpen, setIsAsideOpen] = useState(true);
+
   const [containerWidth, setContainerWidth] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const prevWidthRef = useRef(props.windowWidth);
 
   // Add zoom controls
   const zoomIn = () => { setZoom(prev => Math.min(prev + 0.1, 2)) }
@@ -162,33 +165,38 @@ const PDFViewerPreview = (props) => {
 
 
   // Function to calculate the scale based on page number
-  const getScaleForPage = (pageNumber) => {
+  const getScaleForPage = (pageNumber, zoom = 1) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
 
-    if (!pageDim || containerWidth === 0) {
-      return 1; // Default scale
+    if (!pageDim) {
+      // Return a default scale if page dimensions are not found
+      return 1 * zoom;
     }
 
     const { width, height } = pageDim;
+    const isLandscape = width > height;
 
-    // Check if the page is rotated
-    const adjustedWidth = isRotated ? height : width;
+    // Determine base scale based on orientation and rotation status
+    let baseScale;
+    if (isLandscape) {
+      baseScale = isRotated ? 0.758 : 0.558;
+    } else {
+      baseScale = 0.89;
+    }
 
-    // Calculate scale based on container width
-    const newScale = containerWidth / adjustedWidth;
-
-    return newScale;
+    return baseScale * zoom;
   };
-
 
 
 
   const getScaleForPageThumbnail = (pageNumber) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
-    return pageDim && pageDim.width > pageDim.height ? 0.08 : 0.15; // Adjust the scale as needed
+
+    return pageDim && pageDim.width > pageDim.height ? 0.15 : 0.25; // Adjust the scale as needed
+
+
+
   };
-
-
 
 
   const handleDownload = (base64, ext, fileName) => {
@@ -298,6 +306,41 @@ const PDFViewerPreview = (props) => {
     // }
     return title;
   };
+  useEffect(() => {
+    setZoom(prevZoom => {
+      const newZoom = isAsideOpen ? prevZoom - 0.05 : prevZoom + 0.05;
+      return Math.max(0.5, Math.min(2, newZoom)); // clamp between 0.5 and 2
+    });
+  }, [isAsideOpen]);
+  
+
+  // Update zoom based on window width changes
+  useEffect(() => {
+    let prev = parseFloat(prevWidthRef.current); // convert from "46.7%" to 46.7
+    let current = parseFloat(props.windowWidth); // same here
+  
+    if (isNaN(prev) || isNaN(current)) return; // guard against parsing errors
+  
+    const diff = current - prev;
+    console.log(`prev: ${prev}`);
+    console.log(`current: ${current}`);
+  
+    if (diff !== 0) {
+      const sensitivity = 0.01;
+  
+      setZoom(prevZoom => {
+        let newZoom = current > prev
+          ? prevZoom + diff * sensitivity
+          : prevZoom - Math.abs(diff * sensitivity);
+  
+        return Math.max(0.5, Math.min(2, newZoom)); // clamp
+      });
+  
+      prevWidthRef.current = props.windowWidth; // store original string
+    }
+  }, [props.windowWidth]);
+  
+
 
   return (
     <>
@@ -387,7 +430,7 @@ const PDFViewerPreview = (props) => {
                 >
                   <Page
                     pageNumber={pageIndex + 1}
-                    scale={getScaleForPageThumbnail(pageIndex + 1)}
+                    scale={getScaleForPageThumbnail(pageIndex + 1, zoom)}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
                     className="page-container"
@@ -410,7 +453,7 @@ const PDFViewerPreview = (props) => {
               <div key={`page_${pageIndex + 1}`} id={`page_${pageIndex + 1}`} className="pdf-page-wrapper">
                 <Page
                   pageNumber={pageIndex + 1}
-                  scale={zoom}
+                  scale={getScaleForPage(pageIndex + 1, zoom)}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                   className="page-container shadow-sm"
