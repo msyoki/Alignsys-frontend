@@ -14,8 +14,6 @@ const ConfirmUpdateDialog = (props) => {
     return (
         <Dialog open={props.open} aria-labelledby="confirm-dialog-title">
 
-
-
             <DialogTitle
                 className='p-2 d-flex justify-content-between align-items-center'
                 style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}

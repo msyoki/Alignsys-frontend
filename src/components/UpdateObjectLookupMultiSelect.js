@@ -3,126 +3,142 @@ import Select from 'react-select';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
-const LookupMultiSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault, itemValue,disabled }) => {
+const LookupMultiSelect = ({
+  propId,
+  label,
+  onChange,
+  value,
+  required,
+  error,
+  helperText,
+  selectedVault,
+  itemValue,
+  disabled,
+  mfilesid,
+}) => {
   const [options, setOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [initialValues, setInitialValues] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
-  // Fetch options and set initial values
+  // Set selectedOptions from itemValue on mount or change
+  useEffect(() => {
+    if (itemValue && Array.isArray(itemValue)) {
+      setSelectedOptions(
+        itemValue.map((item) => ({
+          value: item.id,
+          label: item.title,
+        }))
+      );
+    } else {
+      setSelectedOptions([]);
+    }
+  }, [itemValue]);
+
+  // Fetch initial options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}`);
-        const formattedOptions = response.data.map(option => ({
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${mfilesid}/`
+        );
+
+        const formattedOptions = response.data.map((option) => ({
           label: option.name,
           value: option.id,
         }));
 
-        // Split itemValue into an array of trimmed strings if itemValue is not empty or undefined
-        const initialValuesArray = itemValue ? itemValue.split(';').map(value => value.trim()) : [];
+        // Ensure selected values are included in the options
+        const combined = [
+          ...formattedOptions,
+          ...selectedOptions.filter(
+            (opt) => !formattedOptions.some((fo) => fo.value === opt.value)
+          ),
+        ];
 
-        // Filter and map to get the matched values
-        const matchedOptions = formattedOptions.filter(option => initialValuesArray.includes(option.label));
-        const matchedValues = matchedOptions.map(option => option.value);
-
-        // Set initial values and options (excluding already selected values)
-        setOptions(formattedOptions);
-        setInitialValues(matchedValues);
-
+        setOptions(combined);
       } catch (error) {
-        console.error("Error fetching lookup options:", error);
+        console.error('Error fetching lookup options:', error);
       }
     };
 
     fetchOptions();
-  }, [propId, selectedVault, itemValue]);
+  }, [propId, selectedVault, mfilesid, selectedOptions]);
 
-  // Fetch search results based on the search term
+  // Fetch options based on search term
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (searchTerm.trim() === '') return;
+
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}`);
-        const formattedOptions = response.data.map(option => ({
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}/${mfilesid}/`
+        );
+
+        const formattedOptions = response.data.map((option) => ({
           label: option.name,
           value: option.id,
         }));
 
-        // Update options with the new search results, excluding already selected values
-        setOptions(formattedOptions.filter(option => !initialValues.includes(option.value)));
+        const combined = [
+          ...options,
+          ...formattedOptions.filter(
+            (newOption) => !options.some((opt) => opt.value === newOption.value)
+          ),
+        ];
+
+        setOptions(combined);
       } catch (error) {
         console.error('Error fetching lookup options based on search term:', error);
       }
     };
 
     fetchSearchResults();
-  }, [searchTerm, selectedVault, propId, initialValues]);
+  }, [searchTerm]);
 
-  const handleChange = (selectedOptions) => {
-    // Get the selected values from the `Select` component
-    const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
-    // Call the `onChange` callback with the selected values
+  const handleChange = (selected) => {
+    setSelectedOptions(selected || []);
+    const selectedValues = selected ? selected.map((opt) => opt.value) : [];
     onChange(propId, selectedValues);
-    // Update the `initialValues` state with the new selected values
-    setInitialValues(selectedValues);
   };
-
-  // Get the filtered options excluding the already selected initial values
-  const filteredOptions = options.filter(option => !initialValues.includes(option.value));
-
-  // Convert `value` array to options format
-  const selectedOptions = options.filter(option => value.includes(option.value));
 
   const customStyles = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-  
-    control: (base, state) => ({
+    control: (base) => ({
       ...base,
       borderColor: error ? 'red' : base.borderColor,
       fontSize: '12.5px',
-      color: '#555',              // Text color in the control (selected)
+      color: '#555',
       backgroundColor: disabled ? '#f5f5f5' : 'white',
     }),
-  
-    singleValue: (base) => ({
-      ...base,
-      color: '#555',              // Color of selected option text
-      fontSize: '12.5px',
-    }),
-  
     option: (base, state) => ({
       ...base,
-      color: '#555',              // Color of dropdown option text
+      color: '#555',
       fontSize: '12.5px',
       backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
     }),
-  
     placeholder: (base) => ({
       ...base,
-      color: '#555',              // Placeholder color
+      color: '#555',
       fontSize: '12.5px',
     }),
   };
 
-
   return (
     <div>
-   
       <Select
         isMulti
         value={selectedOptions}
         onChange={handleChange}
-        options={filteredOptions}
-        placeholder={itemValue?itemValue: `Please Select ${label} ...`}
+        options={options}
+        placeholder={`Select ${label}`}
         onInputChange={setSearchTerm}
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
-        className='my-2'
+        className="my-2"
         disabled={disabled}
-        menuPortalTarget={document.body}  // Fix overflow issue
-        menuPosition="absolute"  // Ensures dropdown is positioned correctly
-      
+        menuPortalTarget={document.body}
+        menuPosition="absolute"
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

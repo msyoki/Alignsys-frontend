@@ -22,7 +22,7 @@ const VaultSelectForm = () => {
                     }
                 });
                 setVaults(response.data);
-                // console.log(JSON.stringify(response.data));
+                console.log(JSON.stringify(response.data));
             } catch (error) {
                 console.log(error);
             }
@@ -35,7 +35,7 @@ const VaultSelectForm = () => {
         const value = event.target.value;
         const selectedObj = vaults.find(vault => vault.guid === value);
         setSelectedVault(selectedObj);
-        localStorage.setItem('selectedVault', JSON.stringify(selectedObj));
+        sessionStorage.setItem('selectedVault', JSON.stringify(selectedObj));
         navigate('/',{ state: { openalert: true, alertMsg: "logged in successfully", alertSeverity: "success" } });
     };
 

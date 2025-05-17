@@ -9,27 +9,26 @@
 
 .dashboard {
   display: flex;
-  position: relative;
+  position: fixed; /* fixes it to the screen */
   width: 100%;
-  overflow-y: hidden;
-
-  color:var(--primary-color)
+  height: 100vh; /* full screen height */
+  overflow: hidden; /* prevent any scroll */
+  background-color: #fff;
+  color: var(--primary-color);
 }
 
 /* Sidebar */
 .sidebar {
-  width: auto;
-  min-width: '300px';
+  /* min-width: 180px; */
+  width: fit-content; /* Adjusts width to content size */
   background: #2757aa;
- 
   color: #edf4f7;
-  transition: width 0.0s;
-  overflow: hidden; /* Hide excess content when sidebar is closed */
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
-  overflow-y: hidden;
- 
+  transition: width 0.3s ease;
+  overflow: hidden;
 
+  
 }
+
 
 
 
@@ -40,11 +39,11 @@
 
 
 
-
 .sidebar ul {
   list-style: none;
   padding: 0;
   margin: 0px 0;
+  width: 100%;
   
 }
 
@@ -59,9 +58,9 @@
   justify-content: flex-start; /* Align items to the start when sidebar is open */
 }
 
-.sidebar ul li span {
+/* .sidebar ul li span {
   margin-right: 15px;
-}
+} */
 
 
 .sidebar ul li i {
@@ -85,7 +84,7 @@
 } */
 
 .sidebar ul li.main-li{
- 
+  width: 100%;
   background-color: #2757aa;
 }
 
@@ -130,8 +129,9 @@
   width: 100%; /* Make the content width flexible */
   background-color: var(--secondary-color);
   color: #555; /* Remove single quotes */
-  height: 100%; /* Let it fill the height of its parent container */
-  overflow: hidden; /* Prevent unnecessary scroll */
+  height: 100vh; /* Let it fill the height of its parent container */
+  overflow-y: auto; /* Prevent unnecessary scroll */
+  overflow-x: hidden;
   background-color: #fff;
 }
 
@@ -172,6 +172,7 @@ body{
 
 body {
   font-family: "YourFont", sans-serif; /* Replace 'YourFont' with your desired font */
+  overflow: hidden;
 }
 
 * {

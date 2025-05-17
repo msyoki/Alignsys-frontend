@@ -174,6 +174,35 @@ const DocumentList = (props) => {
   const [loadingClick, setLoadingClick] = useSessionState('ss_loadingClick', false);
   const [searched, setSearched] = useSessionState('ss_searched', false);
   const [previewWindowWidth, setPreviewWindowWidth] = useSessionState('ss_previewWindowWidth', 40);
+  const [newWFState, setNewWFState] = useState(null)
+  const [newWF, setNewWF] = useState(null)
+  const [workflows, setWorkflows] = useSessionState('ss_vaultWorkflows', []);
+  const [approvalPayload, setApprovalPayload] = useState(null);
+
+
+  const markAssignementComplete = async () => {
+
+    await axios.post(`${constants.mfiles_api}/api/objectinstance/ApproveAssignment`, approvalPayload, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        console.log('Success:', response.data);
+        setApprovalPayload(null)
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    // console.log(props.vault)
+    // console.log(props.selectedObject)
+    // console.log(item)
+    // console.log(i)
+  }
+
+
+
 
 
 
@@ -187,7 +216,7 @@ const DocumentList = (props) => {
     setValue(newValue);
   };
   const transformFormValues = async () => {
-    alert("called")
+
     try {
       setUpdatingObject(true);
 
@@ -225,62 +254,25 @@ const DocumentList = (props) => {
 
 
 
-      // console.log(requestData);
+      console.log(requestData);
 
 
-      // await axios.put(
-      //   `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
-      //   requestData,
-      //   { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
-      // );
+      await axios.put(
+        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+        requestData,
+        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+      );
 
 
 
-      // setAlertPopOpen(true);
-      // setAlertPopSeverity("success");
-      // setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
-      // setFormValues({});
-
-      // // console.log(selectedObject)
-      // setPreviewObjectProps([])
-      // setSelectedObject({})
-
-      // setTimeout(() => {
-      //   if (selectedObject.id !== 0) {
-      //     previewObject(selectedObject, false);
-      //   } else {
-      //     previewSublistObject(selectedObject, false);
-      //   }
-      // }, 5000);
-
-    } catch (error) {
-      console.error('Error updating object props:', error);
       setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("something went wrong, please try again later!");
-    }
-  };
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
+      setFormValues({});
 
-  const transitionState = async () => {
-    try {
-      setUpdatingObject(true);
-
-      const data = {
-        vaultGuid: props.selectedVault.guid,
-        objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-        objectId: selectedObject.id,
-        nextStateId: selectedState.id,
-        userID: props.mfilesId
-      };
-
-      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
-        headers: { accept: '*/*', 'Content-Type': 'application/json' },
-      });
-
-      // setSelectedState({});
-      // if (!formValues) {
-      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
-      // }
+      // console.log(selectedObject)
+      setPreviewObjectProps([])
+      setSelectedObject({})
 
       setTimeout(() => {
         if (selectedObject.id !== 0) {
@@ -290,10 +282,42 @@ const DocumentList = (props) => {
         }
       }, 5000);
 
+    } catch (error) {
+      console.error('Error updating object props:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("something went wrong, please try again later!");
+    }
+  };
+
+
+  const transitionState = async () => {
+    try {
+      setUpdatingObject(true);
+      const data = {
+        vaultGuid: props.selectedVault.guid,
+        objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+        objectId: selectedObject.id,
+        nextStateId: selectedState.id,
+        userID: props.mfilesId
+      };
+      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
+        headers: { accept: '*/*', 'Content-Type': 'application/json' },
+      });
+      // setSelectedState({});
+      // if (!formValues) {
+      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
+      // }
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject, false);
+        } else {
+          previewSublistObject(selectedObject, false);
+        }
+      }, 5000);
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
       setAlertPopMessage("Updated successfully!");
-
     } catch (error) {
       console.error('Error transitioning state:', error);
       setAlertPopOpen(true);
@@ -302,9 +326,60 @@ const DocumentList = (props) => {
     }
   };
 
+  const addNewWorkflowAndState = async () => {
+    const hasNewWorkflow = Boolean(newWFState?.stateName);
+  
+    if (!hasNewWorkflow) {
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Select a workflow state to save.");
+
+    }
+    else {
+      try {
+        setUpdatingObject(true);
+        const data = {
+          vaultGuid: props.selectedVault.guid,
+          objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+          objectId: selectedObject.id,
+          workflowId: newWF.workflowId,
+          stateId: newWFState.stateId,
+          userID: props.mfilesId
+        };
+
+        await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectWorkflowstate`, data, {
+          headers: { accept: '*/*', 'Content-Type': 'application/json' },
+        });
+
+        setTimeout(() => {
+          if (selectedObject.id !== 0) {
+            previewObject(selectedObject, false);
+          } else {
+            previewSublistObject(selectedObject, false);
+          }
+        }, 5000);
+        setAlertPopOpen(true);
+        setAlertPopSeverity("success");
+        setAlertPopMessage("Updated successfully!");
+        setNewWF(null)
+        setNewWFState(null)
+      } catch (error) {
+        console.error('Error transitioning state:', error);
+        setAlertPopOpen(true);
+        setAlertPopSeverity("error");
+        setAlertPopMessage("something went wrong, please try again later!");
+      }
+    }
+  };
+
+
+
+
   const updateObjectMetadata = async () => {
     const hasFormValues = Object.keys(formValues || {}).length > 0;
     const hasSelectedState = Boolean(selectedState?.title);
+    const hasNewWorkflow = Boolean(newWF?.workflowName);
+
 
     // Process form values if any
     if (hasFormValues) {
@@ -314,6 +389,14 @@ const DocumentList = (props) => {
     // Process state transition if a state is selected
     if (hasSelectedState) {
       await transitionState();
+    }
+
+    if (hasNewWorkflow) {
+      await addNewWorkflowAndState();
+    }
+
+    if(approvalPayload){
+      markAssignementComplete()
     }
 
     // Reload metadata
@@ -382,7 +465,8 @@ const DocumentList = (props) => {
 
   const previewObject = async (item, getLinkedItems) => {
 
-
+    setNewWF(null)
+    setNewWFState(null)
     setComments([])
 
     // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
@@ -414,9 +498,9 @@ const DocumentList = (props) => {
       setLoadingClick(false)
     } catch (error) {
       setLoadingClick(false)
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("something went wrong, please try again later!");
+      // setAlertPopOpen(true);
+      // setAlertPopSeverity("error");
+      // setAlertPopMessage("something went wrong, please try again later!");
       console.error('Error fetching view objects:', error);
       setLoadingObject(false)
     }
@@ -428,7 +512,8 @@ const DocumentList = (props) => {
 
   const previewSublistObject = async (item, getLinkedItems) => {
 
-
+    setNewWF(null)
+    setNewWFState(null)
 
     // Reset the comments and log the selected item
     setComments([]);
@@ -459,7 +544,7 @@ const DocumentList = (props) => {
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
-      // console.log(propsResponse.data)
+      console.log(propsResponse.data)
       setPreviewObjectProps(propsResponse.data);
     } catch (error) {
       setLoadingClick(false)
@@ -542,10 +627,31 @@ const DocumentList = (props) => {
     setDialogOpen(false)
     setSelectedState({})
     setFormValues({})
-    // console.log(currentState)
-    setSelectedState(currentState)
+    setNewWF(null)
+    setNewWFState(null)
+    setApprovalPayload(null)
+
+    setSelectedState({})
+    
 
   }
+
+
+
+  const fetchVaultWorkflows = async () => {
+    try {
+      const response = await axios.get(`${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsWorkflows/${props.selectedVault.guid}/${props.mfilesId}`, {
+        headers: {
+          'accept': '*/*'
+        }
+      });
+
+      setWorkflows(response.data)
+      console.log('Response:', response.data);
+    } catch (error) {
+      console.error('Error fetching workflows:', error);
+    }
+  };
 
 
 
@@ -569,16 +675,20 @@ const DocumentList = (props) => {
       .then(response => {
 
         setSelectedObjWf(response.data)
-        // console.log(response.data)
+        console.log(response.data)
+      
         setCurrentState({
-          stateTitle: response.data.currentStateTitle,
-          stateId: response.data.currentStateid
+          title: response.data.currentStateTitle,
+          id: response.data.currentStateid
         })
+
 
       })
       .catch(error => {
+        fetchVaultWorkflows()
         console.error('Error:', error);
         setSelectedObjWf(null)
+
 
       });
   }
@@ -930,6 +1040,16 @@ const DocumentList = (props) => {
 
   }
 
+  const toggleSidebar = () => {
+    if (props.sidebarOpen) {
+      props.setSidebarOpen(false)
+    } else {
+      props.setSidebarOpen(true)
+    }
+
+
+  }
+
 
 
 
@@ -965,7 +1085,7 @@ const DocumentList = (props) => {
       <LoadingDialog opendialogloading={loadingClick} />
 
 
-      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
+      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' ,height:'auto' }}>
         {/* Object List */}
         <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '25%' }}>
           <Box
@@ -982,13 +1102,29 @@ const DocumentList = (props) => {
           >
             {/* Logo Section */}
             <Box display="flex" alignItems="center" className="mx-1 pe-2">
-              {!props.sidebarOpen && (
+
+              <Box
+                onClick={toggleSidebar}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 40,
+                  height: 40,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: '#f0f4fa',
+                    borderRadius: '6px',
+                    transform: 'scale(1.05)',
+                  },
+                }}
+              >
                 <i
-                  onClick={() => props.setSidebarOpen(true)}
                   className="fa-solid fa-bars"
-                  style={{ fontSize: '18px', marginRight: '12px', cursor: 'pointer' }}
-                />
-              )}
+                  style={{ fontSize: '25px', color: '#2757aa' }}
+                ></i>
+              </Box>
               <img
                 src={logo}
                 alt="Logo"
@@ -1039,7 +1175,7 @@ const DocumentList = (props) => {
 
 
           <div
-            className="p-2 d-flex justify-content-center shadow-sm"
+            className=" d-flex justify-content-center shadow-sm p-1"
             style={{ backgroundColor: '#ecf4fc' }}
           >
             <form
@@ -1083,13 +1219,13 @@ const DocumentList = (props) => {
 
               {/* Search Input */}
               <input
-                className="form-control form-control-md mx-1 rounded"
+                className="form-control form-control-md mx-1  rounded"
                 type="text"
                 required
-                placeholder="Search ..."
+                placeholder="Search"
                 value={props.searchTerm}
                 onChange={(e) => props.setSearchTerm(e.target.value)}
-                style={{ borderRadius: '0px' }}
+                style={{ borderRadius: '0px', fontSize:'13px' }}
               />
 
               {/* Search Button */}
@@ -1111,7 +1247,7 @@ const DocumentList = (props) => {
 
               <Button
                 type="submit"
-                className="mb-3 m-2 rounded-pill" // Retaining the same classes as in the original code
+                className="m-2 rounded-pill" // Retaining the same classes as in the original code
                 style={{
                   fontSize: '12.5px',
                   color: '#fff',
@@ -1144,10 +1280,11 @@ const DocumentList = (props) => {
             value={value}
             onChange={handleChange}
             aria-label="Horizontal tabs example"
-            className="shadow-lg"
+            className="p-1"
             sx={{
               borderColor: 'divider',
-              backgroundColor: '#fff',
+              // backgroundColor: '#fff',
+              backgroundColor: '#ecf4fc',
               minHeight: '36px',  // Reduced overall tab bar height
             }}
           >
@@ -1167,7 +1304,7 @@ const DocumentList = (props) => {
                   height: '36px',
                   padding: '4px 12px',
                   fontSize: '13px',
-                  backgroundColor: '#fff',
+                   backgroundColor: '#ecf4fc',
                   minWidth: 'auto',
                 }}
               />
@@ -1194,14 +1331,15 @@ const DocumentList = (props) => {
                   <>
                     {props.data.length > 0 ? (
                       <div>
-                        <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
-                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span>
-                          <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span>
+                        <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                          {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
+                          {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
+                           <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           Search Results
                         </h6>
 
-                        <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
+                        <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                           {props.data.map((item, index) => (
 
                             <SimpleTreeView>
@@ -1237,6 +1375,7 @@ const DocumentList = (props) => {
                                     {item.objectTypeId || item.objectID === 0 ? (
                                       <>
                                         <FileExtIcon
+                                          fontSize={'15px'}
                                           guid={props.selectedVault.guid}
                                           objectId={item.id}
                                           classId={item.classId || item.classID}
@@ -1352,13 +1491,13 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
                     </h6>
 
-                    <div className=' text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
+                    <div className=' text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.recentData.map((item, index) => (
 
                         <SimpleTreeView>
@@ -1394,6 +1533,7 @@ const DocumentList = (props) => {
                                 {item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtIcon
+                                      fontSize={'15px'}
                                       guid={props.selectedVault.guid}
                                       objectId={item.id}
                                       classId={item.classId || item.classID}
@@ -1454,13 +1594,13 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark m-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
                     </h6>
 
-                    <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
+                    <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.assignedData.map((item, index) => (
 
                         <SimpleTreeView>
@@ -1496,6 +1636,7 @@ const DocumentList = (props) => {
                                 {item.objectTypeId || item.objectID === 0 ? (
                                   <>
                                     <FileExtIcon
+                                      fontSize={'15px'}
                                       guid={props.selectedVault.guid}
                                       objectId={item.id}
                                       classId={item.classId || item.classID}
@@ -1554,13 +1695,13 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
                     </h6>
 
-                    <div className='text-dark' style={{ marginLeft: '20px', height: '65vh', overflowY: 'auto' }}>
+                    <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.deletedData.map((item, index) => (
 
                         <SimpleTreeView>
@@ -1596,6 +1737,7 @@ const DocumentList = (props) => {
                                 <Box display="flex" alignItems="center">
                                   {item.objectTypeId || item.objectID === 0 ? (
                                     <FileExtIcon
+                                      fontSize={'15px'}
                                       guid={props.selectedVault.guid}
                                       objectId={item.id}
                                       classId={item.classId || item.classID}
@@ -1708,8 +1850,8 @@ const DocumentList = (props) => {
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%' }}>
-          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} />
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%', height:'auto' }}>
+          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} />
         </div>
       </div>
 

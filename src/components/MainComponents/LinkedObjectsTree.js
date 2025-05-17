@@ -116,7 +116,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                       borderBottom: '1px solid #dedddd'
                     }}
                   >
-                    <i style={{ color: '#2757aa', fontSize: '15px' }} className="fa-solid fa-folder-open mx-2"></i>
+                    <i style={{ fontSize: '15px' , color:'#a5cbc3'}} className="fa-solid fa-layer-group mx-2"></i>
                     {obj.propertyName}(s)
                   </Box>
                 }
@@ -139,10 +139,10 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                         ) : (
                           <i
                             className="fas fa-folder mx-1"
-                            style={{ fontSize: "15px", color: "#2757aa" }}
+                            style={{ fontSize: "15px", color: "#2a68af" }}
                           ></i>
                         )}
-                        <span style={{ fontSize: '12.5px' }}>{subItem.title}{subItem.objectID === 0 && (
+                        <span style={{ fontSize: '12px' }}>{subItem.title}{subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
                             objectId={subItem.id}
@@ -193,7 +193,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                   padding: '3px',
                   borderBottom: '1px solid #dedddd', padding: '3px'
                 }}>
-                  <i style={{ color: '#2757aa', fontSize: '15px' }} class="fa-solid fa-copy mx-2"></i> Document(s)
+                  <i style={{ fontSize: '15px',color:'#a5cbc3' }} class="fa-solid fa-copy mx-2 "></i> Document(s)
                 </Box>}
             >
               {documents.map((doc) =>
@@ -220,7 +220,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                             style={{ fontSize: "15px", color: "#fff" }}
                           ></i>
                         )}
-                        <span style={{ marginLeft: '8px', fontSize: '12.5px' }}>{subItem.title}{subItem.objectID === 0 && (
+                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>{subItem.title}{subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
                             objectId={subItem.id}

@@ -612,7 +612,7 @@ function Dashboard() {
     getViewableObjects();
     getNetworkStatus();
 
-    const vault = localStorage.getItem('selectedVault');
+    const vault = sessionStorage.getItem('selectedVault');
     if (vault) {
       setSelectedVault(JSON.parse(vault));
       getVaultId(JSON.parse(vault).guid)
@@ -715,7 +715,7 @@ function Dashboard() {
               <>
                 {/* Logo Section */}
                 <div
-                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg p-1"
+                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg "
                   style={{
                     height: "58px", // Fixed height (adjust as needed)
                     minHeight: "58px", // Prevent shrinking
@@ -770,7 +770,7 @@ function Dashboard() {
                     className="shadow-lg"
                     sx={{
                       color: "#fff",
-                      maxHeight: isSublistVisible ? "280px" : "0",
+                      maxHeight: isSublistVisible ? "350px" : "0",
                       overflowY: "auto",
                       width: "100%",
                       opacity: isSublistVisible ? "1" : "0",
@@ -779,7 +779,10 @@ function Dashboard() {
                       backgroundColor: "#2757aa",
 
                       // Move scrollbar to the left
-                      direction: "[ltl]",
+                      // direction: "[ltl]",
+
+                      // Move scrollbar to the left
+                      direction: "rtl",
 
                       // Keep content aligned normally
                       "& *": {
@@ -865,7 +868,7 @@ function Dashboard() {
                           >
                             <ListItemText
                               primary={item.namesingular}
-                              primaryTypographyProps={{ fontSize: "12px" }} // Smaller text size
+                              primaryTypographyProps={{ fontSize: "11px" }} // Smaller text size
                               sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
                             />
                           </ListItem>

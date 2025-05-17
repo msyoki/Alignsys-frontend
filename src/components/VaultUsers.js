@@ -1,32 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
-import AddUserToVault from './AddUserToVault';
-import * as constants from './Auth/configs'
-import LoadingMini from './Loaders/LoaderMini';
+import React, { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TablePagination,
+  CircularProgress
+} from '@mui/material';
+
 import TimedAlert from './TimedAlert';
-import CircularProgress from '@mui/material/CircularProgress';
+import * as constants from './Auth/configs';
+import axios from 'axios';
 
 function VaultUsersTable(props) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleDetach = async (userId) => {
-
     try {
-      // Call the API to detach the user from the vault
       await axios.post(`${constants.auth_api}/api/detach-user-from-vault/`, {
         user_id: userId,
         vault_id: props.vault.guid
       });
 
-      // Refresh the list of users (this can be replaced with a call to fetch updated data)
-      props.fetchUsersNotLinkedToVault(props.vault.guid)
+      props.fetchUsersNotLinkedToVault(props.vault.guid);
       props.viewvaultusers(props.vault.guid);
 
       props.setOpenAlert(true);
       props.setAlertSeverity("success");
       props.setAlertMsg("Detached successfully");
-
     } catch (error) {
       props.setOpenAlert(true);
       props.setAlertSeverity("error");
@@ -35,8 +50,10 @@ function VaultUsersTable(props) {
     }
   };
 
-
-
+  const paginatedUsers = props.vaultUsers.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <>
@@ -49,63 +66,66 @@ function VaultUsersTable(props) {
         setMessage={props.setAlertMsg}
       />
 
-        <Button className='my-2' variant="contained" color="primary" onClick={props.syncUser}>
-          <span style={{ fontSize: '11px' }}>Sync {props.vault.name} Vault Users</span> {props.loading?<span className='mx-2'><CircularProgress size="15px" color="inherit"  /></span>:<></>}
-        </Button>
-      
+      <Button
+        className='my-2'
+        variant="contained"
+        color="primary"
+        onClick={props.syncUser}
+      >
+        <span style={{ fontSize: '11px' }}>
+          Sync {props.vault.name} Vault Users
+        </span>
+        {props.loading && (
+          <span className='mx-2'>
+            <CircularProgress size="15px" color="inherit" />
+          </span>
+        )}
+      </Button>
 
-        <TableContainer component={Paper} style={{ height: '70vh', overflowY: 'auto', fontSize: '5px' }}>
-          <Table className='table table-sm table-responsive p-2' style={{ fontSize: '5px' }}>
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ textAlign: 'center' }}>ID</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell style={{ textAlign: 'center' }}>Email</TableCell>
-                {/* <TableCell style={{ textAlign: 'center' }}>Username</TableCell> */}
-                <TableCell style={{ textAlign: 'center' }}>Full Name</TableCell>
-                {/* <TableCell style={{ textAlign: 'center' }}>LName</TableCell> */}
-                {/* <TableCell style={{ textAlign: 'center' }}>Active</TableCell> */}
-                {/* <TableCell style={{ textAlign: 'center' }}>Admin</TableCell> */}
-                {/* <TableCell style={{ textAlign: 'center' }}>Action</TableCell> */}
+      <TableContainer component={Paper} style={{ height: '70vh', overflowY: 'auto' }}>
+        <Table stickyHeader className='table table-sm table-responsive p-2'>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center">ID</TableCell>
+              <TableCell>Username</TableCell>
+              <TableCell align="center">Email</TableCell>
+              <TableCell align="center">Full Name</TableCell>
+              {/* <TableCell align="center">Action</TableCell> */}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedUsers.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell align="center">{user.mfiles_id}</TableCell>
+                <TableCell>{user.username}</TableCell>
+                <TableCell align="center">{user.email}</TableCell>
+                <TableCell align="center">{user.first_name} {user.last_name}</TableCell>
+                {/* <TableCell align="center">
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleDetach(user.id)}
+                  >
+                    <small><i className='fas fa-unlink mx-2'></i>Detach</small>
+                  </Button>
+                </TableCell> */}
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {props.vaultUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell style={{ textAlign: 'center' }}>{user.mfiles_id}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell style={{ textAlign: 'center' }}>{user.email}</TableCell>
-                  <TableCell style={{ textAlign: 'center' }}>{user.first_name} {user.last_name}</TableCell>
-                  {/* <TableCell style={{ textAlign: 'center' }}>{user.last_name}</TableCell> */}
-                  {/* <TableCell>{user.is_staff ? 'Yes' : 'No'}</TableCell> */}
-                  {/* <TableCell style={{ textAlign: 'center' }}>{user.is_active ? 'Yes' : 'No'}</TableCell> */}
-                  {/* <TableCell style={{ textAlign: 'center' }}>{user.is_admin ? 'Yes' : 'No'}</TableCell> */}
-                  {/* <TableCell>{user.organization}</TableCell> */}
-                  {/* <TableCell style={{ textAlign: 'center' }}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="warning"
-                      onClick={() => handleDetach(user.id)}
-                    >
-                      <small><i className='fas fa-unlink mx-2'></i>Detach</small>
-                    </Button>
-                  </TableCell> */}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={props.vaultUsers.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+      </TableContainer>
 
-        {/* <AddUserToVault
-          selectedVault={props.vault}
-          viewvaultusers={props.viewvaultusers}
-          usersnotlinkedtovault={props.usersnotlinkedtovault}
-          fetchUsersNotLinkedToVault={props.fetchUsersNotLinkedToVault}
-        /> */}
-  
-
-
+     
     </>
   );
 }

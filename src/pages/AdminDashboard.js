@@ -3,6 +3,7 @@ import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Dashboard.css'
 import '../styles/Custombuttons.css'
 import '../styles/Navbar.css'
+
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { useNavigate } from "react-router-dom";
 
@@ -23,17 +24,13 @@ import MiniLoader from '../components/Modals/MiniLoaderDialog';
 import OrganizationVaultList from '../components/MainComponents/OrganizationVaultList';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
-
-import UserRegistrationModal from '../components/RegisterUser';
-import BulkUserRegistrationDialog from '../components/RegisterBulkUsers';
 import * as constants from '../components/Auth/configs'
 import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
 import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
 import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import pic from '../images/R.png'
+import LoginActivityTable from '../components/LoginActivity';
 
 
 
@@ -83,6 +80,7 @@ function AdminDashboard() {
     const [organizationusers, setOrganizationUsers] = useState([])
     const [vaultGroups, setViewVaultGroups] = useState(false);
     const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
+    const [viewLoginActivity, setViewLoginActivity] = useState(false);
     const [viewCreateObject, setViewCreateObject] = useState(false);
     const [viewObjects, setViewObjects] = useState(false);
     const [viewVaultSettings, setViewVaultSettings] = useState(false);
@@ -444,21 +442,11 @@ function AdminDashboard() {
     };
 
 
-    const style = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 400,
-        bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
-    };
 
 
     const viewnewobject = () => {
         setViewCreateObject(true)
+        setViewLoginActivity(false)
         setViewVaultUsers(false)
         setViewLoginAccounts(false)
         setViewVaultGroups(false)
@@ -469,6 +457,7 @@ function AdminDashboard() {
 
     const viewvaultobjects = () => {
         setViewObjects(true)
+        setViewLoginActivity(false)
         setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
@@ -502,6 +491,7 @@ function AdminDashboard() {
 
 
         setViewVaultUsers(true)
+        setViewLoginActivity(false)
         setViewObjects(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
@@ -511,6 +501,7 @@ function AdminDashboard() {
 
     const viewobjectstructure = () => {
         setViewObjectStructure(true)
+        setViewLoginActivity(false)
         setViewVaultUsers(false)
         setViewObjects(false)
         setViewCreateObject(false)
@@ -519,6 +510,7 @@ function AdminDashboard() {
     }
     const viewvaultgroups = () => {
         setViewVaultGroups(true)
+        setViewLoginActivity(false)
         setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewLoginAccounts(false)
@@ -529,12 +521,27 @@ function AdminDashboard() {
 
     const viewloginaccounts = () => {
         setViewLoginAccounts(true)
+        setViewLoginActivity(false)
         setViewVaultUsers(false)
         setViewCreateObject(false)
         setViewVaultGroups(false)
         setViewObjects(false)
         setViewObjectStructure(false)
     }
+
+
+    const viewloginactivity = () => {
+        setViewLoginActivity(true)
+        setViewLoginAccounts(false)
+        setViewVaultUsers(false)
+        setViewCreateObject(false)
+        setViewVaultGroups(false)
+        setViewObjects(false)
+        setViewObjectStructure(false)
+    }
+
+
+
 
     const fetchObjectPermisions = async (object) => {
         setSelectedObject(object)
@@ -750,7 +757,8 @@ function AdminDashboard() {
                                             height: 40,
                                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                                             transform: 'translateZ(0)',
-                                            transition: 'transform 0.2s'
+                                            transition: 'transform 0.2s',
+                                            backgroundColor: '#2757aa'
 
 
                                         }}
@@ -760,39 +768,73 @@ function AdminDashboard() {
 
                                 </div>
 
-                                <ul className="bottom-top menu-items">
-                                    <li className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
 
-                                            <span className=' text-center' style={{ fontSize: '13px' }}>{user.first_name} {user.last_name}</span>
+
+                                {/* Menu Items */}
+                                <ul className="menu-items">
+                                    <li
+                                        className="menu-item main-li shadow-lg"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            padding: "10px 15px",
+                                            borderRadius: "8px",
+                                            width: "100%",  // Ensure full width
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
+                                            <span style={{ fontSize: "14px" }}>{user.first_name}</span>
                                         </div>
-
+                                        <div
+                                            className='mx-2'
+                                            style={{
+                                                transition: "transform 0.3s ease-in-out",
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <span style={{ fontSize: "14px" }}>{user.last_name}</span>
+                                        </div>
                                     </li>
-                                    <li className="menu-item main-li  shadow-lg " style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
 
-                                            <span className=' text-center' style={{ fontSize: '13px' }}> {user.organization} Admin</span>
+                                    <li
+                                        className="menu-item main-li shadow-lg"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            padding: "10px 15px",
+                                            borderRadius: "8px",
+                                            width: "100%",  // Ensure full width
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
+                                            <span style={{ fontSize: "14px" }}>{user.organization}</span>
                                         </div>
-
                                     </li>
                                 </ul>
+
                                 {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
                                     <span className='p-2 mx-3'>{user.organization}</span>
                                 </div> */}
 
 
+
+
+
+                                {/* Bottom Buttons */}
                                 <div>
                                     <ul className="bottom-buttons">
 
-
                                         <li onClick={homePage} className="menu-item main-li shadow-lg">
-                                            <i className="fas fa-house-user" style={{ fontSize: '20px' }}></i>
-                                            <span style={{ fontSize: '13px' }}>Back Home</span>
+                                            <i className="fas fa-house-user" style={{ fontSize: "18px" }}></i>
+                                            <span style={{ fontSize: "14px" }}>Home</span>
                                         </li>
 
                                         <li onClick={logoutUser} className="menu-item main-li shadow-lg">
-                                            <i className="fas fa-sign-out-alt" style={{ fontSize: '20px' }}></i>
-                                            <span style={{ fontSize: '13px' }}>Logout</span>
+                                            <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
+                                            <span style={{ fontSize: "14px" }}>Logout</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -862,6 +904,8 @@ function AdminDashboard() {
                                     toggleSublist1={toggleSublist1}
                                     viewvaultobjects={viewvaultobjects}
                                     viewLoginAccounts={viewLoginAccounts}
+                                    viewLoginActivity={viewLoginActivity}
+                                    viewloginactivity={viewloginactivity}
                                     viewvaultgroups={viewvaultgroups}
                                     vaultObjects={vaultObjects}
                                     viewloginaccounts={viewloginaccounts}
@@ -1133,6 +1177,24 @@ function AdminDashboard() {
                                     </div>
 
                                     <OrganizationUsersTable users={organizationusers} />
+                                </div>
+                                : <></>
+
+                            }
+                            {viewLoginActivity ?
+                                <div id='loginactivity' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                    <div>
+
+                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
+
+                                    </div>
+                                    <div className='btn-group my-3' role="group" aria-label="Basic example">
+                                        {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
+                <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
+
+                                    </div>
+
+                                    <LoginActivityTable />
                                 </div>
                                 : <></>
 

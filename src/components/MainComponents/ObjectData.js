@@ -7,7 +7,7 @@ import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../UpdateObjectLookupMultiSelect';
 import LookupSelect from '../UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button } from '@mui/material';
+import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, FormControl } from '@mui/material';
 import Bot from '../Bot';
 
 import Accordion from '@mui/material/Accordion';
@@ -21,6 +21,7 @@ import FileExtText from '../FileExtText';
 import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
+import UpdateCheckboxUserList from '../UpdateCheckboxUserList';
 
 
 function CustomTabPanel({ children, value, index, ...other }) {
@@ -77,9 +78,12 @@ export default function ObjectData(props) {
       }
     };
 
+
+
     const [value, setValue] = useState(getInitialValue);
 
     useEffect(() => {
+
       try {
         sessionStorage.setItem(key, JSON.stringify(value));
       } catch (e) {
@@ -90,12 +94,31 @@ export default function ObjectData(props) {
     return [value, setValue];
   }
 
+
   const [value, setValue] = useSessionState('ss_viewTabIndex_ObjData', 0);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [openAlert, setOpenAlert] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('');
   const [alertMsg, setAlertMsg] = useState('');
+  const [checkedItems, setCheckedItems] = useState({});
 
+
+
+  const [nextState, setNextStates] = useState([])
+
+
+  const handleWFChangeEmpty = (event) => {
+    const selected = props.workflows.find((wf) => wf.workflowId === event.target.value);
+    props.setNewWF(selected);
+    console.log('Selected workflow:', selected);
+  };
+
+  const handleStateChangeNew = (event) => {
+    const selected = props.newWF.states.find((state) => state.stateId === event.target.value);
+    props.setNewWFState(selected);
+    console.log('Selected state:', selected);
+  };
 
 
   const deleteObject = () => {
@@ -274,16 +297,61 @@ export default function ObjectData(props) {
   };
 
 
-  const filteredProps = props.previewObjectProps.filter(
-
-    item => !['Last modified by', 'Last modified', 'Created', 'Created by', 'Accessed by me', 'Class', 'State', 'Workflow'].includes(item.propName)
+  const filteredProps = props.previewObjectProps.filter(item =>
+    ![
+      'Last modified by',
+      'Last modified',
+      'Created',
+      'Created by',
+      'Accessed by me',
+      'Class',
+      'State',
+      'Workflow',
+      'Marked as rejected by'
+    ].includes(item.propName) &&
+    !(item.propName === 'Marked as complete by' && (!item.value || item.value.length === 0)) &&
+    !(item.propName === 'Assigned to' && (!item.value || item.value.length === 0))
   );
 
 
-  const getPropValue = name => {
+
+
+  // const getPropValue = name => {
+  //   console.log(props.previewObjectProps)
+  //   const foundItem = props.previewObjectProps.find(item => item.propName === name);
+  //   console.log(foundItem.value)
+  //   return foundItem ? foundItem.value : null;
+  // };
+  const getPropValue = (name) => {
     const foundItem = props.previewObjectProps.find(item => item.propName === name);
-    return foundItem ? foundItem.value : null;
+
+    if (!foundItem) return null;
+
+    const { value, datatype } = foundItem;
+
+    // Handle Lookup or MultiSelectLookup fields (array of objects)
+    if (Array.isArray(value)) {
+      if (value.length === 0) return `Please Select ${name} ...`;
+      if (value.length === 1) return value[0].title;
+      return value.map(v => v.title).join(', '); // for multiselects
+    }
+
+    // For other datatypes (string, number, boolean, etc.)
+    return value;
   };
+
+  const getClassId = (name) => {
+    const foundItem = props.previewObjectProps.find(item => item.propName === name);
+
+    if (!foundItem) return null;
+
+    const { value, datatype } = foundItem;
+
+    return value.map(v => v.id).join(', '); // for multiselects
+
+  };
+
+
 
   const trimTitle = (title) => {
     const maxLength = 65; // Set your desired max length
@@ -293,6 +361,33 @@ export default function ObjectData(props) {
     // }
     return title;
   };
+
+
+
+  const setAssignmentPayload = (item, i) => {
+    const id = i.id;
+
+    // Toggle checked state
+    setCheckedItems(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+
+    // Optionally update approval payload if needed
+    const payload = {
+      vaultGuid: props.vault.guid,
+      objectId: props.selectedObject.id,
+      classId: -100,
+      userID: id,
+      approve: !checkedItems[id], // the new value
+    };
+
+    props.setApprovalPayload(payload);
+  };
+
+
+
+
 
 
 
@@ -515,7 +610,7 @@ export default function ObjectData(props) {
 
 
 
-                <Box className="p-1" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
+                <Box className="p-2" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   {/* Left Section */}
                   <Box
                     sx={{ textAlign: 'start', fontSize: '12.5px', width: '50%' }}
@@ -526,7 +621,7 @@ export default function ObjectData(props) {
 
                       <Box
                         sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
-                        className=""
+
                       >
                         {props.selectedObject.objectTypeName || getPropValue('Class')}
 
@@ -536,7 +631,7 @@ export default function ObjectData(props) {
 
                       <Box
                         sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
-                        className=""
+
                       >
                         ID: {props.selectedObject.id}   Version : {props.selectedObject.versionId}
 
@@ -566,319 +661,314 @@ export default function ObjectData(props) {
 
 
                 <Box
-                  className='shadow-lg'
-                  sx={{
 
+                  sx={{
                     backgroundColor: '#fff',
                     fontSize: '12.5px',
 
+
                   }}
+
+
                 >
 
 
-                  <List sx={{
-                    p: 3,
-                    height: '50vh',
-                    overflowY: 'auto'
+                  <List
 
-                  }}>
-                    <>
-                      <ListItem sx={{ p: 0 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                          <Typography
-                            className='my-2'
-                            variant="body2"
+                    sx={{
+                      p: 3,
+                      height: '55vh',
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center', // Center the inner content
+                    }}
+                  // className='shadow-lg'
+                  >
+                    {/* Class Field */}
+                    <ListItem sx={{ p: 0, width: '100%', maxWidth: '500px' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: '#555',
+                            flexBasis: '35%',
+                            fontSize: '12.5px',
+                            textAlign: 'end',
+                          }}
+                        >
+                          Class:
+                        </Typography>
+                        <Box
+                          sx={{
+                            flexBasis: '65%',
+                            fontSize: '12.5px',
+                            textAlign: 'start',
+                            ml: 1,
+
+                          }}
+                        >
+                          <span>
+                            {props.selectedObject.classTypeName || getPropValue('Class')}
+
+                          </span>
+                        </Box>
+                      </Box>
+                    </ListItem>
+
+                    {/* Properties */}
+                    <Box sx={{ fontSize: '12.5px', width: '100%', maxWidth: '500px' }}>
+                      {filteredProps.map((item, index) => (
+                        <ListItem key={index} sx={{ p: 0 }}>
+                          <Box
                             sx={{
-                              color: '#555',
-
-                              flexBasis: '35%',
-                              fontSize: '12.5px',
-                              textAlign: 'end'
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              width: '100%',
+                              alignItems: 'center',
                             }}
                           >
-                            Class:
-                          </Typography>
-                          <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1, mt: 1 }}>
-                            {/* <span>{getPropValue('Class')}</span> */}
-                            <span>  {props.selectedObject.classTypeName || getPropValue('Class')}</span>
+                            {/* Label */}
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#555',
+                                flexBasis: '35%',
+                                fontSize: '12.5px',
+                                textAlign: 'end',
+                              }}
+                            >
+                              {item.propName}
+                              {item.isRequired && (
+                                <span className="text-danger"> *</span>
+                              )}
+                              :
+                            </Typography>
 
-                          </Box>
-                        </Box>
-                      </ListItem>
+                            {/* Value / Input */}
+                            <Box
+                              sx={{
+                                flexBasis: '65%',
+                                fontSize: '12.5px',
+                                textAlign: 'start',
+                                ml: 1,
+                              }}
+                            >
+                              {item.isAutomatic || !item.userPermission?.editPermission ? (
+                                <Typography variant="body2" sx={{ fontSize: '11px', my: 1 }}>
+                                  {item.value}
+                                </Typography>
+                              ) : (
+                                <>
+                                  {item.propName === 'Class' && (
+                                    <span style={{ fontSize: '12.5px', color: '#555' }}>
+                                      {item.value}
+                                    </span>
+                                  )}
 
-                      <Box sx={{ fontSize: '12.5px' }}>
-                        {filteredProps.map((item, index) => (
-                          <ListItem key={index} sx={{ p: 0 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-
-                              {/* Label Section */}
-                              <Typography
-                                className="my-2"
-                                variant="body2"
-                                sx={{
-                                  color: '#555',
-                                  flexBasis: '35%',
-                                  fontSize: '12.5px',
-                                  textAlign: 'end',
-                                }}
-                              >
-                                {item.propName} {item.isRequired && <span className="text-danger"> *</span>} :
-                              </Typography>
-
-                              {/* Value/Input Section */}
-                              <Box sx={{ flexBasis: '65%', fontSize: 'inherit', textAlign: 'start', ml: 1 }}>
-                                {item.isAutomatic || !item.userPermission?.editPermission ? (
-                                  <Typography className="my-2" variant="body2" sx={{ fontSize: '11px' }}>
-                                    {item.value}
-                                  </Typography>
-                                ) : (
-                                  <>
-                                    {/* Display Class Value */}
-                                    {item.propName === 'Class' && (
-                                      <span style={{ fontSize: '12.5px', color: '#555' }}>{item.value}</span>
+                                  {/* Text Input */}
+                                  {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(item.datatype) &&
+                                    !item.isHidden && (
+                                      <input
+                                        value={props.formValues?.[item.id]?.value || ''}
+                                        placeholder={item.value}
+                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                        className="form-control form-control-sm my-1"
+                                        disabled={item.isAutomatic}
+                                        style={{ fontSize: '12.5px', color: '#555' }}
+                                      />
                                     )}
 
-                                    {/* Text Input */}
-                                    {(item.datatype === 'MFDatatypeText' ||
-                                      item.datatype === 'MFDatatypeFloating' ||
-                                      item.datatype === 'MFDatatypeInteger') &&
-                                      !item.isHidden && (
-                                        <input
-                                          value={props.formValues?.[item.id]?.value || ''}
-                                          placeholder={item.value}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          className="form-control form-control-sm my-1"
+                                  {/* Textarea */}
+                                  {item.datatype === 'MFDatatypeMultiLineText' && !item.isHidden && (
+                                    <textarea
+                                      placeholder={item.value}
+                                      value={props.formValues?.[item.id]?.value || ''}
+                                      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                      rows={2}
+                                      className="form-control form-control-sm my-1"
+                                      disabled={item.isAutomatic}
+                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                    />
+                                  )}
+
+                                  {/* Date Picker */}
+                                  {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
+                                    <input
+                                      type="date"
+                                      placeholder={item.value}
+                                      value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                      className="form-control form-control-sm my-1"
+                                      disabled={item.isAutomatic}
+                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                    />
+                                  )}
+
+                                  {/* Timestamp */}
+                                  {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
+                                    <input
+                                      type="time"
+                                      className="form-control form-control-sm my-1"
+                                      value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+                                      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                      disabled={item.isAutomatic}
+                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                    />
+                                  )}
+
+                                  {/* Boolean Dropdown */}
+                                  {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
+                                    <Select
+                                      size="small"
+                                      value={
+                                        props.formValues?.[item.id]?.value ??
+                                        (item.value === 'Yes' ? true : item.value === 'No' ? false : '')
+                                      }
+                                      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                      displayEmpty
+                                      fullWidth
+                                      disabled={item.isAutomatic}
+                                      className="form-control form-control-sm"
+                                      sx={{
+                                        backgroundColor: 'white',
+                                        my: 1,
+                                        fontSize: '12.5px',
+                                        '& .MuiSelect-select': {
+                                          fontSize: '12.5px',
+                                          color: '#555',
+                                          padding: '6px 10px',
+                                          minHeight: 'unset',
+                                        },
+                                        '& .MuiInputBase-root': {
+                                          minHeight: '32px',
+                                        },
+                                        '& .MuiOutlinedInput-input': {
+                                          padding: '6px 10px',
+                                          fontSize: '12.5px',
+                                        },
+                                        '& .MuiMenuItem-root': {
+                                          fontSize: '12.5px',
+                                          color: '#555',
+                                        },
+                                      }}
+                                    >
+                                      <MenuItem value=""><em>None</em></MenuItem>
+                                      <MenuItem value={true}>Yes</MenuItem>
+                                      <MenuItem value={false}>No</MenuItem>
+                                    </Select>
+                                  )}
+
+                                  {/* Multi Select Lookup */}
+                                  {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
+                                    <>
+                                      {(getClassId('Class') === '-100' && item.propName === 'Assigned to') ? (
+                                        <>
+                                          {item.value?.map((i, index) => (
+                                            <FormGroup key={index}>
+                                              <FormControlLabel
+                                                control={
+                                                  <Tooltip title={`Mark as complete for ${i.title}`} placement="left">
+                                                    <Checkbox
+                                                      checked={checkedItems[i.id] || false}
+                                                      onChange={() => setAssignmentPayload(item, i)}
+                                                      sx={{ p: 0.5 }}
+                                                    />
+                                                  </Tooltip>
+                                                }
+                                                label={
+                                                  <span style={{ fontSize: '12px' }}>
+                                                    {i.title?.value || i.title}
+                                                  </span>
+                                                }
+                                                labelPlacement="end"
+                                                sx={{ alignItems: 'center', ml: 0.5 }}
+                                              />
+                                            </FormGroup>
+                                          ))}
+
+                                        </>
+                                      ) : item.propName === 'Marked as complete by' ? (
+                                        <Typography fontSize="12px" className='my-2'>
+                                          {(item.value || [])
+                                            .map(i => i.title?.value || i.title)
+                                            .filter(Boolean)
+                                            .join('; ')}
+                                        </Typography>
+                                      ) : (
+                                        <LookupMultiSelect
+                                          propId={item.id}
+                                          label={item.propName}
+                                          value={props.formValues?.[item.id]?.value || []}
+                                          onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+                                          selectedVault={props.vault}
+                                          itemValue={item.value}
                                           disabled={item.isAutomatic}
-                                          style={{ fontSize: '12.5px', color: '#555' }}
+                                          mfilesid={props.mfilesId}
                                         />
                                       )}
-
-                                    {/* Multi-Line Textarea */}
-                                    {item.datatype === 'MFDatatypeMultiLineText' && !item.isHidden && (
-                                      <textarea
-                                        placeholder={item.value}
-                                        value={props.formValues?.[item.id]?.value || ''}
-                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                        rows={2}
-                                        className="form-control form-control-sm my-1"
-                                        disabled={item.isAutomatic}
-                                        style={{ fontSize: '12.5px', color: '#555' }}
-                                      />
-                                    )}
-
-                                    {/* Date Picker */}
-                                    {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
-                                      <input
-                                        placeholder={item.value}
-                                        type="date"
-                                        value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                        className="form-control form-control-sm my-1"
-                                        disabled={item.isAutomatic}
-                                        style={{ fontSize: '12.5px', color: '#555' }}
-                                      />
-                                    )}
-
-                                    {/* Timestamp Picker */}
-                                    {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
-                                      <input
-                                        type="time"
-                                        className="form-control"
-                                        value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                        disabled={item.isAutomatic}
-                                        style={{ fontSize: '12.5px', color: '#555' }}
-                                      />
-                                    )}
-
-                                    {/* Boolean Select Dropdown */}
-                                    {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                                      <Select
-                                        size="small"
-                                        value={
-                                          props.formValues?.[item.id]?.value ??
-                                          (item.value === "Yes" ? true : item.value === "No" ? false : '')
-                                        }
-                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                        displayEmpty
-                                        fullWidth
-                                        disabled={item.isAutomatic}
-                                        className="form-control form-control-sm"
-                                        sx={{
-                                          backgroundColor: 'white',
-                                          marginY: '8px',
-                                          fontSize: '12.5px',
-                                          '& .MuiSelect-select': {
-                                            fontSize: '12.5px',
-                                            color: '#555',
-                                            paddingTop: '6px',
-                                            paddingBottom: '6px',
-                                            paddingLeft: '10px',
-                                            paddingRight: '10px',
-                                            minHeight: 'unset',
-                                          },
-                                          '& .MuiInputBase-root': {
-                                            minHeight: '32px',
-                                          },
-                                          '& .MuiOutlinedInput-input': {
-                                            padding: '6px 10px',
-                                            fontSize: '12.5px',
-                                          },
-                                          '& .MuiMenuItem-root': {
-                                            fontSize: '12.5px',
-                                            color: '#555',
-                                          },
-                                        }}
-                                      >
-                                        <MenuItem value="" sx={{ fontSize: '12.5px', color: '#555' }}>
-                                          <em>None</em>
-                                        </MenuItem>
-                                        <MenuItem value={true} sx={{ fontSize: '12.5px', color: '#555' }}>
-                                          Yes
-                                        </MenuItem>
-                                        <MenuItem value={false} sx={{ fontSize: '12.5px', color: '#555' }}>
-                                          No
-                                        </MenuItem>
-                                      </Select>
+                                    </>
+                                  )}
 
 
 
-                                    )}
 
-                                    {/* Multi-Select Lookup */}
-                                    {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
-                                      <LookupMultiSelect
-                                        propId={item.id}
-                                        onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                        value={props.formValues?.[item.id]?.value || []}
-                                        selectedVault={props.vault}
-                                        label={item.propName}
-                                        itemValue={item.value}
-                                        disabled={item.isAutomatic}
-                                      />
-                                    )}
-
-                                    {/* Single Lookup Select */}
-                                    {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
-                                      <LookupSelect
-                                        propId={item.id}
-                                        label={item.propName}
-                                        onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
-                                        value={props.formValues?.[item.id]?.value || ''}
-                                        selectedVault={props.vault}
-                                        itemValue={item.value}
-                                        disabled={item.isAutomatic}
-                                      />
-                                    )}
-                                  </>
-
-                                )}
-                              </Box>
+                                  {/* Single Lookup */}
+                                  {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
+                                    <LookupSelect
+                                      propId={item.id}
+                                      label={item.propName}
+                                      value={props.formValues?.[item.id]?.value || ''}
+                                      onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
+                                      selectedVault={props.vault}
+                                      itemValue={item.value}
+                                      disabled={item.isAutomatic}
+                                      mfilesid={props.mfilesId}
+                                    />
+                                  )}
+                                </>
+                              )}
                             </Box>
-                          </ListItem>
-                        ))}
-                      </Box>
-
-
-
-
-
-                    </>
-
-
-
+                          </Box>
+                        </ListItem>
+                      ))}
+                    </Box>
                   </List>
 
 
-                </Box>
-                <Box
-                  className='input-group  p-2 bg-white'
-                  sx={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    fontSize: '10px',
-
-                  }}
-                >
-                  {(Object.keys(props.formValues || {}).length > 0 || props.selectedState.title) && (
-                    <>
-                      <Box>
-                        <Button
-                          size="medium"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => props.updateObjectMetadata()}
-                          sx={{ textTransform: 'none', mr: 1 }}
-                        >
-
-                          <i
-                            className="fas fa-save"
-                            style={{
-                              fontSize: '11px',
-                              cursor: 'pointer',
-                              marginRight: '4px'
-                            }}
-                          />
-                          <small>Save</small>
-                        </Button>
-
-
-                      </Box>
-
-                      <Box>
-                        <Button
-                          size="medium"
-                          variant="contained"
-                          color="warning"
-                          onClick={() => props.discardChange()}
-                          sx={{ textTransform: 'none', mr: 1 }}
-                        >
-                          <i
-                            className="fas fa-window-close"
-                            style={{
-                              fontSize: '11px',
-                              cursor: 'pointer',
-                              marginRight: '4px'
-                            }}
-                          />
-                          <small>Discard</small>
-                        </Button>
-                      </Box>
-                    </>
-                  )}
-
-
-
 
                 </Box>
 
-                <Box className="bg-white my-1">
+                <Box className="bg-white my-2 shadow-lg " sx={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', p: 2, gap: 2 }}>
+                  {/* LEFT COLUMN: Workflows and State */}
                   <Box
-                    className="p-2"
                     sx={{
                       fontSize: '12.5px',
                       '*': {
-                        fontSize: '12.5px !important', // Force font size on all nested elements
+                        fontSize: '12.5px !important',
                       },
                     }}
                   >
                     {props.selectedObkjWf ? (
                       <>
                         <p className="my-1">
-
-                          <i className="fa-solid fa-arrows-spin mx-2" style={{ color: '#2757aa' }} />
+                          <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
                           <span>
-                            <span style={{ color: '#2757aa' }}>Workflow</span>:{" "}
+                            <span style={{ color: '#555', fontSize: '11px' }}>Workflow</span>:{" "}
                             {props.selectedObkjWf.workflowTitle}
                           </span>
                         </p>
                         <p className="my-1">
-                          <i className="fas fa-square-full  text-warning mx-2" />
-                          <span>
-                            <span style={{ color: '#2757aa' }}>State</span>:{" "}
-                            {props.currentState.stateTitle}
-                          </span>
+                          <i className="fas fa-square-full text-warning mx-1" />
+                          <span>{props.currentState.title}</span>
+
                           {props.selectedObkjWf.nextStates && (
                             <Select
                               value={props.selectedState.title}
@@ -909,15 +999,123 @@ export default function ObjectData(props) {
                       </>
                     ) : (
                       <>
-                        <p className="my-0">
-                          <span className="mx-2">---</span>
-                        </p>
-                        <p className="my-0">
-                          <span className="mx-2">---</span>
-                        </p>
+                        {props.workflows?.length > 0 && (
+                          <p className="my-1">
+                            <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
+                            <span style={{ color: '#555', fontSize: '11px' }}>Workflow</span>:{" "}
+                            <Select
+                              value={props.newWF?.workflowId || ''}
+                              onChange={handleWFChangeEmpty}
+                              size="small"
+                              displayEmpty
+                              renderValue={(selected) => {
+                                if (!selected) {
+                                  return <span style={{ color: '#aaa' }}>Select workflow</span>;
+                                }
+                                const wf = props.workflows.find(w => w.workflowId === selected);
+                                return wf?.workflowName || '';
+                              }}
+                              sx={{
+                                fontSize: '12.5px !important',
+                                height: '24px',
+                                marginLeft: '0.5rem',
+                                '.MuiSelect-select': {
+                                  fontSize: '12.5px !important',
+                                },
+                              }}
+                            >
+                              <MenuItem disabled value="">
+                                <em>Select workflow</em>
+                              </MenuItem>
+                              {props.workflows.map((wf) => (
+                                <MenuItem
+                                  key={wf.workflowId}
+                                  value={wf.workflowId}
+                                  sx={{ fontSize: '12.5px !important' }}
+                                >
+                                  {wf.workflowName}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </p>
+                        )}
+                        {props.newWF && (
+                          <p className="my-1">
+                            <i className="fas fa-square-full text-warning mx-1" />
+                            <span style={{ color: '#555', fontSize: '11px' }}>State</span>:{" "}
+                            <Select
+                              value={props.newWFState?.stateId || ''}
+                              onChange={handleStateChangeNew}
+                              displayEmpty
+                              renderValue={(selected) => {
+                                if (!selected) {
+                                  return <span style={{ color: '#aaa' }}>Select state</span>;
+                                }
+                                const state = props.newWF.states.find(s => s.stateId === selected);
+                                return state?.stateName || '';
+                              }}
+                              size="small"
+                              sx={{
+                                fontSize: '12.5px !important',
+                                height: '24px',
+                                marginLeft: '0.5rem',
+                                '.MuiSelect-select': {
+                                  fontSize: '12.5px !important',
+                                },
+                              }}
+                            >
+                              <MenuItem disabled value="">
+                                <em>Select state</em>
+                              </MenuItem>
+                              {props.newWF.states.map((state) => (
+                                <MenuItem
+                                  key={state.stateId}
+                                  value={state.stateId}
+                                  sx={{ fontSize: '12.5px !important' }}
+                                >
+                                  <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
+                                  {state.stateName}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </p>
+                        )}
                       </>
                     )}
                   </Box>
+
+                  {/* RIGHT COLUMN: Buttons */}
+                  {(
+                    Object.keys(props.formValues || {}).length > 0 ||
+                    props.selectedState?.title ||
+                    props.newWF ||
+                    (props.approvalPayload && Object.keys(props.approvalPayload).length > 0)
+                  ) && (
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                          className=' rounded-pill'
+                          size="medium"
+                          variant="contained"
+                          color="primary"
+                          onClick={() => props.updateObjectMetadata()}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          <i className="fas fa-save " style={{ fontSize: '11px', marginRight: '4px' }} />
+                          <small>Save</small>
+                        </Button>
+                        <Button
+                          className=' rounded-pill'
+                          size="medium"
+                          variant="contained"
+                          color="warning"
+                          onClick={() => { props.discardChange(); setCheckedItems({}) }}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          <i className="fas fa-window-close" style={{ fontSize: '11px', marginRight: '4px' }} />
+                          <small>Discard</small>
+                        </Button>
+                      </Box>
+                    )}
                 </Box>
 
 

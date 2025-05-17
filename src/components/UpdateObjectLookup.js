@@ -3,120 +3,133 @@ import Select from 'react-select';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
-const LookupSelect = ({ propId, label, onChange, value, required, error, helperText, selectedVault, itemValue, disabled }) => {
+const LookupSelect = ({
+  propId,
+  label,
+  onChange,
+  value,
+  required,
+  error,
+  helperText,
+  selectedVault,
+  itemValue,
+  disabled,
+  mfilesid
+}) => {
   const [options, setOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [initialValue, setInitialValue] = useState(null);  // Change to handle single value
+  const [selectedOption, setSelectedOption] = useState(null);
 
-  // Fetch options and set initial value
+  // Set initial selected option from itemValue on mount
+  useEffect(() => {
+    if (Array.isArray(itemValue) && itemValue.length > 0) {
+      setSelectedOption({ value: itemValue[0].id, label: itemValue[0].title });
+    } else {
+      setSelectedOption(null);
+    }
+  }, [itemValue]);
+
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}`);
-        const formattedOptions = response.data.map(option => ({
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${mfilesid}/`
+        );
+
+        const formattedOptions = response.data.map((option) => ({
           label: option.name,
-          value: option.id,
+          value: option.id
         }));
 
-        // Split itemValue into an array of trimmed strings if itemValue is not empty or undefined
-        const initialValuesArray = itemValue ? itemValue.split(';').map(value => value.trim()) : [];
+        // Add selectedOption if missing
+        if (selectedOption && !formattedOptions.find((opt) => opt.value === selectedOption.value)) {
+          formattedOptions.push(selectedOption);
+        }
 
-        // Find the initial value option
-        const initialOption = formattedOptions.find(option => initialValuesArray.includes(option.label));
-
-        // Set initial value and options
         setOptions(formattedOptions);
-        setInitialValue(initialOption || null);
-
       } catch (error) {
-        console.error("Error fetching lookup options:", error);
+        console.error('Error fetching lookup options:', error);
       }
     };
 
     fetchOptions();
-  }, [propId, selectedVault, itemValue]);
+  }, [propId, selectedVault, mfilesid, selectedOption]);
 
-  // Fetch search results based on the search term
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (searchTerm.trim() === '') return;
+
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}`);
-        const formattedOptions = response.data.map(option => ({
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}/${mfilesid}/`
+        );
+
+        const formattedSearchOptions = response.data.map((option) => ({
           label: option.name,
-          value: option.id,
+          value: option.id
         }));
 
-        // Update options with the new search results, excluding the initial value
-        setOptions(formattedOptions.filter(option => option.value !== initialValue?.value));
+        const merged = [
+          ...formattedSearchOptions,
+          ...options.filter((opt) => !formattedSearchOptions.some((s) => s.value === opt.value))
+        ];
+
+        setOptions(merged);
       } catch (error) {
-        console.error('Error fetching lookup options based on search term:', error);
+        console.error('Error searching lookup options:', error);
       }
     };
 
     fetchSearchResults();
-  }, [searchTerm, selectedVault, propId, initialValue]);
+  }, [searchTerm]);
 
-  const handleChange = (selectedOption) => {
-    // Get the selected value from the `Select` component
-    const selectedValue = selectedOption ? selectedOption.value : null;
-    // Call the `onChange` callback with the selected value
-    onChange(propId, selectedValue);
-    // Update the `initialValue` state with the new selected value
-    setInitialValue(selectedOption);
+  const handleChange = (selected) => {
+    setSelectedOption(selected);
+    onChange(propId, selected ? selected.value : null);
   };
-
-  // Get the filtered options excluding the already selected initial value
-  const filteredOptions = options.filter(option => option.value !== initialValue?.value);
 
   const customStyles = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-  
-    control: (base, state) => ({
+    control: (base) => ({
       ...base,
       borderColor: error ? 'red' : base.borderColor,
       fontSize: '12.5px',
-      color: '#555',              // Text color in the control (selected)
+      color: '#555',
       backgroundColor: disabled ? '#f5f5f5' : 'white',
     }),
-  
     singleValue: (base) => ({
       ...base,
-      color: '#555',              // Color of selected option text
+      color: '#555',
       fontSize: '12.5px',
     }),
-  
     option: (base, state) => ({
       ...base,
-      color: '#555',              // Color of dropdown option text
+      color: '#555',
       fontSize: '12.5px',
       backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
     }),
-  
     placeholder: (base) => ({
       ...base,
-      color: '#555',              // Placeholder color
+      color: '#555',
       fontSize: '12.5px',
     }),
   };
-  
+
   return (
     <div>
-  
       <Select
-        value={initialValue}
+        value={selectedOption}
         onChange={handleChange}
-        options={filteredOptions}
-        placeholder={itemValue ? itemValue : `Please Select ${label} ...`}
+        options={options}
+        placeholder={`Select ${label}`}
         onInputChange={setSearchTerm}
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
-        className='my-2'
+        className="my-2"
         disabled={disabled}
-        menuPortalTarget={document.body}  // Fix overflow issue
-        menuPosition="absolute"  // Ensures dropdown is positioned correctly
-       
+        menuPortalTarget={document.body}
+        menuPosition="absolute"
       />
       {helperText && <div style={{ color: 'red' }}>{helperText}</div>}
     </div>

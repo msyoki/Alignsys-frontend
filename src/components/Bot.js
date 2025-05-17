@@ -38,7 +38,7 @@ function Bot(props) {
 
         try {
             const filename = uploadedFileName || 'Individual-Sanlam Unit Trust Investment Application form[1]-SHERRY KISILUII.pdf';
-            const response = await axios.post('https://chatbotapi.techedge.dev/query-topic-base64', new URLSearchParams({
+            const response = await axios.post('https://chatbot.alignsys.tech/query-topic-base64', new URLSearchParams({
                 topic: msg,
                 base64_data: props.base64
             }), {

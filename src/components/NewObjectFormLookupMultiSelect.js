@@ -92,7 +92,7 @@ const LookupMultiSelect = ({ userId, propId, label, onChange, value, required, e
         noOptionsMessage={() => loading ? `Loading ${label}...` : `No ${label} found`}
         styles={customStyles}
         required={required}
-        isDisabled={disabled || loading} // Disable when loading
+        // isDisabled={disabled || loading} // Disable when loading
         menuPortalTarget={document.body}
         menuPosition="absolute"
       />

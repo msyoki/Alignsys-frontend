@@ -290,7 +290,7 @@ const ViewsList = (props) => {
     }
 
     useEffect(() => {
-        const savedOption = localStorage.getItem('selectedVault');
+        const savedOption = sessionStorage.getItem('selectedVault');
 
         const fetchData = async () => {
             const guid = JSON.parse(savedOption).guid;
@@ -423,7 +423,7 @@ const ViewsList = (props) => {
             {selectedViewObjects.length > 0 ? (
                 <>
                     <h6
-                        className="p-2 text-dark d-flex flex-wrap"
+                        className="p-2 text-dark d-flex flex-wrap my-2"
                         style={{
                             fontSize: '12px',
                             backgroundColor: '#ecf4fc',
@@ -441,7 +441,7 @@ const ViewsList = (props) => {
                         </div>
 
                         {/* Text + Navigation Column */}
-                        <div className="d-flex flex-wrap align-items-center" style={{ gap: '8px', flex: 1 }}>
+                        <div className="d-flex flex-wrap align-items-center " style={{ gap: '8px', flex: 1 }}>
                             <span onClick={backToViews}>Back to views</span>
                             <i className="fas fa-chevron-right" style={{ color: '#2a68af' }} />
 
@@ -508,13 +508,14 @@ const ViewsList = (props) => {
                                                     {item.objectTypeId === 0 ? (
                                                         <>
                                                             <FileExtIcon
+                                                                fontSize={'15px'}
                                                                 guid={props.selectedVault.guid}
                                                                 objectId={item.id}
                                                                 classId={item.classId !== undefined ? item.classId : item.classID}
                                                             />
                                                         </>
                                                     ) : (
-                                                        <i className="fa-solid fa-folder  " style={{ fontSize: '20px', color: '#2a68af', marginLeft: '8px' }}></i>
+                                                        <i className="fa-solid fa-folder  " style={{ fontSize: '15px', color: '#2a68af', marginLeft: '8px' }}></i>
                                                     )}
                                                     <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 ? (
                                                         <>
@@ -614,7 +615,7 @@ const ViewsList = (props) => {
             ) : (
                 <>
                     {filteredCommonViews.length > 0 && (
-                        <div className='bg-white'>
+                        <div className='bg-white my-2'>
                             <h6
                                 onClick={toggleCommonViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
@@ -676,7 +677,7 @@ const ViewsList = (props) => {
                         </div>
                     )}
                     {otherviews.length > 0 && (
-                        <div className='bg-white'>
+                        <div className='bg-white my-2'>
                             <h6
                                 onClick={toggleOtherViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"

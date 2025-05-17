@@ -50,12 +50,11 @@ export const AuthProvider = ({ children }) => {
             }
         }
         catch (error) {
-            const errorMsg = error.response?.data?.error || error.message || 'An error occurred';
-
+      
             setOpenAlert(true);
             setAlertSeverity("error");
-            setAlertMsg(`Login failed, ${errorMsg}!!`);
-            console.log(`${error}`)
+            setAlertMsg(`Invalid username or password`);
+            console.log(`${error.response?.data.error || error.message}!!`)
             // alert("login failed")
 
         }
@@ -72,8 +71,8 @@ export const AuthProvider = ({ children }) => {
         };
         setAuthtokens(null)
         setUser(null)
-        sessionStorage.removeItem('selectedVault')
-        sessionStorage.removeItem('authTokens')
+        sessionStorage.clear();
+
     }
 
 

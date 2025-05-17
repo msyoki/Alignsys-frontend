@@ -131,6 +131,27 @@ function OrganizationVaultList(props) {
             </ListItemIcon>
             <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Login Accounts" />
           </ListItemButton>
+
+
+          <ListItemButton
+            onClick={() => {
+              props.fetchOrgUsers();
+              props.viewloginactivity();
+            }}
+            sx={{
+              backgroundColor: "#2757aa",
+              color: "#fff",
+              borderRadius: 1,
+              p: 1,
+              mt:1,
+              "&:hover": { backgroundColor: "#1e4686" },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 30 }}>
+              <People sx={{ color: "#fff", fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Login Activity" />
+          </ListItemButton>
         </List>
       </List>
 

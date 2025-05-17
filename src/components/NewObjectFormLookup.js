@@ -98,7 +98,7 @@ const LookupSelect = ({ userId, propId, label, onChange, value, required, error,
         noOptionsMessage={() => loading ? "Loading options..." : "No options found"}
         styles={customStyles}
         required={required}
-        isDisabled={disabled || loading} // 👈 Disable while loading
+        // isDisabled={disabled || loading} // 👈 Disable while loading
         menuPortalTarget={document.body}
         menuPosition="absolute"
       />
