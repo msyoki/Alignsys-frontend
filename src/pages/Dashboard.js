@@ -15,7 +15,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-import logo from '../images/TechEdgeLogo.png';
+import logo from '../images/zamara.png';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
@@ -156,9 +156,9 @@ function Dashboard() {
         return defaultValue;
       }
     };
-  
+
     const [value, setValue] = useState(getInitialValue);
-  
+
     useEffect(() => {
       try {
         sessionStorage.setItem(key, JSON.stringify(value));
@@ -166,7 +166,7 @@ function Dashboard() {
         console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
       }
     }, [key, value]);
-  
+
     return [value, setValue];
   }
 
@@ -187,7 +187,7 @@ function Dashboard() {
   const [selectedClassName, setSelectedClassName] = useSessionState('ss_selectedClassName', '');
   const [selectedObjectId, setSelectedObjectId] = useSessionState('ss_selectedObjectId', null);
   const [selectedObjectName, setSelectedObjectName] = useSessionState('ss_selectedObjectName', '');
-  const [isLoading, setIsLoading] = useSessionState('ss_isLoading', false);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedClassId, setSelectedClassId] = useSessionState('ss_selectedClassId', null);
   const [groupedItems, setGroupedItems] = useSessionState('ss_groupedItems', []);
   const [ungroupedItems, setUngroupedItems] = useSessionState('ss_ungroupedItems', []);
@@ -205,7 +205,7 @@ function Dashboard() {
   const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
   const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
   const [mfilesId, setMfilesId] = useSessionState('ss_mfilesId', null);
-  const [loadingDialog, setLoadingDialog] = useSessionState('ss_loadingDialog', false);
+  const [loadingDialog, setLoadingDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useSessionState('ss_hoveredItem', null);
 
 
@@ -221,26 +221,23 @@ function Dashboard() {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching requisition data:', error);
-      return [];
+      // console.error('Error fetching requisition data:', error);
+      // return [];
     }
   };
 
   const getRecent = async () => {
-
     try {
-
-      const response = await axios.get(
+      const { data } = await axios.get(
         `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
       );
-      // console.log(response.data)
-      setRecentData(response.data)
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching requisition data:', error);
-      return [];
+      setRecentData(data);
+      return data;
+    } catch {
+      return null; // or return [] if your app expects an array
     }
-  }
+  };
+
 
   const getDeleted = async () => {
 
@@ -257,7 +254,7 @@ function Dashboard() {
     } catch (error) {
       // console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
       // console.error('Error fetching requisition data:', error);
-      return [];
+      // return [];
     }
   }
 
@@ -273,8 +270,8 @@ function Dashboard() {
       setAssignedData(response.data)
       return response.data;
     } catch (error) {
-      console.error('Error fetching requisition data:', error);
-      return [];
+      // console.error('Error fetching requisition data:', error);
+      // return [];
     }
   }
 
@@ -654,7 +651,7 @@ function Dashboard() {
     <>
       <TimedAlert
         open={alertOpen}
-        onClose={setOpenAlert}
+        onClose={()=>setOpenAlert(false)}
         severity={alertSeverity}
         message={alertMsg}
         setSeverity={setAlertSeverity}
@@ -723,6 +720,7 @@ function Dashboard() {
                     overflow: "hidden", // Prevent content from affecting height
                   }}
                 >
+
                   <img
                     src={logo}
                     alt="Organization logo"
@@ -738,6 +736,26 @@ function Dashboard() {
 
 
 
+                {/* <div
+                  className="d-flex justify-content-center align-items-center"
+                  style={{ height: '58px' }}
+                >
+                  <Avatar
+                    alt={`${user.first_name} ${user.last_name}`}
+                    {...stringAvatar(
+                      user.first_name && user.last_name
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.first_name || user.last_name || user.username
+                    )}
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      color: '#2757aa',
+                      backgroundColor: '#fff',
+                      fontSize: '12px',
+                    }}
+                  />
+                </div> */}
 
 
                 {/* Menu Items */}
@@ -868,7 +886,7 @@ function Dashboard() {
                           >
                             <ListItemText
                               primary={item.namesingular}
-                              primaryTypographyProps={{ fontSize: "11px" }} // Smaller text size
+                              primaryTypographyProps={{ fontSize: "12px" }} // Smaller text size
                               sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
                             />
                           </ListItem>

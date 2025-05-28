@@ -8,7 +8,7 @@ const TimedAlert = (props) => {
   
   useEffect(() => {
     if (props.open) {
-      const timer = setTimeout(props.onClose, 4000); // Close the alert after 3 seconds
+      const timer = setTimeout(props.onClose, 6000); // Close the alert after 3 seconds
       return () => clearTimeout(timer);        // Cleanup the timeout
     }else{
       props.setSeverity('');
@@ -24,7 +24,7 @@ const TimedAlert = (props) => {
       autoHideDuration={6000}                                  // Auto-hide after 3 seconds
     >
       <Alert onClose={props.onClose} severity={props.severity} variant="filled">
-        {props.message}
+        <span style={{fontSize:'12.5px'}}>{props.message}</span>
       </Alert>
     </Snackbar>
   );

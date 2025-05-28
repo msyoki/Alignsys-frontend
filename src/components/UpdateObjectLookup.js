@@ -88,32 +88,45 @@ const LookupSelect = ({
     onChange(propId, selected ? selected.value : null);
   };
 
-  const customStyles = {
-    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    control: (base) => ({
-      ...base,
-      borderColor: error ? 'red' : base.borderColor,
-      fontSize: '12.5px',
-      color: '#555',
-      backgroundColor: disabled ? '#f5f5f5' : 'white',
-    }),
-    singleValue: (base) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-    }),
-    option: (base, state) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-      backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-    }),
-  };
+const customStyles = {
+  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+  control: (base) => ({
+    ...base,
+    borderColor: error ? 'red' : base.borderColor,
+    fontSize: '13px',
+    color: '#555',
+    backgroundColor: disabled ? '#f5f5f5' : 'white',
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+  }),
+  option: (base, state) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+    backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+  }),
+  multiValue: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+  input: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+};
+
 
   return (
     <div>

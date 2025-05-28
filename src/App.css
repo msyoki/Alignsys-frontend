@@ -1,7 +1,13 @@
 
 body {
-    font-family: Arial, sans-serif !important;
-    font-size: 12px !important;
+    font-family: 'Segoe UI', sans-serif !important;
+    font-size: 13px !important;
 }
 
 
+
+ 
+.black-input::placeholder {
+  color: black !important;
+  opacity: 1; /* Optional: ensures full visibility in some browsers */
+}

@@ -15,14 +15,14 @@ const LoadingMini = (props) => (
           <div className="spinner ">
          
          
-            <img className="my-3" src={logo} alt="Loading" width='150px' />
+            <img className="my-4" src={logo} alt="Loading" width='150px' />
          
-            <Box  className='d-flex justify-content-center main-loader'>
+            <Box  className='d-flex justify-content-center main-loader '>
              
               <CircularProgress size="40px" style={{ color: "#2757aa" }} />
             
             </Box>
-            <p className="my-2 text-dark" style={{fontSize:'12px'}}>{props.msg?<>{props.msg}</>:<>Please wait, processing request ...</>}</p>
+            <p className="my-2 text-dark" style={{fontSize:'13px'}}>{props.msg?<>{props.msg}</>:<>Please wait, processing request ...</>}</p>
            
           </div>
         </div>

@@ -152,14 +152,14 @@ const ImageViewer = ({ src }) => {
         <div className="d-flex align-items-center gap-2 mx-1">
           <span className='mx-2'>
             <i onClick={handleZoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
-            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '11px', color: '#333' }}>
+            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
               {Math.round(zoom * 100)}%
 
             </span>
             <i onClick={handleZoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
           </span>
           <Tooltip title="Reset Zoom">
-            <button onClick={handleReset} className="btn btn-light px-1 py-0" style={{ fontSize: '11px', border: '1px solid #2757aa', color: '#2757aa' }}>
+            <button onClick={handleReset} className="btn btn-light px-1 py-0" style={{ fontSize: '12.5px', border: '1px solid #2757aa', color: '#2757aa' }}>
               <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '12px' }} />
               Reset
             </button>

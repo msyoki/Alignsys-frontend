@@ -64,17 +64,35 @@ const CommentsComponent = (props) => {
               justifyContent: 'space-between',
               backgroundColor: '#ecf4fc',
               height: '53px',
-              fontSize: '12px',
+              fontSize: '13px',
               paddingRight: '10px',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 ,color: '#1d3557' }}>
-              <i className="fas fa-file-pdf text-danger" style={{ fontSize: '16px' }}></i>
-              <span style={{fontSize:'12px'}}>{props.docTitle}.pdf</span>
+
+            <Box
+
+              sx={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: 'important 13px',
+                backgroundColor: '#ecf4fc',
+                height: '53px',
+                color: '#1d3557'
+
+              }}
+            >
+
+
+              <i className="fas fa-file-pdf text-danger mx-2" style={{ fontSize: '25px' }}></i>
+              <span style={{ fontSize: '13px' }}>{props.docTitle}.pdf</span>
+
+
+
             </Box>
 
             <Box sx={{ textAlign: 'right' }}>
-              Reload
+
               <span
                 className="fas fa-sync-alt btn-sm mx-2 "
                 onClick={refreshComments}
@@ -108,7 +126,7 @@ const CommentsComponent = (props) => {
                 />
                 <button
                   type="submit"
-                  className="btn text-white btn-sm"
+                  className="btn text-white btn-sm rounded-pill"
                   disabled={loading}
                   style={{
                     backgroundColor: '#6a994e',
@@ -116,7 +134,7 @@ const CommentsComponent = (props) => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <small>{loading ? 'Submitting...' : 'Submit'}</small>
+                  <small className='mx-2'>{loading ? 'Submitting...' : 'Submit Comment'}</small>
                 </button>
               </Box>
             </form>
@@ -127,24 +145,37 @@ const CommentsComponent = (props) => {
       {/* Comments Section */}
       <Box sx={{ backgroundColor: '#fff' }}>
         {props.selectedObject?.id && props.comments.length > 0 ? (
-          <ul className="p-3 bg-white" style={{ listStyle: 'none', padding: 0, height: '50vh', overflowY: 'auto' }}>
+          <ul
+            className="bg-white"
+            style={{
+              listStyle: 'none',
+              padding: '0.5rem',
+              margin: 0,
+              height: '50vh',
+              overflowY: 'auto',
+            }}
+          >
             {props.comments.map((comment, index) => {
               const [boldText, regularText] = comment.coment.split(':');
               return (
-                <li key={index} style={{ marginBottom: '13px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <i className="fas fa-comment-alt" style={{ marginRight: '10px', color: '#a7c957', fontSize: '20px' }}></i>
-                    <span style={{ fontSize: '12px', color: '#555' }}>
+                <li key={index} style={{ marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i
+                      className="fas fa-comment-alt"
+                      style={{ color: '#a7c957', fontSize: '18px' }}
+                    />
+                    <span style={{ fontSize: '13px', color: '#555' }}>
                       <strong>{boldText}:</strong> {comment.modifiedDate}
                     </span>
                   </div>
-                  <span style={{ fontSize: '12.5px', lineHeight: '1.5', color: '#333' }} className="mx-4">
+                  <div style={{ fontSize: '13px', lineHeight: '1.4', color: '#333', marginLeft: '26px' }}>
                     {regularText}
-                  </span>
+                  </div>
                 </li>
               );
             })}
           </ul>
+
         ) : (
           <>
             {!props.selectedObject?.id ?
@@ -170,7 +201,7 @@ const CommentsComponent = (props) => {
                       <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>
                         Comments
                       </Typography>
-                      <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12px' }}>
+                      <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
                         Please select an object to preview comments
                       </Typography>
                     </>

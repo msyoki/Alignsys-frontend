@@ -22,7 +22,7 @@ import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
 import UpdateCheckboxUserList from '../UpdateCheckboxUserList';
-
+import CircularProgress from '@mui/material/CircularProgress';
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -101,7 +101,6 @@ export default function ObjectData(props) {
   const [openAlert, setOpenAlert] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState('');
   const [alertMsg, setAlertMsg] = useState('');
-  const [checkedItems, setCheckedItems] = useState({});
 
 
 
@@ -111,13 +110,13 @@ export default function ObjectData(props) {
   const handleWFChangeEmpty = (event) => {
     const selected = props.workflows.find((wf) => wf.workflowId === event.target.value);
     props.setNewWF(selected);
-    console.log('Selected workflow:', selected);
+
   };
 
   const handleStateChangeNew = (event) => {
     const selected = props.newWF.states.find((state) => state.stateId === event.target.value);
     props.setNewWFState(selected);
-    console.log('Selected state:', selected);
+
   };
 
 
@@ -367,22 +366,33 @@ export default function ObjectData(props) {
   const setAssignmentPayload = (item, i) => {
     const id = i.id;
 
-    // Toggle checked state
-    setCheckedItems(prev => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    if (id !== props.mfilesId) {
+      setOpenAlert(true);
+      setAlertSeverity("error");
+      setAlertMsg(`You can't complete assigment for ${i.title}`);
+      setDeleteDialogOpen(false)
+    } else {
+      // Toggle checked state
+      props.setCheckedItems(prev => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
 
-    // Optionally update approval payload if needed
-    const payload = {
-      vaultGuid: props.vault.guid,
-      objectId: props.selectedObject.id,
-      classId: -100,
-      userID: id,
-      approve: !checkedItems[id], // the new value
-    };
 
-    props.setApprovalPayload(payload);
+
+      // Optionally update approval payload if needed
+      const payload = {
+        vaultGuid: props.vault.guid,
+        objectId: props.selectedObject.id,
+        classId: props.selectedObject.classID,
+        userID: id,
+        approve: !props.checkedItems[id], // the new value
+      };
+
+      props.setApprovalPayload(payload);
+    }
+
+
   };
 
 
@@ -462,7 +472,7 @@ export default function ObjectData(props) {
                             color: "#fff",
                             borderRadius: "50%",
                             padding: "2px 6px",
-                            fontSize: "10px",
+                            fontSize: "13px",
                             fontWeight: "bold",
                             lineHeight: "1",
                             minWidth: "16px",
@@ -535,7 +545,7 @@ export default function ObjectData(props) {
 
                 <Typography
                   variant="body2"
-                  sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                  sx={{ textAlign: 'center', fontSize: '13px' }}
                 >
                   Please select an object to view its metadata
                 </Typography>
@@ -563,7 +573,7 @@ export default function ObjectData(props) {
                                 classId={props.selectedObject.classId ?? props.selectedObject.classID}
                                 sx={{ fontSize: '25px !important', marginRight: '10px' }}
                               />
-                              <span style={{ fontSize: '14px', marginLeft: '8px' }}>
+                              <span style={{ fontSize: '13px', marginLeft: '8px' }}>
                                 {trimTitle(props.selectedObject.title)}
                                 <FileExtText
                                   guid={props.vault.guid}
@@ -575,7 +585,7 @@ export default function ObjectData(props) {
                           ) : (
                             <>
                               <i className="fas fa-folder" style={{ fontSize: '25px', color: '#2757aa', marginRight: '10px' }}></i>
-                              <span style={{ fontSize: '14px' }}>{trimTitle(props.selectedObject.title)}</span>
+                              <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}</span>
                             </>
                           )}
                         </Box>
@@ -613,14 +623,14 @@ export default function ObjectData(props) {
                 <Box className="p-2" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   {/* Left Section */}
                   <Box
-                    sx={{ textAlign: 'start', fontSize: '12.5px', width: '50%' }}
+                    sx={{ textAlign: 'start', fontSize: '13px', width: '50%' }}
                     className="mx-2"
                   >
 
                     <p className="my-0" >
 
                       <Box
-                        sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
+                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
 
                       >
                         {props.selectedObject.objectTypeName || getPropValue('Class')}
@@ -630,7 +640,7 @@ export default function ObjectData(props) {
                     <p className="my-0" >
 
                       <Box
-                        sx={{ textAlign: 'start', fontSize: '12.5px', width: '60%' }}
+                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
 
                       >
                         ID: {props.selectedObject.id}   Version : {props.selectedObject.versionId}
@@ -645,7 +655,7 @@ export default function ObjectData(props) {
 
                   {/* Right Section */}
                   <Box
-                    sx={{ textAlign: 'end', fontSize: '11px', width: '50%' }}
+                    sx={{ textAlign: 'end', fontSize: '12px', width: '50%' }}
                     className="mx-2"
                   >
                     {["Created", "Last modified"].map((label, index) => (
@@ -664,10 +674,11 @@ export default function ObjectData(props) {
 
                   sx={{
                     backgroundColor: '#fff',
-                    fontSize: '12.5px',
+                    fontSize: '13px',
 
 
                   }}
+
 
 
                 >
@@ -676,7 +687,7 @@ export default function ObjectData(props) {
                   <List
 
                     sx={{
-                      p: 3,
+                      p: 1,
                       height: '55vh',
                       overflowY: 'auto',
                       display: 'flex',
@@ -686,7 +697,7 @@ export default function ObjectData(props) {
                   // className='shadow-lg'
                   >
                     {/* Class Field */}
-                    <ListItem sx={{ p: 0, width: '100%', maxWidth: '500px' }}>
+                    <ListItem sx={{ p: 0, width: '100%' }}>
                       <Box
                         sx={{
                           display: 'flex',
@@ -700,18 +711,20 @@ export default function ObjectData(props) {
                           sx={{
                             color: '#555',
                             flexBasis: '35%',
-                            fontSize: '12.5px',
+                            fontSize: '13px',
                             textAlign: 'end',
                           }}
+                          className='text-muted'
                         >
                           Class:
                         </Typography>
                         <Box
                           sx={{
                             flexBasis: '65%',
-                            fontSize: '12.5px',
+                            fontSize: '13px',
                             textAlign: 'start',
                             ml: 1,
+                            color: '#555'
 
                           }}
                         >
@@ -724,7 +737,7 @@ export default function ObjectData(props) {
                     </ListItem>
 
                     {/* Properties */}
-                    <Box sx={{ fontSize: '12.5px', width: '100%', maxWidth: '500px' }}>
+                    <Box sx={{ fontSize: '13px', width: '100%' }}>
                       {filteredProps.map((item, index) => (
                         <ListItem key={index} sx={{ p: 0 }}>
                           <Box
@@ -741,9 +754,10 @@ export default function ObjectData(props) {
                               sx={{
                                 color: '#555',
                                 flexBasis: '35%',
-                                fontSize: '12.5px',
+                                fontSize: '13px',
                                 textAlign: 'end',
                               }}
+                              className='text-muted'
                             >
                               {item.propName}
                               {item.isRequired && (
@@ -756,19 +770,25 @@ export default function ObjectData(props) {
                             <Box
                               sx={{
                                 flexBasis: '65%',
-                                fontSize: '12.5px',
+                                fontSize: '13px',
                                 textAlign: 'start',
                                 ml: 1,
+                                color: '#555'
+
                               }}
+
                             >
                               {item.isAutomatic || !item.userPermission?.editPermission ? (
-                                <Typography variant="body2" sx={{ fontSize: '11px', my: 1 }}>
-                                  {item.value}
+                                <Typography variant="body2" sx={{ fontSize: '13px', my: 1 }}>
+                                  {Array.isArray(item.value)
+                                    ? item.value.map(v => v?.title?.value || v?.title || '').join('; ')
+                                    : item.value?.title?.value || item.value?.title || item.value}
                                 </Typography>
+
                               ) : (
                                 <>
                                   {item.propName === 'Class' && (
-                                    <span style={{ fontSize: '12.5px', color: '#555' }}>
+                                    <span style={{ fontSize: '13px' }}>
                                       {item.value}
                                     </span>
                                   )}
@@ -782,8 +802,9 @@ export default function ObjectData(props) {
                                         onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                         className="form-control form-control-sm my-1"
                                         disabled={item.isAutomatic}
-                                        style={{ fontSize: '12.5px', color: '#555' }}
+                                        style={{ fontSize: '13px', color: '#555' }}
                                       />
+
                                     )}
 
                                   {/* Textarea */}
@@ -795,7 +816,7 @@ export default function ObjectData(props) {
                                       rows={2}
                                       className="form-control form-control-sm my-1"
                                       disabled={item.isAutomatic}
-                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                      style={{ fontSize: '13px' }}
                                     />
                                   )}
 
@@ -808,7 +829,7 @@ export default function ObjectData(props) {
                                       onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                       className="form-control form-control-sm my-1"
                                       disabled={item.isAutomatic}
-                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                      style={{ fontSize: '13px' }}
                                     />
                                   )}
 
@@ -820,7 +841,7 @@ export default function ObjectData(props) {
                                       value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
                                       onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
                                       disabled={item.isAutomatic}
-                                      style={{ fontSize: '12.5px', color: '#555' }}
+                                      style={{ fontSize: '13px' }}
                                     />
                                   )}
 
@@ -840,9 +861,9 @@ export default function ObjectData(props) {
                                       sx={{
                                         backgroundColor: 'white',
                                         my: 1,
-                                        fontSize: '12.5px',
+                                        fontSize: '13px',
                                         '& .MuiSelect-select': {
-                                          fontSize: '12.5px',
+                                          fontSize: '13px',
                                           color: '#555',
                                           padding: '6px 10px',
                                           minHeight: 'unset',
@@ -852,10 +873,10 @@ export default function ObjectData(props) {
                                         },
                                         '& .MuiOutlinedInput-input': {
                                           padding: '6px 10px',
-                                          fontSize: '12.5px',
+                                          fontSize: '13px',
                                         },
                                         '& .MuiMenuItem-root': {
-                                          fontSize: '12.5px',
+                                          fontSize: '13px',
                                           color: '#555',
                                         },
                                       }}
@@ -869,7 +890,11 @@ export default function ObjectData(props) {
                                   {/* Multi Select Lookup */}
                                   {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
                                     <>
-                                      {(getClassId('Class') === '-100' && item.propName === 'Assigned to') ? (
+
+                                      {(
+                                        (props.selectedObject.objectID === 10 && item.propName === 'Assigned to') ||
+                                        (props.selectedObject.objectTypeId === 10 && item.propName === 'Assigned to')
+                                      ) ? (
                                         <>
                                           {item.value?.map((i, index) => (
                                             <FormGroup key={index}>
@@ -877,14 +902,14 @@ export default function ObjectData(props) {
                                                 control={
                                                   <Tooltip title={`Mark as complete for ${i.title}`} placement="left">
                                                     <Checkbox
-                                                      checked={checkedItems[i.id] || false}
+                                                      checked={props.checkedItems[i.id] || false}
                                                       onChange={() => setAssignmentPayload(item, i)}
                                                       sx={{ p: 0.5 }}
                                                     />
                                                   </Tooltip>
                                                 }
                                                 label={
-                                                  <span style={{ fontSize: '12px' }}>
+                                                  <span style={{ fontSize: '13px' }}>
                                                     {i.title?.value || i.title}
                                                   </span>
                                                 }
@@ -894,25 +919,29 @@ export default function ObjectData(props) {
                                             </FormGroup>
                                           ))}
 
+
                                         </>
                                       ) : item.propName === 'Marked as complete by' ? (
-                                        <Typography fontSize="12px" className='my-2'>
+                                        <Typography fontSize="13px" className='my-2'>
                                           {(item.value || [])
                                             .map(i => i.title?.value || i.title)
                                             .filter(Boolean)
                                             .join('; ')}
                                         </Typography>
                                       ) : (
-                                        <LookupMultiSelect
-                                          propId={item.id}
-                                          label={item.propName}
-                                          value={props.formValues?.[item.id]?.value || []}
-                                          onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                          selectedVault={props.vault}
-                                          itemValue={item.value}
-                                          disabled={item.isAutomatic}
-                                          mfilesid={props.mfilesId}
-                                        />
+                                        <>
+                                          <LookupMultiSelect
+                                            propId={item.id}
+                                            label={item.propName}
+                                            value={props.formValues?.[item.id]?.value || []}
+                                            onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+                                            selectedVault={props.vault}
+                                            itemValue={item.value}
+                                            disabled={item.isAutomatic}
+                                            mfilesid={props.mfilesId}
+                                          />
+
+                                        </>
                                       )}
                                     </>
                                   )}
@@ -946,142 +975,187 @@ export default function ObjectData(props) {
 
                 </Box>
 
-                <Box className="bg-white my-2 shadow-lg " sx={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', p: 2, gap: 2 }}>
+                <Box className="my-2"
+                  sx={{
+                    height: 'auto',
+                    display: 'grid',
+                    gridTemplateColumns: {
+                      xs: '1fr',       // Stack columns on extra-small screens
+                      sm: '1fr auto',  // Side by side from small screens upwards
+                    },
+                    alignItems: 'center',
+                    p: 2,
+                    gap: 2,
+                    backgroundColor: '#ecf4fc',
+                  }}>
                   {/* LEFT COLUMN: Workflows and State */}
                   <Box
                     sx={{
-                      fontSize: '12.5px',
+                      fontSize: '13px',
                       '*': {
-                        fontSize: '12.5px !important',
+                        fontSize: '13px !important',
                       },
                     }}
                   >
-                    {props.selectedObkjWf ? (
+                    {!props.loadingWFS ?
                       <>
+                        {(props.workflows?.length > 0 || props.selectedObkjWf) && (
+                          <>
+                            {props.selectedObkjWf ? (
+                              <>
+                                <p className="my-1">
+                                  <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
+
+                                  <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                                  <span style={{ marginLeft: '0.5rem' }}>
+                                    {props.selectedObkjWf.workflowTitle}
+                                  </span>
+                                </p>
+                                <p className="my-1">
+                                  <i className="fas fa-square-full text-warning mx-1" />
+                                  <span style={{ color: '#555', fontSize: '13px' }}>State</span>:{" "}
+                                  <span style={{ marginLeft: '2rem' }}>{props.currentState.title}</span>
+
+                                  {Array.isArray(props.selectedObkjWf?.nextStates) && props.selectedObkjWf.nextStates.length > 0 && (
+                                    <Select
+                                      value={props.selectedState.title}
+                                      onChange={handleStateChange}
+                                      size="small"
+                                      displayEmpty
+                                      renderValue={(selected) => {
+                                        if (!selected) {
+                                          return <span style={{ color: '#aaa' }}>transition</span>;
+                                        }
+                                        const wf = props.selectedObkjWf.nextStates.find(w => w.workflowId === selected);
+                                        return wf?.workflowName || '';
+                                      }}
+                                      sx={{
+                                        fontSize: '13px !important',
+                                        height: '24px',
+                                        marginLeft: '0.5rem',
+                                        '.MuiSelect-select': {
+                                          fontSize: '13px !important',
+                                        },
+                                      }}
+                                    >
+                                      <MenuItem disabled value="">
+                                        <em>transition to ...</em>
+                                      </MenuItem>
+                                      {props.selectedObkjWf.nextStates.map((state) => (
+                                        <MenuItem
+                                          key={state.id}
+                                          value={state.title}
+                                          sx={{ fontSize: '13px !important' }}
+                                        >
+                                          <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
+                                          {state.title}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  )}
+
+                                </p>
+                              </>
+                            ) : (
+                              <>
+
+                                {props.workflows?.length > 0 && (
+                                  <p className="my-1">
+                                    <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
+                                    <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                                    <Select
+                                      value={props.newWF?.workflowId || ''}
+                                      onChange={handleWFChangeEmpty}
+                                      size="small"
+                                      displayEmpty
+                                      renderValue={(selected) => {
+                                        if (!selected) {
+                                          return <span style={{ color: '#aaa' }}>Select workflow</span>;
+                                        }
+                                        const wf = props.workflows.find(w => w.workflowId === selected);
+                                        return wf?.workflowName || '';
+                                      }}
+                                      sx={{
+                                        fontSize: '13px !important',
+                                        height: '24px',
+                                        marginLeft: '0.5rem',
+                                        '.MuiSelect-select': {
+                                          fontSize: '13px !important',
+                                        },
+                                      }}
+                                    >
+                                      <MenuItem disabled value="">
+                                        <em>Select workflow</em>
+                                      </MenuItem>
+                                      {props.workflows.map((wf) => (
+                                        <MenuItem
+                                          key={wf.workflowId}
+                                          value={wf.workflowId}
+                                          sx={{ fontSize: '13px !important' }}
+                                        >
+                                          {wf.workflowName}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </p>
+                                )}
+                                {props.newWF && (
+                                  <p className="my-1">
+                                    <i className="fas fa-square-full text-warning mx-1" />
+                                    <span style={{ color: '#555', fontSize: '13px' }}>State</span>:{" "}
+                                    <Select
+                                      value={props.newWFState?.stateId || ''}
+                                      onChange={handleStateChangeNew}
+                                      displayEmpty
+                                      renderValue={(selected) => {
+                                        if (!selected) {
+                                          return <span style={{ color: '#aaa' }}>Select state</span>;
+                                        }
+                                        const state = props.newWF.states.find(s => s.stateId === selected);
+                                        return state?.stateName || '';
+                                      }}
+                                      size="small"
+                                      sx={{
+                                        fontSize: '13px !important',
+                                        height: '24px',
+                                        marginLeft: '2rem',
+                                        '.MuiSelect-select': {
+                                          fontSize: '13px !important',
+                                        },
+                                      }}
+                                    >
+                                      <MenuItem disabled value="">
+                                        <em>Select state</em>
+                                      </MenuItem>
+                                      {props.newWF.states.map((state) => (
+                                        <MenuItem
+                                          key={state.stateId}
+                                          value={state.stateId}
+                                          sx={{ fontSize: '13px !important' }}
+                                        >
+                                          <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
+                                          {state.stateName}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </p>
+                                )}
+
+
+                              </>
+                            )}
+                          </>
+                        )}
+                      </> : <>
                         <p className="my-1">
                           <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
-                          <span>
-                            <span style={{ color: '#555', fontSize: '11px' }}>Workflow</span>:{" "}
-                            {props.selectedObkjWf.workflowTitle}
+
+                          <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                          <span className='text-muted' style={{ marginLeft: '0.5rem' }}>
+                            <CircularProgress size="10px" style={{ color: "#2757aa" }} />
                           </span>
                         </p>
-                        <p className="my-1">
-                          <i className="fas fa-square-full text-warning mx-1" />
-                          <span>{props.currentState.title}</span>
-
-                          {props.selectedObkjWf.nextStates && (
-                            <Select
-                              value={props.selectedState.title}
-                              onChange={handleStateChange}
-                              size="small"
-                              sx={{
-                                fontSize: '12.5px !important',
-                                height: '24px',
-                                marginLeft: '0.5rem',
-                                '.MuiSelect-select': {
-                                  fontSize: '12.5px !important',
-                                },
-                              }}
-                            >
-                              {props.selectedObkjWf.nextStates.map((state) => (
-                                <MenuItem
-                                  key={state.id}
-                                  value={state.title}
-                                  sx={{ fontSize: '12.5px !important' }}
-                                >
-                                  <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
-                                  {state.title}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          )}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        {props.workflows?.length > 0 && (
-                          <p className="my-1">
-                            <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
-                            <span style={{ color: '#555', fontSize: '11px' }}>Workflow</span>:{" "}
-                            <Select
-                              value={props.newWF?.workflowId || ''}
-                              onChange={handleWFChangeEmpty}
-                              size="small"
-                              displayEmpty
-                              renderValue={(selected) => {
-                                if (!selected) {
-                                  return <span style={{ color: '#aaa' }}>Select workflow</span>;
-                                }
-                                const wf = props.workflows.find(w => w.workflowId === selected);
-                                return wf?.workflowName || '';
-                              }}
-                              sx={{
-                                fontSize: '12.5px !important',
-                                height: '24px',
-                                marginLeft: '0.5rem',
-                                '.MuiSelect-select': {
-                                  fontSize: '12.5px !important',
-                                },
-                              }}
-                            >
-                              <MenuItem disabled value="">
-                                <em>Select workflow</em>
-                              </MenuItem>
-                              {props.workflows.map((wf) => (
-                                <MenuItem
-                                  key={wf.workflowId}
-                                  value={wf.workflowId}
-                                  sx={{ fontSize: '12.5px !important' }}
-                                >
-                                  {wf.workflowName}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </p>
-                        )}
-                        {props.newWF && (
-                          <p className="my-1">
-                            <i className="fas fa-square-full text-warning mx-1" />
-                            <span style={{ color: '#555', fontSize: '11px' }}>State</span>:{" "}
-                            <Select
-                              value={props.newWFState?.stateId || ''}
-                              onChange={handleStateChangeNew}
-                              displayEmpty
-                              renderValue={(selected) => {
-                                if (!selected) {
-                                  return <span style={{ color: '#aaa' }}>Select state</span>;
-                                }
-                                const state = props.newWF.states.find(s => s.stateId === selected);
-                                return state?.stateName || '';
-                              }}
-                              size="small"
-                              sx={{
-                                fontSize: '12.5px !important',
-                                height: '24px',
-                                marginLeft: '0.5rem',
-                                '.MuiSelect-select': {
-                                  fontSize: '12.5px !important',
-                                },
-                              }}
-                            >
-                              <MenuItem disabled value="">
-                                <em>Select state</em>
-                              </MenuItem>
-                              {props.newWF.states.map((state) => (
-                                <MenuItem
-                                  key={state.stateId}
-                                  value={state.stateId}
-                                  sx={{ fontSize: '12.5px !important' }}
-                                >
-                                  <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
-                                  {state.stateName}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </p>
-                        )}
-                      </>
-                    )}
+                      </>}
                   </Box>
 
                   {/* RIGHT COLUMN: Buttons */}
@@ -1100,7 +1174,7 @@ export default function ObjectData(props) {
                           onClick={() => props.updateObjectMetadata()}
                           sx={{ textTransform: 'none' }}
                         >
-                          <i className="fas fa-save " style={{ fontSize: '11px', marginRight: '4px' }} />
+                          <i className="fas fa-save " style={{ fontSize: '13px', marginRight: '4px' }} />
                           <small>Save</small>
                         </Button>
                         <Button
@@ -1108,15 +1182,17 @@ export default function ObjectData(props) {
                           size="medium"
                           variant="contained"
                           color="warning"
-                          onClick={() => { props.discardChange(); setCheckedItems({}) }}
+                          onClick={() => { props.discardChange(); props.setCheckedItems({}) }}
                           sx={{ textTransform: 'none' }}
                         >
-                          <i className="fas fa-window-close" style={{ fontSize: '11px', marginRight: '4px' }} />
+                          <i className="fas fa-window-close" style={{ fontSize: '13px', marginRight: '4px' }} />
                           <small>Discard</small>
                         </Button>
                       </Box>
                     )}
                 </Box>
+
+
 
 
 
@@ -1181,7 +1257,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                      sx={{ textAlign: 'center', fontSize: '13px' }}
                     >
                       Please wait as we load the document
                     </Typography>
@@ -1197,7 +1273,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                      sx={{ textAlign: 'center', fontSize: '13px' }}
                     >
                       Please select a document to view its content
                     </Typography>
@@ -1232,7 +1308,7 @@ export default function ObjectData(props) {
                 }}
               >
                 <i
-                  className="fas fa-robot my-2"
+                  className="fa-brands fa-android my-2"
                   style={{ fontSize: '120px', color: '#2757aa' }}
                 />
 
@@ -1250,7 +1326,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                      sx={{ textAlign: 'center', fontSize: '13px' }}
                     >
                       Please wait as we load the resources
                     </Typography>
@@ -1266,7 +1342,7 @@ export default function ObjectData(props) {
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                      sx={{ textAlign: 'center', fontSize: '13px' }}
                     >
                       Please select a PDF to interact with the chatbot
                     </Typography>
@@ -1298,8 +1374,8 @@ export default function ObjectData(props) {
 
             />
           </CustomTabPanel>
-        </Box>
-      </Box>
+        </Box >
+      </Box >
     </>
   );
 }

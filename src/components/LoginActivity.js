@@ -28,6 +28,7 @@ function LoginActivityTable() {
         });
 
         const allLogs = response.data.activity;
+        console.log(allLogs)
         setLogs(allLogs);
         setFilteredLogs(applySearch(allLogs, searchTerm));
         setTotalLogs(allLogs.length);
@@ -121,7 +122,7 @@ function LoginActivityTable() {
                             {/* <TableCell align="center">Auth Source</TableCell> */}
                             <TableCell align="center">Device Type</TableCell>
                             <TableCell align="center">Browser</TableCell>
-                            <TableCell align="center">OS</TableCell>
+                            {/* <TableCell align="center">OS</TableCell> */}
                             {/* <TableCell align="center">Platform</TableCell> */}
                             {/* <TableCell align="center">User Agent</TableCell> */}
                         </TableRow>
@@ -130,13 +131,13 @@ function LoginActivityTable() {
                     <TableBody>
                         {paginatedLogs.map((log, index) => (
                             <TableRow key={index}>
-                                <TableCell align="center">{getUsernameFromEmail(log.user)}</TableCell>
+                                <TableCell align="center">{log.user}</TableCell>
                                 <TableCell align="center">{log.timestamp}</TableCell>
                                 <TableCell align="center">{log.ip_address}</TableCell>
                                 {/* <TableCell align="center">{log.auth_source}</TableCell> */}
                                 <TableCell align="center">{log.device_type || '-'}</TableCell>
                                 <TableCell align="center">{log.browser || '-'}</TableCell>
-                                <TableCell align="center">{log.os || '-'}</TableCell>
+                                {/* <TableCell align="center">{log.os || '-'}</TableCell> */}
                                 {/* <TableCell align="center">{log.platform || '-'}</TableCell> */}
                                 {/* <TableCell align="center">
                                     <span style={{ wordBreak: 'break-word', maxWidth: 200, display: 'inline-block' }}>

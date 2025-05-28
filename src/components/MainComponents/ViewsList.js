@@ -145,8 +145,7 @@ const ViewsList = (props) => {
                 "propDatatype": i.propDatatype
             }));
 
-            console.log(transformedList);
-            console.log(updatedItems);
+         
 
 
 
@@ -192,12 +191,12 @@ const ViewsList = (props) => {
                         }
                     }
                 );
-                console.log(response.data)
+           
                 setLoading(false)
 
 
                 setSelectedViewObjects(response.data);
-                console.log(response.data)
+           
                 setSelectedViewName(item.title);
 
             } catch (error) {
@@ -235,8 +234,7 @@ const ViewsList = (props) => {
                 }
             );
             setLoading(false)
-            console.log("fetchMainViewObjects")
-            console.log(response.data)
+          
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
 
@@ -273,8 +271,7 @@ const ViewsList = (props) => {
                     }
                 }
             );
-            console.log("fetchMainViewObjects2")
-            console.log(response.data)
+         
             setLoading(false)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
@@ -313,7 +310,7 @@ const ViewsList = (props) => {
                 // console.log(sortedOtherViews)
                 // console.log(sortedCommonViews)
             } catch (error) {
-                console.error('Error fetching data:', error);
+                // console.error('Error fetching data:', error);
             }
         };
 
@@ -425,7 +422,7 @@ const ViewsList = (props) => {
                     <h6
                         className="p-2 text-dark d-flex flex-wrap my-2"
                         style={{
-                            fontSize: '12px',
+                            fontSize: '13px',
                             backgroundColor: '#ecf4fc',
                             cursor: 'pointer',
                             gap: '8px',
@@ -449,7 +446,12 @@ const ViewsList = (props) => {
                                 <React.Fragment key={index}>
                                     <Tooltip title={item.title}>
                                         <span
-                                            onClick={() => handleViewNavClick(item)}
+                                            onClick={
+                                                () => {
+                                                    handleViewNavClick(item);
+                                                    props.resetPreview();
+                                                }
+                                            }
                                             style={{
                                                 cursor: 'pointer',
                                                 whiteSpace: 'normal',
@@ -486,9 +488,9 @@ const ViewsList = (props) => {
 
                                             sx={{
                                                 marginLeft: '10px',
-                                                fontSize: "12px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "12px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "12px !important" }, // Ensure all text respects this
+                                                fontSize: "13px", // Apply directly to TreeItem
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                                 backgroundColor: "#fff !important",
                                                 "&:hover": {
@@ -548,9 +550,9 @@ const ViewsList = (props) => {
                                             onClick={() => fetchViewData(item)}
 
                                             sx={{
-                                                fontSize: "12px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "12px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "12px !important" }, // Ensure all text respects this
+                                                fontSize: "13px", // Apply directly to TreeItem
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                                 backgroundColor: "#fff",
                                                 "&:hover": {
@@ -565,7 +567,7 @@ const ViewsList = (props) => {
                                             label={
                                                 <Box display="flex" alignItems="center">
                                                     <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
-                                                    <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
+                                                    <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
 
                                                 </Box>
                                             }
@@ -583,9 +585,9 @@ const ViewsList = (props) => {
                                             className='my-1'
 
                                             sx={{
-                                                fontSize: "12px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "12px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "12px !important" }, // Ensure all text respects this
+                                                fontSize: "13px", // Apply directly to TreeItem
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                                 backgroundColor: "#fff",
                                                 "&:hover": {
@@ -600,7 +602,7 @@ const ViewsList = (props) => {
                                             label={
                                                 <Box display="flex" alignItems="center">
                                                     <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
-                                                    <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
+                                                    <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
 
                                                 </Box>
                                             }
@@ -613,14 +615,14 @@ const ViewsList = (props) => {
                     </div>
                 </>
             ) : (
-                <>
+                <span >
                     {filteredCommonViews.length > 0 && (
                         <div className='bg-white my-2'>
                             <h6
                                 onClick={toggleCommonViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
-                                    fontSize: '12px',
+                                    fontSize: '13px',
                                     backgroundColor: '#ecf4fc',
                                     cursor: 'pointer',
                                     display: 'flex'
@@ -633,11 +635,11 @@ const ViewsList = (props) => {
                                 </span>
 
                                 {/* Count in Small Tag */}
-                                <small style={{ color: '#2a68af', fontSize: '12px' }}>({filteredCommonViews.length})</small>
+                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({filteredCommonViews.length})</small>
                             </h6>
 
                             {showCommonViewSublist && (
-                                <div style={{ height: '26vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '24vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -648,9 +650,9 @@ const ViewsList = (props) => {
                                                 className='my-1'
 
                                                 sx={{
-                                                    fontSize: "12px", // Apply directly to TreeItem
-                                                    "& .MuiTreeItem-label": { fontSize: "12px !important" }, // Force label font size
-                                                    "& .MuiTypography-root": { fontSize: "12px !important" }, // Ensure all text respects this
+                                                    fontSize: "13px", // Apply directly to TreeItem
+                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                                    "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                                     backgroundColor: "#fff",
                                                     "&:hover": {
@@ -665,7 +667,7 @@ const ViewsList = (props) => {
                                                 label={
                                                     <Box display="flex" alignItems="center">
                                                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                                        <span style={{ fontSize: '12px' }} className='list-text'>{view.viewName}</span>
+                                                        <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>
                                                 }
                                             >
@@ -682,7 +684,7 @@ const ViewsList = (props) => {
                                 onClick={toggleOtherViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
-                                    fontSize: '12px',
+                                    fontSize: '13px',
                                     backgroundColor: '#ecf4fc',
                                     cursor: 'pointer',
                                     display: 'flex'
@@ -695,11 +697,11 @@ const ViewsList = (props) => {
                                 </span>
 
                                 {/* Count in Small Tag */}
-                                <small style={{ color: '#2a68af', fontSize: '12px' }}>({otherviews.length})</small>
+                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({otherviews.length})</small>
                             </h6>
 
                             {showOtherViewSublist && (
-                                <div style={{ height: '26vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '24vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {otherviews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -710,9 +712,9 @@ const ViewsList = (props) => {
                                                 className='my-1'
 
                                                 sx={{
-                                                    fontSize: "12px", // Apply directly to TreeItem
-                                                    "& .MuiTreeItem-label": { fontSize: "12px !important" }, // Force label font size
-                                                    "& .MuiTypography-root": { fontSize: "12px !important" }, // Ensure all text respects this
+                                                    fontSize: "13px", // Apply directly to TreeItem
+                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                                    "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                                     backgroundColor: "#fff",
                                                     "&:hover": {
@@ -727,7 +729,7 @@ const ViewsList = (props) => {
                                                 label={
                                                     <Box display="flex" alignItems="center">
                                                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                                                        <span style={{ fontSize: '12px' }} className='list-text'>{view.viewName}</span>
+                                                        <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>
                                                 }
                                             >
@@ -738,7 +740,7 @@ const ViewsList = (props) => {
                             )}
                         </div>
                     )}
-                </>
+                </span>
             )}
         </>
 

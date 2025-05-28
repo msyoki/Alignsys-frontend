@@ -101,7 +101,7 @@
     background: #e76f51; /* Message bubble color for self */
     color: #fff;
     align-self: flex-end;
-    font-size: 12px; /* Increased font size for better readability */
+    font-size: 13px; /* Increased font size for better readability */
     border-radius: 25px;
     padding: 10px 15px;
     max-width: 250px; /* Adjust max width if needed */

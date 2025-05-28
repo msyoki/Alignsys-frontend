@@ -52,33 +52,46 @@ const LookupMultiSelect = ({ userId, propId, label, onChange, value, required, e
     onChange(propId, selectedOptions ? selectedOptions.map(option => option.value) : []);
   };
 
-  const customStyles = {
-    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    control: (base, state) => ({
-      ...base,
-      borderColor: error ? 'red' : base.borderColor,
-      fontSize: '12.5px',
-      color: '#555',
-      backgroundColor: disabled ? '#f5f5f5' : 'white',
-      minHeight: '40px',
-    }),
-    singleValue: (base) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-    }),
-    option: (base, state) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-      backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: '#555',
-      fontSize: '12.5px',
-    }),
-  };
+const customStyles = {
+  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+  control: (base, state) => ({
+    ...base,
+    borderColor: error ? 'red' : base.borderColor,
+    fontSize: '13px',
+    color: '#555',
+    backgroundColor: disabled ? '#f5f5f5' : 'white',
+    minHeight: '40px',
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+  }),
+  option: (base, state) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+    backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: '#555',
+    fontSize: '13px',
+  }),
+  multiValue: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+  input: (base) => ({
+    ...base,
+    fontSize: '13px',
+  }),
+};
+
 
   return (
     <div style={{ position: 'relative' }}>
@@ -111,7 +124,7 @@ const LookupMultiSelect = ({ userId, propId, label, onChange, value, required, e
         </div>
       )}
       {helperText && (
-        <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '12.5px' }} className='mx-3'>
+        <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '13px' }} className='mx-3'>
           {helperText}
         </span>
       )}

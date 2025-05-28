@@ -63,7 +63,6 @@ CustomTabPanel.propTypes = {
 };
 
 function a11yProps(index) {
-
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
@@ -139,18 +138,19 @@ const DocumentList = (props) => {
 
   const [value, setValue] = useSessionState('ss_value', 0);
 
-  const [loading, setLoading] = useSessionState('ss_loading', false);
+  const [loading, setLoading] = useState(false);
   let [requisitionProps, setRequisitionProps] = useSessionState('ss_requisitionProps', {});
   let [docProps, setDocProps] = useSessionState('ss_docProps', {});
   let [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
+  // let [selectedObject, setSelectedObject] = useState({});
   let [selectedFile, setSelectedFile] = useSessionState('ss_selectedFile', {});
-  let [loadingobjects, setLoadingObjects] = useSessionState('ss_loadingObjects', false);
+  let [loadingobjects, setLoadingObjects] = useState(false);
   let [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
 
   const [openAlert, setOpenAlert] = useSessionState('ss_openAlert', false);
   const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
   const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
-  const [loadingPreviewObject, setLoadingPreviewObject] = useSessionState('ss_loadingPreviewObject', false);
+  const [loadingPreviewObject, setLoadingPreviewObject] = useState(false);
   const [pageNumber, setPageNumber] = useSessionState('ss_pageNumber', 1);
   const [linkedObjects, setLinkedObjects] = useSessionState('ss_linkedObjects', []);
   const [tabIndex, setTabIndex] = useSessionState('ss_tabIndex', 0);
@@ -160,25 +160,26 @@ const DocumentList = (props) => {
   const [selectedIndex, setSelectedIndex] = useSessionState('ss_selectedIndex', null);
   const [base64, setBase64] = useSessionState('ss_base64', '');
   const [extension, setExtension] = useSessionState('ss_extension', '');
-  const [loadingfile, setLoadingFile] = useSessionState('ss_loadingFile', false);
-  const [loadingobject, setLoadingObject] = useSessionState('ss_loadingObject', false);
+  const [loadingfile, setLoadingFile] = useState(false);
+  const [loadingobject, setLoadingObject] = useState(false);
   const [dialogOpen, setDialogOpen] = useSessionState('ss_dialogOpen', false);
   const [uptatingObject, setUpdatingObject] = useSessionState('ss_updatingObject', false);
   const [selectedObkjWf, setSelectedObjWf] = useSessionState('ss_selectedObjWf', {});
   const [currentState, setCurrentState] = useSessionState('ss_currentState', {});
   const [selectedState, setSelectedState] = useSessionState('ss_selectedState', {});
   const [comments, setComments] = useSessionState('ss_comments', []);
-  const [loadingcomments, setLoadingComments] = useSessionState('ss_loadingComments', false);
+  const [loadingcomments, setLoadingComments] = useState(false);
   const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
   const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
-  const [loadingClick, setLoadingClick] = useSessionState('ss_loadingClick', false);
+  const [loadingClick, setLoadingClick] = useState(false);
   const [searched, setSearched] = useSessionState('ss_searched', false);
   const [previewWindowWidth, setPreviewWindowWidth] = useSessionState('ss_previewWindowWidth', 40);
   const [newWFState, setNewWFState] = useState(null)
   const [newWF, setNewWF] = useState(null)
   const [workflows, setWorkflows] = useSessionState('ss_vaultWorkflows', []);
   const [approvalPayload, setApprovalPayload] = useState(null);
-
+  const [checkedItems, setCheckedItems] = useState({});
+  const [loadingWFS, setLoadingWFS] = useState(false);
 
   const markAssignementComplete = async () => {
 
@@ -189,7 +190,7 @@ const DocumentList = (props) => {
       }
     })
       .then(response => {
-        console.log('Success:', response.data);
+
         setApprovalPayload(null)
       })
       .catch(error => {
@@ -252,18 +253,11 @@ const DocumentList = (props) => {
         vaultGuid: props.selectedVault?.guid || "", // Ensure valid vaultGuid
       };
 
-
-
-      console.log(requestData);
-
-
       await axios.put(
         `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
         requestData,
         { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
       );
-
-
 
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
@@ -273,6 +267,7 @@ const DocumentList = (props) => {
       // console.log(selectedObject)
       setPreviewObjectProps([])
       setSelectedObject({})
+      setUpdatingObject(false);
 
       setTimeout(() => {
         if (selectedObject.id !== 0) {
@@ -283,6 +278,7 @@ const DocumentList = (props) => {
       }, 5000);
 
     } catch (error) {
+      setUpdatingObject(false)
       console.error('Error updating object props:', error);
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
@@ -318,17 +314,19 @@ const DocumentList = (props) => {
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
       setAlertPopMessage("Updated successfully!");
+      setUpdatingObject(false)
     } catch (error) {
       console.error('Error transitioning state:', error);
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
       setAlertPopMessage("something went wrong, please try again later!");
+      setUpdatingObject(false)
     }
   };
 
   const addNewWorkflowAndState = async () => {
     const hasNewWorkflow = Boolean(newWFState?.stateName);
-  
+
     if (!hasNewWorkflow) {
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
@@ -364,6 +362,7 @@ const DocumentList = (props) => {
         setNewWF(null)
         setNewWFState(null)
       } catch (error) {
+        setUpdatingObject(false);
         console.error('Error transitioning state:', error);
         setAlertPopOpen(true);
         setAlertPopSeverity("error");
@@ -395,7 +394,7 @@ const DocumentList = (props) => {
       await addNewWorkflowAndState();
     }
 
-    if(approvalPayload){
+    if (approvalPayload) {
       markAssignementComplete()
     }
 
@@ -412,7 +411,7 @@ const DocumentList = (props) => {
   };
 
   const reloadObjectMetadata = async () => {
-    await getSelectedObjWorkflow(selectedObject.objectTypeId, selectedObject.id);
+    // await getSelectedObjWorkflow(selectedObject.objectTypeId, selectedObject.id);
 
     if (selectedObject.objectTypeId === 0) {
       await previewObject(selectedObject, false);  // Await previewObject to ensure it's completed
@@ -464,10 +463,12 @@ const DocumentList = (props) => {
 
 
   const previewObject = async (item, getLinkedItems) => {
-
+    setWorkflows([])
+    setCheckedItems({})
     setNewWF(null)
     setNewWFState(null)
     setComments([])
+    setLoadingWFS(true)
 
     // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
     //   handleOpenDialog();
@@ -486,7 +487,7 @@ const DocumentList = (props) => {
     setSelectedObject(item)
 
 
-    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id)
+    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id, (item.classId || item.classID))
 
 
 
@@ -498,11 +499,12 @@ const DocumentList = (props) => {
       setLoadingClick(false)
     } catch (error) {
       setLoadingClick(false)
+      setLoadingObject(false)
       // setAlertPopOpen(true);
       // setAlertPopSeverity("error");
-      // setAlertPopMessage("something went wrong, please try again later!");
-      console.error('Error fetching view objects:', error);
-      setLoadingObject(false)
+      // setAlertPopMessage("could not find object, object could be deleted");
+      // console.error('Error fetching view objects:', error);
+
     }
     setBase64('');
     setExtension('');
@@ -511,10 +513,11 @@ const DocumentList = (props) => {
   };
 
   const previewSublistObject = async (item, getLinkedItems) => {
-
+    setWorkflows([])
+    setCheckedItems({})
     setNewWF(null)
     setNewWFState(null)
-
+    setLoadingWFS(true)
     // Reset the comments and log the selected item
     setComments([]);
 
@@ -537,21 +540,25 @@ const DocumentList = (props) => {
     // console.log(item)
 
     // Fetch the object workflow asynchronously
-    getSelectedObjWorkflow((item.objectTypeId || item.objectID, item.id));
+    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id, (item.classId || item.classID))
+
 
     try {
       // Fetch view object properties
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
-      console.log(propsResponse.data)
+
       setPreviewObjectProps(propsResponse.data);
+      setLoadingObject(false)
+      setLoadingClick(false)
     } catch (error) {
+      setLoadingObject(false);
       setLoadingClick(false)
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
       setAlertPopMessage("something went wrong, please try again later!");
-      console.error('Error fetching view objects:', error);
+
     } finally {
       setLoadingObject(false);
       setLoadingClick(false)
@@ -632,34 +639,40 @@ const DocumentList = (props) => {
     setApprovalPayload(null)
 
     setSelectedState({})
-    
+
 
   }
 
 
+  
+  const fetchVaultWorkflows = async (objectTypeId, classId) => {
 
-  const fetchVaultWorkflows = async () => {
     try {
-      const response = await axios.get(`${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsWorkflows/${props.selectedVault.guid}/${props.mfilesId}`, {
+      const response = await axios.get(`${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsObjectClassTypeWorkflows/${props.selectedVault.guid}/${props.mfilesId}/${objectTypeId}/${classId}`, {
         headers: {
           'accept': '*/*'
         }
       });
-
+      setLoadingWFS(false)
       setWorkflows(response.data)
-      console.log('Response:', response.data);
+ 
+
     } catch (error) {
+      setLoadingWFS(false)
       console.error('Error fetching workflows:', error);
+   
+
     }
   };
 
 
 
   // Get current worflow state 
-  const getSelectedObjWorkflow = async (dataType, objectsId) => {
+  const getSelectedObjWorkflow = async (objectTypeId, objectsId, classId) => {
+
     const data = {
       vaultGuid: props.selectedVault.guid,
-      objectTypeId: dataType,
+      objectTypeId: objectTypeId,
       objectId: objectsId,
       userEmail: props.user.email,
       userID: props.mfilesId
@@ -673,19 +686,21 @@ const DocumentList = (props) => {
       }
     })
       .then(response => {
-
+        setLoadingWFS(false)
         setSelectedObjWf(response.data)
-        console.log(response.data)
-      
+
+
         setCurrentState({
           title: response.data.currentStateTitle,
           id: response.data.currentStateid
         })
+        console.log(response.data)
+
 
 
       })
       .catch(error => {
-        fetchVaultWorkflows()
+        fetchVaultWorkflows(objectTypeId, classId)
         console.error('Error:', error);
         setSelectedObjWf(null)
 
@@ -745,12 +760,23 @@ const DocumentList = (props) => {
 
 
 
-  function refreshUpdate() {
-    getPropsFile(0, selectedFile.internalID, selectedFile.classID, selectedFile.title)
-    switchToTab(1)
-  }
+
 
   const reloadPage = () => {
+    const authTokens = sessionStorage.getItem('authTokens');
+    const selectedVault = sessionStorage.getItem('selectedVault');
+
+    sessionStorage.clear();
+
+    if (authTokens !== null) {
+      sessionStorage.setItem('authTokens', authTokens);
+    }
+
+    if (selectedVault !== null) {
+      sessionStorage.setItem('selectedVault', selectedVault);
+    }
+
+
     window.location.reload();
   };
 
@@ -807,7 +833,7 @@ const DocumentList = (props) => {
 
     }
     catch (error) {
-      console.error('Error fetching requisition data:', error);
+      // console.error('Error fetching requisition data:', error);
 
     }
 
@@ -817,6 +843,7 @@ const DocumentList = (props) => {
 
 
   const handleSearch = (e) => {
+    resetPreview()
     setValue(0)
     e.preventDefault();
     setLoading(true)
@@ -1050,6 +1077,14 @@ const DocumentList = (props) => {
 
   }
 
+  const resetPreview = () => {
+    setBase64('')
+    setExtension('')
+    setSelectedObject({});
+    setPreviewObjectProps([]);
+    setComments([])
+  }
+
 
 
 
@@ -1085,24 +1120,25 @@ const DocumentList = (props) => {
       <LoadingDialog opendialogloading={loadingClick} />
 
 
-      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' ,height:'auto' }}>
+      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd', height: 'auto' }}>
         {/* Object List */}
         <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '25%' }}>
           <Box
-            style={{
+            sx={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '6px 10px',
-              fontSize: '12px',
+              px: 2,
+              py: 1,
+              fontSize: '13px',
               backgroundColor: '#fff',
               color: '#1C4690',
+              overflowX: 'hidden'
             }}
-            className='p-2'
           >
-            {/* Logo Section */}
-            <Box display="flex" alignItems="center" className="mx-1 pe-2">
-
+            {/* Logo + Menu Icon */}
+            <Box display="flex" alignItems="center">
+              {/* Sidebar Toggle Icon */}
               <Box
                 onClick={toggleSidebar}
                 sx={{
@@ -1112,82 +1148,65 @@ const DocumentList = (props) => {
                   width: 40,
                   height: 40,
                   cursor: 'pointer',
+                  borderRadius: 1,
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     backgroundColor: '#f0f4fa',
-                    borderRadius: '6px',
                     transform: 'scale(1.05)',
                   },
                 }}
               >
-                <i
-                  className="fa-solid fa-bars"
-                  style={{ fontSize: '25px', color: '#2757aa' }}
-                ></i>
+                <i className="fa-solid fa-bars" style={{ fontSize: '20px', color: '#2757aa' }} />
               </Box>
+
+              {/* Logo */}
               <img
                 src={logo}
                 alt="Logo"
-                width="150px"
-                style={{
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                }}
-                className='mx-3'
+                width="130"
+                className="mx-3"
+                style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
               />
             </Box>
 
-            {/* Right Section */}
+            {/* Right Section: Vault + Avatar */}
             <Box display="flex" alignItems="center">
-              <Tooltip title="Switch to a different vault">
-                <VaultSelectForm activeVault={props.selectedVault} />
+              {/* Vault Selector */}
+              <Tooltip title="Switch to a different vault" placement="left">
+                <Box className="mx-2" sx={{ cursor: 'pointer' }}>
+                  <VaultSelectForm activeVault={props.selectedVault} />
+                </Box>
               </Tooltip>
 
-              <Box
-                className="mx-2"
-                style={{
-                  cursor: 'pointer',
-                  color: '#1C4690',
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                  transition: 'transform 0.2s',
-                }}
-              >
-                <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
-                  <Avatar
-                    alt={`${props.user.first_name} ${props.user.last_name}`}
-                    {...props.stringAvatar(
-                      props.user.first_name && props.user.last_name
-                        ? `${props.user.first_name} ${props.user.last_name}`
-                        : props.user.first_name || props.user.last_name || props.user.username
-                    )}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      backgroundColor: '#2757aa',
-                      fontSize: '12px',
-                    }}
-                  />
-                </Tooltip>
-              </Box>
+              {/* User Avatar */}
+              <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
+                <Avatar
+                  alt={`${props.user.first_name} ${props.user.last_name}`}
+                  {...props.stringAvatar(
+                    props.user.first_name && props.user.last_name
+                      ? `${props.user.first_name} ${props.user.last_name}`
+                      : props.user.first_name || props.user.last_name || props.user.username
+                  )}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    backgroundColor: '#2757aa',
+                    fontSize: '13px',
+                    ml: 2,
+                  }}
+                />
+              </Tooltip>
             </Box>
           </Box>
 
-
-
           <div
-            className=" d-flex justify-content-center shadow-sm p-1"
+            className="d-flex justify-content-center shadow-sm p-3"
             style={{ backgroundColor: '#ecf4fc' }}
           >
-            <form
-              onSubmit={handleSearch}
-              className="input-group"
-              style={{ maxWidth: '600px', width: '100%' }}
-            >
-              {/* Icon Section */}
-              <div
-                className="p-1 d-flex align-items-center"
-                style={{ display: 'flex', alignItems: 'center' }}
-              >
+            <div className="d-flex w-100" style={{ maxWidth: '900px' }}>
+              {/* Left side: Vault Selector - 50% width */}
+              <div className="d-flex align-items-center" style={{ flex: '1 1 20%' }}>
+
                 <Tooltip title="Go back home">
                   <i
                     onClick={reloadPage}
@@ -1197,7 +1216,6 @@ const DocumentList = (props) => {
                       cursor: 'pointer',
                       color: '#1C4690',
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                      transition: 'transform 0.2s',
                     }}
                   ></i>
                 </Tooltip>
@@ -1205,74 +1223,54 @@ const DocumentList = (props) => {
                 <Tooltip title="Create/Add new object or document">
                   <i
                     onClick={props.getVaultObjects}
-                    className="fas fa-plus mx-3"
+                    className="fas fa-plus mx-2"
                     style={{
                       fontSize: '25px',
                       cursor: 'pointer',
                       color: '#1C4690',
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                      transition: 'transform 0.2s',
                     }}
                   ></i>
                 </Tooltip>
+
               </div>
 
-              {/* Search Input */}
-              <input
-                className="form-control form-control-md mx-1  rounded"
-                type="text"
-                required
-                placeholder="Search"
-                value={props.searchTerm}
-                onChange={(e) => props.setSearchTerm(e.target.value)}
-                style={{ borderRadius: '0px', fontSize:'13px' }}
-              />
-
-              {/* Search Button */}
-              {/* <button
-                type="submit"
-                className="btn btn-md shadow rounded d-flex align-items-center"
-                style={{
-                  fontSize: '12.5px',
-                  color: '#fff',
-                  backgroundColor: '#2757aa',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+              {/* Right side: Action Icons - 50% width, right aligned */}
+              <div
+                className="d-flex align-items-center "
+                style={{ flex: '1 1 80%' }}
               >
-                <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
-                <span className="mx-2">Search</span>
-              </button> */}
+                {/* Search Input */}
+                <form onSubmit={handleSearch} className="position-relative flex-grow-1 me-3">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Search"
+                    value={props.searchTerm}
+                    onChange={(e) => props.setSearchTerm(e.target.value)}
+                    className="form-control form-control-md ps-3 pe-5"
+                    style={{
+                      fontSize: '13px',
+                      borderRadius: '6px',
 
-              <Button
-                type="submit"
-                className="m-2 rounded-pill" // Retaining the same classes as in the original code
-                style={{
-                  fontSize: '12.5px',
-                  color: '#fff',
-                  backgroundColor: '#2757aa',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  textTransform: 'none',
-                }}
-                disabled={false}
-                variant="contained"
-              >
-                <i className="fas fa-search" style={{ fontSize: '15px' }}></i>
-                <span className="mx-2">Search</span>
-              </Button>
+                      width: '100%',
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className="btn position-absolute end-0 top-0 mt-1 me-2 p-0 border-0 bg-transparent"
+                    style={{ height: '30px', width: '30px' }}
+                  >
+                    <i className="fas fa-search text-muted" style={{ fontSize: '15px' }}></i>
+                  </button>
+                </form>
 
-              {/* Alerts */}
-              <TransitionAlerts
-                setOpen={setOpenAlert}
-                open={openAlert}
-                alertSeverity={alertSeverity}
-                alertmsg={alertMsg}
-              />
-            </form>
+              </div>
+            </div>
           </div>
+
+
+
 
 
           <Tabs
@@ -1297,14 +1295,15 @@ const DocumentList = (props) => {
                   if (label === 'All') setSearched(false);
                   if (label === 'Recent') props.getRecent?.();
                   if (label === 'Assigned') props.getAssigned?.();
+                  resetPreview();
                 }}
                 {...a11yProps(index)}
                 sx={{
                   minHeight: '36px',
                   height: '36px',
-                  padding: '4px 12px',
-                  fontSize: '13px',
-                   backgroundColor: '#ecf4fc',
+                  padding: '4px 13px',
+
+                  backgroundColor: '#ecf4fc',
                   minWidth: 'auto',
                 }}
               />
@@ -1329,13 +1328,13 @@ const DocumentList = (props) => {
               <>
                 {searched ?
                   <>
-                    {props.data.length > 0 ? (
+                    {props.data?.length > 0 ? (
                       <div>
-                        <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                        <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                           {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
                           {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
-                           <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           Search Results
                         </h6>
 
@@ -1356,9 +1355,9 @@ const DocumentList = (props) => {
 
                                 sx={{
                                   marginLeft: '10px',
-                                  fontSize: "12.5px", // Apply directly to TreeItem
-                                  "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
-                                  "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+                                  fontSize: "13px", // Apply directly to TreeItem
+                                  "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                                  "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                                   backgroundColor: "#fff",
                                   "&:hover": {
@@ -1435,7 +1434,7 @@ const DocumentList = (props) => {
                           <Typography
                             variant="body2"
                             className='text-dark'
-                            sx={{ textAlign: 'center', fontSize: '12.5px' }}
+                            sx={{ textAlign: 'center', fontSize: '13px' }}
                           >
                             Please try a different search paramenter
                           </Typography>
@@ -1462,6 +1461,7 @@ const DocumentList = (props) => {
                     setAlertPopMessage={setAlertPopMessage}
                     user={props.user}
                     mfilesId={props.mfilesId}
+                    resetPreview={resetPreview}
 
 
                   />
@@ -1491,7 +1491,7 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
@@ -1514,9 +1514,9 @@ const DocumentList = (props) => {
 
                             sx={{
                               marginLeft: '10px',
-                              fontSize: "12.5px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+                              fontSize: "13px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                               backgroundColor: "#fff",
                               "&:hover": {
@@ -1594,7 +1594,7 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark m-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark m-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
@@ -1617,9 +1617,9 @@ const DocumentList = (props) => {
 
                             sx={{
                               marginLeft: '10px',
-                              fontSize: "12.5px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+                              fontSize: "13px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                               backgroundColor: "#fff",
                               "&:hover": {
@@ -1695,7 +1695,7 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '12.5px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
@@ -1718,9 +1718,9 @@ const DocumentList = (props) => {
 
                             sx={{
                               marginLeft: '10px',
-                              fontSize: "12.5px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "12.5px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "12.5px !important" }, // Ensure all text respects this
+                              fontSize: "13px", // Apply directly to TreeItem
+                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
                               backgroundColor: "#fff",
                               "&:hover": {
@@ -1766,7 +1766,7 @@ const DocumentList = (props) => {
                                   <i
                                     className="fas fa-trash-restore"
                                     style={{
-                                      fontSize: '11px',
+                                      fontSize: '13px',
                                       cursor: 'pointer',
                                       marginRight: '4px'
                                     }}
@@ -1850,8 +1850,8 @@ const DocumentList = (props) => {
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%', height:'auto' }}>
-          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} />
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%', height: 'auto' }}>
+          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} checkedItems={checkedItems} setCheckedItems={setCheckedItems} loadingWFS={loadingWFS} />
         </div>
       </div>
 

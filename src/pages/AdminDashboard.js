@@ -668,7 +668,7 @@ function AdminDashboard() {
     };
 
     const inputStyle = {
-        fontSize: '12px',
+        fontSize: '12.5px',
         mx: 2,
     };
 
@@ -705,7 +705,7 @@ function AdminDashboard() {
                 setLoading(false)
                 setOpenAlert(true);
                 setAlertSeverity("error");
-                setAlertMsg("Failed syncing accounts, ensure vault users have emails (unique)");
+                setAlertMsg("Failed syncing accounts, try again later");
                 console.log(error);
             });
 
@@ -727,9 +727,9 @@ function AdminDashboard() {
             <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
             <div className="dashboard">
-                <nav className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                    {/* Sidebar content */}
-                    <div className="sidebar-content" style={{ marginTop: '0%' }}>
+                {/* Sidebar */}
+                <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} `}>
+                    <div className="sidebar-content" style={{minWidth:'200px'}}>
                         {sidebarOpen && (
                             <>
                                 <div className='bg-white shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -784,18 +784,9 @@ function AdminDashboard() {
                                         }}
                                     >
                                         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
-                                            <span style={{ fontSize: "14px" }}>{user.first_name}</span>
+                                            <span style={{ fontSize: "14px" }}>{user.first_name} {user.last_name}</span>
                                         </div>
-                                        <div
-                                            className='mx-2'
-                                            style={{
-                                                transition: "transform 0.3s ease-in-out",
-                                                display: "flex",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <span style={{ fontSize: "14px" }}>{user.last_name}</span>
-                                        </div>
+                                       
                                     </li>
 
                                     <li
@@ -815,7 +806,7 @@ function AdminDashboard() {
                                     </li>
                                 </ul>
 
-                                {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>
+                                {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12.5px' }}>
                                     <span className='p-2 mx-3'>{user.organization}</span>
                                 </div> */}
 
@@ -856,7 +847,7 @@ function AdminDashboard() {
                             {/* Header Box */}
                             <Box
                                 sx={{
-                                    fontSize: '12px',
+                                    fontSize: '12.5px',
                                     backgroundColor: '#ecf4fc',
                                     color: '#2757aa',
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
@@ -865,7 +856,7 @@ function AdminDashboard() {
                                     alignItems: 'center', // Vertical alignment
                                     justifyContent: 'space-between', // Spacing between icon and text
 
-                                    padding: '12px', // Add padding for better spacing
+                                    padding: '12.5px', // Add padding for better spacing
                                 }}
 
                             >
@@ -879,7 +870,7 @@ function AdminDashboard() {
                             {/* Vault List */}
                             <div
                                 style={{
-                                    fontSize: '12px',
+                                    fontSize: '12.5px',
 
                                     overflowY: 'auto', // Enable scrolling
                                     // border: '1px solid #ddd',
@@ -925,7 +916,7 @@ function AdminDashboard() {
 
                         <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '80%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
                             {viewCreateObject ?
-                                <div id="newobject" style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id="newobject" style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
                                         <Box sx={{ p: 3, boxShadow: 2, fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
                                             <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i> Create New Object
@@ -1031,7 +1022,7 @@ function AdminDashboard() {
                                 <>
                                     <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>{selectedVault.name} ( Vault Objects )</h6>
 
-                                    <div id='vaultobjects' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                    <div id='vaultobjects' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
 
 
                                         <div style={{ boxShadow: 'none' }} className='shadow-lg p-3'>
@@ -1081,7 +1072,7 @@ function AdminDashboard() {
 
                             }
                             {viewObjectStructure ?
-                                <div id='updateobjstructure' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id='updateobjstructure' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
                                         <div>
                                             <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
@@ -1103,7 +1094,7 @@ function AdminDashboard() {
                             }
 
                             {vaultGroups ?
-                                <div id='permissions' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id='permissions' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
 
                                         <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
@@ -1164,7 +1155,7 @@ function AdminDashboard() {
                             }
 
                             {viewLoginAccounts ?
-                                <div id='usermanagement' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id='usermanagement' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
 
                                         <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
@@ -1182,7 +1173,7 @@ function AdminDashboard() {
 
                             }
                             {viewLoginActivity ?
-                                <div id='loginactivity' style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div id='loginactivity' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
 
                                         <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
@@ -1200,7 +1191,7 @@ function AdminDashboard() {
 
                             }
                             {viewVaultUsers ?
-                                <div id='vaultusermanagement' style={{ fontSize: '12px' }}>
+                                <div id='vaultusermanagement' style={{ fontSize: '12.5px' }}>
 
                                     <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i> <span style={{ color: '#2757aa' }}>{selectedVault.name}</span>  Vault Users</h6>
 
@@ -1212,7 +1203,7 @@ function AdminDashboard() {
                             }
 
                             {!viewLoginAccounts && !viewLoginAccounts && !viewvaultgroups && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
-                                <div style={{ fontSize: '12px', marginBottom: '20px' }}>
+                                <div style={{ fontSize: '12.5px', marginBottom: '20px' }}>
 
                                     <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
                                     <ul className=' p-3' style={{ overflowY: 'auto' }}>

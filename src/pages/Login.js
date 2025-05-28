@@ -1,204 +1,178 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import '../styles/Login.css';
-import logo from '../images/m.png';
-import Authcontext from '../components/Auth/Authprovider';
-import '../styles/Custombuttons.css';
-import { Link } from "react-router-dom";
-import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
-import Input from '@mui/material/Input';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  InputLabel,
+  InputAdornment,
+  FormControl,
+  Input,
+  Button,
+} from '@mui/material';
 import KeyIcon from '@mui/icons-material/Key';
 import PersonIcon from '@mui/icons-material/Person';
-import * as constants from '../components/Auth/configs';
-import Alerts from '../components/Alert';
-import image from '../images/ZFBLU.webp';
-import logo2 from '../images/ZFWHITE.webp';
-import TimedAlert from '../components/TimedAlert';
-import { useNavigate } from 'react-router-dom';
 
-import { Button } from '@mui/material';
+import Authcontext from '../components/Auth/Authprovider';
+import TimedAlert from '../components/TimedAlert';
+
+import '../styles/Login.css';
+import '../styles/Custombuttons.css';
+
+import image from '../images/ZFBLU.png';
+import logo2 from '../images/ZFWHITE.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handlePasswordReset = () => {
-    navigate('/password-reset');
-
-  }
-
-
-
-
   const {
-    loginUser, openAlert,
-    setOpenAlert, setAlertMsg, setAlertSeverity, alertMsg, alertSeverity
+    loginUser,
+    openAlert,
+    setOpenAlert,
+    setAlertMsg,
+    setAlertSeverity,
+    alertMsg,
+    alertSeverity,
   } = useContext(Authcontext);
 
-
-
-
   const togglePasswordVisibility = () => {
-    const passwordInput = document.getElementById('password');
-    const toggleIcon = document.getElementById('togglePassword');
-
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-      toggleIcon.className = 'fas fa-eye ml-2';
-    } else {
-      passwordInput.type = 'password';
-      toggleIcon.className = 'fas fa-eye-slash ml-2';
-    }
+    const input = document.getElementById('password');
+    const icon = document.getElementById('togglePassword');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    icon.className = isHidden ? 'fas fa-eye ml-2' : 'fas fa-eye-slash ml-2';
   };
+
+  const handlePasswordReset = () => navigate('/password-reset');
 
   return (
     <>
-
       <TimedAlert
         open={openAlert}
-        onClose={setOpenAlert}
+        onClose={() => setOpenAlert(false)}
         severity={alertSeverity}
         message={alertMsg}
         setSeverity={setAlertSeverity}
         setMessage={setAlertMsg}
       />
-      <div className="login-container">
 
-        <div className="left-side">
-          <form onSubmit={loginUser} className="text-center text-dark p-3">
-            <div>
-              <img src={image} alt="Sample logo" style={{ width: '200px' }} />
-              <h6 className="my-3 p-2">SIGN IN</h6>
+      <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
+        {/* Left Side - Form */}
+        <div className="left-side d-flex align-items-center justify-content-center w-100 w-md-50 bg-white p-4">
+          <form onSubmit={loginUser} className="text-center text-dark w-100" style={{ maxWidth: '360px' }}>
+            <img src={image} alt="Logo" className="mb-3" style={{ width: '180px' }} />
+            <h6 className="mb-3">SIGN IN</h6>
+
+            <FormControl variant="standard" fullWidth className="mb-3">
+              <InputLabel htmlFor="email">Username*</InputLabel>
+              <Input
+                id="email"
+                name="email"
+                type="text"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Username"
+                startAdornment={
+                  <InputAdornment position="start">
+                    <PersonIcon />
+                  </InputAdornment>
+                }
+                style={{ fontSize: '14px' }}
+              />
+            </FormControl>
+
+            <FormControl variant="standard" fullWidth className="mb-2">
+              <InputLabel htmlFor="password">Password*</InputLabel>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="User password"
+                startAdornment={
+                  <InputAdornment position="start">
+                    <KeyIcon />
+                  </InputAdornment>
+                }
+                endAdornment={
+                  <InputAdornment position="end">
+                    <i
+                      id="togglePassword"
+                      className="fas fa-eye-slash"
+                      onClick={togglePasswordVisibility}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </InputAdornment>
+                }
+                style={{ fontSize: '14px' }}
+              />
+            </FormControl>
+
+            <div className="text-end mb-3">
+              <a
+                onClick={handlePasswordReset}
+                style={{
+                  textDecoration: 'none',
+                  color: '#1C4690',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                Forgot password?
+              </a>
             </div>
 
-            <div className="form-group my-2">
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="email">Email*</InputLabel>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="Email"
-                  startAdornment={<InputAdornment position="start"><PersonIcon /></InputAdornment>}
-                  style={{ fontSize: '14px' }}
-                />
-              </FormControl>
-            </div>
+            <Button
+              type="submit"
+              variant="contained"
+              className="mb-3 rounded-pill"
+              style={{
+                fontSize: '13px',
+                color: '#fff',
+                backgroundColor: '#2757aa',
+                width: '60%',
+                padding: '10px',
+                textTransform: 'none',
+              }}
+            >
+              Login
+            </Button>
 
-            <div className="form-group my-2">
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="password">Password*</InputLabel>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="User password"
-                  startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <i
-                        onClick={togglePasswordVisibility}
-                        className="fas fa-eye-slash"
-                        id="togglePassword"
-                      ></i>
-                    </InputAdornment>
-                  }
-                  style={{ fontSize: '14px' }}
-                />
-              </FormControl>
-            </div>
-
-            <div className="d-flex justify-content-end align-items-center my-3">
-              <p className="small mb-0">
-                <a
-                  onClick={handlePasswordReset}
-                  style={{ textDecoration: 'none', color: '#1C4690', cursor: 'pointer', fontSize: '13px' }}
-                >
-                  Forgot password?
-                </a>
-              </p>
-            </div>
-
-            <div className="text-center text-lg-start mt-1 row">
-              <div className="col-lg-12 text-center">
-                {/* <ButtonComponent
-                  type="submit"
-                  cssClass="e-custom-primary"
-                  className="mb-3 m-2"
-                  style={{ textTransform: 'none', fontWeight: 'lighter', width: '40%', padding: '10px' }}
-                  disabled={false}
-                >
-                  Login
-                </ButtonComponent> */}
-                <Button
-                  type="submit"
-                  className="mb-3 m-2 rounded-pill" // Retaining the same classes as in the original code
-                  style={{
-                    fontSize: '12.5px',
-                    color: '#fff',
-                    backgroundColor: '#2757aa',
-                    cursor: 'pointer',
-                    width: '40%',
-                    padding: '10px',
-                    textTransform: 'none',
-                  }}
-                  disabled={false}
-                  variant="contained"
-                >
-                  Login
-                </Button>
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <p>
-                Go to{' '}
-                <a
-                  href="https://edms.alignsys.tech"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'none', color: '#1C4690', fontSize: '12px' }}
-                >
-                  <span>
-                    <small className="mx-1" style={{ fontSize: '12px' }}>DSS - Digital Signing Service</small>
-                  </span>
-                </a>
-              </p>
-            </div>
+            <p className="mt-3" style={{ fontSize: '13px' }}>
+              Go to{' '}
+              <a
+                href="https://edms.alignsys.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1C4690', textDecoration: 'none' }}
+              >
+                DSS - Digital Signing Service
+              </a>
+            </p>
           </form>
         </div>
 
-
-        <div className="right-side" style={{ backgroundColor: '#007bff', textAlign: 'center', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', height: '100vh' }}>
-          <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-
-            <img className="" src={logo2} alt="Loading" width="400px" />
-            <p className="text-center font-weight-italic responsive-font mb-2 mt-4 text-white">
-              <span>EDMS</span> Software Solution
-            </p>
-          </div>
-
-          <div className="text-center" style={{ marginTop: 'auto' }}>
-            {/* <h5 className="text-center font-weight-italic responsive-font mb-2 mt-5">
-              <b>EMDS</b> Software Solution
-            </h5>
-            <p className="text-center font-weight-italic responsive-font mb-4">
-              Streamline Document-Centric Processes with Efficiency and Security
-            </p> */}
-
-          </div>
+        {/* Right Side - Banner */}
+        <div
+          className="right-side w-100 w-md-50 d-flex flex-column justify-content-center align-items-center"
+          style={{
+            backgroundColor: '#007bff',
+            padding: '20px',
+          }}
+        >
+          <img src={logo2} alt="Banner Logo" width="300px" />
+          <p
+            className="text-white mt-4"
+            style={{ fontStyle: 'italic', fontSize: '15px' }}
+          >
+            <strong>EDMS</strong> Software Solution
+          </p>
         </div>
-
-
-
       </div>
-    </>
 
+    </>
   );
 };
 

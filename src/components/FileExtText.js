@@ -18,13 +18,13 @@ const FileExtText = (props) => {
         const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
         const ext = data[0]?.extension?.replace(/^\./, '').toLowerCase(); // Normalize extension
-        console.log(ext);
+        // console.log(ext);
         setExtension(ext);
       } catch (err) {
         if (axios.isCancel(err)) {
-          console.log('Request canceled:', err.message);
+          // console.log('Request canceled:', err.message);
         } else {
-          console.error('Error fetching the extension:', err);
+          // console.error('Error fetching the extension:', err);
           setError(err.message);
         }
       } finally {

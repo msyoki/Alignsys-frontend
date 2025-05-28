@@ -1,13 +1,28 @@
-.pdf-render-wrapper {
-  display: flex;
-  height: 70vh;
+/* GLOBAL SETTINGS */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-.thumbnail-sidebar {
+/* MAIN CONTAINER */
+.pdf-viewer-container {
+  display: flex;
+  flex-direction: row;
+  height: 80vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #666666;
+}
+
+.tall {
+  height: 90vh;
+}
+
+/* SIDEBAR / THUMBNAILS */
+.pdf-thumbnail-panel {
   position: relative;
   height: 100%;
-  width: 200px;
-  background-color: #555;
+  width: 210px;
+  background-color: #666666;
   color: black;
   z-index: 1000;
   flex-shrink: 0;
@@ -16,42 +31,57 @@
   flex-direction: column;
   align-items: center;
   padding: 10px;
-
 }
 
-/* .thumbnail-sidebar.mobile {
-  width: 100px;
-} */
+/* Responsive sidebar for mobile */
+@media (max-width: 500px) {
+  .pdf-thumbnail-panel {
+    width: 200px;
+    padding: 5px;
+  }
 
-.thumbnail {
+  .thumbnail-item {
+    margin-bottom: 15px;
+  }
+
+  .thumbnail-page-number {
+    font-size: 9px;
+  }
+}
+
+.thumbnail-scroll-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.thumbnail-item {
   width: 100%;
   margin-bottom: 25px;
+  text-align: center;
   border-width: 0.5px;
   border-style: none;
-  /* background-color: #bfc0be; */
   color: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-align: center;
-  
 }
 
-.thumbnail.active {
-  border-width: 3.5px;
-  border-style: solid;
-  border-color: #C0DCF5 ;
-  background-color: #C0DCF5 ;
+.thumbnail-item.active {
+  border: 3.5px solid #C0DCF5;
+  background-color: #C0DCF5;
   color: black;
 }
 
-.page-number {
-  display: block;
+.thumbnail-page-number {
   font-size: 10px;
-  margin: 3px 0 0;
+  margin-top: 3px;
+  display: block;
   background-color: inherit;
 }
 
-.pdf-main {
+/* PDF MAIN VIEWER */
+.pdf-main-viewer {
   position: relative;
   overflow-y: auto;
   height: 100%;
@@ -60,61 +90,61 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
+  padding: 0;
 }
 
-.pdf-main.mobile {
-  padding: 5px;
+/* Main viewer responsive padding for mobile */
+@media (max-width: 768px) {
+  .pdf-main-viewer {
+    padding: 5px;
+  }
 }
 
 .pdf-page-wrapper {
   position: relative;
-  width: 100%;
   margin-bottom: 10px;
+  /* width and height handled via JS inline styles */
 }
 
+/* ANNOTATION LAYER */
+.annotation-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  /* width and height set inline via React */
+}
 
+/* CUSTOM SCROLLBARS */
+.scrollbar-custom1::-webkit-scrollbar,
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
 
+.scrollbar-custom1::-webkit-scrollbar-track {
+  background: #666666;
+}
 
-  /* Applies to WebKit browsers (Chrome, Safari, Edge) */
-  .scrollbar-custom1::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .scrollbar-custom1::-webkit-scrollbar-track {
-    background: #555; /* Track color */
-  }
-  
-  .scrollbar-custom1::-webkit-scrollbar-thumb {
-    background-color: #e5e6e4; /* Scrollbar handle */
-    border-radius: 4px;
-  }
-  
-  /* Optional: Firefox support */
-  .scrollbar-custom1 {
-    scrollbar-width: thin;
-    scrollbar-color: #e5e6e4 #555;
-  }
-  
-  
-  
-    /* Applies to WebKit browsers (Chrome, Safari, Edge) */
-    .scrollbar-custom::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    .scrollbar-custom::-webkit-scrollbar-track {
-      background: #bfc0be; /* Track color */
-    }
-    
-    .scrollbar-custom::-webkit-scrollbar-thumb {
-      background-color: #555; /* Scrollbar handle */
-      border-radius: 4px;
-    }
-    
-    /* Optional: Firefox support */
-    .scrollbar-custom {
-      scrollbar-width: thin;
-      scrollbar-color: #555 #bfc0be;
-    }
-    
+.scrollbar-custom1::-webkit-scrollbar-thumb {
+  background-color: #e5e6e4;
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #bfc0be;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #666666;
+  border-radius: 4px;
+}
+
+.scrollbar-custom1 {
+  scrollbar-width: thin;
+  scrollbar-color: #e5e6e4 #666666;
+}
+
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #666666 #bfc0be;
+}

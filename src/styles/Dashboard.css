@@ -19,8 +19,8 @@
 
 /* Sidebar */
 .sidebar {
-  /* min-width: 180px; */
-  width: fit-content; /* Adjusts width to content size */
+
+  width: 180px; /* Adjusts width to content size */
   background: #2757aa;
   color: #edf4f7;
   transition: width 0.3s ease;
@@ -130,10 +130,19 @@
   background-color: var(--secondary-color);
   color: #555; /* Remove single quotes */
   height: 100vh; /* Let it fill the height of its parent container */
-  overflow-y: auto; /* Prevent unnecessary scroll */
+  overflow-y: hidden; /* Prevent unnecessary scroll */
   overflow-x: hidden;
   background-color: #fff;
 }
+
+
+
+  @media screen and (max-width: 768px) {
+   .content {
+      overflow-y: auto;
+    }
+
+  }
 
 
 

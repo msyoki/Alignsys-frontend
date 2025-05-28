@@ -72,7 +72,7 @@ function Bot(props) {
         }
     };
 
- 
+
 
     useEffect(() => {
         chatLogsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,47 +86,22 @@ function Bot(props) {
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    fontSize: 'important 12px',
+                    fontSize: 'important 13px',
                     backgroundColor: '#ecf4fc',
                     height: '53px',
-                    color: '#1d3557' 
+                    color: '#1d3557'
 
                 }}
             >
 
 
-                <i className="fas fa-file-pdf mx-2 text-danger" style={{ fontSize: '15px' }}></i>
-                <span style={{ fontSize: '12px' }}>{props.objectTitle}.pdf</span>
+                <i className="fas fa-file-pdf mx-2 text-danger" style={{ fontSize: '25px' }}></i>
+                <span style={{ fontSize: '13px' }}>{props.objectTitle}.pdf</span>
 
 
 
             </Box>
 
-
-            <Box
-                className="p-2 bg-white"
-                sx={{
-                    width: '100%',
-
-
-                }}
-            >
-                <form onSubmit={handleChatSubmit} className='input-group  '>
-                    <input
-                        type="text"
-                        id="chat-input"
-                        className='form-control form-control-md'
-                        placeholder="Query from document..."
-                        value={inputValue}
-                        autoComplete="off"
-                        onChange={(e) => setInputValue(e.target.value)}
-                    />
-                    <button style={{ backgroundColor: '#6a994e' }} type="submit" className='btn btn-md text-white'>
-                        <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i>
-                        <small>Search</small>
-                    </button>
-                </form>
-            </Box>
 
 
 
@@ -140,6 +115,44 @@ function Bot(props) {
                     backgroundColor: '#fff'
                 }}
             >
+
+                <Box
+                    className="p-2 bg-white"
+                    sx={{
+                        width: '100%',
+
+
+                    }}
+                >
+                    <form onSubmit={handleChatSubmit} >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <textarea
+                                id="chat-input"
+                                className="form-control "
+                                placeholder="Prompt document..."
+                                value={inputValue}
+                                autoComplete="off"
+                                onChange={(e) => setInputValue(e.target.value)}
+                                style={{ flex: 5 }}
+
+
+                                rows="2"
+
+
+
+
+
+
+                            />
+
+                            <button style={{ backgroundColor: '#6a994e' }} type="submit" className='btn btn-md text-white mx-2 rounded-pill'>
+                                {/* <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i> */}
+                                <small className='mx-2'>Submit Prompt</small>
+                            </button>
+                        </Box>
+                    </form>
+                </Box>
+
                 {messages.map((message) => (
                     <div key={message.id} className={`chat-msg ${message.type}`}>
                         <span className="msg-avatar">
@@ -147,6 +160,7 @@ function Bot(props) {
                                 className={`fas ${message.type === 'self' ? 'fa-user' : 'fa-robot'}`}
                                 style={{ color: '#2757aa', fontSize: '20px' }}
                             />
+
                         </span>
 
                         <div

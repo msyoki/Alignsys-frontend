@@ -60,16 +60,16 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
   return (
     <>
       {loading ? (
-        <TreeItem sx={{
+        <TreeItem className="text-muted" sx={{
 
           backgroundColor: '#fff',
           // backgroundColor: '#e5e5e5',
           padding: '3px',
           color: '#555 !impoetant',
           borderBottom: '1px solid #dedddd',
-          fontSize: "10px", // Apply directly to TreeItem
-          "& .MuiTreeItem-label": { fontSize: "10px !important" }, // Force label font size
-          "& .MuiTypography-root": { fontSize: "10px !important" }, // Ensure all text respects this
+          fontSize: "12px", // Apply directly to TreeItem
+          "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+          "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
         }} itemId="loading" label="Loading..." />
 
       ) : linkedObjects.length > 0 ? (
@@ -81,7 +81,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
 
                 sx={
                   {
-                    marginLeft: '10px',
+                    marginLeft: '13px',
                     backgroundColor: '#fff',
 
                     "&:hover": {
@@ -138,11 +138,11 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                           />
                         ) : (
                           <i
-                            className="fas fa-folder mx-1"
+                            className="fas fa-folder mx-2"
                             style={{ fontSize: "15px", color: "#2a68af" }}
                           ></i>
                         )}
-                        <span style={{ fontSize: '12px' }}>{subItem.title}{subItem.objectID === 0 && (
+                        <span style={{ fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
                             objectId={subItem.id}
@@ -162,7 +162,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
             <TreeItem
               sx={
                 {
-                  marginLeft: '10px',
+                  marginLeft: '13px',
                   backgroundColor: '#fff',
 
                   "&:hover": {
@@ -220,7 +220,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                             style={{ fontSize: "15px", color: "#fff" }}
                           ></i>
                         )}
-                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>{subItem.title}{subItem.objectID === 0 && (
+                        <span style={{ marginLeft: '8px', fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
                           <FileExtText
                             guid={selectedVault.guid}
                             objectId={subItem.id}
@@ -242,14 +242,16 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
 
             backgroundColor: '#fff',
             // backgroundColor: '#e5e5e5',
+            
             padding: '3px',
             borderBottom: '1px solid #dedddd',
-            fontSize: "10px", // Apply directly to TreeItem
-            "& .MuiTreeItem-label": { fontSize: "10px !important" }, // Force label font size
-            "& .MuiTypography-root": { fontSize: "10px !important" }, // Ensure all text respects this
+            fontSize: "12px", // Apply directly to TreeItem
+            "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
+            "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
           }}
           itemId="no-relationships"
-          label="No Relationships Found"
+          label="No relationships found"
+          className="text-muted"
         />
 
 

@@ -21,7 +21,7 @@ const LoadingDialog = ({ opendialogloading }) => {
           <Box className="my-2" sx={{ width: '100%', margin: 'auto' }}>
             <CircularProgress size="40px" style={{ color: "#2757aa" }} />
           </Box>
-          <p className="mt-2" style={{ fontSize: '12px' }}>
+          <p className="mt-2" style={{ fontSize: '13px' }}>
             Please wait, processing...
           </p>
         </div>

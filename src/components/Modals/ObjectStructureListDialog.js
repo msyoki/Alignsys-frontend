@@ -167,7 +167,7 @@ const ObjectStructureList = (props) => {
             }, {}));
             props.setIsFormOpen(true);
             props.setLoadingDialog(false)
-           
+
         } catch (error) {
             props.setLoadingDialog(false)
             console.error("Error fetching class properties:", error);
@@ -258,7 +258,7 @@ const ObjectStructureList = (props) => {
             }));
 
 
-        // console.log(propertiesPayload)
+        console.log(propertiesPayload)
 
         propertiesPayload.forEach((prop) => {
             if (prop.isRequired && !props.formValues[prop.propId]) {
@@ -290,8 +290,8 @@ const ObjectStructureList = (props) => {
                     accept: '*/*',
                 };
 
-                let istemplate= props.templateIsTrue?"True":"False"
-     
+                let istemplate = props.templateIsTrue ? "True" : "False"
+
                 if (!props.templateIsTrue) {
                     // Handle file upload if selectedObjectId is 0 and a file is uploaded
                     if (props.selectedObjectId === 0 && uploadedFile) {
@@ -448,7 +448,7 @@ const ObjectStructureList = (props) => {
                 <Dialog open={props.vaultObjectModalsOpen} onClose={props.closeModal} fullWidth>
                     <DialogTitle
                         className='p-2 d-flex justify-content-between align-items-center'
-                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '14px' }}
                     >
 
                         <img className="mx-3" src={logo} alt="Loading" width="130px" />
@@ -459,7 +459,7 @@ const ObjectStructureList = (props) => {
 
 
                     <DialogContent>
-                        <p className='my-2' style={{ fontSize: '12.5px' }}>
+                        <p className='my-2' style={{ fontSize: '13px' }}>
                             Please select from Item types below
                         </p>
 
@@ -468,6 +468,13 @@ const ObjectStructureList = (props) => {
                             variant="outlined"
                             placeholder="Search Object Type..."
                             size="small"
+                            InputLabelProps={{
+                                shrink: true,
+                                sx: { fontSize: '13px', color: '#555' } // label styling
+                            }}
+                            InputProps={{
+                                sx: { fontSize: '13px', color: '#555' } // input text styling
+                            }}
                             fullWidth
                             value={searchTerm}
                             onChange={handleSearchTermChange}
@@ -495,7 +502,7 @@ const ObjectStructureList = (props) => {
                                                     </ListItemIcon>
                                                     <ListItemText
                                                         primary={item.namesingular}
-                                                        sx={{ '& .MuiTypography-root': { fontSize: '15px' } }}
+                                                        sx={{ '& .MuiTypography-root': { fontSize: '13px' } }}
                                                     />
                                                 </ListItem>
                                             ))}
@@ -525,7 +532,7 @@ const ObjectStructureList = (props) => {
                     {/* Dialog Title */}
                     <DialogTitle
                         className="p-2 d-flex justify-content-between align-items-center"
-                        style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "15px" }}
+                        style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
                     >
                         <img src={logo} alt="Loading" width="130px" className="mx-3" />
                         <span className="flex items-center mx-3">
@@ -539,7 +546,7 @@ const ObjectStructureList = (props) => {
 
                     {/* Dialog Content */}
                     <DialogContent>
-                        <p className='mt-2' style={{ fontSize: '12.5px' }}>
+                        <p className='mt-2' style={{ fontSize: '13px' }}>
                             Please select / search from classes below
                         </p>
 
@@ -548,6 +555,13 @@ const ObjectStructureList = (props) => {
                             fullWidth
                             variant="outlined"
                             size="small"
+                            InputLabelProps={{
+                                shrink: true,
+                                sx: { fontSize: '13px', color: '#555' } // label styling
+                            }}
+                            InputProps={{
+                                sx: { fontSize: '13px', color: '#555' } // input text styling
+                            }}
                             placeholder="Search class..."
                             value={searchQuery}
                             onChange={handleSearchChange}
@@ -570,7 +584,7 @@ const ObjectStructureList = (props) => {
                                                         <ListItemText
                                                             primary={group.classGroupName}
                                                             className="p-1 mx-2"
-                                                            style={{ '& .MuiTypography-root': { fontSize: '15px' }, color: '#555' }}
+                                                            style={{ '& .MuiTypography-root': { fontSize: '13px' }, color: '#555' }}
 
                                                         />
                                                     </ListItem>
@@ -588,7 +602,7 @@ const ObjectStructureList = (props) => {
                                                                         style={{ color: "#2a68af", fontSize: "20px" }}>
                                                                     </i>
                                                                 </ListItemIcon>
-                                                                <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={member.className} />
+                                                                <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '13px' } }} primary={member.className} />
                                                             </ListItem>
                                                         ))}
                                                     </List>
@@ -600,7 +614,7 @@ const ObjectStructureList = (props) => {
                                     {props.ungroupedItems.length > 0 && filterItems(props.ungroupedItems).length > 0 && (
                                         <>
                                             <ListItem className='p-0 my-3' style={{ backgroundColor: '#ecf4fc' }}>
-                                                <ListItemText style={{ '& .MuiTypography-root': { fontSize: '15px' }, color: '#555' }} primary="Ungrouped" className="p-1 mx-2" />
+                                                <ListItemText style={{ '& .MuiTypography-root': { fontSize: '13px' }, color: '#555' }} primary="Ungrouped" className="p-1 mx-2" />
                                             </ListItem>
                                             <List component="div" disablePadding className="ml-4">
                                                 {filterItems(props.ungroupedItems).map((member) => (
@@ -616,7 +630,7 @@ const ObjectStructureList = (props) => {
                                                                 style={{ color: "#2a68af", fontSize: "20px" }}>
                                                             </i>
                                                         </ListItemIcon>
-                                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={member.className} />
+                                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '13px' } }} primary={member.className} />
                                                     </ListItem>
                                                 ))}
                                             </List>
@@ -640,18 +654,18 @@ const ObjectStructureList = (props) => {
                     {/* Dialog Title */}
                     <DialogTitle
                         className="p-2 d-flex justify-content-between align-items-center"
-                        style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "15px" }}
+                        style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
                     >
                         <img src={logo} alt="Loading" width="130px" className="mx-3" />
                         <span className="flex items-center mx-3 cursor-pointer">
 
-                            <i class="fa-solid fa-copy"></i> <span className="font-bold mx-1">{props.selectedClassName} Templates</span>
+                            <i class="fa-solid fa-copy"></i> <span className=" mx-1">{props.selectedClassName} Templates</span>
                         </span>
                     </DialogTitle>
 
                     {/* Dialog Content */}
                     <DialogContent>
-                        <p className="my-4" style={{ fontSize: "15px" }}>
+                        <p className="my-4" style={{ fontSize: "13px" }}>
                             Please select a template
                         </p>
 
@@ -670,7 +684,7 @@ const ObjectStructureList = (props) => {
                                                 <i style={{ color: "#2a68af", fontSize: "20px" }} className="fas fa-folder-plus mx-1"></i>
                                             }
                                         </ListItemIcon>
-                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '15px' } }} primary={item.title} />
+                                        <ListItemText sx={{ '& .MuiTypography-root': { fontSize: '13px' } }} primary={item.title} />
                                     </ListItem>
                                 ))
                             ) : (
@@ -686,7 +700,7 @@ const ObjectStructureList = (props) => {
 
 
 
-                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={() => {props.setTemplateModalOpen(false);  props.setTemplateIsTrue(false)}} >
+                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={() => { props.setTemplateModalOpen(false); props.setTemplateIsTrue(false) }} >
                             Close
                         </Button>
                         <Button className='mx-4' color="primary" size='small' variant="contained" onClick={dontUseTemplates} >
@@ -700,7 +714,7 @@ const ObjectStructureList = (props) => {
                 <Dialog open={props.isFormOpen} onClose={closeFormDialog} fullWidth>
                     <DialogTitle
                         className='p-2 d-flex justify-content-between align-items-center'
-                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '14px' }}
                     >
 
                         <img className="mx-3" src={logo} alt="Loading" width="130px" />
@@ -708,7 +722,7 @@ const ObjectStructureList = (props) => {
                             {props.selectedObjectId === 0 ?
                                 <i style={{ color: "#fff", fontSize: "20px" }} className="fa-solid fa-file-circle-plus"></i> :
                                 <i style={{ color: "#fff", fontSize: "20px" }} className="fas fa-folder-plus"></i>
-                            }<small className='mx-2' style={{ fontWeight: 'bold' }}>{props.selectedClassName} </small>
+                            }<small className='mx-2' >{props.selectedClassName} </small>
                         </span>
                     </DialogTitle>
 
@@ -733,7 +747,7 @@ const ObjectStructureList = (props) => {
                                         uploadedFile={uploadedFile}
                                     />
                                     {fileUploadError && (
-                                        <div style={{ color: '#CC3333', fontSize: '12.5px' }}>
+                                        <div style={{ color: '#CC3333', fontSize: '13px' }}>
                                             {fileUploadError}
                                         </div>
                                     )}
@@ -756,13 +770,13 @@ const ObjectStructureList = (props) => {
                                             color: '#1C4690',
 
                                             flexBasis: '35%',
-                                            fontSize: '12.5px',
+                                            fontSize: '13px',
                                             textAlign: 'end'
                                         }}
                                     >
                                         Class :
                                     </Typography>
-                                    <Box className="my-2" sx={{ flexBasis: '65%', fontSize: '12.5px', textAlign: 'start', ml: 1 , fontSize:'12.5px', color:'#555'}}>
+                                    <Box className="my-2" sx={{ flexBasis: '65%', fontSize: '13px', textAlign: 'start', ml: 1, fontSize: '13px', color: '#555' }}>
                                         {props.selectedClassName}
                                     </Box>
                                 </Box>
@@ -784,14 +798,14 @@ const ObjectStructureList = (props) => {
                                                     color: '#1C4690',
 
                                                     flexBasis: '35%',
-                                                    fontSize: '12.5px',
+                                                    fontSize: '13px',
                                                     textAlign: 'end'
                                                 }}
                                             >
                                                 {prop.title} {prop.isRequired && <span className="text-danger"> *</span>} :
                                             </Typography>
 
-                                            <Box sx={{ width: '65%', fontSize: '12.5px', color: '#555', textAlign: 'start', ml: 1 }}>
+                                            <Box sx={{ width: '65%', fontSize: '13px', color: '#555', textAlign: 'start', ml: 1 }}>
                                                 <>
                                                     {prop.isAutomatic || !prop.userPermission.editPermission ?
                                                         <>
@@ -799,14 +813,14 @@ const ObjectStructureList = (props) => {
                                                                 className='my-2'
                                                                 variant="body2"
                                                                 sx={{
-                                                                    fontSize: '12.5px'
+                                                                    fontSize: '13px'
                                                                 }}
 
                                                             >
                                                                 ( Automatic )
                                                             </Typography>
                                                         </> :
-                                                        <Box sx={{ fontSize: '12.5px' }}>
+                                                        <Box sx={{ fontSize: '13px' }}>
                                                             {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
 
                                                                 <TextField
@@ -819,8 +833,8 @@ const ObjectStructureList = (props) => {
                                                                     size="small"
                                                                     className="my-1 bg-white"
                                                                     disabled={!!prop.value}
-                                                                    InputProps={{ style: { fontSize: '12.5px' } }}
-                                                                    InputLabelProps={{ style: { fontSize: '12.5px' } }}
+                                                                    InputProps={{ style: { fontSize: '13px' } }}
+                                                                    InputLabelProps={{ style: { fontSize: '13px' } }}
                                                                 />
 
                                                             )}
@@ -840,8 +854,8 @@ const ObjectStructureList = (props) => {
                                                                             rows={4}
                                                                             size="small"
                                                                             className="my-1 bg-white"
-                                                                            InputProps={{ style: { fontSize: '12.5px' } }}
-                                                                            InputLabelProps={{ style: { fontSize: '12.5px' } }}
+                                                                            InputProps={{ style: { fontSize: '13px' } }}
+                                                                            InputLabelProps={{ style: { fontSize: '13px' } }}
                                                                         /></>}
                                                                 </>
 
@@ -901,32 +915,32 @@ const ObjectStructureList = (props) => {
                                                                             sx={{
                                                                                 backgroundColor: 'white',
                                                                                 marginY: '8px',
-                                                                                fontSize: '12.5px',
+                                                                                fontSize: '13px',
                                                                                 '& .MuiSelect-select': {
-                                                                                  fontSize: '12.5px',
-                                                                                  color: '#555',
-                                                                                  paddingTop: '6px',
-                                                                                  paddingBottom: '6px',
-                                                                                  paddingLeft: '10px',
-                                                                                  paddingRight: '10px',
-                                                                                  minHeight: 'unset',
+                                                                                    fontSize: '13px',
+                                                                                    color: '#555',
+                                                                                    paddingTop: '6px',
+                                                                                    paddingBottom: '6px',
+                                                                                    paddingLeft: '10px',
+                                                                                    paddingRight: '10px',
+                                                                                    minHeight: 'unset',
                                                                                 },
                                                                                 '& .MuiInputBase-root': {
-                                                                                  minHeight: '32px',
+                                                                                    minHeight: '32px',
                                                                                 },
                                                                                 '& .MuiOutlinedInput-input': {
-                                                                                  padding: '6px 10px',
-                                                                                  fontSize: '12.5px',
+                                                                                    padding: '6px 10px',
+                                                                                    fontSize: '13px',
                                                                                 },
                                                                                 '& .MuiMenuItem-root': {
-                                                                                  fontSize: '12.5px',
-                                                                                  color: '#555',
+                                                                                    fontSize: '13px',
+                                                                                    color: '#555',
                                                                                 },
-                                                                              }}
+                                                                            }}
                                                                         >
-                                                                            <MenuItem  sx={{ fontSize: '12.5px', color: '#555' }} value=""><em>None</em></MenuItem>
-                                                                            <MenuItem  sx={{ fontSize: '12.5px', color: '#555' }} value={true}>True</MenuItem>
-                                                                            <MenuItem  sx={{ fontSize: '12.5px', color: '#555' }} value={false}>False</MenuItem>
+                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value=""><em>None</em></MenuItem>
+                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={true}>True</MenuItem>
+                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={false}>False</MenuItem>
                                                                         </Select></>}
                                                                 </>
 
@@ -936,7 +950,7 @@ const ObjectStructureList = (props) => {
                                                                 <>
                                                                     {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
                                                                         <input
-                                                                            style={{color:'#555', fontSize:'12.5px'}}
+                                                                            style={{ color: '#555', fontSize: '13px' }}
                                                                             type="datetime-local"
                                                                             className="form-control bg-white"
                                                                             value={props.formValues[prop.propId] || ''}
@@ -959,10 +973,10 @@ const ObjectStructureList = (props) => {
                                                                             helperText={formErrors[prop.propId]}
                                                                             InputLabelProps={{
                                                                                 shrink: true,
-                                                                                sx: { fontSize: '12.5px', color: '#555' } // label styling
+                                                                                sx: { fontSize: '13px', color: '#555' } // label styling
                                                                             }}
                                                                             InputProps={{
-                                                                                sx: { fontSize: '12.5px', color: '#555' } // input text styling
+                                                                                sx: { fontSize: '13px', color: '#555' } // input text styling
                                                                             }}
                                                                             size="small"
                                                                             className="my-1 bg-white"
@@ -985,7 +999,7 @@ const ObjectStructureList = (props) => {
 
                     <DialogActions>
 
-                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={()=>{ closeFormDialog() ;props.setTemplateIsTrue(false)}}>Cancel</Button>
+                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={() => { closeFormDialog(); props.setTemplateIsTrue(false) }}>Cancel</Button>
                         <Button className='mx-4' color="primary" size='medium' variant="contained" onClick={handleSubmit} >
                             Create
                         </Button>
