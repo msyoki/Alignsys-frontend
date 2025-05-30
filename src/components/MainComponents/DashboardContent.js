@@ -33,6 +33,7 @@ import { Tooltip } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import LinkedObjectsTree from './LinkedObjectsTree';
+import AddButtonWithMenu from '../AddButtonWithMenu';
 
 
 
@@ -180,6 +181,10 @@ const DocumentList = (props) => {
   const [approvalPayload, setApprovalPayload] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [loadingWFS, setLoadingWFS] = useState(false);
+
+  const [selectedItemId, setSelectedItemId] = useState(null);
+
+
 
   const markAssignementComplete = async () => {
 
@@ -469,6 +474,8 @@ const DocumentList = (props) => {
     setNewWFState(null)
     setComments([])
     setLoadingWFS(true)
+    setBase64('');
+    setExtension('');
 
     // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
     //   handleOpenDialog();
@@ -506,8 +513,7 @@ const DocumentList = (props) => {
       // console.error('Error fetching view objects:', error);
 
     }
-    setBase64('');
-    setExtension('');
+
     // }
     getObjectComments(item);
   };
@@ -548,6 +554,7 @@ const DocumentList = (props) => {
       const propsResponse = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
       );
+      console.log(propsResponse.data)
 
       setPreviewObjectProps(propsResponse.data);
       setLoadingObject(false)
@@ -644,7 +651,7 @@ const DocumentList = (props) => {
   }
 
 
-  
+
   const fetchVaultWorkflows = async (objectTypeId, classId) => {
 
     try {
@@ -655,12 +662,12 @@ const DocumentList = (props) => {
       });
       setLoadingWFS(false)
       setWorkflows(response.data)
- 
+
 
     } catch (error) {
       setLoadingWFS(false)
       console.error('Error fetching workflows:', error);
-   
+
 
     }
   };
@@ -1083,6 +1090,7 @@ const DocumentList = (props) => {
     setSelectedObject({});
     setPreviewObjectProps([]);
     setComments([])
+
   }
 
 
@@ -1156,14 +1164,14 @@ const DocumentList = (props) => {
                   },
                 }}
               >
-                <i className="fa-solid fa-bars" style={{ fontSize: '20px', color: '#2757aa' }} />
+                <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
               </Box>
 
               {/* Logo */}
               <img
                 src={logo}
                 alt="Logo"
-                width="130"
+                width="150"
                 className="mx-3"
                 style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
               />
@@ -1200,19 +1208,19 @@ const DocumentList = (props) => {
           </Box>
 
           <div
-            className="d-flex justify-content-center shadow-sm p-3"
+            className="d-flex justify-content-center shadow-sm p-2"
             style={{ backgroundColor: '#ecf4fc' }}
           >
             <div className="d-flex w-100" style={{ maxWidth: '900px' }}>
               {/* Left side: Vault Selector - 50% width */}
-              <div className="d-flex align-items-center" style={{ flex: '1 1 20%' }}>
+              <div className="d-flex align-items-center " style={{ flex: '1 1 20%' }}>
 
                 <Tooltip title="Go back home">
                   <i
                     onClick={reloadPage}
-                    className="fas fa-home mx-2"
+                    className="fas fa-home mx-3"
                     style={{
-                      fontSize: '25px',
+                      fontSize: '30px',
                       cursor: 'pointer',
                       color: '#1C4690',
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
@@ -1220,7 +1228,7 @@ const DocumentList = (props) => {
                   ></i>
                 </Tooltip>
 
-                <Tooltip title="Create/Add new object or document">
+                {/* <Tooltip title="Create/Add new object or document">
                   <i
                     onClick={props.getVaultObjects}
                     className="fas fa-plus mx-2"
@@ -1231,7 +1239,8 @@ const DocumentList = (props) => {
                       textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                     }}
                   ></i>
-                </Tooltip>
+                </Tooltip> */}
+                <AddButtonWithMenu vaultObjectsList={props.vaultObjectsList} fetchItemData={props.fetchItemData} />
 
               </div>
 
@@ -1248,7 +1257,7 @@ const DocumentList = (props) => {
                     placeholder="Search"
                     value={props.searchTerm}
                     onChange={(e) => props.setSearchTerm(e.target.value)}
-                    className="form-control form-control-md ps-3 pe-5"
+                    className="form-control form-control-md ps-3 pe-5 mx-2"
                     style={{
                       fontSize: '13px',
                       borderRadius: '6px',
@@ -1292,10 +1301,11 @@ const DocumentList = (props) => {
                 style={{ textTransform: 'none' }}
                 label={label}
                 onClick={() => {
+                  resetPreview();
                   if (label === 'All') setSearched(false);
                   if (label === 'Recent') props.getRecent?.();
                   if (label === 'Assigned') props.getAssigned?.();
-                  resetPreview();
+
                 }}
                 {...a11yProps(index)}
                 sx={{
@@ -1330,7 +1340,7 @@ const DocumentList = (props) => {
                   <>
                     {props.data?.length > 0 ? (
                       <div>
-                        <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                        <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                           {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
                           {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
@@ -1345,32 +1355,43 @@ const DocumentList = (props) => {
                               <TreeItem
                                 key={`tree-item-${index}`} // Unique key
                                 itemId={`tree-item-${index}`} // Unique itemId
-                                onClick={() =>
+                                onClick={() => {
+                                  setSelectedItemId(item.id); // update selected
                                   item.objectTypeId || item.objectID === 0
                                     ? previewSublistObject(item, true)
                                     : previewObject(item, true)
                                 }
-                                className='my-1'
-
+                                }
 
                                 sx={{
-                                  marginLeft: '10px',
+
                                   fontSize: "13px", // Apply directly to TreeItem
                                   "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                   "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                  backgroundColor: "#fff",
+                                  backgroundColor: '#fff !important',
                                   "&:hover": {
-                                    backgroundColor: "#fff !important", // Maintain white background on hover
+                                    backgroundColor: '#fff !important', // Maintain white background on hover
                                   },
 
                                   borderRadius: "0px !important", // Remove border radius
                                   "& .MuiTreeItem-content": {
                                     borderRadius: "0px !important", // Remove border radius from content area
                                   },
+                                  "& .MuiTreeItem-content.Mui-selected": {
+                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                  },
+                                  "& .MuiTreeItem-content:hover": {
+                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                  },
+
+
+                                  "& .MuiTreeItem-content.Mui-selected:hover": {
+                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                  },
                                 }}
                                 label={
-                                  <Box display="flex" alignItems="center">
+                                  <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }} >
                                     {item.objectTypeId || item.objectID === 0 ? (
                                       <>
                                         <FileExtIcon
@@ -1398,7 +1419,7 @@ const DocumentList = (props) => {
                                 }
                               >
 
-                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId}/>
                               </TreeItem>
                             </SimpleTreeView>
 
@@ -1407,20 +1428,29 @@ const DocumentList = (props) => {
                       </div>
                     ) : (
                       <>
+                        <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                          {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
+                          {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
+                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                          Search Results
+                        </h6>
                         <Box
                           sx={{
                             width: '100%',
-                            marginTop: '5%',
+
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            mx: 'auto'
+                            mx: 'auto',
+                            padding: '20px',
+                            backgroundColor: '#ecf4fc'
                           }}
                         >
                           <i
-                            className="fas fa-search my-2"
-                            style={{ fontSize: '120px', color: '#2757aa' }}
+                            className="fa-solid fa-search my-3"
+                            style={{ fontSize: '40px', color: '#2757aa' }}
                           />
 
 
@@ -1462,6 +1492,8 @@ const DocumentList = (props) => {
                     user={props.user}
                     mfilesId={props.mfilesId}
                     resetPreview={resetPreview}
+                    setSelectedItemId={setSelectedItemId}
+                    selectedItemId={selectedItemId}
 
 
                   />
@@ -1491,7 +1523,7 @@ const DocumentList = (props) => {
               <>
                 {props.recentData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Recently Modified By Me ({props.recentData.length})
@@ -1504,10 +1536,12 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() =>
+                            onClick={() => {
+                              setSelectedItemId(item.id); // update selected
                               item.objectTypeId === 0 || item.objectID === 0
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
+                            }
                             }
                             className='my-1'
 
@@ -1518,18 +1552,25 @@ const DocumentList = (props) => {
                               "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                              backgroundColor: "#fff",
+                              backgroundColor: '#fff !important',
                               "&:hover": {
-                                backgroundColor: "#fff !important", // Maintain white background on hover
+                                backgroundColor: '#fff !important', // Maintain white background on hover
                               },
 
                               borderRadius: "0px !important", // Remove border radius
                               "& .MuiTreeItem-content": {
                                 borderRadius: "0px !important", // Remove border radius from content area
                               },
+                              "& .MuiTreeItem-content.Mui-selected": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
+
+                              "& .MuiTreeItem-content.Mui-selected:hover": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
                             }}
                             label={
-                              <Box display="flex" alignItems="center">
+                              <Box display="flex" alignItems="center" sx={{ padding: '3px',backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                 {item.objectTypeId === 0 || item.objectID === 0 ? (
                                   <>
                                     <FileExtIcon
@@ -1557,7 +1598,7 @@ const DocumentList = (props) => {
                             }
                           >
 
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId} />
                           </TreeItem>
                         </SimpleTreeView>
 
@@ -1566,8 +1607,47 @@ const DocumentList = (props) => {
                   </div>
                 ) : (
                   <>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+
+                      Recently Modified By Me
+                    </h6>
+
+                    <Box
+                      sx={{
+                        width: '100%',
+
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        padding: '20px',
+                        backgroundColor: '#ecf4fc'
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-ban my-3"
+                        style={{ fontSize: '40px', color: '#2757aa' }}
+                      />
 
 
+                      <Typography
+                        variant="body2"
+                        className='my-2 text-dark'
+                        sx={{ textAlign: 'center' }}
+                      >
+                        No Results Found
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className='text-dark'
+                        sx={{ textAlign: 'center', fontSize: '13px' }}
+                      >
+                        Recent is Empty
+                      </Typography>
+
+                    </Box>
                   </>
                 )}
               </>
@@ -1594,7 +1674,7 @@ const DocumentList = (props) => {
               <>
                 {props.assignedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark m-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Assigned ({props.assignedData.length})
@@ -1607,10 +1687,12 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() =>
+                            onClick={() => {
+                              setSelectedItemId(item.id); // update selected
                               item.objectTypeId === 0 || item.objectID === 0
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
+                            }
                             }
                             className='my-1'
 
@@ -1621,18 +1703,25 @@ const DocumentList = (props) => {
                               "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                              backgroundColor: "#fff",
+                              backgroundColor: '#fff !important',
                               "&:hover": {
-                                backgroundColor: "#fff !important", // Maintain white background on hover
+                                backgroundColor: '#fff !important', // Maintain white background on hover
                               },
 
                               borderRadius: "0px !important", // Remove border radius
                               "& .MuiTreeItem-content": {
                                 borderRadius: "0px !important", // Remove border radius from content area
                               },
+                              "& .MuiTreeItem-content.Mui-selected": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
+
+                              "& .MuiTreeItem-content.Mui-selected:hover": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
                             }}
                             label={
-                              <Box display="flex" alignItems="center">
+                              <Box display="flex" alignItems="center" sx={{ padding: '3px',backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                 {item.objectTypeId || item.objectID === 0 ? (
                                   <>
                                     <FileExtIcon
@@ -1660,7 +1749,7 @@ const DocumentList = (props) => {
                             }
                           >
 
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId}/>
                           </TreeItem>
                         </SimpleTreeView>
 
@@ -1669,7 +1758,46 @@ const DocumentList = (props) => {
                   </div>
                 ) : (
                   <>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
+                      Assigned
+                    </h6>
+                    <Box
+                      sx={{
+                        width: '100%',
+
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        padding: '20px',
+                        backgroundColor: '#ecf4fc'
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-ban my-3"
+                        style={{ fontSize: '40px', color: '#2757aa' }}
+                      />
+
+
+                      <Typography
+                        variant="body2"
+                        className='my-2 text-dark'
+                        sx={{ textAlign: 'center' }}
+                      >
+                        No Results Found
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className='text-dark'
+                        sx={{ textAlign: 'center', fontSize: '13px' }}
+                      >
+                        Assigned to me is empty
+                      </Typography>
+
+                    </Box>
 
                   </>
                 )}
@@ -1695,7 +1823,7 @@ const DocumentList = (props) => {
               <>
                 {props.deletedData.length > 0 ? (
                   <div >
-                    <h6 className='p-2 text-dark my-2' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
                       <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
                       Deleted By Me ({props.deletedData.length})
@@ -1708,10 +1836,12 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() =>
+                            onClick={() => {
+                              setSelectedItemId(item.id); // update selected
                               item.objectTypeId || item.objectID === 0
                                 ? previewSublistObject(item, true)
                                 : previewObject(item, true)
+                            }
                             }
                             className='my-1'
 
@@ -1722,18 +1852,25 @@ const DocumentList = (props) => {
                               "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                               "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                              backgroundColor: "#fff",
+                              backgroundColor: '#fff !important',
                               "&:hover": {
-                                backgroundColor: "#fff !important", // Maintain white background on hover
+                                backgroundColor: '#fff !important', // Maintain white background on hover
                               },
 
                               borderRadius: "0px !important", // Remove border radius
                               "& .MuiTreeItem-content": {
                                 borderRadius: "0px !important", // Remove border radius from content area
                               },
+                              "& .MuiTreeItem-content.Mui-selected": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
+
+                              "& .MuiTreeItem-content.Mui-selected:hover": {
+                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                              },
                             }}
                             label={
-                              <Box display="flex" alignItems="center" justifyContent="space-between">
+                              <Box display="flex" alignItems="center" justifyContent="space-between" sx={{padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                 <Box display="flex" alignItems="center">
                                   {item.objectTypeId || item.objectID === 0 ? (
                                     <FileExtIcon
@@ -1787,7 +1924,46 @@ const DocumentList = (props) => {
                   </div>
                 ) : (
                   <>
+                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
+                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
 
+                      Deleted By Me
+                    </h6>
+                    <Box
+                      sx={{
+                        width: '100%',
+
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        padding: '20px',
+                        backgroundColor: '#ecf4fc'
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-ban my-3"
+                        style={{ fontSize: '40px', color: '#2757aa' }}
+                      />
+
+
+                      <Typography
+                        variant="body2"
+                        className='my-2 text-dark'
+                        sx={{ textAlign: 'center' }}
+                      >
+                        No Results Found
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className='text-dark'
+                        sx={{ textAlign: 'center', fontSize: '13px' }}
+                      >
+                        Deleted is empty
+                      </Typography>
+
+                    </Box>
 
                   </>
                 )}
@@ -1850,10 +2026,10 @@ const DocumentList = (props) => {
 
 
         {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#fff', minWidth: '48%', height: 'auto' }}>
+        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#ecf4fc', minWidth: '48%', height: 'auto' }}>
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} checkedItems={checkedItems} setCheckedItems={setCheckedItems} loadingWFS={loadingWFS} />
         </div>
-      </div>
+      </div >
 
     </>
   );

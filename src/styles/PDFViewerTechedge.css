@@ -1,70 +1,40 @@
-/* GLOBAL SETTINGS */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-/* MAIN CONTAINER */
+/* Layout container */
 .pdf-viewer-container {
   display: flex;
   flex-direction: row;
-  height: 80vh;
+  height: 69vh;
   width: 100%;
   overflow: hidden;
   background-color: #666666;
 }
 
-.tall {
-  height: 90vh;
-}
-
-/* SIDEBAR / THUMBNAILS */
+/* Sidebar (thumbnails) */
 .pdf-thumbnail-panel {
-  position: relative;
-  height: 100%;
   width: 210px;
   background-color: #666666;
-  color: black;
-  z-index: 1000;
-  flex-shrink: 0;
   overflow-y: auto;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px;
+  z-index: 1000;
 }
 
-/* Responsive sidebar for mobile */
 @media (max-width: 500px) {
   .pdf-thumbnail-panel {
     width: 200px;
     padding: 5px;
   }
-
-  .thumbnail-item {
-    margin-bottom: 15px;
-  }
-
-  .thumbnail-page-number {
-    font-size: 9px;
-  }
-}
-
-.thumbnail-scroll-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 10px;
 }
 
 .thumbnail-item {
   width: 100%;
   margin-bottom: 25px;
   text-align: center;
-  border-width: 0.5px;
-  border-style: none;
-  color: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .thumbnail-item.active {
@@ -77,23 +47,20 @@
   font-size: 10px;
   margin-top: 3px;
   display: block;
-  background-color: inherit;
 }
 
-/* PDF MAIN VIEWER */
+/* Main viewer */
 .pdf-main-viewer {
-  position: relative;
-  overflow-y: auto;
-  height: 100%;
   flex: 1;
+  height: 100%;
+  overflow-y: auto;
   background-color: #bfc0be;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0;
+  padding: 10px;
 }
 
-/* Main viewer responsive padding for mobile */
 @media (max-width: 768px) {
   .pdf-main-viewer {
     padding: 5px;
@@ -103,19 +70,24 @@
 .pdf-page-wrapper {
   position: relative;
   margin-bottom: 10px;
-  /* width and height handled via JS inline styles */
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-/* ANNOTATION LAYER */
+.pdf-container {
+  width: 100%;
+}
+
+/* Annotation canvas (if applicable) */
 .annotation-canvas {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 5;
-  /* width and height set inline via React */
 }
 
-/* CUSTOM SCROLLBARS */
+/* Custom Scrollbars */
 .scrollbar-custom1::-webkit-scrollbar,
 .scrollbar-custom::-webkit-scrollbar {
   width: 8px;

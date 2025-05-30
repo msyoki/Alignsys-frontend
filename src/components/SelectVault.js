@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem , Box} from '@mui/material';
 import Authcontext from '../components/Auth/Authprovider';
 import axios from 'axios';
 import * as constants from './Auth/configs';
@@ -32,8 +32,8 @@ const VaultSelectForm = ({ onVaultChange }) => {
         'Content-Type': 'application/json',
       },
     })
-    .then((response) => setVaults(response.data))
-    .catch((error) => console.error('Error fetching vaults:', error));
+      .then((response) => setVaults(response.data))
+      .catch((error) => console.error('Error fetching vaults:', error));
   };
 
   useEffect(() => {
@@ -45,17 +45,22 @@ const VaultSelectForm = ({ onVaultChange }) => {
   return (
     <FormControl
       size="small"
-      className="mx-2"
-     
+      className="mx-1 "
+      sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}
     >
-      <InputLabel id="vault-select-label" style={{ color: '#1C4690' }}>
-         Vault
-      </InputLabel>
+
+
       <Select
-        labelId="vault-select-label"
         value={selectedVault?.guid || ''}
         onChange={handleVaultChange}
-        style={{ color: '#1C4690', fontSize: '12px' }}
+        size="small"
+        displayEmpty
+        className='rounded-pill'
+        sx={{
+          color: '#1C4690',
+          fontSize: '12px',
+          flexGrow: 1,
+        }}
         MenuProps={{
           PaperProps: {
             style: {
@@ -65,14 +70,18 @@ const VaultSelectForm = ({ onVaultChange }) => {
           },
         }}
       >
+        <MenuItem value="" disabled>
+          <span  style={{ fontSize: '12px' }}>Switch selcted vault</span>
+        </MenuItem>
         {vaults.map((vault) => (
           <MenuItem key={vault.guid} value={vault.guid}>
-            <i className="fas fa-hdd me-2" style={{ color: '#1C4690' }}></i>
+            <i className="fa-solid  fa-database me-2" style={{ color: '#1C4690' }}></i>
             <span className="text-dark" style={{ fontSize: '12px' }}>{vault.name}</span>
           </MenuItem>
         ))}
       </Select>
     </FormControl>
+
   );
 };
 

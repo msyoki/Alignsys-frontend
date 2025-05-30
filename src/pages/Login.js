@@ -63,15 +63,15 @@ const Login = () => {
             <h6 className="mb-3">SIGN IN</h6>
 
             <FormControl variant="standard" fullWidth className="mb-3">
-              <InputLabel htmlFor="email">Username*</InputLabel>
+              <InputLabel htmlFor="email">Email*</InputLabel>
               <Input
                 id="email"
                 name="email"
-                type="text"
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Username"
+                placeholder="Email"
                 startAdornment={
                   <InputAdornment position="start">
                     <PersonIcon />
@@ -132,7 +132,7 @@ const Login = () => {
                 fontSize: '13px',
                 color: '#fff',
                 backgroundColor: '#2757aa',
-                width: '60%',
+                width: '40%',
                 padding: '10px',
                 textTransform: 'none',
               }}

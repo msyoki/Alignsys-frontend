@@ -15,7 +15,8 @@ import {
     TextField,
     Checkbox,
     FormControlLabel,
-    Box, Typography
+    Box, Typography,
+    Grid
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -41,6 +42,7 @@ import FileUploadComponent from '../FileUpload';
 import * as constants from '../Auth/configs';
 import TimedAlert from '../TimedAlert';
 import LoadingDialog from '../Loaders/LoaderDialog';
+import PDFViewerPreview from '../Pdf2';
 
 
 
@@ -711,78 +713,32 @@ const ObjectStructureList = (props) => {
 
 
 
-                <Dialog open={props.isFormOpen} onClose={closeFormDialog} fullWidth>
+                <Dialog open={props.isFormOpen} onClose={closeFormDialog} fullScreen>
                     <DialogTitle
                         className='p-2 d-flex justify-content-between align-items-center'
-                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '14px' }}
+                        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
                     >
 
-                        <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                        <img className="mx-3" src={logo} alt="Loading" width="180px" />
                         <span className="ml-auto mx-3">
                             {props.selectedObjectId === 0 ?
                                 <i style={{ color: "#fff", fontSize: "20px" }} className="fa-solid fa-file-circle-plus"></i> :
                                 <i style={{ color: "#fff", fontSize: "20px" }} className="fas fa-folder-plus"></i>
-                            }<small className='mx-2' >{props.selectedClassName} </small>
+                            }<small className='mx-2' >Create {props.selectedClassName} </small>
                         </span>
                     </DialogTitle>
 
 
                     <DialogContent
                         className="form-group my-4"
-                        sx={{ overflow: 'auto', maxHeight: '80vh' }} // Ensures content fits within the dialog
+                        sx={{ overflow: 'auto' }}
                     >
-                        <Box
-                            className="shadow-lg p-4 shadow-sm"
-                            sx={{
-                                width: '100%',
-                                maxHeight: '100%',
-                                overflowY: 'auto', // Allows scrolling if needed
-                                backgroundColor: '#ecf4fc',
-                            }}
-                        >
-                            {(props.selectedObjectId === 0 && !props.templateIsTrue) && (
-                                <div>
-                                    <FileUploadComponent
-                                        handleFileChange={handleFileChange}
-                                        uploadedFile={uploadedFile}
-                                    />
-                                    {fileUploadError && (
-                                        <div style={{ color: '#CC3333', fontSize: '13px' }}>
-                                            {fileUploadError}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                        {(props.selectedObjectId === 0 && !props.templateIsTrue) ?
+                            <Grid container spacing={3}>
+                                {/* List Section */}
+                                <Grid item xs={12} md={5} order={{ xs: 1, md: 2 }} >
 
-                            <List sx={{ p: 0 }}>
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        width: '100%',
-                                        marginY: '2px'
-                                    }}
-                                >
-                                    <Typography
-                                        className="my-2"
-                                        variant="body2"
-                                        sx={{
-                                            color: '#1C4690',
-
-                                            flexBasis: '35%',
-                                            fontSize: '13px',
-                                            textAlign: 'end'
-                                        }}
-                                    >
-                                        Class :
-                                    </Typography>
-                                    <Box className="my-2" sx={{ flexBasis: '65%', fontSize: '13px', textAlign: 'start', ml: 1, fontSize: '13px', color: '#555' }}>
-                                        {props.selectedClassName}
-                                    </Box>
-                                </Box>
-
-                                {filteredProperties.map((prop) => (
-                                    <ListItem key={prop.propId} sx={{ p: 0 }}>
+                                    <List sx={{ p: 0 }}>
                                         <Box
                                             sx={{
                                                 display: 'flex',
@@ -795,211 +751,526 @@ const ObjectStructureList = (props) => {
                                                 className="my-2"
                                                 variant="body2"
                                                 sx={{
-                                                    color: '#1C4690',
+                                                    color: 'black',
 
                                                     flexBasis: '35%',
                                                     fontSize: '13px',
                                                     textAlign: 'end'
                                                 }}
                                             >
-                                                {prop.title} {prop.isRequired && <span className="text-danger"> *</span>} :
+                                                Class :
                                             </Typography>
-
-                                            <Box sx={{ width: '65%', fontSize: '13px', color: '#555', textAlign: 'start', ml: 1 }}>
-                                                <>
-                                                    {prop.isAutomatic || !prop.userPermission.editPermission ?
-                                                        <>
-                                                            <Typography
-                                                                className='my-2'
-                                                                variant="body2"
-                                                                sx={{
-                                                                    fontSize: '13px'
-                                                                }}
-
-                                                            >
-                                                                ( Automatic )
-                                                            </Typography>
-                                                        </> :
-                                                        <Box sx={{ fontSize: '13px' }}>
-                                                            {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
-
-                                                                <TextField
-                                                                    value={prop.value || props.formValues[prop.propId]}
-                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                    fullWidth
-                                                                    required={prop.isRequired}
-                                                                    error={!!formErrors[prop.propId]}
-                                                                    helperText={formErrors[prop.propId]}
-                                                                    size="small"
-                                                                    className="my-1 bg-white"
-                                                                    disabled={!!prop.value}
-                                                                    InputProps={{ style: { fontSize: '13px' } }}
-                                                                    InputLabelProps={{ style: { fontSize: '13px' } }}
-                                                                />
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <TextField
-                                                                            label={prop.title}
-                                                                            value={props.formValues[prop.propId]}
-                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                            fullWidth
-                                                                            required={prop.isRequired}
-                                                                            error={!!formErrors[prop.propId]}
-                                                                            helperText={formErrors[prop.propId]}
-                                                                            multiline
-                                                                            rows={4}
-                                                                            size="small"
-                                                                            className="my-1 bg-white"
-                                                                            InputProps={{ style: { fontSize: '13px' } }}
-                                                                            InputLabelProps={{ style: { fontSize: '13px' } }}
-                                                                        /></>}
-                                                                </>
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <LookupSelect
-                                                                            userId={parseInt(props.mfilesId, 10)}
-                                                                            propId={prop.propId}
-                                                                            label={prop.title}
-                                                                            onChange={handleInputChange}
-                                                                            value={props.formValues[prop.propId]}
-                                                                            required={prop.isRequired}
-                                                                            error={!!formErrors[prop.propId]}
-                                                                            helperText={formErrors[prop.propId]}
-                                                                            selectedVault={props.selectedVault}
-                                                                            size="small"
-                                                                            className="my-1"
-                                                                        /></>}
-                                                                </>
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <LookupMultiSelect
-                                                                            userId={parseInt(props.mfilesId, 10)}
-                                                                            propId={prop.propId}
-                                                                            label={prop.title}
-                                                                            onChange={handleInputChange}
-                                                                            value={props.formValues[prop.propId] || []}
-                                                                            required={prop.isRequired}
-                                                                            error={!!formErrors[prop.propId]}
-                                                                            helperText={formErrors[prop.propId]}
-                                                                            selectedVault={props.selectedVault}
-                                                                            size="small"
-                                                                            className="my-1"
-                                                                        /></>}
-
-                                                                </>
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <Select
-                                                                            size="small"
-                                                                            value={props.formValues[prop.propId] ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
-                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                            displayEmpty
-                                                                            fullWidth
-                                                                            className='bg-white'
-                                                                            sx={{
-                                                                                backgroundColor: 'white',
-                                                                                marginY: '8px',
-                                                                                fontSize: '13px',
-                                                                                '& .MuiSelect-select': {
-                                                                                    fontSize: '13px',
-                                                                                    color: '#555',
-                                                                                    paddingTop: '6px',
-                                                                                    paddingBottom: '6px',
-                                                                                    paddingLeft: '10px',
-                                                                                    paddingRight: '10px',
-                                                                                    minHeight: 'unset',
-                                                                                },
-                                                                                '& .MuiInputBase-root': {
-                                                                                    minHeight: '32px',
-                                                                                },
-                                                                                '& .MuiOutlinedInput-input': {
-                                                                                    padding: '6px 10px',
-                                                                                    fontSize: '13px',
-                                                                                },
-                                                                                '& .MuiMenuItem-root': {
-                                                                                    fontSize: '13px',
-                                                                                    color: '#555',
-                                                                                },
-                                                                            }}
-                                                                        >
-                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value=""><em>None</em></MenuItem>
-                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={true}>True</MenuItem>
-                                                                            <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={false}>False</MenuItem>
-                                                                        </Select></>}
-                                                                </>
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <input
-                                                                            style={{ color: '#555', fontSize: '13px' }}
-                                                                            type="datetime-local"
-                                                                            className="form-control bg-white"
-                                                                            value={props.formValues[prop.propId] || ''}
-                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
-                                                                        /></>}
-                                                                </>
-
-                                                            )}
-
-                                                            {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
-                                                                <>
-                                                                    {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
-                                                                        <TextField
-                                                                            type="date"
-                                                                            value={props.formValues[prop.propId]}
-                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
-                                                                            fullWidth
-                                                                            required={prop.isRequired}
-                                                                            error={!!formErrors[prop.propId]}
-                                                                            helperText={formErrors[prop.propId]}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                sx: { fontSize: '13px', color: '#555' } // label styling
-                                                                            }}
-                                                                            InputProps={{
-                                                                                sx: { fontSize: '13px', color: '#555' } // input text styling
-                                                                            }}
-                                                                            size="small"
-                                                                            className="my-1 bg-white"
-                                                                        />
-                                                                    </>}
-                                                                </>
-
-                                                            )}
-                                                        </Box>
-                                                    }
-                                                </>
+                                            <Box className="my-2" sx={{ flexBasis: '65%', fontSize: '13px', textAlign: 'start', ml: 1, fontSize: '13px', color: '#555' }}>
+                                                {props.selectedClassName}
                                             </Box>
                                         </Box>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Box>
+
+                                        {filteredProperties.map((prop) => (
+                                            <ListItem key={prop.propId} sx={{ p: 0 }}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        width: '100%',
+                                                        marginY: '2px'
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        className="my-2"
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'black',
+
+                                                            flexBasis: '35%',
+                                                            fontSize: '13px',
+                                                            textAlign: 'end'
+                                                        }}
+                                                    >
+                                                        {prop.title} {prop.isRequired && <span className="text-danger"> *</span>} :
+                                                    </Typography>
+
+                                                    <Box sx={{ width: '65%', fontSize: '13px', color: '#555', textAlign: 'start', ml: 1 }}>
+                                                        <>
+                                                            {prop.isAutomatic || !prop.userPermission.editPermission ?
+                                                                <>
+                                                                    <Typography
+                                                                        className='my-2'
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            fontSize: '13px'
+                                                                        }}
+
+                                                                    >
+                                                                        ( Automatic )
+                                                                    </Typography>
+                                                                </> :
+                                                                <Box sx={{ fontSize: '13px' }}>
+                                                                    {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
+
+                                                                        <TextField
+                                                                            value={prop.value || props.formValues[prop.propId]}
+                                                                            onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                            fullWidth
+                                                                            required={prop.isRequired}
+                                                                            error={!!formErrors[prop.propId]}
+                                                                            helperText={formErrors[prop.propId]}
+                                                                            size="small"
+                                                                            className="my-1 bg-white"
+                                                                            disabled={!!prop.value}
+                                                                            InputProps={{ style: { fontSize: '13px' } }}
+                                                                            InputLabelProps={{ style: { fontSize: '13px' } }}
+                                                                        />
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <TextField
+                                                                                    label={prop.title}
+                                                                                    value={props.formValues[prop.propId]}
+                                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                    fullWidth
+                                                                                    required={prop.isRequired}
+                                                                                    error={!!formErrors[prop.propId]}
+                                                                                    helperText={formErrors[prop.propId]}
+                                                                                    multiline
+                                                                                    rows={4}
+                                                                                    size="small"
+                                                                                    className="my-1 bg-white"
+                                                                                    InputProps={{ style: { fontSize: '13px' } }}
+                                                                                    InputLabelProps={{ style: { fontSize: '13px' } }}
+                                                                                /></>}
+                                                                        </>
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <LookupSelect
+                                                                                    userId={parseInt(props.mfilesId, 10)}
+                                                                                    propId={prop.propId}
+                                                                                    label={prop.title}
+                                                                                    onChange={handleInputChange}
+                                                                                    value={props.formValues[prop.propId]}
+                                                                                    required={prop.isRequired}
+                                                                                    error={!!formErrors[prop.propId]}
+                                                                                    helperText={formErrors[prop.propId]}
+                                                                                    selectedVault={props.selectedVault}
+                                                                                    size="small"
+                                                                                    className="my-1"
+                                                                                /></>}
+                                                                        </>
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <LookupMultiSelect
+                                                                                    userId={parseInt(props.mfilesId, 10)}
+                                                                                    propId={prop.propId}
+                                                                                    label={prop.title}
+                                                                                    onChange={handleInputChange}
+                                                                                    value={props.formValues[prop.propId] || []}
+                                                                                    required={prop.isRequired}
+                                                                                    error={!!formErrors[prop.propId]}
+                                                                                    helperText={formErrors[prop.propId]}
+                                                                                    selectedVault={props.selectedVault}
+                                                                                    size="small"
+                                                                                    className="my-1"
+                                                                                /></>}
+
+                                                                        </>
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <Select
+                                                                                    size="small"
+                                                                                    value={props.formValues[prop.propId] ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
+                                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                    displayEmpty
+                                                                                    fullWidth
+                                                                                    className='bg-white'
+                                                                                    sx={{
+                                                                                        backgroundColor: 'white',
+                                                                                        marginY: '8px',
+                                                                                        fontSize: '13px',
+                                                                                        '& .MuiSelect-select': {
+                                                                                            fontSize: '13px',
+                                                                                            color: '#555',
+                                                                                            paddingTop: '6px',
+                                                                                            paddingBottom: '6px',
+                                                                                            paddingLeft: '10px',
+                                                                                            paddingRight: '10px',
+                                                                                            minHeight: 'unset',
+                                                                                        },
+                                                                                        '& .MuiInputBase-root': {
+                                                                                            minHeight: '32px',
+                                                                                        },
+                                                                                        '& .MuiOutlinedInput-input': {
+                                                                                            padding: '6px 10px',
+                                                                                            fontSize: '13px',
+                                                                                        },
+                                                                                        '& .MuiMenuItem-root': {
+                                                                                            fontSize: '13px',
+                                                                                            color: '#555',
+                                                                                        },
+                                                                                    }}
+                                                                                >
+                                                                                    <MenuItem sx={{ fontSize: '13px', color: '#555' }} value=""><em>None</em></MenuItem>
+                                                                                    <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={true}>True</MenuItem>
+                                                                                    <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={false}>False</MenuItem>
+                                                                                </Select></>}
+                                                                        </>
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <input
+                                                                                    style={{ color: '#555', fontSize: '13px' }}
+                                                                                    type="datetime-local"
+                                                                                    className="form-control bg-white"
+                                                                                    value={props.formValues[prop.propId] || ''}
+                                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
+                                                                                /></>}
+                                                                        </>
+
+                                                                    )}
+
+                                                                    {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
+                                                                        <>
+                                                                            {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                <TextField
+                                                                                    type="date"
+                                                                                    value={props.formValues[prop.propId]}
+                                                                                    onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                    fullWidth
+                                                                                    required={prop.isRequired}
+                                                                                    error={!!formErrors[prop.propId]}
+                                                                                    helperText={formErrors[prop.propId]}
+                                                                                    InputLabelProps={{
+                                                                                        shrink: true,
+                                                                                        sx: { fontSize: '13px', color: '#555' } // label styling
+                                                                                    }}
+                                                                                    InputProps={{
+                                                                                        sx: { fontSize: '13px', color: '#555' } // input text styling
+                                                                                    }}
+                                                                                    size="small"
+                                                                                    className="my-1 bg-white"
+                                                                                />
+                                                                            </>}
+                                                                        </>
+
+                                                                    )}
+                                                                </Box>
+                                                            }
+                                                        </>
+                                                    </Box>
+                                                </Box>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+
+                                </Grid>
+
+                                {/* File Upload Section */}
+                                <Grid item xs={12} md={7} order={{ xs: 2, md: 2 }} >
+                                    <div className='container'>
+                                        {(props.selectedObjectId === 0 && !props.templateIsTrue) && (
+                                            <>
+                                                {uploadedFile ?
+                                                    <>
+                                                        <PDFViewerPreview document={uploadedFile} setUploadedFile={setUploadedFile} />
+                                                    </>
+                                                    : <>     <FileUploadComponent
+                                                        handleFileChange={handleFileChange}
+                                                        uploadedFile={uploadedFile}
+                                                    />
+                                                        {fileUploadError && (
+                                                            <div style={{ color: '#CC3333', fontSize: '13px' }}>
+                                                                {fileUploadError}
+                                                            </div>
+                                                        )}</>
+                                                }
+
+
+                                            </>
+                                        )}
+                                    </div>
+                                </Grid>
+                            </Grid>
+                            : <>
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    justifyContent="center"
+                                    alignItems="center"
+
+                                >
+                                    <Grid item xs={12} md={6}>
+                                        <List sx={{ p: 0 }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    width: '100%',
+                                                    marginY: '2px'
+                                                }}
+                                            >
+                                                <Typography
+                                                    className="my-2"
+                                                    variant="body2"
+                                                    sx={{
+                                                        color: 'black',
+
+                                                        flexBasis: '35%',
+                                                        fontSize: '13px',
+                                                        textAlign: 'end'
+                                                    }}
+                                                >
+                                                    Class :
+                                                </Typography>
+                                                <Box className="my-2" sx={{ flexBasis: '65%', fontSize: '13px', textAlign: 'start', ml: 1, fontSize: '13px', color: '#555' }}>
+                                                    {props.selectedClassName}
+                                                </Box>
+                                            </Box>
+
+                                            {filteredProperties.map((prop) => (
+                                                <ListItem key={prop.propId} sx={{ p: 0 }}>
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            width: '100%',
+                                                            marginY: '2px'
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            className="my-2"
+                                                            variant="body2"
+                                                            sx={{
+                                                                color: 'black',
+
+                                                                flexBasis: '35%',
+                                                                fontSize: '13px',
+                                                                textAlign: 'end'
+                                                            }}
+                                                        >
+                                                            {prop.title} {prop.isRequired && <span className="text-danger"> *</span>} :
+                                                        </Typography>
+
+                                                        <Box sx={{ width: '65%', fontSize: '13px', color: '#555', textAlign: 'start', ml: 1 }}>
+                                                            <>
+                                                                {prop.isAutomatic || !prop.userPermission.editPermission ?
+                                                                    <>
+                                                                        <Typography
+                                                                            className='my-2'
+                                                                            variant="body2"
+                                                                            sx={{
+                                                                                fontSize: '13px'
+                                                                            }}
+
+                                                                        >
+                                                                            ( Automatic )
+                                                                        </Typography>
+                                                                    </> :
+                                                                    <Box sx={{ fontSize: '13px' }}>
+                                                                        {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(prop.propertytype) && !prop.isHidden && (
+
+                                                                            <TextField
+                                                                                value={prop.value || props.formValues[prop.propId]}
+                                                                                onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                fullWidth
+                                                                                required={prop.isRequired}
+                                                                                error={!!formErrors[prop.propId]}
+                                                                                helperText={formErrors[prop.propId]}
+                                                                                size="small"
+                                                                                className="my-1 bg-white"
+                                                                                disabled={!!prop.value}
+                                                                                InputProps={{ style: { fontSize: '13px' } }}
+                                                                                InputLabelProps={{ style: { fontSize: '13px' } }}
+                                                                            />
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeMultiLineText' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <TextField
+                                                                                        label={prop.title}
+                                                                                        value={props.formValues[prop.propId]}
+                                                                                        onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                        fullWidth
+                                                                                        required={prop.isRequired}
+                                                                                        error={!!formErrors[prop.propId]}
+                                                                                        helperText={formErrors[prop.propId]}
+                                                                                        multiline
+                                                                                        rows={4}
+                                                                                        size="small"
+                                                                                        className="my-1 bg-white"
+                                                                                        InputProps={{ style: { fontSize: '13px' } }}
+                                                                                        InputLabelProps={{ style: { fontSize: '13px' } }}
+                                                                                    /></>}
+                                                                            </>
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeLookup' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <LookupSelect
+                                                                                        userId={parseInt(props.mfilesId, 10)}
+                                                                                        propId={prop.propId}
+                                                                                        label={prop.title}
+                                                                                        onChange={handleInputChange}
+                                                                                        value={props.formValues[prop.propId]}
+                                                                                        required={prop.isRequired}
+                                                                                        error={!!formErrors[prop.propId]}
+                                                                                        helperText={formErrors[prop.propId]}
+                                                                                        selectedVault={props.selectedVault}
+                                                                                        size="small"
+                                                                                        className="my-1"
+                                                                                    /></>}
+                                                                            </>
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeMultiSelectLookup' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <LookupMultiSelect
+                                                                                        userId={parseInt(props.mfilesId, 10)}
+                                                                                        propId={prop.propId}
+                                                                                        label={prop.title}
+                                                                                        onChange={handleInputChange}
+                                                                                        value={props.formValues[prop.propId] || []}
+                                                                                        required={prop.isRequired}
+                                                                                        error={!!formErrors[prop.propId]}
+                                                                                        helperText={formErrors[prop.propId]}
+                                                                                        selectedVault={props.selectedVault}
+                                                                                        size="small"
+                                                                                        className="my-1"
+                                                                                    /></>}
+
+                                                                            </>
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeBoolean' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <Select
+                                                                                        size="small"
+                                                                                        value={props.formValues[prop.propId] ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
+                                                                                        onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                        displayEmpty
+                                                                                        fullWidth
+                                                                                        className='bg-white'
+                                                                                        sx={{
+                                                                                            backgroundColor: 'white',
+                                                                                            marginY: '8px',
+                                                                                            fontSize: '13px',
+                                                                                            '& .MuiSelect-select': {
+                                                                                                fontSize: '13px',
+                                                                                                color: '#555',
+                                                                                                paddingTop: '6px',
+                                                                                                paddingBottom: '6px',
+                                                                                                paddingLeft: '10px',
+                                                                                                paddingRight: '10px',
+                                                                                                minHeight: 'unset',
+                                                                                            },
+                                                                                            '& .MuiInputBase-root': {
+                                                                                                minHeight: '32px',
+                                                                                            },
+                                                                                            '& .MuiOutlinedInput-input': {
+                                                                                                padding: '6px 10px',
+                                                                                                fontSize: '13px',
+                                                                                            },
+                                                                                            '& .MuiMenuItem-root': {
+                                                                                                fontSize: '13px',
+                                                                                                color: '#555',
+                                                                                            },
+                                                                                        }}
+                                                                                    >
+                                                                                        <MenuItem sx={{ fontSize: '13px', color: '#555' }} value=""><em>None</em></MenuItem>
+                                                                                        <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={true}>True</MenuItem>
+                                                                                        <MenuItem sx={{ fontSize: '13px', color: '#555' }} value={false}>False</MenuItem>
+                                                                                    </Select></>}
+                                                                            </>
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeTimestamp' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <input
+                                                                                        style={{ color: '#555', fontSize: '13px' }}
+                                                                                        type="datetime-local"
+                                                                                        className="form-control bg-white"
+                                                                                        value={props.formValues[prop.propId] || ''}
+                                                                                        onChange={(e) => handleInputChange(prop.propId, e.target.value, prop.propertytype)}
+                                                                                    /></>}
+                                                                            </>
+
+                                                                        )}
+
+                                                                        {prop.propertytype === 'MFDatatypeDate' && !prop.isHidden && (
+                                                                            <>
+                                                                                {prop.value ? <> <p className="p-1 my-1"> {prop.value} </p></> : <>
+                                                                                    <TextField
+                                                                                        type="date"
+                                                                                        value={props.formValues[prop.propId]}
+                                                                                        onChange={(e) => handleInputChange(prop.propId, e.target.value)}
+                                                                                        fullWidth
+                                                                                        required={prop.isRequired}
+                                                                                        error={!!formErrors[prop.propId]}
+                                                                                        helperText={formErrors[prop.propId]}
+                                                                                        InputLabelProps={{
+                                                                                            shrink: true,
+                                                                                            sx: { fontSize: '13px', color: '#555' } // label styling
+                                                                                        }}
+                                                                                        InputProps={{
+                                                                                            sx: { fontSize: '13px', color: '#555' } // input text styling
+                                                                                        }}
+                                                                                        size="small"
+                                                                                        className="my-1 bg-white"
+                                                                                    />
+                                                                                </>}
+                                                                            </>
+
+                                                                        )}
+                                                                    </Box>
+                                                                }
+                                                            </>
+                                                        </Box>
+                                                    </Box>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Grid>
+
+
+                                </Grid>
+                            </>
+                        }
                     </DialogContent>
 
 
-                    <DialogActions>
 
-                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={() => { closeFormDialog(); props.setTemplateIsTrue(false) }}>Cancel</Button>
+
+
+
+
+                    <DialogActions style={{ backgroundColor: '#ecf4fc' }}>
+
+                        <Button className='mx-2' color="warning" size='small' variant="contained" onClick={() => { closeFormDialog(); props.setTemplateIsTrue(false); setUploadedFile(null) }}>Cancel</Button>
                         <Button className='mx-4' color="primary" size='medium' variant="contained" onClick={handleSubmit} >
                             Create
                         </Button>

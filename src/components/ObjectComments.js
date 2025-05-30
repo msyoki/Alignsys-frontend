@@ -54,7 +54,7 @@ const CommentsComponent = (props) => {
     <div>
       {props.selectedObject?.id && (
         <>
-          {/* Header Section */}
+          {/* Header */}
           <Box
             className="p-2"
             sx={{
@@ -65,55 +65,26 @@ const CommentsComponent = (props) => {
               backgroundColor: '#ecf4fc',
               height: '53px',
               fontSize: '13px',
-              paddingRight: '10px',
+              px: 2,
+              color: '#1d3557',
             }}
           >
-
-            <Box
-
-              sx={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: 'important 13px',
-                backgroundColor: '#ecf4fc',
-                height: '53px',
-                color: '#1d3557'
-
-              }}
-            >
-
-
-              <i className="fas fa-file-pdf text-danger mx-2" style={{ fontSize: '25px' }}></i>
-              <span style={{ fontSize: '13px' }}>{props.docTitle}.pdf</span>
-
-
-
+            <Box display="flex" alignItems="center" gap={1}>
+              <i className="fas fa-file-pdf text-danger" style={{ fontSize: '24px' }}></i>
+              <span>{props.docTitle}.pdf</span>
             </Box>
 
-            <Box sx={{ textAlign: 'right' }}>
-
-              <span
-                className="fas fa-sync-alt btn-sm mx-2 "
-                onClick={refreshComments}
-                style={{
-                  cursor: 'pointer',
-                  padding: '8px',
-
-
-
-                  fontSize: '15px',
-                }}
-              // onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1e4a94')}
-              // onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2757aa')}
-              />
-            </Box>
+            <i
+              className="fas fa-sync-alt"
+              onClick={refreshComments}
+              style={{ cursor: 'pointer', fontSize: '15px', padding: '8px' }}
+            />
           </Box>
 
-          {/* Comment Input Section */}
-          <Box className="p-2" sx={{ width: '100%' }}>
-            <form onSubmit={handleSubmit} className="p-2" style={{ width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Comment Input */}
+          <Box sx={{ backgroundColor: '#fff', p: 2 }}>
+            <form onSubmit={handleSubmit}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <textarea
                   className="form-control"
                   rows="2"
@@ -122,98 +93,81 @@ const CommentsComponent = (props) => {
                   placeholder="Write a comment..."
                   required
                   disabled={loading}
-                  style={{ flex: 5 }}
+                  style={{ resize: 'vertical', width: '100%' }}
                 />
-                <button
-                  type="submit"
-                  className="btn text-white btn-sm rounded-pill"
-                  disabled={loading}
-                  style={{
-                    backgroundColor: '#6a994e',
-                    height: '38px',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <small className='mx-2'>{loading ? 'Submitting...' : 'Submit Comment'}</small>
-                </button>
+                <Box textAlign="right">
+                  <button
+                    type="submit"
+                    className="btn text-white btn-sm rounded-pill"
+                    disabled={loading}
+                    style={{ backgroundColor: '#6a994e', height: '38px' }}
+                  >
+                    <small className="mx-2">{loading ? 'Submitting...' : 'Submit Comment'}</small>
+                  </button>
+                </Box>
               </Box>
             </form>
           </Box>
         </>
       )}
 
-      {/* Comments Section */}
-      <Box sx={{ backgroundColor: '#fff' }}>
+      {/* Comments List */}
+      <>
         {props.selectedObject?.id && props.comments.length > 0 ? (
+           <Box sx={{ backgroundColor: '#fff', px: 2, py: 1 }}>
           <ul
-            className="bg-white"
             style={{
               listStyle: 'none',
-              padding: '0.5rem',
+              padding: 0,
               margin: 0,
-              height: '50vh',
+              maxHeight: '50vh',
               overflowY: 'auto',
             }}
           >
             {props.comments.map((comment, index) => {
               const [boldText, regularText] = comment.coment.split(':');
               return (
-                <li key={index} style={{ marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <i
-                      className="fas fa-comment-alt"
-                      style={{ color: '#a7c957', fontSize: '18px' }}
-                    />
+                <li key={index} style={{ marginBottom: '12px' }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <i className="fas fa-comment-alt" style={{ color: '#a7c957', fontSize: '18px' }} />
                     <span style={{ fontSize: '13px', color: '#555' }}>
                       <strong>{boldText}:</strong> {comment.modifiedDate}
                     </span>
-                  </div>
-                  <div style={{ fontSize: '13px', lineHeight: '1.4', color: '#333', marginLeft: '26px' }}>
+                  </Box>
+                  <Box sx={{ fontSize: '13px', color: '#333', ml: '26px', lineHeight: 1.4 }}>
                     {regularText}
-                  </div>
+                  </Box>
                 </li>
               );
             })}
           </ul>
-
+           </Box>
         ) : (
-          <>
-            {!props.selectedObject?.id ?
-              <>
-                <Box
-                  sx={{
-                    width: '100%',
-                    marginTop: props.selectedObject?.id ? 0 : '20%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                  }}
-                >
-                  <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: '#2757aa' }}></i>
-                  {props.loadingcomments ? (
-                    <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>
-                      Searching comments...
-                    </Typography>
-                  ) : (
-                    <>
-                      <Typography variant="body2" className="my-2" sx={{ textAlign: 'center' }}>
-                        Comments
-                      </Typography>
-                      <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
-                        Please select an object to preview comments
-                      </Typography>
-                    </>
-                  )}
-                </Box>
-              </> : <></>}
-
-
-          </>
+          !props.selectedObject?.id && (
+            <Box
+              sx={{
+                mt: '20%',
+                textAlign: 'center',
+                color: '#2757aa',
+                backgroundColor: '#ecf4fc',
+                py: 4,
+              }}
+            >
+              <i className="fas fa-comment-alt" style={{ fontSize: '120px' }} />
+              <Typography variant="body2" className="my-2">
+                {props.loadingcomments ? 'Searching comments...' : 'Comments'}
+              </Typography>
+              {!props.loadingcomments && (
+                <Typography variant="body2" sx={{ fontSize: '13px' }}>
+                  Please select an object to preview comments
+                </Typography>
+              )}
+            </Box>
+          )
         )}
-      </Box>
+      </>
     </div>
+
 
   );
 };

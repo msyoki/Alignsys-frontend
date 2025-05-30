@@ -107,24 +107,24 @@ const LookupMultiSelect = ({
       ...base,
       borderColor: error ? 'red' : base.borderColor,
       fontSize: '13px',
-      color: '#555',
+      color: 'black',
       backgroundColor: disabled ? '#f5f5f5' : 'white',
     }),
     option: (base, state) => ({
       ...base,
-      color: '#555',
+      color: 'black',
       fontSize: '13px',
       backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
     }),
     placeholder: (base) => ({
       ...base,
-      color: '#555',
+      color: 'black',
       fontSize: '13px',
     }),
     singleValue: (base) => ({
       ...base,
       fontSize: '13px',
-      color: '#555',
+      color: 'black',
     }),
     multiValue: (base) => ({
       ...base,

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Container, Box, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import logo from '../images/ZFBLU.webp';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
@@ -8,7 +8,8 @@ import axios from 'axios';
 
 const VaultSelectForm = () => {
   const { authTokens, user } = useContext(Authcontext);
-  const [selectedVault, setSelectedVault] = useState({});
+  const [selectedVaultGuid, setSelectedVaultGuid] = useState('');
+
   const [vaults, setVaults] = useState([]);
   const navigate = useNavigate();
 
@@ -33,11 +34,16 @@ const VaultSelectForm = () => {
 
   const handleVaultChange = (event) => {
     const value = event.target.value;
+    setSelectedVaultGuid(value);
+
     const selectedObj = vaults.find(vault => vault.guid === value);
-    setSelectedVault(selectedObj);
-    sessionStorage.setItem('selectedVault', JSON.stringify(selectedObj));
-    navigate('/', { state: { openalert: true, alertMsg: "logged in successfully", alertSeverity: "success" } });
+    if (selectedObj) {
+      sessionStorage.setItem('selectedVault', JSON.stringify(selectedObj));
+      navigate('/', { state: { openalert: true, alertMsg: "logged in successfully", alertSeverity: "success" } });
+    }
   };
+
+
 
   return (
     <div style={{ backgroundColor: '#fff' }}>
@@ -86,17 +92,11 @@ const VaultSelectForm = () => {
           </p>
 
           <FormControl fullWidth className="my-3" sx={{ fontSize: '13px' }}>
-            <InputLabel
-              id="vault-select-label"
-              className="text-dark"
-              sx={{ fontSize: '14px' }}
-            >
-              Select Vault
-            </InputLabel>
+
             <Select
-              labelId="vault-select-label"
-              value={selectedVault.guid || ''}
+              value={selectedVaultGuid}
               onChange={handleVaultChange}
+              displayEmpty
               size="medium"
               sx={{
                 fontSize: '12px',
@@ -104,18 +104,26 @@ const VaultSelectForm = () => {
                   fontSize: '14px',
                 },
               }}
+              inputProps={{ 'aria-label': 'Select Vault' }}
             >
+              <MenuItem value="" disabled>
+                <span style={{ fontSize: '14px' }}>Please select a vault</span>
+              </MenuItem>
               {vaults.map((vault) => (
                 <MenuItem
                   key={vault.guid}
                   value={vault.guid}
                   sx={{ fontSize: '14px' }}
                 >
-                  {vault.name}
+                  <i className="fa-solid  fa-database me-2" style={{ color: '#1C4690' }}></i> {vault.name}
                 </MenuItem>
               ))}
             </Select>
+
+
           </FormControl>
+
+
         </Box>
       </Container>
     </div>

@@ -34,7 +34,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#fff' }}>
+        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#ecf4fc' }}>
           {children}
         </Box>
       )}
@@ -398,6 +398,14 @@ export default function ObjectData(props) {
 
 
 
+  const isLink = (value) => {
+    try {
+      new URL(value);
+      return value.startsWith('http://') || value.startsWith('https://');
+    } catch (err) {
+      return false;
+    }
+  };
 
 
 
@@ -431,7 +439,7 @@ export default function ObjectData(props) {
                 style={{ textTransform: "none" }}
                 sx={{
                   width: "auto",
-                  height: "61px",
+                  height: "56px",
                   minWidth: "100px", // Ensures all tabs have a minimum width
                   display: "flex",
                   alignItems: "center",
@@ -446,7 +454,7 @@ export default function ObjectData(props) {
               style={{ textTransform: "none" }}
               sx={{
                 width: "auto",
-                height: "61px",
+                height: "56px",
                 minWidth: "100px", // Matches other tabs
                 display: "flex",
                 alignItems: "center",
@@ -492,7 +500,7 @@ export default function ObjectData(props) {
 
         </Box>
 
-        <Box sx={{ flexGrow: 1, margin: 0, color: '#555' }} >
+        <Box sx={{ flexGrow: 1, margin: 0, color: 'black' }} >
           <CustomTabPanel
             value={value}
             index={0}
@@ -554,7 +562,7 @@ export default function ObjectData(props) {
 
             {props.previewObjectProps.length > 0 && (
               <Box>
-                <Box className="p-1" display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '8px' }}>
+                <Box display="flex" flexDirection="column" sx={{ backgroundColor: '#ecf4fc', padding: '4px' }}>
 
                   {/* Flex container for Left and Right sections */}
                   <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -593,13 +601,13 @@ export default function ObjectData(props) {
                     </Box>
 
                     {/* Right Section (Actions) */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '20%' }} className="mx-2">
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '20%' }} >
                       {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && (
                         <Tooltip title="Download document">
                           <i
                             className="fas fa-download mx-3"
                             onClick={() => downloadBase64File(props.base64, props.extension, props.selectedObject.title)}
-                            style={{ fontSize: '18px', cursor: 'pointer' }}
+                            style={{ fontSize: '20px', cursor: 'pointer', color: "#2757aa" }}
                           />
                         </Tooltip>
                       )}
@@ -607,9 +615,9 @@ export default function ObjectData(props) {
                       {props.selectedObject?.userPermission?.deletePermission && (
                         <Tooltip title="Delete Object">
                           <i
-                            className="fas fa-trash"
+                            className="fas fa-trash mx-3"
                             onClick={() => setDeleteDialogOpen(true)}
-                            style={{ fontSize: '18px', cursor: 'pointer' }}
+                            style={{ fontSize: '20px', cursor: 'pointer', color: "#2757aa" }}
                           />
                         </Tooltip>
                       )}
@@ -619,52 +627,41 @@ export default function ObjectData(props) {
                 </Box>
 
 
-
                 <Box className="p-2" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   {/* Left Section */}
-                  <Box
-                    sx={{ textAlign: 'start', fontSize: '13px', width: '50%' }}
-                    className="mx-2"
-                  >
+                  <Box sx={{ textAlign: 'start', fontSize: '13px', maxWidth: '30%' }} className="mx-2">
+                    <Box sx={{ fontSize: '12px', color: '#555' }}>
+                      {props.selectedObject.objectTypeName || getPropValue('Class')}
+                    </Box>
 
-                    <p className="my-0" >
-
-                      <Box
-                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
-
-                      >
-                        {props.selectedObject.objectTypeName || getPropValue('Class')}
-
-                      </Box>
-                    </p>
-                    <p className="my-0" >
-
-                      <Box
-                        sx={{ textAlign: 'start', fontSize: '12px', width: '60%' }}
-
-                      >
-                        ID: {props.selectedObject.id}   Version : {props.selectedObject.versionId}
-
-                      </Box>
-                    </p>
-
-
-
+                    <Box
+                      className="input-group"
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                        gap: '8px',
+                        fontSize: '12px',
+                        color: '#555',
+                        width: '100%',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      ID: {props.selectedObject.id} &nbsp;&nbsp; Version: {props.selectedObject.versionId}
+                    </Box>
                   </Box>
 
-
                   {/* Right Section */}
-                  <Box
-                    sx={{ textAlign: 'end', fontSize: '12px', width: '50%' }}
-                    className="mx-2"
-                  >
-                    {["Created", "Last modified"].map((label, index) => (
-                      <p className="my-0" key={label}>
+                  <Box sx={{ textAlign: 'end', fontSize: '12px', maxWidth: '80%', color: '#555' }} className="mx-2">
+                    {["Created", "Last modified"].map((label) => (
+                      <Box key={label}>
                         {label}: {getPropValue(label)} {getPropValue(`${label} by`)}
-                      </p>
+                      </Box>
                     ))}
                   </Box>
                 </Box>
+
 
 
 
@@ -697,7 +694,7 @@ export default function ObjectData(props) {
                   // className='shadow-lg'
                   >
                     {/* Class Field */}
-                    <ListItem sx={{ p: 0, width: '100%' }}>
+                    <ListItem sx={{ p: 0, width: '100%', marginTop: '3%' }}>
                       <Box
                         sx={{
                           display: 'flex',
@@ -709,12 +706,13 @@ export default function ObjectData(props) {
                         <Typography
                           variant="body2"
                           sx={{
-                            color: '#555',
+
                             flexBasis: '35%',
                             fontSize: '13px',
                             textAlign: 'end',
                           }}
-                          className='text-muted'
+                          className='text-dark'
+
                         >
                           Class:
                         </Typography>
@@ -724,9 +722,10 @@ export default function ObjectData(props) {
                             fontSize: '13px',
                             textAlign: 'start',
                             ml: 1,
-                            color: '#555'
+
 
                           }}
+                          className='text-dark'
                         >
                           <span>
                             {props.selectedObject.classTypeName || getPropValue('Class')}
@@ -752,12 +751,13 @@ export default function ObjectData(props) {
                             <Typography
                               variant="body2"
                               sx={{
-                                color: '#555',
+
                                 flexBasis: '35%',
                                 fontSize: '13px',
                                 textAlign: 'end',
                               }}
-                              className='text-muted'
+                              className='text-dark'
+
                             >
                               {item.propName}
                               {item.isRequired && (
@@ -773,17 +773,23 @@ export default function ObjectData(props) {
                                 fontSize: '13px',
                                 textAlign: 'start',
                                 ml: 1,
-                                color: '#555'
+                                color: 'black'
 
                               }}
 
                             >
                               {item.isAutomatic || !item.userPermission?.editPermission ? (
                                 <Typography variant="body2" sx={{ fontSize: '13px', my: 1 }}>
-                                  {Array.isArray(item.value)
-                                    ? item.value.map(v => v?.title?.value || v?.title || '').join('; ')
-                                    : item.value?.title?.value || item.value?.title || item.value}
+                                  <>
+                                    {isLink(item.value) ? (
+                                      <a href={item.value} target="_blank" rel="noopener noreferrer">
+                                        {item.value}
+                                      </a>
+                                    ) : (
+                                      <>{item.value}</>
+                                    )}</>
                                 </Typography>
+
 
                               ) : (
                                 <>
@@ -796,14 +802,25 @@ export default function ObjectData(props) {
                                   {/* Text Input */}
                                   {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(item.datatype) &&
                                     !item.isHidden && (
-                                      <input
-                                        value={props.formValues?.[item.id]?.value || ''}
-                                        placeholder={item.value}
-                                        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                        className="form-control form-control-sm my-1"
-                                        disabled={item.isAutomatic}
-                                        style={{ fontSize: '13px', color: '#555' }}
-                                      />
+                                      <>
+                                        {isLink(item.value) ? (
+                                          <Typography variant="body2" sx={{ fontSize: '13px', my: 1 }}>
+                                            <a href={item.value} target="_blank" rel="noopener noreferrer">
+                                              {item.value}
+                                            </a>
+                                          </Typography>
+                                        ) : (
+                                          <input
+                                            value={props.formValues?.[item.id]?.value || ''}
+                                            placeholder={item.value}
+                                            onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+                                            className="form-control form-control-sm form-control-black my-1"
+                                            disabled={item.isAutomatic}
+                                            style={{ fontSize: '13px', color: 'black' }}
+                                          />
+                                        )}
+                                      </>
+
 
                                     )}
 
@@ -813,10 +830,10 @@ export default function ObjectData(props) {
                                       placeholder={item.value}
                                       value={props.formValues?.[item.id]?.value || ''}
                                       onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                      rows={2}
-                                      className="form-control form-control-sm my-1"
+                                      rows={10}
+                                      className="form-control form-control-sm form-control-black my-1"
                                       disabled={item.isAutomatic}
-                                      style={{ fontSize: '13px' }}
+                                      style={{ fontSize: '13px', color: 'black' }}
                                     />
                                   )}
 
@@ -827,7 +844,7 @@ export default function ObjectData(props) {
                                       placeholder={item.value}
                                       value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
                                       onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                      className="form-control form-control-sm my-1"
+                                      className="form-control form-control-sm form-control-black my-1"
                                       disabled={item.isAutomatic}
                                       style={{ fontSize: '13px' }}
                                     />
@@ -864,7 +881,7 @@ export default function ObjectData(props) {
                                         fontSize: '13px',
                                         '& .MuiSelect-select': {
                                           fontSize: '13px',
-                                          color: '#555',
+                                          color: 'black',
                                           padding: '6px 10px',
                                           minHeight: 'unset',
                                         },
@@ -877,7 +894,7 @@ export default function ObjectData(props) {
                                         },
                                         '& .MuiMenuItem-root': {
                                           fontSize: '13px',
-                                          color: '#555',
+                                          color: 'black',
                                         },
                                       }}
                                     >
@@ -1006,14 +1023,14 @@ export default function ObjectData(props) {
                                 <p className="my-1">
                                   <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
 
-                                  <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                                  <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}
                                   <span style={{ marginLeft: '0.5rem' }}>
                                     {props.selectedObkjWf.workflowTitle}
                                   </span>
                                 </p>
                                 <p className="my-1">
                                   <i className="fas fa-square-full text-warning mx-1" />
-                                  <span style={{ color: '#555', fontSize: '13px' }}>State</span>:{" "}
+                                  <span style={{ color: 'black', fontSize: '13px' }}>State</span>:{" "}
                                   <span style={{ marginLeft: '2rem' }}>{props.currentState.title}</span>
 
                                   {Array.isArray(props.selectedObkjWf?.nextStates) && props.selectedObkjWf.nextStates.length > 0 && (
@@ -1062,7 +1079,7 @@ export default function ObjectData(props) {
                                 {props.workflows?.length > 0 && (
                                   <p className="my-1">
                                     <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
-                                    <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                                    <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}
                                     <Select
                                       value={props.newWF?.workflowId || ''}
                                       onChange={handleWFChangeEmpty}
@@ -1102,7 +1119,7 @@ export default function ObjectData(props) {
                                 {props.newWF && (
                                   <p className="my-1">
                                     <i className="fas fa-square-full text-warning mx-1" />
-                                    <span style={{ color: '#555', fontSize: '13px' }}>State</span>:{" "}
+                                    <span style={{ color: 'black', fontSize: '13px' }}>State</span>:{" "}
                                     <Select
                                       value={props.newWFState?.stateId || ''}
                                       onChange={handleStateChangeNew}
@@ -1150,7 +1167,7 @@ export default function ObjectData(props) {
                         <p className="my-1">
                           <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
 
-                          <span style={{ color: '#555', fontSize: '13px' }}>Workflow</span>:{" "}
+                          <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}
                           <span className='text-muted' style={{ marginLeft: '0.5rem' }}>
                             <CircularProgress size="10px" style={{ color: "#2757aa" }} />
                           </span>
@@ -1223,6 +1240,7 @@ export default function ObjectData(props) {
                 fileName={props.selectedObject.title}
                 selectedObject={props.selectedObject}
                 windowWidth={props.windowWidth}
+                mfilesId={props.mfilesId}
 
               />
 
@@ -1373,6 +1391,9 @@ export default function ObjectData(props) {
               docTitle={props.selectedObject.title}
 
             />
+
+
+
           </CustomTabPanel>
         </Box >
       </Box >

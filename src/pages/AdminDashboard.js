@@ -1020,7 +1020,7 @@ function AdminDashboard() {
 
                             {viewObjects ?
                                 <>
-                                    <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>{selectedVault.name} ( Vault Objects )</h6>
+                                    <h6 className='shadow-lg p-3 '><i className="fa-solid  fa-database  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>{selectedVault.name} ( Vault Objects )</h6>
 
                                     <div id='vaultobjects' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
 
@@ -1097,7 +1097,7 @@ function AdminDashboard() {
                                 <div id='permissions' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
                                     <div>
 
-                                        <h6 className='shadow-lg p-3 '><i className="fas fa-hdd  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
+                                        <h6 className='shadow-lg p-3 '><i className="fa-solid  fa-database  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
 
                                         <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>
                                             <Button
@@ -1212,7 +1212,7 @@ function AdminDashboard() {
                                             <span className='list-text'>Organization Name: <b>{user.organization}</b></span>
                                         </li>
                                         <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-hdd mx-3" style={{ fontSize: '1.5em' }}></i>
+                                            <i className="fa-solid  fa-database mx-3" style={{ fontSize: '1.5em' }}></i>
                                             <span className='list-text'>Number of Vaults: <b>{user.vaultcount}</b></span>
                                         </li>
 

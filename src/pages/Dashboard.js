@@ -15,7 +15,7 @@ import axios from 'axios'
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs'
-import logo from '../images/zamara.png';
+import logo from '../images/TechEdgeLogo.png';
 import { Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
@@ -310,7 +310,7 @@ function Dashboard() {
       .then((response) => {
         setVaultObjectsList(response.data);
         // console.log(response.data);
-        toggleSublist();
+        // toggleSublist();
       })
       .catch((error) => {
         // console.log(error);
@@ -454,54 +454,42 @@ function Dashboard() {
 
   // 6. More Complex Data Fetching & Handling
   const fetchItemData = async (objectId, objectName) => {
-    setSelectedObjectName(objectName);
     setIsLoading(true);
+    setSelectedObjectName(objectName);
 
     try {
-      // Fetch data from the API
-      const response = await axios.get(
-        `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}/${mfilesId}`
-      );
-      const { grouped, unGrouped } = response.data;
+      const url = `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}/${mfilesId}`;
+      const { data } = await axios.get(url);
+      const { grouped, unGrouped } = data;
 
-      // Update state with fetched data
       setSelectedObjectId(objectId);
       setGroupedItems(grouped);
-      // console.log(grouped)
       setUngroupedItems(unGrouped);
-      // console.log(unGrouped)
 
-      // console.log('Grouped Items:', grouped);
-
-      // Calculate the total number of classes
       const totalClasses =
         grouped.reduce((acc, group) => acc + group.members.length, 0) +
         unGrouped.length;
 
-      // Handle cases where there is only one class
       if (totalClasses === 1) {
-        const singleClass = grouped.length > 0
+        const singleClass = grouped.length
           ? grouped[0].members[0]
           : unGrouped[0];
 
         handleClassSelection(
           singleClass.classId,
           singleClass.className,
-          objectId,
-
+          objectId
         );
-        // closeModal();
       } else {
-        // Open the data modal if multiple classes are available
         setIsDataOpen(true);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      // Ensure loading state is reset regardless of success or error
       setIsLoading(false);
     }
   };
+
 
   const handleClassSelection = async (classId, className, objectId) => {
     setLoadingDialog(true)
@@ -645,13 +633,14 @@ function Dashboard() {
     getRecent();
     getAssigned();
     getDeleted();
+
   }
 
   return (
     <>
       <TimedAlert
         open={alertOpen}
-        onClose={()=>setOpenAlert(false)}
+        onClose={() => setOpenAlert(false)}
         severity={alertSeverity}
         message={alertMsg}
         setSeverity={setAlertSeverity}
@@ -706,7 +695,7 @@ function Dashboard() {
 
       <div className="dashboard">
         {/* Sidebar */}
-        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} `}>
+        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`} >
           <div className="sidebar-content">
             {sidebarOpen && (
               <>
@@ -715,8 +704,8 @@ function Dashboard() {
                   className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg "
                   style={{
                     height: "58px", // Fixed height (adjust as needed)
-                    minHeight: "58px", // Prevent shrinking
-                    maxHeight: "58px", // Prevent expansion
+                    minHeight: "56px", // Prevent shrinking
+                    maxHeight: "56px", // Prevent expansion
                     overflow: "hidden", // Prevent content from affecting height
                   }}
                 >
@@ -761,7 +750,7 @@ function Dashboard() {
                 {/* Menu Items */}
                 <ul className="menu-items">
                   <li
-                    onClick={getVaultObjects2}
+                    onClick={toggleSublist}
                     className="menu-item main-li shadow-lg"
                     style={{
                       display: "flex",
@@ -785,7 +774,7 @@ function Dashboard() {
                   <List
                     dense
                     disablePadding
-                    className="shadow-lg"
+
                     sx={{
                       color: "#fff",
                       maxHeight: isSublistVisible ? "350px" : "0",
@@ -794,41 +783,34 @@ function Dashboard() {
                       opacity: isSublistVisible ? "1" : "0",
                       transition: "max-height 0.4s ease, opacity 0.3s ease",
                       padding: isSublistVisible ? "10px 20px" : "0",
-                      backgroundColor: "#2757aa",
+                      backgroundColor: "#fff",
 
-                      // Move scrollbar to the left
-                      // direction: "[ltl]",
+                      // ✅ Add this line:
+                      borderRight: "1px solid #2757aa",
 
-                      // Move scrollbar to the left
                       direction: "rtl",
-
-                      // Keep content aligned normally
                       "& *": {
                         direction: "ltr",
                       },
 
-                      // Modern Scrollbar Styling (ChatGPT-like)
-                      "&::-webkit-scrollbar": {
-                        width: "3px",
-                      },
+                      // Scrollbar styling remains unchanged...
+                      "&::-webkit-scrollbar": { width: "3px" },
                       "&::-webkit-scrollbar-track": {
                         background: "rgba(255, 255, 255, 0.15)",
                         borderRadius: "10px",
-                        boxShadow: "inset 0 0 5px rgba(255, 255, 255, 0.2)", // Subtle glow effect
+                        boxShadow: "inset 0 0 5px rgba(255, 255, 255, 0.2)",
                       },
                       "&::-webkit-scrollbar-thumb": {
                         background: "rgba(255, 255, 255, 0.6)",
                         borderRadius: "10px",
                         minHeight: "25px",
                         transition: "background 0.3s",
-                        border: "2px solid rgba(255, 255, 255, 0.2)", // Outline effect
+                        border: "2px solid rgba(255, 255, 255, 0.2)",
                       },
                       "&::-webkit-scrollbar-thumb:hover": {
                         background: "#ffffff",
                         boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
                       },
-
-                      // Scrollbar Arrows (like ChatGPT)
                       "&::-webkit-scrollbar-button:single-button": {
                         display: "block",
                         height: "10px",
@@ -838,16 +820,12 @@ function Dashboard() {
                       "&::-webkit-scrollbar-button:single-button:hover": {
                         background: "rgba(255, 255, 255, 0.4)",
                       },
-
-                      // Up arrow
                       "&::-webkit-scrollbar-button:single-button:vertical:decrement": {
                         backgroundImage:
                           "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 14l5-5 5 5H7z\"/></svg>')",
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
                       },
-
-                      // Down arrow
                       "&::-webkit-scrollbar-button:single-button:vertical:increment": {
                         backgroundImage:
                           "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 10l5 5 5-5H7z\"/></svg>')",
@@ -855,6 +833,7 @@ function Dashboard() {
                         backgroundPosition: "center",
                       },
                     }}
+
                   >
 
 
@@ -874,15 +853,15 @@ function Dashboard() {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "flex-start",
-                              backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#2757aa  ",
-                              color: hoveredItem === item.objectid ? "#555" : "#fff",
+                              backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff ",
+                              color: hoveredItem === item.objectid ? "#555" : "#555",
                               py: 0,
                               px: 1, // Reduced padding
                               margin: "2px 0", // Smaller margin
-                              height: "22px", // Reduced height for a compact look
-                              boxShadow: hoveredItem === item.objectid ? "0px 2px 5px rgba(0, 0, 0, 0.1)" : "none",
+                              height: "20px", // Reduced height for a compact look
+                              // boxShadow: hoveredItem === item.objectid ? "0px 2px 5px rgba(0, 0, 0, 0.1)" : "none",
                             }}
-                            className="shadow-lg"
+
                           >
                             <ListItemText
                               primary={item.namesingular}
@@ -890,6 +869,7 @@ function Dashboard() {
                               sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
                             />
                           </ListItem>
+                          
 
                         ))}
                   </List>
@@ -956,6 +936,8 @@ function Dashboard() {
             stringAvatar={stringAvatar}
             setSidebarOpen={setSidebarOpen}
             setTemplateIsTrue={setTemplateIsTrue}
+            vaultObjectsList={vaultObjectsList}
+            fetchItemData={fetchItemData}
 
           />
         </main >

@@ -69,6 +69,8 @@ const ViewsList = (props) => {
     const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
     const [loading, setLoading] = useSessionState('ss_loading', false);
 
+    // const [selectedItemId, setSelectedItemId] = useState(null);
+
 
 
     // const [otherviews, setOtherViews] = useState([]);
@@ -145,7 +147,7 @@ const ViewsList = (props) => {
                 "propDatatype": i.propDatatype
             }));
 
-         
+
 
 
 
@@ -191,19 +193,19 @@ const ViewsList = (props) => {
                         }
                     }
                 );
-           
+
                 setLoading(false)
 
 
                 setSelectedViewObjects(response.data);
-           
+
                 setSelectedViewName(item.title);
 
             } catch (error) {
                 setLoading(false)
                 props.setAlertPopOpen(true);
                 props.setAlertPopSeverity("info");
-                props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request.!");
+                props.setAlertPopMessage("Sorry, we couldn't find any objects!");
                 console.error('Error fetching view objects:', error);
             }
         }
@@ -234,7 +236,7 @@ const ViewsList = (props) => {
                 }
             );
             setLoading(false)
-          
+
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
 
@@ -242,7 +244,7 @@ const ViewsList = (props) => {
             setLoading(false)
             props.setAlertPopOpen(true);
             props.setAlertPopSeverity("info");
-            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request.!");
+            props.setAlertPopMessage("Sorry, we couldn't find any objects!");
             console.error('Error fetching view objects:', error);
         }
     }
@@ -271,7 +273,7 @@ const ViewsList = (props) => {
                     }
                 }
             );
-         
+
             setLoading(false)
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
@@ -420,25 +422,25 @@ const ViewsList = (props) => {
             {selectedViewObjects.length > 0 ? (
                 <>
                     <h6
-                        className="p-2 text-dark d-flex flex-wrap my-2"
+                        className="px-2 py-1 text-dark d-flex align-items-center flex-wrap my-1"
                         style={{
                             fontSize: '13px',
                             backgroundColor: '#ecf4fc',
                             cursor: 'pointer',
-                            gap: '8px',
+                            gap: '4px',
                         }}
                     >
-                        {/* Icon Column */}
-                        <div className="d-flex align-items-start pt-1" style={{ minWidth: '24px' }}>
+                        {/* Icon */}
+                        <div className="d-flex align-items-center" style={{ minWidth: '24px' }}>
                             <FontAwesomeIcon
                                 icon={faTable}
-                                style={{ color: '#1C4690', fontSize: '20px' }}
-                                className='mx-2'
+                                style={{ color: '#1C4690', fontSize: '18px' }}
+                                className="mx-2"
                             />
                         </div>
 
-                        {/* Text + Navigation Column */}
-                        <div className="d-flex flex-wrap align-items-center " style={{ gap: '8px', flex: 1 }}>
+                        {/* Text + Navigation */}
+                        <div className="d-flex align-items-center flex-wrap" style={{ gap: '6px', flex: 1 }}>
                             <span onClick={backToViews}>Back to views</span>
                             <i className="fas fa-chevron-right" style={{ color: '#2a68af' }} />
 
@@ -446,17 +448,16 @@ const ViewsList = (props) => {
                                 <React.Fragment key={index}>
                                     <Tooltip title={item.title}>
                                         <span
-                                            onClick={
-                                                () => {
-                                                    handleViewNavClick(item);
-                                                    props.resetPreview();
-                                                }
-                                            }
+                                            onClick={() => {
+                                                handleViewNavClick(item);
+                                                props.resetPreview();
+                                            }}
                                             style={{
                                                 cursor: 'pointer',
                                                 whiteSpace: 'normal',
                                                 wordBreak: 'break-word',
                                                 maxWidth: '150px',
+                                                fontSize: '13px',
                                             }}
                                         >
                                             {trimTitle(item.title)}
@@ -478,10 +479,12 @@ const ViewsList = (props) => {
                                         <TreeItem
                                             key={`tree-item-${item.id || index}`} // Unique key
                                             itemId={`tree-item-${item.id || index}`} // Unique itemId
-                                            onClick={() =>
+                                            onClick={() => {
+                                                props.setSelectedItemId(item.id); // update selected
                                                 item.objectTypeId === 0
                                                     ? props.previewSublistObject(item, true)
                                                     : props.previewObject(item, true)
+                                            }
                                             }
                                             className='my-1 '
 
@@ -492,21 +495,28 @@ const ViewsList = (props) => {
                                                 "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                                 "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                                backgroundColor: "#fff !important",
+                                                backgroundColor: '#fff !important',
                                                 "&:hover": {
-                                                    backgroundColor: "#fff !important", // Maintain white background on hover
+                                                    backgroundColor: '#fff !important', // Maintain white background on hover
                                                 },
 
                                                 borderRadius: "0px !important", // Remove border radius
                                                 "& .MuiTreeItem-content": {
                                                     borderRadius: "0px !important", // Remove border radius from content area
                                                 },
+                                                "& .MuiTreeItem-content.Mui-selected": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
+
+                                                "& .MuiTreeItem-content.Mui-selected:hover": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
 
 
 
                                             }}
                                             label={
-                                                <Box display="flex" alignItems="center">
+                                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                                     {item.objectTypeId === 0 ? (
                                                         <>
                                                             <FileExtIcon
@@ -534,7 +544,7 @@ const ViewsList = (props) => {
                                             }
                                         >
 
-                                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} />
+                                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={props.setSelectedItemId} selectedItemId={props.selectedItemId} />
                                         </TreeItem>
                                     </SimpleTreeView>
 
@@ -554,18 +564,25 @@ const ViewsList = (props) => {
                                                 "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                                 "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                                backgroundColor: "#fff",
+                                                backgroundColor: '#fff !important',
                                                 "&:hover": {
-                                                    backgroundColor: "#fff !important", // Maintain white background on hover
+                                                    backgroundColor: '#fff !important', // Maintain white background on hover
                                                 },
 
                                                 borderRadius: "0px !important", // Remove border radius
                                                 "& .MuiTreeItem-content": {
                                                     borderRadius: "0px !important", // Remove border radius from content area
                                                 },
+                                                "& .MuiTreeItem-content.Mui-selected": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
+
+                                                "& .MuiTreeItem-content.Mui-selected:hover": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
                                             }}
                                             label={
-                                                <Box display="flex" alignItems="center">
+                                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                                     <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
                                                     <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
 
@@ -589,18 +606,25 @@ const ViewsList = (props) => {
                                                 "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                                 "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                                backgroundColor: "#fff",
+                                                backgroundColor: '#fff !important',
                                                 "&:hover": {
-                                                    backgroundColor: "#fff !important", // Maintain white background on hover
+                                                    backgroundColor: '#fff !important', // Maintain white background on hover
                                                 },
 
                                                 borderRadius: "0px !important", // Remove border radius
                                                 "& .MuiTreeItem-content": {
                                                     borderRadius: "0px !important", // Remove border radius from content area
                                                 },
+                                                "& .MuiTreeItem-content.Mui-selected": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
+
+                                                "& .MuiTreeItem-content.Mui-selected:hover": {
+                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                },
                                             }}
                                             label={
-                                                <Box display="flex" alignItems="center">
+                                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                                     <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                                                     <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
 
@@ -617,7 +641,7 @@ const ViewsList = (props) => {
             ) : (
                 <span >
                     {filteredCommonViews.length > 0 && (
-                        <div className='bg-white my-2'>
+                        <div className='bg-white  my-1'>
                             <h6
                                 onClick={toggleCommonViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
@@ -639,7 +663,7 @@ const ViewsList = (props) => {
                             </h6>
 
                             {showCommonViewSublist && (
-                                <div style={{ height: '24vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '27vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -654,18 +678,25 @@ const ViewsList = (props) => {
                                                     "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                                     "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                                    backgroundColor: "#fff",
+                                                    backgroundColor: '#fff !important',
                                                     "&:hover": {
-                                                        backgroundColor: "#fff !important", // Maintain white background on hover
+                                                        backgroundColor: '#fff !important', // Maintain white background on hover
                                                     },
 
                                                     borderRadius: "0px !important", // Remove border radius
                                                     "& .MuiTreeItem-content": {
                                                         borderRadius: "0px !important", // Remove border radius from content area
                                                     },
+                                                    "& .MuiTreeItem-content.Mui-selected": {
+                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                    },
+
+                                                    "& .MuiTreeItem-content.Mui-selected:hover": {
+                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                    },
                                                 }}
                                                 label={
-                                                    <Box display="flex" alignItems="center">
+                                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === view.id ? '#fcf3c0' : 'inherit' }}>
                                                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
                                                         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>
@@ -679,7 +710,7 @@ const ViewsList = (props) => {
                         </div>
                     )}
                     {otherviews.length > 0 && (
-                        <div className='bg-white my-2'>
+                        <div className='bg-white  my-1'>
                             <h6
                                 onClick={toggleOtherViewSublist}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
@@ -701,7 +732,7 @@ const ViewsList = (props) => {
                             </h6>
 
                             {showOtherViewSublist && (
-                                <div style={{ height: '24vh', overflowY: 'auto' }} className=' text-dark bg-white '>
+                                <div style={{ height: '27vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {otherviews.map((view, index) => (
 
                                         <SimpleTreeView>
@@ -716,18 +747,25 @@ const ViewsList = (props) => {
                                                     "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
                                                     "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
 
-                                                    backgroundColor: "#fff",
+                                                    backgroundColor: '#fff !important',
                                                     "&:hover": {
-                                                        backgroundColor: "#fff !important", // Maintain white background on hover
+                                                        backgroundColor: '#fff !important', // Maintain white background on hover
                                                     },
 
                                                     borderRadius: "0px !important", // Remove border radius
                                                     "& .MuiTreeItem-content": {
                                                         borderRadius: "0px !important", // Remove border radius from content area
                                                     },
+                                                    "& .MuiTreeItem-content.Mui-selected": {
+                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                    },
+
+                                                    "& .MuiTreeItem-content.Mui-selected:hover": {
+                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
+                                                    },
                                                 }}
                                                 label={
-                                                    <Box display="flex" alignItems="center">
+                                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === view.id ? '#fcf3c0' : 'inherit' }}>
                                                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
                                                         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>

@@ -338,7 +338,7 @@ const PDFViewerPreview = (props) => {
 
       prevWidthRef.current = props.windowWidth; // store original string
     }
-  }, [props.windowWidth]);
+  }, [props.windowWidth, props.document]);
 
 
 
@@ -347,31 +347,31 @@ const PDFViewerPreview = (props) => {
 
       {/* File Info Bar */}
 
-    <Tooltip title={props.selectedObject?.title}>
+      <Tooltip title={props.selectedObject?.title}>
 
-          <Box
+        <Box
 
-            sx={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: 'important 13px',
-              backgroundColor: '#ecf4fc',
-              height: '53px',
-              color: '#1d3557',
-            
-
-            }}
-          >
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 'important 13px',
+            backgroundColor: '#ecf4fc',
+            height: '53px',
+            color: '#1d3557',
 
 
-            <i style={{ fontSize: '25px',  marginLeft:'15px', marginRight:'8px' }} className='fas fa-file-pdf text-danger '></i>
-            <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
+          }}
+        >
 
 
-          </Box>
-        </Tooltip>
-     
+          <i style={{ fontSize: '25px', marginLeft: '15px', marginRight: '8px' }} className='fas fa-file-pdf text-danger '></i>
+          <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
+
+
+        </Box>
+      </Tooltip>
+
       {/* Top Controls Bar */}
       <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
         <div className="d-flex align-items-center flex-wrap gap-2">
@@ -401,17 +401,15 @@ const PDFViewerPreview = (props) => {
           </span>
 
           {/* Zoom Controls */}
-          <div className="d-flex align-items-center gap-2 mx-1">
+          <div className="d-flex align-items-center gap-2 mx-3">
             <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
             <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '13px', color: '#333' }}>
               {Math.round(zoom * 100)}%
             </span>
             <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
             <Tooltip title="Reset Zoom">
-              <button onClick={resetZoom} className="btn btn-light px-1 py-0" style={{ fontSize: '13px', border: '1px solid #2757aa', color: '#2757aa' }}>
-                <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '13px' }} />
-                Reset
-              </button>
+              <i onClick={resetZoom} className="fa-solid fa-rotate-right me-1" style={{ fontSize: '18px', color: '#2757aa' }} />
+
             </Tooltip>
           </div>
 
@@ -423,7 +421,15 @@ const PDFViewerPreview = (props) => {
           {/* Sign PDF */}
           <Tooltip title="Digitally Sign Copy">
             <span className='mx-1'>
-              <SignButton {...props} />
+              <SignButton
+
+                objectid={props.selectedObject.id}
+                classid={props.selectedObject.classId || props.selectedObject.classID}
+                fileId={props.fileId}
+                vault={props.vault}
+                email={props.email}
+                mfilesId={props.mfilesId}
+              />
             </span>
           </Tooltip>
         </div>
@@ -433,33 +439,33 @@ const PDFViewerPreview = (props) => {
 
 
 
-      <div className="pdf-render-wrapper">
-
+      <div className="pdf-viewer-container">
 
         {isAsideOpen && (
-          <aside className={`thumbnail-sidebar ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
+          <aside className={`pdf-thumbnail-panel ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
             <Document className="pdf-container" file={props.document}>
               {[...Array(numPages).keys()].map((pageIndex) => (
                 <div
                   key={`thumbnail_${pageIndex + 1}`}
                   id={`thumbnail_${pageIndex + 1}`}
-                  className={`thumbnail ${pageNumber === pageIndex + 1 ? 'active' : ''}`}
+                  className={`thumbnail-item ${pageNumber === pageIndex + 1 ? 'active' : ''}`}
                   onClick={() => thumbnailNavigation(pageIndex)}
                 >
                   <Page
                     pageNumber={pageIndex + 1}
-                    scale={getScaleForPageThumbnail(pageIndex + 1, zoom)}
+                    scale={getScaleForPageThumbnail(pageIndex + 1)}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
                     className="page-container"
                   />
-                  <span className="page-number">{`${pageIndex + 1}`}</span>
+                  <span className="thumbnail-page-number">{`${pageIndex + 1}`}</span>
                 </div>
               ))}
             </Document>
           </aside>
         )}
-        <main className="pdf-main scrollbar-custom" ref={mainContainerRef}>
+
+        <main className="pdf-main-viewer scrollbar-custom" ref={mainContainerRef}>
           <Document
             className="pdf-container"
             file={props.document}
@@ -468,7 +474,11 @@ const PDFViewerPreview = (props) => {
             error={<div>Error loading PDF!</div>}
           >
             {[...Array(numPages).keys()].map((pageIndex) => (
-              <div key={`page_${pageIndex + 1}`} id={`page_${pageIndex + 1}`} className="pdf-page-wrapper">
+              <div
+                key={`page_${pageIndex + 1}`}
+                id={`page_${pageIndex + 1}`}
+                className="pdf-page-wrapper"
+              >
                 <Page
                   pageNumber={pageIndex + 1}
                   scale={getScaleForPage(pageIndex + 1, zoom)}
@@ -481,7 +491,6 @@ const PDFViewerPreview = (props) => {
             ))}
           </Document>
         </main>
-
       </div>
 
     </>

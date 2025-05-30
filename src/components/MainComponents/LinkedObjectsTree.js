@@ -6,7 +6,7 @@ import FileExtIcon from "../FileExtIcon"; // Import your file icon component
 import FileExtText from "../FileExtText"; // Import your file text component
 import * as constants from '../Auth/configs'
 
-const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowClick }) => {
+const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowClick,setSelectedItemId,selectedItemId }) => {
   const [linkedObjects, setLinkedObjects] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -93,9 +93,9 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                     "& .MuiTreeItem-content.Mui-selected": {
                       backgroundColor: "#fff !important", // Keep white after selection
                     },
-                    "& .MuiTreeItem-content.Mui-selected:hover": {
-                      backgroundColor: "#fff !important", // Keep white even when selected and hovered
-                    },
+                    // "& .MuiTreeItem-content.Mui-selected:hover": {
+                    //   backgroundColor: "#fff !important", // Keep white even when selected and hovered
+                    // },
                     borderRadius: "0px !important", // Remove border radius
                     "& .MuiTreeItem-content": {
                       borderRadius: "0px !important", // Remove border radius from content area
@@ -116,19 +116,19 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                       borderBottom: '1px solid #dedddd'
                     }}
                   >
-                    <i style={{ fontSize: '15px' , color:'#a5cbc3'}} className="fa-solid fa-layer-group mx-2"></i>
-                    {obj.propertyName}(s)
+                    <i style={{ fontSize: '15px' , color:'#8d99ae'}} className="fa-solid fa-layer-group mx-2"></i>
+                    {obj.propertyName}
                   </Box>
                 }
               >
                 {obj.items?.map((subItem) => (
-                  <TreeItem
-                    onClick={() => handleRowClick(subItem)}
+                  <TreeItem  
+                    onClick={() => {setSelectedItemId(subItem.id); handleRowClick(subItem)}}
 
                     key={`grid-object-sub-${obj.propertyName}-${subItem.id}`}
                     itemId={`grid-object-sub-${obj.propertyName}-${subItem.id}`}
                     label={
-                      <Box display="flex" alignItems="center" >
+                      <Box display="flex" alignItems="center" sx={{padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
                         {subItem.objectID === 0 ? (
                           <FileExtIcon
                             fontSize={'15px'}
@@ -193,18 +193,18 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                   padding: '3px',
                   borderBottom: '1px solid #dedddd', padding: '3px'
                 }}>
-                  <i style={{ fontSize: '15px',color:'#a5cbc3' }} class="fa-solid fa-copy mx-2 "></i> Document(s)
+                  <i style={{ fontSize: '15px',color:'#8d99ae' }} class="fa-solid fa-copy mx-2 "></i> Document(s)
                 </Box>}
             >
               {documents.map((doc) =>
                 doc.items?.map((subItem, index) => (
                   <TreeItem
 
-                    onClick={() => handleRowClick(subItem)}
+                    onClick={() => {setSelectedItemId(subItem.id);handleRowClick(subItem)}}
                     key={`grid-document-sub-${index}-${subItem.id}`}
                     itemId={`grid-document-sub-${index}-${subItem.id}`}
                     label={
-                      <Box display="flex" alignItems="center">
+                      <Box display="flex" alignItems="center" sx={{padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
                         {subItem.objectID === 0 ? (
 
 

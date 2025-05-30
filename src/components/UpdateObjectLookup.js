@@ -94,23 +94,23 @@ const customStyles = {
     ...base,
     borderColor: error ? 'red' : base.borderColor,
     fontSize: '13px',
-    color: '#555',
+    color: 'black',
     backgroundColor: disabled ? '#f5f5f5' : 'white',
   }),
   singleValue: (base) => ({
     ...base,
-    color: '#555',
+    color: 'black',
     fontSize: '13px',
   }),
   option: (base, state) => ({
     ...base,
-    color: '#555',
+    color: 'black',
     fontSize: '13px',
     backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
   }),
   placeholder: (base) => ({
     ...base,
-    color: '#555',
+    color: 'black',
     fontSize: '13px',
   }),
   multiValue: (base) => ({

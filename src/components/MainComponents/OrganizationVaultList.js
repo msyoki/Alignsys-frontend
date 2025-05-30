@@ -78,7 +78,7 @@ function OrganizationVaultList(props) {
             >
               <ListItemIcon sx={{ minWidth: 30 }}>
                 {/* <Storage sx={{ color: "#fff", fontSize: 18 }} /> */}
-                <i class="fas fa-hdd" style={{ color: "#fff", fontSize: "18px" }}></i>
+                <i class="fa-solid fa-database" style={{ color: "#fff", fontSize: "18px" }}></i>
               </ListItemIcon>
               <ListItemText primaryTypographyProps={{ variant: "caption" }} primary={vault.name} />
               {openVaults[vault.guid] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
