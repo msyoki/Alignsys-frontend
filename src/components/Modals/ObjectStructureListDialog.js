@@ -43,6 +43,7 @@ import * as constants from '../Auth/configs';
 import TimedAlert from '../TimedAlert';
 import LoadingDialog from '../Loaders/LoaderDialog';
 import PDFViewerPreview from '../Pdf2';
+import DynamicFileViewer from '../DynamicFileViewer2';
 
 
 
@@ -96,7 +97,8 @@ const ObjectStructureList = (props) => {
     const [alertSeverity, setAlertSeverity] = useState('');
     const [alertMsg, setAlertMsg] = useState('');
 
-
+    const [base64Content, setBase64Content] = useState('')
+    const [fileExt, setFileExt] = useState('')
 
     const closeFormDialog = () => {
         props.setIsFormOpen(false);
@@ -230,11 +232,55 @@ const ObjectStructureList = (props) => {
         setFormErrors(newFormErrors);
     };
 
-    const handleFileChange = (file) => {
+function blobToBase64WithExtension(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const base64Data = reader.result.split(',')[1]; // base64 content
+            let extension = '';
+
+            // If the blob has a name (like a File object), extract extension from it
+            if (blob.name && typeof blob.name === 'string') {
+                const parts = blob.name.split('.');
+                if (parts.length > 1) {
+                    extension = parts.pop().toLowerCase();
+                }
+            } else {
+                // Fallback to MIME type if no name is available
+                const mimeType = blob.type;
+                if (mimeType === 'application/pdf') {
+                    extension = 'pdf';
+                } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    extension = 'docx';
+                } else if (mimeType === 'image/png') {
+                    extension = 'png';
+                } else if (mimeType === 'image/jpeg') {
+                    extension = 'jpg';
+                } else {
+                    extension = ''; // unknown or unsupported
+                }
+            }
+
+            resolve({ base64: base64Data, extension });
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+
+
+    const handleFileChange = async (file) => {
         if (file) {
             setFileUploadError('');
         }
         setUploadedFile(file);
+        const { base64, extension } = await blobToBase64WithExtension(file);
+        setBase64Content(base64);
+     
+        setFileExt(extension)
     };
 
     // const filteredProperties = props.formProperties.filter(
@@ -426,6 +472,8 @@ const ObjectStructureList = (props) => {
         props.templateIsTrue,
         props.templates,
     ]);
+
+
 
 
 
@@ -987,7 +1035,9 @@ const ObjectStructureList = (props) => {
                                             <>
                                                 {uploadedFile ?
                                                     <>
-                                                        <PDFViewerPreview document={uploadedFile} setUploadedFile={setUploadedFile} />
+                                                        <DynamicFileViewer base64Content={base64Content} fileExtension={fileExt} setUploadedFile={setUploadedFile} />
+
+
                                                     </>
                                                     : <>     <FileUploadComponent
                                                         handleFileChange={handleFileChange}

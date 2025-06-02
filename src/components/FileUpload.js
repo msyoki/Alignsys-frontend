@@ -38,7 +38,7 @@ const FileUploadComponent = (props) => {
                         <p style={{ fontSize: '13px' }}>{props.uploadedFile.name}</p>
                     ) : (
                         <>
-                           <p>Upload a PDF file </p>
+                           <p>Upload a file </p>
                             <p><i className="fas fa-upload my-4" style={{ fontSize: '50px' }}></i></p>
 
                          
