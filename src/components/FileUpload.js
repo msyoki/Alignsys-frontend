@@ -35,19 +35,24 @@ const FileUploadComponent = (props) => {
                     {isDragActive ? (
                         <p>Drop the files here...</p>
                     ) : props.uploadedFile ? (
-                        <p style={{ fontSize: '13px' }}>{props.uploadedFile.name}</p>
+                        <>
+                            <p style={{fontWeight:'bold' }} >Uploaded File</p>
+                            <p style={{ fontSize:'13px',  color:'black', fontWeight:'bold'  }} className='my-4'>{props.uploadedFile.name}</p>
+                            <p>Drag 'n' drop a file here, or click to browse device to change file</p>
+                        </>
                     ) : (
                         <>
-                           <p>Upload a file </p>
+                            <p>Upload a file </p>
                             <p><i className="fas fa-upload my-4" style={{ fontSize: '50px' }}></i></p>
 
-                         
+
 
                             <p>Drag 'n' drop a file here, or click to browse device</p></>
                     )}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import SignButton from './SignDocument';
 import PDFViewerPreview from './Pdf';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Tooltip } from '@mui/material';
+import { Table, Typography, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, IconButton, Tooltip } from '@mui/material';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
@@ -396,7 +396,7 @@ const ReactViewer = ({ fileurl, numPages, setNumPages, pageNumber, setPageNumber
   );
 };
 
-const DynamicFileViewer = ({ base64Content, fileExtension}) => {
+const DynamicFileViewer = ({ base64Content, fileExtension, objectid, fileId, vault, email, fileName, selectedObject, windowWidth, mfilesId }) => {
 
 
   function useSessionState(key, defaultValue) {
@@ -431,10 +431,10 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
 
   const handleViewFile = async () => {
     if (!base64Content || !fileExtension) return;
-  
+
     const ext = fileExtension.toLowerCase();
     let src = '';
-  
+
     // Helper function to handle base64 conversion
     const generateBase64Url = (base64Content, ext) => {
       const mimeTypeMap = {
@@ -449,13 +449,13 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
         doc: 'application/msword',
         // Add more types as needed
       };
-  
+
       if (mimeTypeMap[ext]) {
         return `data:${mimeTypeMap[ext]};base64,${base64Content}`;
       }
       return '';
     };
-  
+
     // Function to handle file upload and generate download URL
     const uploadBase64WithExtension = async (base64String, extension) => {
       const mimeTypeMap = {
@@ -468,34 +468,34 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
         jpeg: 'image/jpeg',
         // Add more as needed
       };
-  
+
       try {
         const mimeType = mimeTypeMap[extension.toLowerCase()] || 'application/octet-stream';
-  
+
         // Strip base64 header if present
         const base64Data = base64String.split(',').pop();
         const byteCharacters = atob(base64Data);
         const byteArray = new Uint8Array([...byteCharacters].map(char => char.charCodeAt(0)));
         const blob = new Blob([byteArray], { type: mimeType });
-  
+
         const formData = new FormData();
         formData.append('file', blob, `file.${extension}`);
-  
+
         const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData);
-  
+
         const fileUrl = response.data?.data?.url;
         if (fileUrl) {
           const downloadUrl = transformToDownloadUrl(fileUrl);
           return downloadUrl;
         }
-  
+
         return null;
       } catch (error) {
         console.error('Error uploading file:', error);
         return null;
       }
     };
-  
+
     // Helper function to transform the URL for downloading
     const transformToDownloadUrl = (url) => {
       const urlObj = new URL(url);
@@ -504,25 +504,25 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
       urlObj.pathname = pathParts.join('/');
       return urlObj.toString();
     };
-  
+
     // Handle the file extension logic
     if (['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt'].includes(ext)) {
       src = generateBase64Url(base64Content, ext);
-    } else if (['docx', 'xlsx', 'doc'].includes(ext)) {
+    } else if (['docx', 'xlsx','xls', 'doc', 'ppt'].includes(ext)) {
       // Wait for the upload to finish before setting the file URL
       src = await uploadBase64WithExtension(base64Content, ext);
     } else if (ext === 'csv') {
       setCSVContent(parseCSV(atob(base64Content)));
       return; // Return early for CSV, no need to set fileUrl
     }
-  
+
     if (src) {
       setFileUrl(src);
     } else {
       console.error('Unsupported file type or error occurred.');
     }
   };
-  
+
 
   const parseCSV = (csvContent) => {
     const rows = csvContent.split('\n');
@@ -554,7 +554,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
     }
 
     if (ext === 'pdf') {
-      return <PDFViewerPreview  document={fileUrl}  />;
+      return <PDFViewerPreview windowWidth={windowWidth} document={fileUrl} objectid={objectid} fileId={fileId} vault={vault} email={email} base64Content={base64Content} fileExtension={fileExtension} fileName={fileName} selectedObject={selectedObject} mfilesId={mfilesId} />;
     }
 
     if (ext === 'txt') {
@@ -563,8 +563,8 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
       <DocumentEditorContainerComponent id="container" style={{ 'height': '590px' }} serviceUrl="https://services.syncfusion.com/vue/production/api/documenteditor/" enableToolbar={true} />
     }
 
-    if (ext === 'docx' || ext === 'doc' || ext === 'xlsx') {
-  
+    if (ext === 'docx' || ext === 'doc' || ext === 'xlsx'|| ext === 'xls' || ext === 'ppt' ) {
+
       return (
         <iframe
           src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
@@ -573,7 +573,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
           frameBorder="0"
         />
         // <SyncfusionViewer base64File={fileUrl} fileType={ext} />
-     
+
 
       );
     }
@@ -582,7 +582,40 @@ const DynamicFileViewer = ({ base64Content, fileExtension}) => {
       return <CSVViewer data={csvContent} />;
     }
 
-    return <p>Unsupported file type.</p>;
+    return <Box
+      sx={{
+        width: '100%',
+        marginTop: '20%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        mx: 'auto'
+      }}
+    >
+      <i
+        className="fa-solid fa-ban my-2"
+        style={{ fontSize: '120px', color: '#2757aa' }}
+      />
+
+
+      <>
+        <Typography
+          variant="body2"
+          className='my-2'
+          sx={{ textAlign: 'center' }}
+        >
+          Unsupported format <span style={{color: '#2757aa' }}>"{ext}"</span>
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{ textAlign: 'center', fontSize: '13px' }}
+        >
+          Please select a different file, type not supported
+        </Typography>
+      </>
+
+    </Box>;
   };
 
   useEffect(() => {

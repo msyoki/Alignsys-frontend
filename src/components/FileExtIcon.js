@@ -5,6 +5,7 @@ import * as constants from './Auth/configs';
 const FileExtIcon = (props) => {
   const [extension, setExtension] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [is400, setIs400] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -16,7 +17,9 @@ const FileExtIcon = (props) => {
         const ext = data[0]?.extension?.replace(/^\./, '').toLowerCase();
         setExtension(ext);
       } catch (err) {
-        if (!axios.isCancel(err)) {
+        if (axios.isAxiosError(err) && err.response && err.response.status === 400) {
+          setIs400(true);
+        } else if (!axios.isCancel(err)) {
           console.error('Error fetching the extension:', err);
         }
       } finally {
@@ -31,13 +34,19 @@ const FileExtIcon = (props) => {
     };
   }, [props.guid, props.objectId, props.classId]);
 
-  if (loading) {
-    return null; // Don't show anything while loading
-  }
-
   const iconStyle = {
     fontSize: props.fontSize || '20px',
   };
+
+  if (loading) {
+    // Show grey file icon while loading
+    return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+  }
+
+  if (is400) {
+    // Show book icon if 400 error
+    return <i className="fas fa-book" style={iconStyle}></i>;
+  }
 
   // Render icons based on extension
   switch (extension) {
@@ -48,7 +57,10 @@ const FileExtIcon = (props) => {
     case 'txt':
       return <i className="fas fa-file-alt" style={{ ...iconStyle, color: '#6c757d' }}></i>;
     case 'xlsx':
+    case 'xls':
       return <i className="far fa-file-excel" style={{ ...iconStyle, color: '#3e8914' }}></i>;
+    case 'ppt':
+      return <i className="fa-solid fa-file-powerpoint" style={{ ...iconStyle, color: '#ef6351' }}></i>;
     case 'docx':
     case 'doc':
       return <i className="fas fa-file-word" style={{ ...iconStyle, color: '#0077b6' }}></i>;
@@ -57,8 +69,12 @@ const FileExtIcon = (props) => {
     case 'jpg':
       return <i className="fas fa-file-image" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     default:
-      // Always show the default grey file icon
-      return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      // If extension exists but is not handled, show grey file icon
+      if (extension) {
+        return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      }
+      // If no extension (shouldn't happen), show book icon as fallback
+      return <i className="fas fa-book" style={{ ...iconStyle, color: '#7cb518' }}></i>;
   }
 };
 

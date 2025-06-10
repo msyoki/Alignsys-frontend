@@ -1,176 +1,56 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Authcontext from '../components/Auth/Authprovider';
-import { useNavigate } from 'react-router-dom';
-import '../styles/Dashboard.css'
-import '../styles/Custombuttons.css'
-import '../styles/Navbar.css'
-
+import { useNavigate, useLocation } from 'react-router-dom';
+import '../styles/Dashboard.css';
+import '../styles/Custombuttons.css';
+import '../styles/Navbar.css';
 import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
-import axios from 'axios'
+import { Box, Tooltip, Avatar, List, ListItem, ListItemText } from '@mui/material';
+import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
-import * as constants from '../components/Auth/configs'
+import * as constants from '../components/Auth/configs';
 import logo from '../images/TechEdgeLogo.png';
-import { Tooltip } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import pic from '../images/R.png'
-import { useLocation } from 'react-router-dom';
-
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import TimedAlert from '../components/TimedAlert';
+import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
 import {
-  faFileAlt,
-  faFolderOpen,
-  faTasks,
-  faChartBar,
-  faUser,
-  faHandPointer,
-  faCar,
-  faFile,
-  faFolder,
-  faUserFriends,
-  faPlus,
-  faTag
+  faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile,
+  faFolder, faUserFriends, faPlus, faTag
 } from '@fortawesome/free-solid-svg-icons';
-import TimedAlert from '../components/TimedAlert';
-import VaultSelectForm from '../components/SelectVault';
-import NetworkIcon from '../components/NetworkStatus';
-import MiniLoader from '../components/Modals/MiniLoaderDialog';
+
 const allIcons = {
-  faFileAlt,
-  faFolderOpen,
-  faTasks,
-  faChartBar,
-  faUser,
-  faCar,
-  faFile,
-  faFolder,
-  faUserFriends,
+  faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends,
 };
 
-
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+function useSessionState(key, defaultValue) {
+  const getInitialValue = () => {
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (stored === null || stored === 'undefined') return defaultValue;
+      return JSON.parse(stored);
+    } catch (e) {
+      console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+      return defaultValue;
+    }
   };
+  const [value, setValue] = useState(getInitialValue);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+    }
+  }, [key, value]);
+  return [value, setValue];
 }
-
 
 function Dashboard() {
   const location = useLocation();
-  // 1. Context & Navigation
   const { user, authTokens, departments, logoutUser } = useContext(Authcontext);
   const navigate = useNavigate();
 
-
-
-
-
-
-  // 2. State Declarations
-  // const [openObjectModal, setOpenObjectModal] = useState(false);
-  // const [viewableobjects, setViewableObjects] = useState([]);
-  // const [data, setData] = useState([]);
-  // const [searchTerm, setSearchTerm] = useState('');
-  // const [searched, setSearched] = useState(false);
-  // const [allrequisitions, setRequisitions] = useState([]);
-  // const [selectedVault, setSelectedVault] = useState(null);
-  // const [vaultObjectsList, setVaultObjectsList] = useState(null);
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [menuOpen, setMenuOpen] = useState(false);
-  // const [isFormOpen, setIsFormOpen] = useState(false);
-  // const [templateIsTrue, setTemplateIsTrue] = useState(false);
-  // const [templates, setTemplates] = useState([]);
-  // const [selectedClassName, setSelectedClassName] = useState('');
-  // const [selectedObjectId, setSelectedObjectId] = useState(null);
-  // const [selectedObjectName, setSelectedObjectName] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [selectedClassId, setSelectedClassId] = useState(null);
-  // const [groupedItems, setGroupedItems] = useState([]);
-  // const [ungroupedItems, setUngroupedItems] = useState([]);
-  // const [isDataOpen, setIsDataOpen] = useState(false);
-  // const [formProperties, setFormProperties] = useState([]);
-  // const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  // const [formValues, setFormValues] = useState({});
-  // const [value, setValue] = useState(0);
-  // const [isSublistVisible, setIsSublistVisible] = useState(false);
-  // let [docClasses, setDocClasses] = useState([]); // Document classes
-  // const [recentData, setRecentData] = useState([]);
-  // const [assignedData, setAssignedData] = useState([]);
-
-  // const [deletedData, setDeletedData] = useState([]);
-
-  // const [alertOpen, setOpenAlert] = useState(false);
-  // const [alertSeverity, setAlertSeverity] = useState('');
-  // const [alertMsg, setAlertMsg] = useState('');
-  // const [mfilesId, setMfilesId] = useState(null);
-  // const [loadingDialog, setLoadingDialog] = useState(false)
-
-  // const [hoveredItem, setHoveredItem] = useState(null);
-
-  function useSessionState(key, defaultValue) {
-    const getInitialValue = () => {
-      try {
-        const stored = sessionStorage.getItem(key);
-        if (stored === null || stored === 'undefined') {
-          return defaultValue;
-        }
-        return JSON.parse(stored);
-      } catch (e) {
-        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
-        return defaultValue;
-      }
-    };
-
-    const [value, setValue] = useState(getInitialValue);
-
-    useEffect(() => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify(value));
-      } catch (e) {
-        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
-      }
-    }, [key, value]);
-
-    return [value, setValue];
-  }
-
-
+  // --- State ---
   const [openObjectModal, setOpenObjectModal] = useSessionState('ss_openObjectModal', false);
   const [viewableobjects, setViewableObjects] = useSessionState('ss_viewableObjects', []);
   const [data, setData] = useSessionState('ss_data', []);
@@ -208,22 +88,14 @@ function Dashboard() {
   const [loadingDialog, setLoadingDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useSessionState('ss_hoveredItem', null);
 
-
-  // 3. Helper Functions / API Calls
-
-  // Search for objects in a vault
+  // --- Helper Functions ---
   const searchObject = async (search, vault) => {
-
     try {
-      const formattedString = viewableobjects.join(',\n    ');
       const response = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${mfilesId}`
       );
       return response.data;
-    } catch (error) {
-      // console.error('Error fetching requisition data:', error);
-      // return [];
-    }
+    } catch (error) {}
   };
 
   const getRecent = async () => {
@@ -233,51 +105,29 @@ function Dashboard() {
       );
       setRecentData(data);
       return data;
-    } catch {
-      return null; // or return [] if your app expects an array
-    }
+    } catch { return null; }
   };
 
-
   const getDeleted = async () => {
-
     try {
-
       const response = await axios.get(
         `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
       );
-      // console.log(`Deleted: `)
-      // console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
-      // console.log(response.data)
-      setDeletedData(response.data)
+      setDeletedData(response.data);
       return response.data;
-    } catch (error) {
-      // console.log(`${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`)
-      // console.error('Error fetching requisition data:', error);
-      // return [];
-    }
-  }
+    } catch (error) {}
+  };
 
   const getAssigned = async () => {
-
-
     try {
-
       const response = await axios.get(
         `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
       );
-      // console.log(response.data)
-      setAssignedData(response.data)
+      setAssignedData(response.data);
       return response.data;
-    } catch (error) {
-      // console.error('Error fetching requisition data:', error);
-      // return [];
-    }
-  }
+    } catch (error) {}
+  };
 
-
-
-  // Get objects for a selected vault
   const getVaultObjects = () => {
     const config = {
       method: 'get',
@@ -288,16 +138,10 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        // console.log(response.data);
         setOpenObjectModal(true);
       })
-      .catch((error) => {
-        // console.log(error);
-      });
+      .catch(() => {});
   };
-
-
-
 
   const getVaultObjects2 = () => {
     const config = {
@@ -309,12 +153,8 @@ function Dashboard() {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        // console.log(response.data);
-        // toggleSublist();
       })
-      .catch((error) => {
-        // console.log(error);
-      });
+      .catch(() => {});
   };
 
   const getViewableObjects = () => {
@@ -322,58 +162,28 @@ function Dashboard() {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${constants.auth_api}/api/viewable-objects/`,
-      headers: {
-        'Authorization': `Bearer ${authTokens.access}`,
-      },
+      headers: { 'Authorization': `Bearer ${authTokens.access}` },
     };
-
     axios
       .request(config)
-      .then((response) => {
-        // console.log("objects were found")
-        // console.log(response.data)
-        setViewableObjects(response.data);
-      })
-      .catch((error) => {
-        // console.log("no viewable objects")
-        // console.log(error);
-      });
+      .then((response) => setViewableObjects(response.data))
+      .catch(() => {});
   };
 
-
-
-
   const getVaultId = async (guid) => {
-
-    let data = JSON.stringify({
-      "user_id": user.id,
-      "guid": guid
-    });
-
+    let data = JSON.stringify({ "user_id": user.id, "guid": guid });
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${constants.auth_api}/api/vaultid/`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       data: data
     };
-
     axios.request(config)
-      .then((response) => {
-        // console.log(response.data);
-        // console.log(response.data.mfilesID)
-        setMfilesId(response.data.mfilesID)
-      })
-      .catch((error) => {
-        // console.log(error);
-      });
+      .then((response) => setMfilesId(response.data.mfilesID))
+      .catch(() => {});
+  };
 
-  }
-
-
-  // Get network connection status
   function getNetworkStatus() {
     if (navigator.connection) {
       const connection = navigator.connection;
@@ -383,98 +193,91 @@ function Dashboard() {
         rtt: connection.rtt,
       };
     } else {
-      return {
-        downlink: 10,
-        effectiveType: '4g',
-        rtt: 50,
-      };
+      return { downlink: 10, effectiveType: '4g', rtt: 50 };
     }
   }
-
-  // 4. Utility Functions
 
   const findBestIconMatch = (name) => {
     const nameWords = name.toLowerCase().split(' ');
     for (let iconName in allIcons) {
       for (let word of nameWords) {
-        if (iconName.toLowerCase().includes(word)) {
-          return allIcons[iconName];
-        }
+        if (iconName.toLowerCase().includes(word)) return allIcons[iconName];
         if (
           word.toLowerCase().includes('document') ||
           word.toLowerCase().includes('invoice') ||
           word.toLowerCase().includes('Petty Cash')
-        ) {
-          return faFile;
-        }
+        ) return faFile;
         if (
           word.toLowerCase().includes('staff') ||
           word.toLowerCase().includes('employee')
-        ) {
-          return faUser;
-        }
+        ) return faUser;
       }
     }
     return faFolder;
   };
 
-  // 5. Event Handlers & Toggles
+  // --- Preview Logic ---
+  const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
+  const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
+  const [base64, setBase64] = useSessionState('ss_base64', '');
+  const [extension, setExtension] = useSessionState('ss_extension', '');
 
-  const adminPage = () => {
-    navigate('/admin');
+  // Preview main object
+  const previewObject = async (item, isMain = true) => {
+    setSelectedObject(item);
+    // Example: fetch object properties, file, etc.
+    try {
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${mfilesId}`;
+      const { data } = await axios.get(url);
+      setPreviewObjectProps(data);
+      // Optionally fetch file/base64/extension here
+      // setBase64(...), setExtension(...)
+    } catch (error) {
+      setPreviewObjectProps([]);
+    }
   };
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  // Preview sublist object
+  const previewSublistObject = async (item, isMain = true) => {
+    setSelectedObject(item);
+    // Example: fetch sublist object properties
+    try {
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${mfilesId}`;
+      const { data } = await axios.get(url);
+      setPreviewObjectProps(data);
+    } catch (error) {
+      setPreviewObjectProps([]);
+    }
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  // --- Event Handlers ---
+  const adminPage = () => navigate('/admin');
+  const handleChange = (event, newValue) => setValue(newValue);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const reloadPage = () => window.location.reload();
+  const toggleSublist = () => setIsSublistVisible(!isSublistVisible);
+  const closeModal = () => setOpenObjectModal(false);
+  const closeDataDialog = () => setIsDataOpen(false);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const reloadPage = () => {
-    window.location.reload();
-  };
-
-  const toggleSublist = () => {
-    setIsSublistVisible(!isSublistVisible);
-  };
-
-  const closeModal = () => {
-    setOpenObjectModal(false);
-  };
-
-  const closeDataDialog = () => {
-    setIsDataOpen(false);
-  };
-
-  // 6. More Complex Data Fetching & Handling
+  // --- Data Fetching & Handling ---
   const fetchItemData = async (objectId, objectName) => {
     setIsLoading(true);
     setSelectedObjectName(objectName);
-
     try {
       const url = `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}/${mfilesId}`;
       const { data } = await axios.get(url);
       const { grouped, unGrouped } = data;
-
       setSelectedObjectId(objectId);
       setGroupedItems(grouped);
       setUngroupedItems(unGrouped);
-
       const totalClasses =
         grouped.reduce((acc, group) => acc + group.members.length, 0) +
         unGrouped.length;
-
       if (totalClasses === 1) {
         const singleClass = grouped.length
           ? grouped[0].members[0]
           : unGrouped[0];
-
         handleClassSelection(
           singleClass.classId,
           singleClass.className,
@@ -490,12 +293,11 @@ function Dashboard() {
     }
   };
 
-
   const handleClassSelection = async (classId, className, objectId) => {
-    setLoadingDialog(true)
+    setLoadingDialog(true);
     setSelectedClassName(className);
     setSelectedClassId(classId);
-    setSelectedObjectId(objectId)
+    setSelectedObjectId(objectId);
 
     const fetchTemplates = async () => {
       try {
@@ -503,48 +305,39 @@ function Dashboard() {
           `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
           { headers: { accept: '*/*' } }
         );
-        // console.log('Templates response:', response.data);
-        // console.log(response.data)
         setTemplates(response.data);
-
-
-        setTemplateModalOpen(true); // Opens the template modal
-        setLoadingDialog(false)
+        setTemplateModalOpen(true);
+        setLoadingDialog(false);
       } catch (error) {
         console.error('Error fetching templates:', error);
-        await proceedNoneTemplate(); // Proceed with no templates if the request fails
+        await proceedNoneTemplate();
       }
     };
 
     const proceedNoneTemplate = async () => {
-      setLoadingDialog(true)
+      setLoadingDialog(true);
       try {
         const response = await axios.get(
           `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${mfilesId}`
         );
-        // console.log('Class properties response:', response.data);
-
-        setFormProperties(() => response.data); // Functional update to avoid stale values
+        setFormProperties(() => response.data);
         setFormValues(() =>
           response.data.reduce((acc, prop) => {
-            acc[prop.propId] = ''; // Initialize form values
+            acc[prop.propId] = '';
             return acc;
           }, {})
         );
-
-        setIsFormOpen(true); // Open the form modal
-        setLoadingDialog(false)
-
+        setIsFormOpen(true);
+        setLoadingDialog(false);
       } catch (error) {
-        setLoadingDialog(false)
+        setLoadingDialog(false);
         console.error('Error fetching class properties:', error);
       } finally {
-        setLoadingDialog(false)
-        closeDataDialog(); // Close the dialog regardless of success or failure
+        setLoadingDialog(false);
+        closeDataDialog();
       }
     };
 
-    // Check the selectedObjectId and decide which function to call
     if (selectedObjectId === 0) {
       await fetchTemplates();
     } else {
@@ -552,72 +345,51 @@ function Dashboard() {
     }
   };
 
-
-  // 7. Derived/Computed Values
+  // --- Derived/Computed Values ---
   const data2 = [];
   const allrequisitionsnew = allrequisitions.sort(
     (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
   );
 
   function stringToColor(string) {
-    let hash = 0;
-    let i;
-
-    /* eslint-disable no-bitwise */
+    let hash = 0, i;
     for (i = 0; i < string.length; i += 1) {
       hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
-
     let color = '#';
-
     for (i = 0; i < 3; i += 1) {
       const value = (hash >> (i * 8)) & 0xff;
       color += `00${value.toString(16)}`.slice(-2);
     }
-    /* eslint-enable no-bitwise */
-
     return color;
   }
 
   function stringAvatar(name) {
-
-    const nameParts = name.split(' '); // Split the name into parts
-    const firstInitial = nameParts[0] ? nameParts[0][0] : ''; // Get the first letter of the first part
-    const secondInitial = nameParts[1] ? nameParts[1][0] : ''; // Get the first letter of the second part (if it exists)
-
-    return {
-      children: `${firstInitial}${secondInitial}`, // Combine the initials
-    };
+    const nameParts = name.split(' ');
+    const firstInitial = nameParts[0] ? nameParts[0][0] : '';
+    const secondInitial = nameParts[1] ? nameParts[1][0] : '';
+    return { children: `${firstInitial}${secondInitial}` };
   }
 
-
-  // 8. useEffect Hooks
+  // --- useEffect Hooks ---
   useEffect(() => {
-    // Initial setup: get viewable objects, network status, and selected vault
     getViewableObjects();
     getNetworkStatus();
-
     const vault = sessionStorage.getItem('selectedVault');
     if (vault) {
       setSelectedVault(JSON.parse(vault));
-      getVaultId(JSON.parse(vault).guid)
-
+      getVaultId(JSON.parse(vault).guid);
     }
-
     if (location.state?.openalert) {
       setOpenAlert(true);
       setAlertMsg(location.state.alertMsg);
       setAlertSeverity(location.state.alertSeverity);
     }
-  }, []); // Runs only once on mount
+  }, []);
 
-  // Call getRecent and getAssigned whenever selectedVault changes
   useEffect(() => {
-    if (selectedVault) {
-      getVaultId(selectedVault.guid)
-    }
-  }, [selectedVault]); // Runs whenever selectedVault updates
-
+    if (selectedVault) getVaultId(selectedVault.guid);
+  }, [selectedVault]);
 
   useEffect(() => {
     if (selectedVault) {
@@ -626,16 +398,15 @@ function Dashboard() {
       getAssigned();
       getDeleted();
     }
-  }, [selectedVault, mfilesId]); // Runs whenever selectedVault updates
-
+  }, [selectedVault, mfilesId]);
 
   const resetViews = () => {
     getRecent();
     getAssigned();
     getDeleted();
+  };
 
-  }
-
+  // --- Render ---
   return (
     <>
       <TimedAlert
@@ -676,7 +447,6 @@ function Dashboard() {
         templateModalOpen={templateModalOpen}
         setFormValues={setFormValues}
         formValues={formValues}
-
         closeDataDialog={closeDataDialog}
         selectedClassName={selectedClassName}
         setIsFormOpen={setIsFormOpen}
@@ -687,29 +457,24 @@ function Dashboard() {
         setTemplates={setTemplates}
         user={user}
         mfilesId={mfilesId}
-
-
-
-
       />
 
       <div className="dashboard">
         {/* Sidebar */}
-        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`} >
+        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`}>
           <div className="sidebar-content">
             {sidebarOpen && (
               <>
                 {/* Logo Section */}
                 <div
-                  className="d-flex flex-column justify-content-center align-items-center  bg-white shadow-lg "
+                  className="d-flex flex-column justify-content-center align-items-center bg-white shadow-lg"
                   style={{
-                    height: "58px", // Fixed height (adjust as needed)
-                    minHeight: "56px", // Prevent shrinking
-                    maxHeight: "56px", // Prevent expansion
-                    overflow: "hidden", // Prevent content from affecting height
+                    height: "58px",
+                    minHeight: "56px",
+                    maxHeight: "56px",
+                    overflow: "hidden",
                   }}
                 >
-
                   <img
                     src={logo}
                     alt="Organization logo"
@@ -722,31 +487,6 @@ function Dashboard() {
                     }}
                   />
                 </div>
-
-
-
-                {/* <div
-                  className="d-flex justify-content-center align-items-center"
-                  style={{ height: '58px' }}
-                >
-                  <Avatar
-                    alt={`${user.first_name} ${user.last_name}`}
-                    {...stringAvatar(
-                      user.first_name && user.last_name
-                        ? `${user.first_name} ${user.last_name}`
-                        : user.first_name || user.last_name || user.username
-                    )}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      color: '#2757aa',
-                      backgroundColor: '#fff',
-                      fontSize: '12px',
-                    }}
-                  />
-                </div> */}
-
-
                 {/* Menu Items */}
                 <ul className="menu-items">
                   <li
@@ -769,12 +509,10 @@ function Dashboard() {
                       style={{ transition: "transform 0.3s ease-in-out" }}
                     ></i>
                   </li>
-
                   {/* Sublist with Smooth Animation */}
                   <List
                     dense
                     disablePadding
-
                     sx={{
                       color: "#fff",
                       maxHeight: isSublistVisible ? "350px" : "0",
@@ -784,16 +522,9 @@ function Dashboard() {
                       transition: "max-height 0.4s ease, opacity 0.3s ease",
                       padding: isSublistVisible ? "10px 20px" : "0",
                       backgroundColor: "#fff",
-
-                      // ✅ Add this line:
                       borderRight: "1px solid #2757aa",
-
                       direction: "rtl",
-                      "& *": {
-                        direction: "ltr",
-                      },
-
-                      // Scrollbar styling remains unchanged...
+                      "& *": { direction: "ltr" },
                       "&::-webkit-scrollbar": { width: "3px" },
                       "&::-webkit-scrollbar-track": {
                         background: "rgba(255, 255, 255, 0.15)",
@@ -833,10 +564,7 @@ function Dashboard() {
                         backgroundPosition: "center",
                       },
                     }}
-
                   >
-
-
                     {isSublistVisible &&
                       vaultObjectsList !== null &&
                       vaultObjectsList
@@ -856,25 +584,20 @@ function Dashboard() {
                               backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff ",
                               color: hoveredItem === item.objectid ? "#555" : "#555",
                               py: 0,
-                              px: 1, // Reduced padding
-                              margin: "2px 0", // Smaller margin
-                              height: "20px", // Reduced height for a compact look
-                              // boxShadow: hoveredItem === item.objectid ? "0px 2px 5px rgba(0, 0, 0, 0.1)" : "none",
+                              px: 1,
+                              margin: "2px 0",
+                              height: "20px",
                             }}
-
                           >
                             <ListItemText
                               primary={item.namesingular}
-                              primaryTypographyProps={{ fontSize: "12px" }} // Smaller text size
+                              primaryTypographyProps={{ fontSize: "12px" }}
                               sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
                             />
                           </ListItem>
-                          
-
                         ))}
                   </List>
                 </ul>
-
                 {/* Bottom Buttons */}
                 <div>
                   <ul className="bottom-buttons">
@@ -894,12 +617,8 @@ function Dashboard() {
             )}
           </div>
         </nav>
-
-
-
         {/* Content Section */}
-        < main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`
-        }>
+        <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
           <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
             <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
               <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
@@ -922,12 +641,10 @@ function Dashboard() {
             viewableobjects={viewableobjects}
             toggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
-
             recentData={recentData}
             setRecentData={setRecentData}
             getRecent={getRecent}
             mfilesId={mfilesId}
-
             assignedData={assignedData}
             setAssignedData={setAssignedData}
             getAssigned={getAssigned}
@@ -938,17 +655,20 @@ function Dashboard() {
             setTemplateIsTrue={setTemplateIsTrue}
             vaultObjectsList={vaultObjectsList}
             fetchItemData={fetchItemData}
-
+            previewObject={previewObject}
+            previewSublistObject={previewSublistObject}
+            selectedObject={selectedObject}
+            setSelectedObject={setSelectedObject}
+            previewObjectProps={previewObjectProps}
+            setPreviewObjectProps={setPreviewObjectProps}
+            base64={base64}
+            setBase64={setBase64}
+            extension={extension}
+            setExtension={setExtension}
           />
-        </main >
-      </div >
-
-
-
-
+        </main>
+      </div>
     </>
-
-
   );
 }
 

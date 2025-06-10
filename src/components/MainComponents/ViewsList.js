@@ -1,61 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTable } from '@fortawesome/free-solid-svg-icons';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import { Typography } from '@mui/material';
-
-import CircularProgress from '@mui/material/CircularProgress';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ObjectPropValue from '../ObjectPropValue'
-import * as constants from '../Auth/configs'
-import FileExtIcon from '../FileExtIcon';
-import FileExtText from '../FileExtText';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Box } from '@mui/material';
 import OfficeApp from '../Modals/OfficeAppDialog';
 import LoadingDialog from '../Loaders/LoaderDialog';
-import BasicSimpleTreeView from '../Tree';
-
-
-import Box from '@mui/material/Box';
+import FileExtIcon from '../FileExtIcon';
+import FileExtText from '../FileExtText';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import LinkedObjectsTree from './LinkedObjectsTree';
+import * as constants from '../Auth/configs';
+import RightClickMenu from '../RightMenu';
+import TimedAlert from '../TimedAlert';
 
+function useSessionState(key, defaultValue) {
+    const getInitialValue = () => {
+        try {
+            const stored = sessionStorage.getItem(key);
+            if (stored === null || stored === 'undefined') return defaultValue;
+            return JSON.parse(stored);
+        } catch {
+            return defaultValue;
+        }
+    };
+    const [value, setValue] = useState(getInitialValue);
+    useEffect(() => {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        } catch { }
+    }, [key, value]);
+    return [value, setValue];
+}
 
+const MAX_TITLE_LENGTH = 30;
+const trimTitle = (title) => title.length > MAX_TITLE_LENGTH ? title.substring(0, MAX_TITLE_LENGTH) + '...' : title;
 
 const ViewsList = (props) => {
-
-    function useSessionState(key, defaultValue) {
-        const getInitialValue = () => {
-            try {
-                const stored = sessionStorage.getItem(key);
-                if (stored === null || stored === 'undefined') {
-                    return defaultValue;
-                }
-                return JSON.parse(stored);
-            } catch (e) {
-                console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
-                return defaultValue;
-            }
-        };
-
-        const [value, setValue] = useState(getInitialValue);
-
-        useEffect(() => {
-            try {
-                sessionStorage.setItem(key, JSON.stringify(value));
-            } catch (e) {
-                console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
-            }
-        }, [key, value]);
-
-        return [value, setValue];
-    }
-
+    // Session state
     const [otherviews, setOtherViews] = useSessionState('ss_otherviews', []);
     const [commonviews, setCommonViews] = useSessionState('ss_commonviews', []);
     const [selectedViewObjects, setSelectedViewObjects] = useSessionState('ss_selectedViewObjects', []);
@@ -69,266 +51,54 @@ const ViewsList = (props) => {
     const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
     const [loading, setLoading] = useSessionState('ss_loading', false);
 
-    // const [selectedItemId, setSelectedItemId] = useState(null);
+    // Local state
+    const [openAlert, setOpenAlert] = useState(false);
+    const [alertSeverity, setAlertSeverity] = useState("info");
+    const [alertMsg, setAlertMsg] = useState("");
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [menuAnchor, setMenuAnchor] = useState(null);
+    const [menuItem, setMenuItem] = useState(null);
 
 
+    // Memoized filtered views
+    const filteredOtherViews = useMemo(
+        () => otherviews.filter(view => view),
+        [otherviews]
+    );
+    const filteredCommonViews = useMemo(
+        () => commonviews.filter(view => view.userPermission?.readPermission),
+        [commonviews]
+    );
 
-    // const [otherviews, setOtherViews] = useState([]);
-    // const [commonviews, setCommonViews] = useState([]);
-    // const [selectedViewObjects, setSelectedViewObjects] = useState([]);
-    // const [selectedViewName, setSelectedViewName] = useState('');
-    // const [selectedViewCategory, setSelectedViewCategory] = useState([]);
-    // const [showOtherViewSublist, setshowOtherViewSublist] = useState(true);
-    // const [showCommonViewSublist, setshowCommonViewSublist] = useState(true);
-    // const [selectedIndex, setSelectedIndex] = useState(null);
-    // const [viewNavigation, setViewNavigation] = useState([]);
-    // const [openOfficeApp, setOpenOfficeApp] = useState(false);
-    // const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({});
-    // const [loading, setLoading] = useState(false);
-
-
-
-    const relatedObjects = props.linkedObjects.filter(item => item.objectID !== 0);
-    const relatedDocuments = props.linkedObjects.filter(item => item.objectID === 0);
-
-
-    const handleAccordionChange = (index) => (event, isExpanded) => {
-        setSelectedIndex(isExpanded ? index : null);
-    };
-
-
-    const backHome = () => {
-        setSelectedViewObjects([])
-        setSelectedViewName('')
-        setSelectedViewCategory('')
-    }
-
-
-    const toggleCommonViewSublist = () => {
-        setshowCommonViewSublist(!showCommonViewSublist);
-        setshowOtherViewSublist(showOtherViewSublist);
-    };
-
-
-    const toggleOtherViewSublist = () => {
-        setshowOtherViewSublist(!showOtherViewSublist);
-        setshowCommonViewSublist(showCommonViewSublist);
-    };
-
-    const fetchViewData = async (item) => {
-        // Add item to navigation if not already present
-        // console.log(item)
-        setLoading(true)
-
-        setViewNavigation(prevItems => {
-            const exists = prevItems.some(navItem => navItem.propId === item.propId);
-            const updatedItems = exists ? prevItems : [...prevItems, { ...item, type: item.type, title: item.title }];
-
-            // Process further within the updater function context
-            processNavigation(updatedItems);
-
-            return updatedItems;
-        });
-
-
-
-        const processNavigation = (updatedItems) => {
-            const newItem = {
-                "propId": `${item.propId}`,
-                "propDatatype": `${item.propDatatype}`
-            };
-
-
-            const itemList = updatedItems.filter(item => item.type && item.type === "MFFolderContentItemTypePropertyFolder");
-
-            // Transform the list to keep only propId and propDatatype
-            const transformedList = itemList.map(i => ({
-                "propId": i.propId,
-                "propDatatype": i.propDatatype
-            }));
-
-
-
-
-
-            // Function to check if the new item exists
-            function itemExists(list, item) {
-                return list.some(existingItem =>
-                    existingItem.propId === item.propId &&
-                    existingItem.propDatatype === item.propDatatype
-                );
-            }
-
-            // Add the new item if it doesn't exist
-            if (!itemExists(transformedList, newItem)) {
-                transformedList.push(newItem);
-            }
-
-            // Log the updated item list
-            // console.log({
-            //     viewId: item.viewId,
-            //     properties: transformedList,
-            //     vaultGuid: `${props.selectedVault.guid}`
-            // });
-
-            apiRequest(transformedList)
-
-        };
-
-
-        const apiRequest = async (newPropList) => {
-            // Pending testing added filterprops as a list 
-            try {
-                const response = await axios.post(
-                    `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
-                    {
-                        viewId: item.viewId,
-                        properties: newPropList,
-                        vaultGuid: `${props.selectedVault.guid}`
-                    },
-                    {
-                        headers: {
-                            accept: '*/*',
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
-                setLoading(false)
-
-
-                setSelectedViewObjects(response.data);
-
-                setSelectedViewName(item.title);
-
-            } catch (error) {
-                setLoading(false)
-                props.setAlertPopOpen(true);
-                props.setAlertPopSeverity("info");
-                props.setAlertPopMessage("Sorry, we couldn't find any objects!");
-                console.error('Error fetching view objects:', error);
-            }
-        }
-    }
-
-    const fetchMainViewObjects = async (item, viewType) => {
-        setLoading(true)
-        // Add item to navigation with view type
-        setViewNavigation(prevItems => {
-            const exists = prevItems.some(navItem => navItem.id === item.id);
-            if (!exists) {
-                return [...prevItems, {
-                    ...item,
-                    type: viewType,
-                    title: item.viewName
-                }];
-            }
-            return prevItems;
-        });
-
-        try {
-            const response = await axios.get(
-                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.mfilesId}`,
-                {
-                    headers: {
-                        accept: '*/*',
-                    }
-                }
-            );
-            setLoading(false)
-
-            setSelectedViewObjects(response.data);
-            setSelectedViewName(item.viewName);
-
-        } catch (error) {
-            setLoading(false)
-            props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("info");
-            props.setAlertPopMessage("Sorry, we couldn't find any objects!");
-            console.error('Error fetching view objects:', error);
-        }
-    }
-
-    const fetchMainViewObjects2 = async (item) => {
-        // Add item to navigation with ViewFolder type
-
-        setLoading(true)
-        setViewNavigation(prevItems => {
-            const exists = prevItems.some(navItem => navItem.id === item.id);
-            if (!exists) {
-                return [...prevItems, {
-                    ...item,
-                    type: 'MFFolderContentItemTypeViewFolder'
-                }];
-            }
-            return prevItems;
-        });
-
-        try {
-            const response = await axios.get(
-                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}`,
-                {
-                    headers: {
-                        accept: '*/*',
-                    }
-                }
-            );
-
-            setLoading(false)
-            setSelectedViewObjects(response.data);
-            setSelectedViewName(item.title);
-
-        } catch (error) {
-
-            setLoading(false)
-            props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("info");
-            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
-            console.error('Error fetching view objects:', error);
-        }
-    }
-
+    // Fetch views on mount or navigation change
     useEffect(() => {
         const savedOption = sessionStorage.getItem('selectedVault');
-
+        if (!savedOption) return;
         const fetchData = async () => {
             const guid = JSON.parse(savedOption).guid;
             try {
                 const response = await axios.get(
                     `${constants.mfiles_api}/api/Views/GetViews/${guid}/${props.mfilesId}`
                 );
-
-                // Sort the views alphabetically by their names before setting state
-                const sortedOtherViews = response.data.otherViews.sort((a, b) =>
-                    a.viewName.localeCompare(b.viewName)
-                );
-
-                const sortedCommonViews = response.data.commonViews.sort((a, b) =>
-                    a.viewName.localeCompare(b.viewName)
-                );
-
-                setOtherViews(sortedOtherViews);
-                setCommonViews(sortedCommonViews);
-                // console.log(sortedOtherViews)
-                // console.log(sortedCommonViews)
-            } catch (error) {
-                // console.error('Error fetching data:', error);
-            }
+                setOtherViews(response.data.otherViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
+                setCommonViews(response.data.commonViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
+            } catch { }
         };
-
         fetchData();
-    }, [viewNavigation, props.mfilesId]);
+    }, [viewNavigation, props.mfilesId, setOtherViews, setCommonViews]);
 
+    // Navigation and fetch logic
+    const backToViews = () => {
+        setSelectedViewObjects([]);
+        setViewNavigation([]);
+        setSelectedViewCategory([]);
+    };
 
     const handleViewNavClick = (item) => {
-        // Remove clicked item and all items after it from navigation
         const itemIndex = viewNavigation.findIndex(navItem => navItem.id === item.id);
         if (itemIndex !== -1) {
-            const updatedItems = viewNavigation.slice(0, itemIndex + 1);
-            setViewNavigation(updatedItems);
+            setViewNavigation(viewNavigation.slice(0, itemIndex + 1));
         }
-
-        // Handle navigation based on item type
         switch (item.type) {
             case 'Common Views':
             case 'Other Views':
@@ -341,7 +111,104 @@ const ViewsList = (props) => {
                 fetchViewData(item);
                 break;
             default:
-            // console.log('Unknown type');
+        }
+    };
+
+    const fetchMainViewObjects = async (item, viewType) => {
+        setLoading(true);
+        setViewNavigation(prevItems => {
+            const exists = prevItems.some(navItem => navItem.id === item.id);
+            if (!exists) {
+                return [...prevItems, { ...item, type: viewType, title: item.viewName }];
+            }
+            return prevItems;
+        });
+        try {
+            const response = await axios.get(
+                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.mfilesId}`,
+                { headers: { accept: '*/*' } }
+            );
+            setLoading(false);
+            setSelectedViewObjects(response.data);
+            setSelectedViewName(item.viewName);
+        } catch {
+            setLoading(false);
+            props.setAlertPopOpen(true);
+            props.setAlertPopSeverity("info");
+            props.setAlertPopMessage("Sorry, we couldn't find any objects!");
+        }
+    };
+
+    const fetchMainViewObjects2 = async (item) => {
+        setLoading(true);
+        setViewNavigation(prevItems => {
+            const exists = prevItems.some(navItem => navItem.id === item.id);
+            if (!exists) {
+                return [...prevItems, { ...item, type: 'MFFolderContentItemTypeViewFolder' }];
+            }
+            return prevItems;
+        });
+        try {
+            const response = await axios.get(
+                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}`,
+                { headers: { accept: '*/*' } }
+            );
+            setLoading(false);
+            setSelectedViewObjects(response.data);
+            setSelectedViewName(item.title);
+        } catch {
+            setLoading(false);
+            props.setAlertPopOpen(true);
+            props.setAlertPopSeverity("info");
+            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
+        }
+    };
+
+    const fetchViewData = async (item) => {
+        setLoading(true);
+        setViewNavigation(prevItems => {
+            const exists = prevItems.some(navItem => navItem.propId === item.propId);
+            const updatedItems = exists ? prevItems : [...prevItems, { ...item, type: item.type, title: item.title }];
+            processNavigation(updatedItems);
+            return updatedItems;
+        });
+
+        function processNavigation(updatedItems) {
+            const newItem = { propId: `${item.propId}`, propDatatype: `${item.propDatatype}` };
+            const itemList = updatedItems.filter(i => i.type === "MFFolderContentItemTypePropertyFolder");
+            const transformedList = itemList.map(i => ({
+                propId: i.propId,
+                propDatatype: i.propDatatype
+            }));
+            if (!transformedList.some(existingItem =>
+                existingItem.propId === newItem.propId &&
+                existingItem.propDatatype === newItem.propDatatype
+            )) {
+                transformedList.push(newItem);
+            }
+            apiRequest(transformedList);
+        }
+
+        async function apiRequest(newPropList) {
+            try {
+                const response = await axios.post(
+                    `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
+                    {
+                        viewId: item.viewId,
+                        properties: newPropList,
+                        vaultGuid: `${props.selectedVault.guid}`
+                    },
+                    { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+                );
+                setLoading(false);
+                setSelectedViewObjects(response.data);
+                setSelectedViewName(item.title);
+            } catch {
+                setLoading(false);
+                props.setAlertPopOpen(true);
+                props.setAlertPopSeverity("info");
+                props.setAlertPopMessage("Sorry, we couldn't find any objects!");
+            }
         }
     };
 
@@ -352,54 +219,21 @@ const ViewsList = (props) => {
                 const response = await axios.get(url);
                 const data = response.data;
                 const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-
-                if (extension === 'csv' || extension === 'xlsx' || extension === 'docx' || extension === 'txt') {
-                    const updatedItem = {
+                if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
+                    setObjectToEditOnOfficeApp({
                         ...item,
                         guid: props.selectedVault.guid,
-                        extension: extension,
+                        extension,
                         type: item.objectTypeId ?? item.objectID
-                    };
-
-                    setObjectToEditOnOfficeApp(updatedItem);
+                    });
                     setOpenOfficeApp(true);
                 }
-            } catch (error) {
-                console.error('Error fetching the extension:', error);
-
-            }
+            } catch { }
         };
-
         fetchExtension();
     }
 
-    const trimTitle = (title) => {
-        const maxLength = 30; // Set your desired max length
-        if (title.length > maxLength) {
-            return title.substring(0, maxLength) + '...';
-            // return title
-        }
-        return title;
-    };
-
-    const trimTitle2 = (title) => {
-        const maxLength = 50; // Updated to match the desired max length
-        if (title.length > maxLength) {
-            // return title.substring(0, maxLength) + '...';
-            return title
-        }
-        return title;
-    };
-
-
-    const backToViews = () => {
-        setSelectedViewObjects([])
-        setViewNavigation([])
-        setSelectedViewCategory([])
-    }
-
     const handleRowClick = (subItem) => {
-
         if (subItem.objectID === 0) {
             props.previewSublistObject(subItem, false);
         } else {
@@ -407,16 +241,59 @@ const ViewsList = (props) => {
         }
     };
 
-    const documents = props.linkedObjects.filter(item => item.objecttypeID === 0);
-    const otherObjects = props.linkedObjects.filter(item => item.objecttypeID !== 0);
+    // Right click menu
+    const handleRightClick = (event, item) => {
+        event.preventDefault();
+        setMenuAnchor(event.currentTarget);
+        setMenuItem(item);
+    };
+    const handleMenuClose = () => {
+        setMenuAnchor(null);
+        setMenuItem(null);
+    };
 
-    const filteredOtherViews = otherviews.filter(view => view.userPermission?.readPermission);
-    const filteredCommonViews = commonviews.filter(view => view.userPermission?.readPermission);
+    const rightClickActions = [
+        ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+            {
+                label: (
+                    <span>
+                        <i className="fa-brands fa-windows" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+                        Open with Office
+                    </span>
+                ),
+                onClick: (itm) => {
+                    openApp(itm);
+                    handleMenuClose();
+                }
+            }
+        ] : []),
+        ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+            {
+                label: (
+                    <span>
+                        <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+                        Delete
+                    </span>
+                ),
+                onClick: (itm) => {
+                    // deleteObject(itm); // Uncomment and implement if needed
+                    handleMenuClose();
+                }
+            }
+        ] : [])
+    ];
 
-
-
+    // --- UI ---
     return (
         <>
+            <TimedAlert
+                open={openAlert}
+                onClose={() => setOpenAlert(false)}
+                severity={alertSeverity}
+                message={alertMsg}
+                setSeverity={setAlertSeverity}
+                setMessage={setAlertMsg}
+            />
             <LoadingDialog opendialogloading={loading} />
             <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
             {selectedViewObjects.length > 0 ? (
@@ -430,7 +307,6 @@ const ViewsList = (props) => {
                             gap: '4px',
                         }}
                     >
-                        {/* Icon */}
                         <div className="d-flex align-items-center" style={{ minWidth: '24px' }}>
                             <FontAwesomeIcon
                                 icon={faTable}
@@ -438,12 +314,9 @@ const ViewsList = (props) => {
                                 className="mx-2"
                             />
                         </div>
-
-                        {/* Text + Navigation */}
                         <div className="d-flex align-items-center flex-wrap" style={{ gap: '6px', flex: 1 }}>
                             <span onClick={backToViews}>Back to views</span>
                             <i className="fas fa-chevron-right" style={{ color: '#2a68af' }} />
-
                             {viewNavigation.map((item, index) => (
                                 <React.Fragment key={index}>
                                     <Tooltip title={item.title}>
@@ -468,182 +341,147 @@ const ViewsList = (props) => {
                             ))}
                         </div>
                     </h6>
-
-
                     <div className='p-2 text-dark' style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
                                 {item.type === "MFFolderContentItemTypeObjectVersion" && (
-                                    // <Box sx={{ minHeight: 352, minWidth: 250 }}>
                                     <SimpleTreeView>
                                         <TreeItem
-                                            key={`tree-item-${item.id || index}`} // Unique key
-                                            itemId={`tree-item-${item.id || index}`} // Unique itemId
+                                            key={`tree-item-${item.id || index}`}
+                                            itemId={`tree-item-${item.id || index}`}
                                             onClick={() => {
-                                                props.setSelectedItemId(item.id); // update selected
+                                                props.setSelectedItemId(item.id);
                                                 item.objectTypeId === 0
                                                     ? props.previewSublistObject(item, true)
                                                     : props.previewObject(item, true)
-                                            }
-                                            }
-                                            className='my-1 '
-
-
+                                            }}
+                                            className='my-1'
                                             sx={{
                                                 marginLeft: '10px',
-                                                fontSize: "13px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                                fontSize: "13px",
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                                "& .MuiTypography-root": { fontSize: "13px !important" },
                                                 backgroundColor: '#fff !important',
-                                                "&:hover": {
-                                                    backgroundColor: '#fff !important', // Maintain white background on hover
-                                                },
-
-                                                borderRadius: "0px !important", // Remove border radius
-                                                "& .MuiTreeItem-content": {
-                                                    borderRadius: "0px !important", // Remove border radius from content area
-                                                },
-                                                "& .MuiTreeItem-content.Mui-selected": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
-
-                                                "& .MuiTreeItem-content.Mui-selected:hover": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
-
-
-
+                                                "&:hover": { backgroundColor: '#fff !important' },
+                                                borderRadius: "0px !important",
+                                                "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                                                "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                                "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                             }}
                                             label={
-                                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                                    {item.objectTypeId === 0 ? (
-                                                        <>
-                                                            <FileExtIcon
-                                                                fontSize={'15px'}
-                                                                guid={props.selectedVault.guid}
-                                                                objectId={item.id}
-                                                                classId={item.classId !== undefined ? item.classId : item.classID}
-                                                            />
-                                                        </>
-                                                    ) : (
-                                                        <i className="fa-solid fa-folder  " style={{ fontSize: '15px', color: '#2a68af', marginLeft: '8px' }}></i>
-                                                    )}
-                                                    <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 ? (
-                                                        <>
-                                                            <FileExtText
-                                                                guid={props.selectedVault.guid}
-                                                                objectId={item.id}
-                                                                classId={item.classId}
-                                                            />
-                                                        </>
-                                                    ) : null} </span>
+                                                <div
+                                                    onContextMenu={(e) => {
+                                                        e.preventDefault();
+                                                        handleRightClick(e, item);
 
-
-                                                </Box>
+                                                    }}
+                                                    style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                                                >
+                                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+                                                        {item.objectTypeId === 0 ? (
+                                                            <>
+                                                                <FileExtIcon
+                                                                    fontSize={'15px'}
+                                                                    guid={props.selectedVault.guid}
+                                                                    objectId={item.id}
+                                                                    classId={item.classId !== undefined ? item.classId : item.classID}
+                                                                />
+                                                            </>
+                                                        ) : (
+                                                            <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af', marginLeft: '8px' }}></i>
+                                                        )}
+                                                        <span style={{ marginLeft: '8px' }}>
+                                                            {item.title}
+                                                            {item.objectTypeId === 0 ? (
+                                                                <FileExtText
+                                                                    guid={props.selectedVault.guid}
+                                                                    objectId={item.id}
+                                                                    classId={item.classId}
+                                                                />
+                                                            ) : null}
+                                                        </span>
+                                                    </Box>
+                                                </div>
                                             }
                                         >
-
                                             <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId !== undefined ? item.objectTypeId : item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={props.setSelectedItemId} selectedItemId={props.selectedItemId} />
                                         </TreeItem>
                                     </SimpleTreeView>
-
-
                                 )}
                                 {item.type === "MFFolderContentItemTypePropertyFolder" && (
-
-
                                     <SimpleTreeView>
                                         <TreeItem
-                                            key={`${index}`} // Unique key
-                                            itemId={`${index}`} // Unique itemId
+                                            key={`${index}`}
+                                            itemId={`${index}`}
                                             onClick={() => fetchViewData(item)}
-
                                             sx={{
-                                                fontSize: "13px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                                fontSize: "13px",
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                                "& .MuiTypography-root": { fontSize: "13px !important" },
                                                 backgroundColor: '#fff !important',
-                                                "&:hover": {
-                                                    backgroundColor: '#fff !important', // Maintain white background on hover
-                                                },
-
-                                                borderRadius: "0px !important", // Remove border radius
-                                                "& .MuiTreeItem-content": {
-                                                    borderRadius: "0px !important", // Remove border radius from content area
-                                                },
-                                                "& .MuiTreeItem-content.Mui-selected": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
-
-                                                "& .MuiTreeItem-content.Mui-selected:hover": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
+                                                "&:hover": { backgroundColor: '#fff !important' },
+                                                borderRadius: "0px !important",
+                                                "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                                                "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                                "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                             }}
                                             label={
                                                 <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                                     <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }}></i>
                                                     <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
-
                                                 </Box>
                                             }
-                                        >
-                                        </TreeItem>
+                                        />
                                     </SimpleTreeView>
                                 )}
                                 {item.type === "MFFolderContentItemTypeViewFolder" && (
-
                                     <SimpleTreeView>
                                         <TreeItem
-                                            key={`${index}`} // Unique key
-                                            itemId={`${index}`} // Unique itemId
+                                            key={`${index}`}
+                                            itemId={`${index}`}
                                             onClick={() => fetchMainViewObjects2(item)}
                                             className='my-1'
-
                                             sx={{
-                                                fontSize: "13px", // Apply directly to TreeItem
-                                                "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                                "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                                fontSize: "13px",
+                                                "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                                "& .MuiTypography-root": { fontSize: "13px !important" },
                                                 backgroundColor: '#fff !important',
-                                                "&:hover": {
-                                                    backgroundColor: '#fff !important', // Maintain white background on hover
-                                                },
-
-                                                borderRadius: "0px !important", // Remove border radius
-                                                "& .MuiTreeItem-content": {
-                                                    borderRadius: "0px !important", // Remove border radius from content area
-                                                },
-                                                "& .MuiTreeItem-content.Mui-selected": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
-
-                                                "& .MuiTreeItem-content.Mui-selected:hover": {
-                                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                },
+                                                "&:hover": { backgroundColor: '#fff !important' },
+                                                borderRadius: "0px !important",
+                                                "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                                                "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                                "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                             }}
                                             label={
                                                 <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
                                                     <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
                                                     <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
-
                                                 </Box>
                                             }
-                                        >
-                                        </TreeItem>
+                                        />
                                     </SimpleTreeView>
                                 )}
                             </React.Fragment>
                         ))}
+                        {/* RightClickMenu rendered once, controlled by state */}
+                        {rightClickActions.length > 0 && (
+                            <RightClickMenu
+                                anchorEl={menuAnchor}
+                                open={Boolean(menuAnchor)}
+                                onClose={handleMenuClose}
+                                item={menuItem}
+                                actions={rightClickActions}
+                            />
+                        )}
+
                     </div>
                 </>
             ) : (
-                <span >
+                <span>
                     {filteredCommonViews.length > 0 && (
                         <div className='bg-white  my-1'>
                             <h6
-                                onClick={toggleCommonViewSublist}
+                                onClick={e => setshowCommonViewSublist(v => !v)}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
                                     fontSize: '13px',
@@ -652,48 +490,30 @@ const ViewsList = (props) => {
                                     display: 'flex'
                                 }}
                             >
-                                {/* List Icon and Text */}
                                 <span className="d-flex align-items-center">
                                     <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
                                     Common Views
                                 </span>
-
-                                {/* Count in Small Tag */}
                                 <small style={{ color: '#2a68af', fontSize: '13px' }}>({filteredCommonViews.length})</small>
                             </h6>
-
                             {showCommonViewSublist && (
                                 <div style={{ height: '27vh', overflowY: 'auto' }} className=' text-dark bg-white '>
                                     {filteredCommonViews.map((view, index) => (
-
-                                        <SimpleTreeView>
+                                        <SimpleTreeView key={index}>
                                             <TreeItem
-                                                key={`${index}`} // Unique key
-                                                itemId={`${index}`} // Unique itemId
+                                                itemId={`${index}`}
                                                 onClick={() => fetchMainViewObjects(view, "Common Views")}
                                                 className='my-1'
-
                                                 sx={{
-                                                    fontSize: "13px", // Apply directly to TreeItem
-                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                                    "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                                    fontSize: "13px",
+                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                                    "& .MuiTypography-root": { fontSize: "13px !important" },
                                                     backgroundColor: '#fff !important',
-                                                    "&:hover": {
-                                                        backgroundColor: '#fff !important', // Maintain white background on hover
-                                                    },
-
-                                                    borderRadius: "0px !important", // Remove border radius
-                                                    "& .MuiTreeItem-content": {
-                                                        borderRadius: "0px !important", // Remove border radius from content area
-                                                    },
-                                                    "& .MuiTreeItem-content.Mui-selected": {
-                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                    },
-
-                                                    "& .MuiTreeItem-content.Mui-selected:hover": {
-                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                    },
+                                                    "&:hover": { backgroundColor: '#fff !important' },
+                                                    borderRadius: "0px !important",
+                                                    "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                                                    "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                                    "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                                 }}
                                                 label={
                                                     <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === view.id ? '#fcf3c0' : 'inherit' }}>
@@ -701,18 +521,17 @@ const ViewsList = (props) => {
                                                         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>
                                                 }
-                                            >
-                                            </TreeItem>
+                                            />
                                         </SimpleTreeView>
                                     ))}
                                 </div>
                             )}
                         </div>
                     )}
-                    {otherviews.length > 0 && (
+                    {filteredOtherViews.length > 0 && (
                         <div className='bg-white  my-1'>
                             <h6
-                                onClick={toggleOtherViewSublist}
+                                onClick={e => setshowOtherViewSublist(v => !v)}
                                 className="p-2 text-dark d-flex align-items-center justify-content-between"
                                 style={{
                                     fontSize: '13px',
@@ -721,48 +540,30 @@ const ViewsList = (props) => {
                                     display: 'flex'
                                 }}
                             >
-                                {/* List Icon and Text */}
                                 <span className="d-flex align-items-center">
                                     <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
                                     Other Views
                                 </span>
-
-                                {/* Count in Small Tag */}
-                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({otherviews.length})</small>
+                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({filteredOtherViews.length})</small>
                             </h6>
-
                             {showOtherViewSublist && (
                                 <div style={{ height: '27vh', overflowY: 'auto' }} className=' text-dark bg-white '>
-                                    {otherviews.map((view, index) => (
-
-                                        <SimpleTreeView>
+                                    {filteredOtherViews.map((view, index) => (
+                                        <SimpleTreeView key={index}>
                                             <TreeItem
-                                                key={`${index}`} // Unique key
-                                                itemId={`${index}`} // Unique itemId
+                                                itemId={`${index}`}
                                                 onClick={() => fetchMainViewObjects(view, "Other Views")}
                                                 className='my-1'
-
                                                 sx={{
-                                                    fontSize: "13px", // Apply directly to TreeItem
-                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                                    "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                                    fontSize: "13px",
+                                                    "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                                    "& .MuiTypography-root": { fontSize: "13px !important" },
                                                     backgroundColor: '#fff !important',
-                                                    "&:hover": {
-                                                        backgroundColor: '#fff !important', // Maintain white background on hover
-                                                    },
-
-                                                    borderRadius: "0px !important", // Remove border radius
-                                                    "& .MuiTreeItem-content": {
-                                                        borderRadius: "0px !important", // Remove border radius from content area
-                                                    },
-                                                    "& .MuiTreeItem-content.Mui-selected": {
-                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                    },
-
-                                                    "& .MuiTreeItem-content.Mui-selected:hover": {
-                                                        backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                                    },
+                                                    "&:hover": { backgroundColor: '#fff !important' },
+                                                    borderRadius: "0px !important",
+                                                    "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                                                    "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                                    "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                                 }}
                                                 label={
                                                     <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === view.id ? '#fcf3c0' : 'inherit' }}>
@@ -770,8 +571,7 @@ const ViewsList = (props) => {
                                                         <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
                                                     </Box>
                                                 }
-                                            >
-                                            </TreeItem>
+                                            />
                                         </SimpleTreeView>
                                     ))}
                                 </div>
@@ -781,7 +581,6 @@ const ViewsList = (props) => {
                 </span>
             )}
         </>
-
     );
 };
 

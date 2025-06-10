@@ -232,43 +232,43 @@ const ObjectStructureList = (props) => {
         setFormErrors(newFormErrors);
     };
 
-function blobToBase64WithExtension(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+    function blobToBase64WithExtension(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
 
-        reader.onloadend = () => {
-            const base64Data = reader.result.split(',')[1]; // base64 content
-            let extension = '';
+            reader.onloadend = () => {
+                const base64Data = reader.result.split(',')[1]; // base64 content
+                let extension = '';
 
-            // If the blob has a name (like a File object), extract extension from it
-            if (blob.name && typeof blob.name === 'string') {
-                const parts = blob.name.split('.');
-                if (parts.length > 1) {
-                    extension = parts.pop().toLowerCase();
-                }
-            } else {
-                // Fallback to MIME type if no name is available
-                const mimeType = blob.type;
-                if (mimeType === 'application/pdf') {
-                    extension = 'pdf';
-                } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                    extension = 'docx';
-                } else if (mimeType === 'image/png') {
-                    extension = 'png';
-                } else if (mimeType === 'image/jpeg') {
-                    extension = 'jpg';
+                // If the blob has a name (like a File object), extract extension from it
+                if (blob.name && typeof blob.name === 'string') {
+                    const parts = blob.name.split('.');
+                    if (parts.length > 1) {
+                        extension = parts.pop().toLowerCase();
+                    }
                 } else {
-                    extension = ''; // unknown or unsupported
+                    // Fallback to MIME type if no name is available
+                    const mimeType = blob.type;
+                    if (mimeType === 'application/pdf') {
+                        extension = 'pdf';
+                    } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                        extension = 'docx';
+                    } else if (mimeType === 'image/png') {
+                        extension = 'png';
+                    } else if (mimeType === 'image/jpeg') {
+                        extension = 'jpg';
+                    } else {
+                        extension = ''; // unknown or unsupported
+                    }
                 }
-            }
 
-            resolve({ base64: base64Data, extension });
-        };
+                resolve({ base64: base64Data, extension });
+            };
 
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
 
 
 
@@ -279,7 +279,7 @@ function blobToBase64WithExtension(blob) {
         setUploadedFile(file);
         const { base64, extension } = await blobToBase64WithExtension(file);
         setBase64Content(base64);
-     
+
         setFileExt(extension)
     };
 
@@ -761,7 +761,7 @@ function blobToBase64WithExtension(blob) {
 
 
 
-                <Dialog open={props.isFormOpen} onClose={closeFormDialog} fullScreen>
+                <Dialog open={props.isFormOpen} onClose={closeFormDialog} maxWidth='xl' >
                     <DialogTitle
                         className='p-2 d-flex justify-content-between align-items-center'
                         style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -778,14 +778,14 @@ function blobToBase64WithExtension(blob) {
 
 
                     <DialogContent
-                        className="form-group my-4"
+                        className="form-group my-3"
                         sx={{ overflow: 'auto' }}
                     >
                         {(props.selectedObjectId === 0 && !props.templateIsTrue) ?
                             <Grid container spacing={3}>
                                 {/* List Section */}
-                                <Grid item xs={12} md={5} order={{ xs: 1, md: 2 }} >
-
+                                <Grid item xs={12} md={7} order={{ xs: 1, md: 2 }} sx={{ width: '250px' }} >
+                          
                                     <List sx={{ p: 0 }}>
                                         <Box
                                             sx={{
@@ -1027,34 +1027,38 @@ function blobToBase64WithExtension(blob) {
                                     </List>
 
                                 </Grid>
-
                                 {/* File Upload Section */}
-                                <Grid item xs={12} md={7} order={{ xs: 2, md: 2 }} >
+                                <Grid item xs={12} md={5} order={{ xs: 2, md: 2 }} sx={{ width: '700px' }}>
                                     <div className='container'>
                                         {(props.selectedObjectId === 0 && !props.templateIsTrue) && (
                                             <>
-                                                {uploadedFile ?
+                                                {/* {uploadedFile ?
                                                     <>
                                                         <DynamicFileViewer base64Content={base64Content} fileExtension={fileExt} setUploadedFile={setUploadedFile} />
 
 
                                                     </>
-                                                    : <>     <FileUploadComponent
-                                                        handleFileChange={handleFileChange}
-                                                        uploadedFile={uploadedFile}
-                                                    />
+                                                    : <> */}
+                                                        <FileUploadComponent
+                                                            handleFileChange={handleFileChange}
+                                                            uploadedFile={uploadedFile}
+                                                        />
                                                         {fileUploadError && (
                                                             <div style={{ color: '#CC3333', fontSize: '13px' }}>
                                                                 {fileUploadError}
                                                             </div>
-                                                        )}</>
-                                                }
+                                                        )}
+                                                    {/* </>
+                                                } */}
 
 
                                             </>
                                         )}
                                     </div>
                                 </Grid>
+
+
+
                             </Grid>
                             : <>
                                 <Grid

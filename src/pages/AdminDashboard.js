@@ -124,6 +124,12 @@ function AdminDashboard() {
     const [isDragging, setIsDragging] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+
+    // Add a constant for your standard font family and size
+    const STANDARD_FONT_FAMILY = "'Segoe UI', 'Roboto', 'Arial', sans-serif";
+    const STANDARD_FONT_SIZE = '13px';
+
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -726,10 +732,10 @@ function AdminDashboard() {
             <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid} open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
             <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
-            <div className="dashboard">
+            <div className="dashboard"  style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
                 {/* Sidebar */}
                 <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} `}>
-                    <div className="sidebar-content" style={{minWidth:'200px'}}>
+                    <div className="sidebar-content" style={{ minWidth: '200px', fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
                         {sidebarOpen && (
                             <>
                                 <div className='bg-white shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -786,7 +792,7 @@ function AdminDashboard() {
                                         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
                                             <span style={{ fontSize: "14px" }}>{user.first_name} {user.last_name}</span>
                                         </div>
-                                       
+
                                     </li>
 
                                     <li

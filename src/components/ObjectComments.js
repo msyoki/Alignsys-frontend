@@ -154,11 +154,11 @@ const CommentsComponent = (props) => {
               }}
             >
               <i className="fas fa-comment-alt" style={{ fontSize: '120px' }} />
-              <Typography variant="body2" className="my-2">
+              <Typography variant="body2" className="my-2" sx={{color: 'black'}}>
                 {props.loadingcomments ? 'Searching comments...' : 'Comments'}
               </Typography>
               {!props.loadingcomments && (
-                <Typography variant="body2" sx={{ fontSize: '13px' }}>
+                <Typography variant="body2" sx={{ fontSize: '13px', color: 'black' }}>
                   Please select an object to preview comments
                 </Typography>
               )}

@@ -103,12 +103,40 @@ function Bot(props) {
             </Box>
 
 
+            <Box sx={{ backgroundColor: '#fff', p: 2 }}>
+                <form onSubmit={handleChatSubmit}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <textarea
+                            id="chat-input"
+                            className="form-control"
+                            placeholder="Prompt document..."
+                            rows="2"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+
+                            required
+
+                            style={{ resize: 'vertical', width: '100%' }}
+                        />
+                        <Box textAlign="right">
+                            <button
+                                type="submit"
+                                className="btn text-white btn-sm rounded-pill"
+
+                                style={{ backgroundColor: '#6a994e', height: '38px' }}
+                            >
+                                <small className="mx-2"> Submit Prompt</small>
+                            </button>
+                        </Box>
+                    </Box>
+                </form>
+            </Box>
 
 
             <div
                 className=' p-2'
                 style={{
-                    height: '70vh',
+                    height: '50vh',
                     overflowY: 'auto',
                     scrollbarColor: '#1d3557',
                     scrollBehavior: 'smooth',
@@ -116,42 +144,7 @@ function Bot(props) {
                 }}
             >
 
-                <Box
-                    className="p-2 bg-white"
-                    sx={{
-                        width: '100%',
 
-
-                    }}
-                >
-                    <form onSubmit={handleChatSubmit} >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <textarea
-                                id="chat-input"
-                                className="form-control "
-                                placeholder="Prompt document..."
-                                value={inputValue}
-                                autoComplete="off"
-                                onChange={(e) => setInputValue(e.target.value)}
-                                style={{ flex: 5 }}
-
-
-                                rows="2"
-
-
-
-
-
-
-                            />
-
-                            <button style={{ backgroundColor: '#6a994e' }} type="submit" className='btn btn-md text-white mx-2 rounded-pill'>
-                                {/* <i className="fas fa-search mx-1" style={{ fontSize: '15px' }}></i> */}
-                                <small className='mx-2'>Submit Prompt</small>
-                            </button>
-                        </Box>
-                    </form>
-                </Box>
 
                 {messages.map((message) => (
                     <div key={message.id} className={`chat-msg ${message.type}`}>

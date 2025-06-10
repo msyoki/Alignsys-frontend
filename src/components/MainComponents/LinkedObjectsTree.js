@@ -2,42 +2,112 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { Box } from "@mui/material";
-import FileExtIcon from "../FileExtIcon"; // Import your file icon component
-import FileExtText from "../FileExtText"; // Import your file text component
+import FileExtIcon from "../FileExtIcon";
+import FileExtText from "../FileExtText";
 import * as constants from '../Auth/configs'
+import RightClickMenu from "../RightMenu";
+import OfficeApp from "../Modals/OfficeAppDialog";
 
-const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowClick,setSelectedItemId,selectedItemId }) => {
+function useSessionState(key, defaultValue) {
+  const getInitialValue = () => {
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (stored === null || stored === 'undefined') return defaultValue;
+      return JSON.parse(stored);
+    } catch {
+      return defaultValue;
+    }
+  };
+  const [value, setValue] = useState(getInitialValue);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch { }
+  }, [key, value]);
+  return [value, setValue];
+}
+
+const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowClick, setSelectedItemId, selectedItemId }) => {
   const [linkedObjects, setLinkedObjects] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
+  const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
 
-  // Fetch linked objects when component mounts
-  useEffect(() => {
-    const fetchLinkedObjects = async () => {
-      setLoading(true);
-      try {
 
-        const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${mfilesId}`
-        // console.log(url)
-        const response = await axios.get(url);
-        setLinkedObjects(response.data || []);
-        console.log(response.data)
-      } catch (error) {
-        console.error("Error fetching linked objects:", error);
-        setLinkedObjects([]);
-      }
-      setLoading(false);
-    };
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState("info");
+  const [alertMsg, setAlertMsg] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-    fetchLinkedObjects();
-  }, [id, objectType, selectedVault.guid]);
+  // Right-click menu state
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuItem, setMenuItem] = useState(null);
 
+  const handleRightClick = (event, item) => {
+    event.preventDefault();
+    setMenuAnchor(event.currentTarget);
+    setMenuItem(item);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setMenuItem(null);
+  };
+
+useEffect(() => {
+  fetchLinkedObjects();
+}, [id, objectType, selectedVault.guid]);
+
+const fetchLinkedObjects = async () => {
+  setLoading(true);
+  try {
+    const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${mfilesId}`
+    const response = await axios.get(url);
+    setLinkedObjects(response.data || []);
+  } catch (error) {
+    setLinkedObjects([]);
+  }
+  setLoading(false);
+};
+
+const deleteObject = (item) => {
+  let data = JSON.stringify({
+    "vaultGuid": selectedVault.guid,
+    "objectId": item.id,
+    "classId": item.classID || item.classId,
+    "userID": mfilesId
+  });
+
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: `${constants.mfiles_api}/api/ObjectDeletion/DeleteObject`,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+
+  axios.request(config)
+    .then((response) => {
+      setOpenAlert(true);
+      setAlertSeverity("success");
+      setAlertMsg("Object was deleted successsfully");
+      setDeleteDialogOpen(false);
+      fetchLinkedObjects(); // <-- Reload the component data after delete
+    })
+    .catch((error) => {
+      setOpenAlert(true);
+      setAlertSeverity("error");
+      setAlertMsg("Failed to delete, please try again later");
+      setDeleteDialogOpen(false);
+    });
+}
 
   function mergeObjects(objects) {
     const mergedMap = new Map();
-
     objects.forEach(obj => {
-      const key = `${obj.objecttypeID}-${obj.propertyName}`; // Unique key for grouping
-
+      const key = `${obj.objecttypeID}-${obj.propertyName}`;
       if (!mergedMap.has(key)) {
         mergedMap.set(key, {
           objecttypeID: obj.objecttypeID,
@@ -46,63 +116,99 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
           items: []
         });
       }
-
-      mergedMap.get(key).items.push(...obj.items); // Append items to existing list
+      mergedMap.get(key).items.push(...obj.items);
     });
-
     return Array.from(mergedMap.values());
   }
-  // Filter "Other Objects" (objectTypeID !== 0)
+
   const otherObjects = mergeObjects(linkedObjects.filter((item) => item.objecttypeID !== 0));
-  // Filter "Documents" (objectTypeID === 0)
   const documents = linkedObjects.filter((item) => item.objecttypeID === 0);
+
+
+
+
+  function openApp(item) {
+    // console.log(item)
+    const fetchExtension = async () => {
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+
+      try {
+        const response = await axios.get(url);
+        const data = response.data;
+        const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
+          setObjectToEditOnOfficeApp({
+            ...item,
+            guid: selectedVault.guid,
+            extension,
+            type: item.objectTypeId ?? item.objectID
+          });
+          setOpenOfficeApp(true);
+        }
+      } catch { }
+    };
+    fetchExtension();
+  }
+
+  const rightClickActions = [
+    ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+      {
+        label: (
+          <span>
+            <i className="fa-brands fa-windows" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+            Open with Office
+          </span>
+        ),
+        onClick: (itm) => {
+          openApp(itm);
+          handleMenuClose();
+        }
+      }
+    ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+      {
+        label: (
+          <span>
+            <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+            Delete
+          </span>
+        ),
+        onClick: (itm) => {
+          deleteObject(itm);
+          handleMenuClose();
+        }
+      }
+    ] : [])
+  ];
 
   return (
     <>
+      <OfficeApp open={openOfficeApp} close={() => setOpenOfficeApp(false)} object={objectToEditOnOffice} />
       {loading ? (
         <TreeItem className="text-muted" sx={{
-
           backgroundColor: '#fff',
-          // backgroundColor: '#e5e5e5',
           padding: '3px',
           color: '#555 !impoetant',
           borderBottom: '1px solid #dedddd',
-          fontSize: "12px", // Apply directly to TreeItem
-          "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-          "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
+          fontSize: "12px",
+          "& .MuiTreeItem-label": { fontSize: "13px !important" },
+          "& .MuiTypography-root": { fontSize: "13px !important" },
         }} itemId="loading" label="Loading..." />
-
       ) : linkedObjects.length > 0 ? (
         <>
           {/* Render Other Objects */}
           {otherObjects.length > 0 &&
             otherObjects.map((obj, index) => (
               <TreeItem
-
-                sx={
-                  {
-                    marginLeft: '13px',
-                    backgroundColor: '#fff',
-
-                    "&:hover": {
-                      backgroundColor: "#fff !important", // Maintain white background on hover
-                    },
-                    "& .MuiTreeItem-content:hover": {
-                      backgroundColor: "#fff !important", // Remove hover effect from the content area
-                    },
-                    "& .MuiTreeItem-content.Mui-selected": {
-                      backgroundColor: "#fff !important", // Keep white after selection
-                    },
-                    // "& .MuiTreeItem-content.Mui-selected:hover": {
-                    //   backgroundColor: "#fff !important", // Keep white even when selected and hovered
-                    // },
-                    borderRadius: "0px !important", // Remove border radius
-                    "& .MuiTreeItem-content": {
-                      borderRadius: "0px !important", // Remove border radius from content area
-                    },
-
-                  }
-                }
+                sx={{
+                  marginLeft: '13px',
+                  backgroundColor: '#fff',
+                  "&:hover": { backgroundColor: "#fff !important" },
+                  "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
+                  "& .MuiTreeItem-content.Mui-selected": { backgroundColor: "#fff !important" },
+                  borderRadius: "0px !important",
+                  "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+                }}
                 key={`grid-object-${index}`}
                 itemId={`grid-object-${index}`}
                 label={
@@ -111,46 +217,48 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                     alignItems="center"
                     sx={{
                       backgroundColor: '#fff',
-                      // backgroundColor: '#e5e5e5',
                       padding: '3px',
                       borderBottom: '1px solid #dedddd'
                     }}
                   >
-                    <i style={{ fontSize: '15px' , color:'#8d99ae'}} className="fa-solid fa-layer-group mx-2"></i>
-                    {obj.propertyName}
+                    <i style={{ fontSize: '15px', color: '#8d99ae' }} className="fa-solid fa-folder-tree mx-2"></i>
+                    {obj.propertyName.includes('(s)') ? obj.propertyName : `${obj.propertyName}(s)`}
                   </Box>
                 }
               >
                 {obj.items?.map((subItem) => (
-                  <TreeItem  
-                    onClick={() => {setSelectedItemId(subItem.id); handleRowClick(subItem)}}
-
+                  <TreeItem
+                    onClick={() => { setSelectedItemId(subItem.id); handleRowClick(subItem) }}
                     key={`grid-object-sub-${obj.propertyName}-${subItem.id}`}
                     itemId={`grid-object-sub-${obj.propertyName}-${subItem.id}`}
                     label={
-                      <Box display="flex" alignItems="center" sx={{padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
-                        {subItem.objectID === 0 ? (
-                          <FileExtIcon
-                            fontSize={'15px'}
-                            guid={selectedVault.guid}
-                            objectId={subItem.id}
-                            classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
-                          />
-                        ) : (
-                          <i
-                            className="fas fa-folder mx-2"
-                            style={{ fontSize: "15px", color: "#2a68af" }}
-                          ></i>
-                        )}
-                        <span style={{ fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
-                          <FileExtText
-                            guid={selectedVault.guid}
-                            objectId={subItem.id}
-                            classId={subItem.classID}
-                          />
-                        )}</span>
-                       
-                      </Box>
+                      <div
+                        onContextMenu={e => handleRightClick(e, subItem)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                      >
+                        <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
+                          {subItem.objectID === 0 ? (
+                            <FileExtIcon
+                              fontSize={'15px'}
+                              guid={selectedVault.guid}
+                              objectId={subItem.id}
+                              classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
+                            />
+                          ) : (
+                            <i
+                              className="fas fa-folder mx-2"
+                              style={{ fontSize: "15px", color: "#2a68af" }}
+                            ></i>
+                          )}
+                          <span style={{ fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
+                            <FileExtText
+                              guid={selectedVault.guid}
+                              objectId={subItem.id}
+                              classId={subItem.classID}
+                            />
+                          )}</span>
+                        </Box>
+                      </div>
                     }
                   />
                 ))}
@@ -160,101 +268,92 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
           {/* Render Documents */}
           {documents.length > 0 && (
             <TreeItem
-              sx={
-                {
-                  marginLeft: '13px',
-                  backgroundColor: '#fff',
-
-                  "&:hover": {
-                    backgroundColor: "#fff !important", // Maintain white background on hover
-                  },
-                  "& .MuiTreeItem-content:hover": {
-                    backgroundColor: "#fff !important", // Remove hover effect from the content area
-                  },
-                  "& .MuiTreeItem-content.Mui-selected": {
-                    backgroundColor: "#fff !important", // Keep white after selection
-                  },
-                  "& .MuiTreeItem-content.Mui-selected:hover": {
-                    backgroundColor: "#fff !important", // Keep white even when selected and hovered
-                  },
-                  borderRadius: "0px !important", // Remove border radius
-                  "& .MuiTreeItem-content": {
-                    borderRadius: "0px !important", // Remove border radius from content area
-                  },
-
-                }
-              }
+              sx={{
+                marginLeft: '13px',
+                backgroundColor: '#fff',
+                "&:hover": { backgroundColor: "#fff !important" },
+                "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
+                "& .MuiTreeItem-content.Mui-selected": { backgroundColor: "#fff !important" },
+                "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: "#fff !important" },
+                borderRadius: "0px !important",
+                "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+              }}
               key="grid-document"
               itemId="grid-document"
               label={
                 <Box display="flex" alignItems="center" sx={{
                   backgroundColor: '#fff',
-                  // backgroundColor: '#e5e5e5',
                   padding: '3px',
-                  borderBottom: '1px solid #dedddd', padding: '3px'
+                  borderBottom: '1px solid #dedddd'
                 }}>
-                  <i style={{ fontSize: '15px',color:'#8d99ae' }} class="fa-solid fa-copy mx-2 "></i> Document(s)
+                  <i style={{ fontSize: '15px', color: '#8d99ae' }} className="fa fa-book mx-2 "></i> Document(s)
                 </Box>}
             >
               {documents.map((doc) =>
                 doc.items?.map((subItem, index) => (
                   <TreeItem
-
-                    onClick={() => {setSelectedItemId(subItem.id);handleRowClick(subItem)}}
+                    onClick={() => { setSelectedItemId(subItem.id); handleRowClick(subItem) }}
                     key={`grid-document-sub-${index}-${subItem.id}`}
                     itemId={`grid-document-sub-${index}-${subItem.id}`}
                     label={
-                      <Box display="flex" alignItems="center" sx={{padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
-                        {subItem.objectID === 0 ? (
-
-
-                          <FileExtIcon
-                            fontSize={'15px'}
-                            guid={selectedVault.guid}
-                            objectId={subItem.id}
-                            classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
-                          />
-                        ) : (
-                          <i
-                            className="fas fa-folder mx-1"
-                            style={{ fontSize: "15px", color: "#fff" }}
-                          ></i>
-                        )}
-                        <span style={{ marginLeft: '8px', fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
-                          <FileExtText
-                            guid={selectedVault.guid}
-                            objectId={subItem.id}
-                            classId={subItem.classID}
-                          />
-                        )}</span>
-
-                      </Box>
+                      <div
+                        onContextMenu={e => handleRightClick(e, subItem)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                      >
+                        <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
+                          {subItem.objectID === 0 ? (
+                            <FileExtIcon
+                              fontSize={'15px'}
+                              guid={selectedVault.guid}
+                              objectId={subItem.id}
+                              classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
+                            />
+                          ) : (
+                            <i
+                              className="fas fa-folder mx-1"
+                              style={{ fontSize: "15px", color: "#fff" }}
+                            ></i>
+                          )}
+                          <span style={{ marginLeft: '8px', fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
+                            <FileExtText
+                              guid={selectedVault.guid}
+                              objectId={subItem.id}
+                              classId={subItem.classID}
+                            />
+                          )}</span>
+                        </Box>
+                      </div>
                     }
                   />
                 ))
               )}
             </TreeItem>
           )}
+          {/* RightClickMenu rendered once, controlled by state */}
+          {rightClickActions.length > 0 && (
+            <RightClickMenu
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={handleMenuClose}
+              item={menuItem}
+              actions={rightClickActions}
+            />
+          )}
         </>
       ) : (
         <TreeItem
           sx={{
-
             backgroundColor: '#fff',
-            // backgroundColor: '#e5e5e5',
-            
             padding: '3px',
             borderBottom: '1px solid #dedddd',
-            fontSize: "12px", // Apply directly to TreeItem
-            "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-            "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
+            fontSize: "12px",
+            "& .MuiTreeItem-label": { fontSize: "13px !important" },
+            "& .MuiTypography-root": { fontSize: "13px !important" },
           }}
           itemId="no-relationships"
           label="No relationships found"
           className="text-muted"
         />
-
-
       )}
     </>
   );

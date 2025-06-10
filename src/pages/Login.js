@@ -143,7 +143,7 @@ const Login = () => {
             <p className="mt-3" style={{ fontSize: '13px' }}>
               Go to{' '}
               <a
-                href="https://edms.alignsys.tech"
+                href="https://dss.alignsys.tech"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#1C4690', textDecoration: 'none' }}

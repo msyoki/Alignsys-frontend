@@ -342,7 +342,7 @@ const PDFViewerPreview = (props) => {
                 <div className="d-flex align-items-center flex-wrap gap-2">
 
                     {/* Toggle Sidebar Button */}
-                    <span className="d-flex align-items-center cursor-pointer" onClick={toggleAside}>
+                    {/* <span className="d-flex align-items-center cursor-pointer" onClick={toggleAside}>
                         <Tooltip title={isAsideOpen ? "Close thumbnail view" : "Open thumbnail view"}>
                             <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
                             <span className="text-muted ms-1" style={{ fontSize: '13px', cursor: 'pointer' }}>
@@ -350,7 +350,7 @@ const PDFViewerPreview = (props) => {
                             </span>
                         </Tooltip>
 
-                    </span>
+                    </span> */}
 
                     {/* Page Navigation */}
                     <span className="d-flex align-items-center text-dark" style={{ fontSize: '13px' }}>
@@ -390,7 +390,7 @@ const PDFViewerPreview = (props) => {
             </div>
 
             <div className="pdf-viewer-container">
-
+{/* 
                 {isAsideOpen && (
                     <aside className={`pdf-thumbnail-panel ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
                         <Document className="pdf-container" file={props.document}>
@@ -413,7 +413,7 @@ const PDFViewerPreview = (props) => {
                             ))}
                         </Document>
                     </aside>
-                )}
+                )} */}
 
                 <main className="pdf-main-viewer scrollbar-custom" ref={mainContainerRef}>
                     <Document

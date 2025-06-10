@@ -1,18 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Loader from '../Loaders/LoaderMini';
 import { Avatar, Button } from '@mui/material';
 import { Typography } from '@mui/material';
 
 import Box from '@mui/material/Box';
-
-import FileUpdateModal from '../UpdateFile';
-
-import { Spinner } from '@chakra-ui/react'
-import TransitionAlerts from '../Alert';
 import ObjectData from './ObjectData';
-import NetworkIcon from '../NetworkStatus';
-
+import RightClickMenu from '../RightMenu';
 
 import ViewsList from './ViewsList';
 import VaultSelectForm from '../SelectVault';
@@ -35,9 +29,6 @@ import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import LinkedObjectsTree from './LinkedObjectsTree';
 import AddButtonWithMenu from '../AddButtonWithMenu';
 
-
-
-const baseurldata = constants.mfiles_api
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -72,43 +63,6 @@ function a11yProps(index) {
 
 
 const DocumentList = (props) => {
-  // const [value, setValue] = useState(0);
-
-  // const [loading, setLoading] = useState(false)
-  // let [requisitionProps, setRequisitionProps] = useState({})
-  // let [docProps, setDocProps] = useState({})
-  // let [selectedObject, setSelectedObject] = useState({})
-  // let [selectedFile, setSelectedFile] = useState({});
-  // let [loadingobjects, setLoadingObjects] = useState(false)
-  // let [selectedFileId, setSelectedFileId] = useState(null)
-
-  // const [openAlert, setOpenAlert] = useState(false);
-  // const [alertSeverity, setAlertSeverity] = useState('');
-  // const [alertMsg, setAlertMsg] = useState('');
-  // const [loadingPreviewObject, setLoadingPreviewObject] = useState(false)
-  // const [pageNumber, setPageNumber] = useState(1);
-  // const [linkedObjects, setLinkedObjects] = useState([])
-  // const [tabIndex, setTabIndex] = useState(0);
-
-  // const [previewObjectProps, setPreviewObjectProps] = useState([])
-  // const [formValues, setFormValues] = useState({});
-  // const [selectedIndex, setSelectedIndex] = useState(null);
-  // const [base64, setBase64] = useState('')
-  // const [extension, setExtension] = useState('')
-  // const [loadingfile, setLoadingFile] = useState(false)
-  // const [loadingobject, setLoadingObject] = useState(false)
-  // const [dialogOpen, setDialogOpen] = useState(false);
-  // const [uptatingObject, setUpdatingObject] = useState(false)
-  // const [selectedObkjWf, setSelectedObjWf] = useState({})
-  // const [currentState, setCurrentState] = useState({})
-  // const [selectedState, setSelectedState] = useState({});
-  // const [comments, setComments] = useState([]);
-  // const [loadingcomments, setLoadingComments] = useState(false);
-  // const [openOfficeApp, setOpenOfficeApp] = useState(false)
-  // const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useState({})
-  // const [loadingClick, setLoadingClick] = useState(false);
-  // const [searched, setSearched] = useState(false)
-
 
   function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -140,11 +94,9 @@ const DocumentList = (props) => {
   const [value, setValue] = useSessionState('ss_value', 0);
 
   const [loading, setLoading] = useState(false);
-  let [requisitionProps, setRequisitionProps] = useSessionState('ss_requisitionProps', {});
-  let [docProps, setDocProps] = useSessionState('ss_docProps', {});
+
   let [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
-  // let [selectedObject, setSelectedObject] = useState({});
-  let [selectedFile, setSelectedFile] = useSessionState('ss_selectedFile', {});
+
   let [loadingobjects, setLoadingObjects] = useState(false);
   let [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
 
@@ -152,13 +104,10 @@ const DocumentList = (props) => {
   const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
   const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
   const [loadingPreviewObject, setLoadingPreviewObject] = useState(false);
-  const [pageNumber, setPageNumber] = useSessionState('ss_pageNumber', 1);
-  const [linkedObjects, setLinkedObjects] = useSessionState('ss_linkedObjects', []);
-  const [tabIndex, setTabIndex] = useSessionState('ss_tabIndex', 0);
+  ;
 
   const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
   const [formValues, setFormValues] = useSessionState('ss_formValues', {});
-  const [selectedIndex, setSelectedIndex] = useSessionState('ss_selectedIndex', null);
   const [base64, setBase64] = useSessionState('ss_base64', '');
   const [extension, setExtension] = useSessionState('ss_extension', '');
   const [loadingfile, setLoadingFile] = useState(false);
@@ -182,7 +131,33 @@ const DocumentList = (props) => {
   const [checkedItems, setCheckedItems] = useState({});
   const [loadingWFS, setLoadingWFS] = useState(false);
 
+  const col1Ref = useRef(null);
+  const col2Ref = useRef(null);
+  const dividerRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuItem, setMenuItem] = useState(null);
+
+  // Handler for right-click
+  const handleRightClick = (event, item) => {
+    event.preventDefault();
+    setMenuAnchor(event.currentTarget);
+    setMenuItem(item);
+  };
+
+  // Handler to close menu
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setMenuItem(null);
+  };
+
+
   const [selectedItemId, setSelectedItemId] = useState(null);
+
+  let clickTimeout = null;
 
 
 
@@ -201,22 +176,10 @@ const DocumentList = (props) => {
       .catch(error => {
         console.error('Error:', error);
       });
-    // console.log(props.vault)
-    // console.log(props.selectedObject)
-    // console.log(item)
-    // console.log(i)
+
   }
 
-
-
-
-
-
-
-
   const handleCloseDialog = () => setDialogOpen(false);
-
-
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -376,9 +339,6 @@ const DocumentList = (props) => {
     }
   };
 
-
-
-
   const updateObjectMetadata = async () => {
     const hasFormValues = Object.keys(formValues || {}).length > 0;
     const hasSelectedState = Boolean(selectedState?.title);
@@ -428,45 +388,6 @@ const DocumentList = (props) => {
 
 
 
-  const handleAccordionChange = (index) => (event, isExpanded) => {
-    setSelectedIndex(isExpanded ? index : null);
-  };
-
-  let [fileUrl, setFileUrl] = useState('')
-
-
-  const switchToTab = (index) => {
-    setTabIndex(index);
-  };
-
-
-
-
-  const getLinkedObjects = async (id, objectType) => {
-    setLinkedObjects([])
-    setLoadingObjects(true)
-
-    try {
-      let url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${props.selectedVault.guid}/${objectType}/${id}/${props.mfilesId}`
-
-      const response = await axios.get(url);
-
-      setLinkedObjects(response.data)
-      // console.log(response.data)
-
-      setLoadingObjects(false)
-    }
-    catch (error) {
-      console.error('Error fetching requisition data:', error);
-      setLoadingObjects(false)
-      setLinkedObjects([])
-
-
-    }
-  }
-
-
-
   const previewObject = async (item, getLinkedItems) => {
     setWorkflows([])
     setCheckedItems({})
@@ -477,19 +398,11 @@ const DocumentList = (props) => {
     setBase64('');
     setExtension('');
 
-    // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
-    //   handleOpenDialog();
-    //   return;
-    // }
-    // else {
     setSelectedState({})
     setLoadingObject(true)
     setLoadingClick(true)
-    // console.log(formValues)
+
     setFormValues({})
-    // if (getLinkedItems) {
-    //   getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
-    // }
 
     setSelectedObject(item)
 
@@ -507,10 +420,7 @@ const DocumentList = (props) => {
     } catch (error) {
       setLoadingClick(false)
       setLoadingObject(false)
-      // setAlertPopOpen(true);
-      // setAlertPopSeverity("error");
-      // setAlertPopMessage("could not find object, object could be deleted");
-      // console.error('Error fetching view objects:', error);
+
 
     }
 
@@ -524,20 +434,10 @@ const DocumentList = (props) => {
     setNewWF(null)
     setNewWFState(null)
     setLoadingWFS(true)
-    // Reset the comments and log the selected item
+
     setComments([]);
 
-    // Handle dialog open if form values or state exist
-    // if (Object.keys(formValues || {}).length > 0 || selectedState.title) {
-    //   handleOpenDialog();
-    //   return;
-    // }
 
-    // if (getLinkedItems) {
-    //   getLinkedObjects(item.id, (item.objectTypeId !== undefined ? item.objectTypeId : item.objectID))
-    // }
-
-    // Set loading states and clear selected state/form
     setSelectedState({});
     setLoadingObject(true);
     setLoadingClick(true)
@@ -630,13 +530,6 @@ const DocumentList = (props) => {
     getObjectComments(item);
   };
 
-
-
-
-
-
-
-
   const discardChange = () => {
     setDialogOpen(false)
     setSelectedState({})
@@ -649,8 +542,6 @@ const DocumentList = (props) => {
 
 
   }
-
-
 
   const fetchVaultWorkflows = async (objectTypeId, classId) => {
 
@@ -672,9 +563,6 @@ const DocumentList = (props) => {
     }
   };
 
-
-
-  // Get current worflow state 
   const getSelectedObjWorkflow = async (objectTypeId, objectsId, classId) => {
 
     const data = {
@@ -763,12 +651,6 @@ const DocumentList = (props) => {
   }
 
 
-
-
-
-
-
-
   const reloadPage = () => {
     const authTokens = sessionStorage.getItem('authTokens');
     const selectedVault = sessionStorage.getItem('selectedVault');
@@ -787,67 +669,6 @@ const DocumentList = (props) => {
     window.location.reload();
   };
 
-  // const signDocument = async () => {
-  //   setPreparingForSigning(true)
-  //   try {
-  //     const response = await axios.get(`${baseurldss}/api/SelfSign/${selectedFileId}/${props.user.staffNumber}`);
-  //     const { filelink } = response.data;
-  //     window.open(filelink, '_blank'); // Open link in new tab
-  //     setPreparingForSigning(false)
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //     setPreparingForSigning(false)
-  //     alert('Please try later, the document is currently checked out !!!')
-  //     // Handle error
-  //   }
-
-
-  // };
-  let openObjectModal = () => {
-    props.setOpenObjectModal(true)
-  }
-  const getPropsFile = async (objId, internalId, classId, title) => {
-    switchToTab(0)
-    setDocProps({})
-    setFileUrl('')
-    setRequisitionProps({})
-
-    setSelectedFile({ "objID": objId, "internalID": internalId, "classID": classId, "title": title })
-
-    setSelectedFileId(internalId)
-    try {
-      let url = '';
-      if (objId === 0) {
-        url = `${baseurldata}/api/RequisitionDocs?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
-      } else {
-
-        getLinkedObjects(internalId)
-        url = `${baseurldata}/api/Requisition/getRequisitionProps?ObjectID=${objId}&InternalID=${internalId}&ClassID=${classId}`
-      }
-
-      const response = await axios.get(url);
-      // console.log(response.data)
-      if (objId === 0) {
-        setDocProps(response.data)
-        setFileUrl(response.data.files[0].base64)
-        setRequisitionProps({})
-      }
-      else {
-        setRequisitionProps(response.data)
-        setDocProps({})
-        setFileUrl('')
-      }
-
-    }
-    catch (error) {
-      // console.error('Error fetching requisition data:', error);
-
-    }
-
-
-
-  }
-
 
   const handleSearch = (e) => {
     resetPreview()
@@ -859,7 +680,7 @@ const DocumentList = (props) => {
       setLoading(false)
       setSearched(true)
       props.setData(data);
-      // console.log(data)
+      console.log(data)
     });
 
   };
@@ -874,149 +695,62 @@ const DocumentList = (props) => {
     setAlertPopOpen(false);
   };
 
-  function openApp(item) {
-    const fetchExtension = async () => {
+  // const openApp = async (item) => {
+  //   const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+  //   //   console.log(url)
+  //   try {
+  //     const response = await axios.get(url);
+  //     const data = response.data;
+  //     // const extension = data[0]?.extension?.toLowerCase();
+  //     const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
 
+  //     if (extension === 'pdf' || extension === 'ppt' || extension === 'csv' || extension === 'xlsx' || extension === 'xls' || extension === 'docx' || extension === 'doc' || extension === 'txt') {
+  //       const updatedItem = {
+  //         ...item,
+  //         guid: props.selectedVault.guid,
+  //         extension: extension,
+  //         type: item.objectTypeId ?? item.objectID
+  //       };
+
+
+  //       // Display extension in alert
+
+  //       // Set the object to be edited and open the modal
+  //       setObjectToEditOnOfficeApp(updatedItem);
+  //       setOpenOfficeApp(true);
+  //     } else {
+  //       alert(`This file type ${extension} is not supported for editing.`);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching the extension:', error);
+
+  //   }
+
+  // }
+
+  function openApp(item) {
+    // console.log(item)
+    const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
-      //   console.log(url)
+
       try {
         const response = await axios.get(url);
         const data = response.data;
-        // const extension = data[0]?.extension?.toLowerCase();
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-
-        if (extension === 'csv' || extension === 'xlsx' || extension === 'docx' || extension === 'txt') {
-          const updatedItem = {
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
+          setObjectToEditOnOfficeApp({
             ...item,
             guid: props.selectedVault.guid,
-            extension: extension,
+            extension,
             type: item.objectTypeId ?? item.objectID
-          };
-
-
-          // Display extension in alert
-
-          // Set the object to be edited and open the modal
-          setObjectToEditOnOfficeApp(updatedItem);
+          });
           setOpenOfficeApp(true);
-        } else {
-          //   alert(`This file type ${extension} is not supported for editing.`);
         }
-      } catch (error) {
-        console.error('Error fetching the extension:', error);
-
-      }
+      } catch { }
     };
-
     fetchExtension();
   }
 
-  const col1Ref = useRef(null);
-  const col2Ref = useRef(null);
-  const dividerRef = useRef(null);
-  const containerRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // useEffect(() => {
-  //   if (isMobile) return;
-
-  //   const handleMouseMove = (e) => {
-  //     if (!isDragging) return;
-  //     const containerWidth = containerRef.current.getBoundingClientRect().width;
-  //     let newCol1Width = (e.clientX / containerWidth) * 100;
-  //     if (newCol1Width < 10) newCol1Width = 10;
-  //     if (newCol1Width > 90) newCol1Width = 90;
-  //     col1Ref.current.style.width = `${newCol1Width}%`;
-  //     col2Ref.current.style.width = `${100 - newCol1Width}%`;
-  //     setPreviewWindowWidth(col2Ref.current.style.width)
-
-  //   };
-
-  //   const handleMouseUp = () => setIsDragging(false);
-
-  //   document.addEventListener('mousemove', handleMouseMove);
-  //   document.addEventListener('mouseup', handleMouseUp);
-  //   return () => {
-  //     document.removeEventListener('mousemove', handleMouseMove);
-  //     document.removeEventListener('mouseup', handleMouseUp);
-  //   };
-  // }, [isDragging, isMobile]);
-
-  // const handleMouseDown = () => {
-  //   if (!isMobile) setIsDragging(true);
-  // };
-
-  const handleMouseDown = useCallback((e) => {
-    // Only start dragging if the left mouse button is pressed (button 0)
-    if (e.button === 0 && !isMobile) {
-      setIsDragging(true);
-    }
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (isMobile) return;
-
-    let animationFrameId;
-
-    const handleMouseMove = (e) => {
-      if (!isDragging) return;
-
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
-      animationFrameId = requestAnimationFrame(() => {
-        const containerWidth = containerRef.current?.getBoundingClientRect().width;
-        if (!containerWidth) return;
-
-        let newCol1Width = (e.clientX / containerWidth) * 100;
-
-        // Clamp width to avoid layout breaking
-        newCol1Width = Math.min(90, Math.max(10, newCol1Width));
-        const newCol2Width = 100 - newCol1Width;
-
-        // Apply widths
-        if (col1Ref.current) col1Ref.current.style.width = `${newCol1Width}%`;
-        if (col2Ref.current) col2Ref.current.style.width = `${newCol2Width}%`;
-
-        setPreviewWindowWidth(`${newCol2Width}%`);
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    };
-  }, [isDragging, isMobile]);
-
-
-  const trimTitle2 = (title) => {
-    const maxLength = 50; // Updated to match the desired max length
-    if (title) {
-      if (title.length > maxLength) {
-        // return title.substring(0, maxLength) + '...';
-        return title
-      }
-    }
-    return title;
-  };
 
   const handleRowClick = (subItem) => {
     if (subItem.objectID === 0) {
@@ -1025,10 +759,6 @@ const DocumentList = (props) => {
       previewObject(subItem, false);
     }
   };
-
-
-  const documents = linkedObjects.filter(item => item.objecttypeID === 0);
-  const otherObjects = linkedObjects.filter(item => item.objecttypeID !== 0);
 
 
   const restoreObject = async (item) => {
@@ -1093,7 +823,126 @@ const DocumentList = (props) => {
 
   }
 
+  function handleClick(item) {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+    }
 
+    clickTimeout = setTimeout(() => {
+      setSelectedItemId(item.id);
+      if (item.objectTypeId === 0 || item.objectID === 0) {
+        previewSublistObject(item, true);
+      } else {
+        previewObject(item, true);
+      }
+    }, 250); // Delay to allow doubleClick to cancel it
+  }
+
+  function handleDoubleClick(item) {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+    }
+
+    if (item.objectTypeId === 0 || item.objectID === 0) {
+      openApp(item);
+    }
+  }
+
+
+
+  const handleMouseDown = useCallback((e) => {
+    // Only start dragging if the left mouse button is pressed (button 0)
+    if (e.button === 0 && !isMobile) {
+      setIsDragging(true);
+    }
+  }, [isMobile]);
+
+
+  const rightClickActions = [
+    ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+      {
+        label: (
+          <span>
+            <i className="fa-brands fa-windows" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+            Open with Office
+          </span>
+        ),
+        onClick: (itm) => {
+          openApp(itm);
+          handleMenuClose();
+        }
+      }
+    ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+      {
+        label: (
+          <span>
+            <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+            Delete
+          </span>
+        ),
+        onClick: (itm) => {
+          // Implement delete logic here
+          handleMenuClose();
+        }
+      }
+    ] : [])
+  ];
+
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+
+    let animationFrameId;
+
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      animationFrameId = requestAnimationFrame(() => {
+        const containerWidth = containerRef.current?.getBoundingClientRect().width;
+        if (!containerWidth) return;
+
+        let newCol1Width = (e.clientX / containerWidth) * 100;
+
+        // Clamp width to avoid layout breaking
+        newCol1Width = Math.min(90, Math.max(10, newCol1Width));
+        const newCol2Width = 100 - newCol1Width;
+
+        // Apply widths
+        if (col1Ref.current) col1Ref.current.style.width = `${newCol1Width}%`;
+        if (col2Ref.current) col2Ref.current.style.width = `${newCol2Width}%`;
+
+        setPreviewWindowWidth(`${newCol2Width}%`);
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isDragging, isMobile]);
 
 
 
@@ -1355,13 +1204,9 @@ const DocumentList = (props) => {
                               <TreeItem
                                 key={`tree-item-${index}`} // Unique key
                                 itemId={`tree-item-${index}`} // Unique itemId
-                                onClick={() => {
-                                  setSelectedItemId(item.id); // update selected
-                                  item.objectTypeId || item.objectID === 0
-                                    ? previewSublistObject(item, true)
-                                    : previewObject(item, true)
-                                }
-                                }
+                                onClick={() => handleClick(item)}
+                                onDoubleClick={() => handleDoubleClick(item)}
+
 
                                 sx={{
 
@@ -1391,35 +1236,44 @@ const DocumentList = (props) => {
                                   },
                                 }}
                                 label={
-                                  <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }} >
-                                    {item.objectTypeId || item.objectID === 0 ? (
-                                      <>
-                                        <FileExtIcon
-                                          fontSize={'15px'}
-                                          guid={props.selectedVault.guid}
-                                          objectId={item.id}
-                                          classId={item.classId || item.classID}
-                                        />
-                                      </>
-                                    ) : (
-                                      <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                    )}
-                                    <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 ? (
-                                      <>
-                                        <FileExtText
-                                          guid={props.selectedVault.guid}
-                                          objectId={item.id}
-                                          classId={item.classId || item.classID}
-                                        />
-                                      </>
-                                    ) : null}</span>
+                                  <div
+                                    onContextMenu={(e) => {
+                                      e.preventDefault();
+                                      handleRightClick(e, item);
+
+                                    }}
+                                    style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                                  >
+                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }} >
+                                      {item.objectTypeId || item.objectID === 0 ? (
+                                        <>
+                                          <FileExtIcon
+                                            fontSize={'15px'}
+                                            guid={props.selectedVault.guid}
+                                            objectId={item.id}
+                                            classId={item.classId || item.classID}
+                                          />
+                                        </>
+                                      ) : (
+                                        <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                      )}
+                                      <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 ? (
+                                        <>
+                                          <FileExtText
+                                            guid={props.selectedVault.guid}
+                                            objectId={item.id}
+                                            classId={item.classId || item.classID}
+                                          />
+                                        </>
+                                      ) : null}</span>
 
 
-                                  </Box>
+                                    </Box>
+                                  </div>
                                 }
                               >
 
-                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId}/>
+                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
                               </TreeItem>
                             </SimpleTreeView>
 
@@ -1480,7 +1334,7 @@ const DocumentList = (props) => {
                     viewableobjects={props.viewableobjects}
                     previewSublistObject={previewSublistObject}
                     selectedObject={selectedObject}
-                    linkedObjects={linkedObjects}
+
                     loadingobjects={loadingobjects}
                     selectedVault={props.selectedVault}
                     setPreviewObjectProps={setPreviewObjectProps}
@@ -1536,13 +1390,9 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => {
-                              setSelectedItemId(item.id); // update selected
-                              item.objectTypeId === 0 || item.objectID === 0
-                                ? previewSublistObject(item, true)
-                                : previewObject(item, true)
-                            }
-                            }
+                            onClick={() => handleClick(item)}
+                            onDoubleClick={() => handleDoubleClick(item)}
+
                             className='my-1'
 
 
@@ -1570,35 +1420,44 @@ const DocumentList = (props) => {
                               },
                             }}
                             label={
-                              <Box display="flex" alignItems="center" sx={{ padding: '3px',backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                {item.objectTypeId === 0 || item.objectID === 0 ? (
-                                  <>
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  </>
-                                ) : (
-                                  <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                )}
-                                <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
-                                  <>
-                                    <FileExtText
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  </>
-                                ) : null}</span>
+                              <div
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  handleRightClick(e, item);
+
+                                }}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                              >
+                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+                                  {item.objectTypeId === 0 || item.objectID === 0 ? (
+                                    <>
+                                      <FileExtIcon
+                                        fontSize={'15px'}
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId || item.classID}
+                                      />
+                                    </>
+                                  ) : (
+                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                  )}
+                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
+                                    <>
+                                      <FileExtText
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId || item.classID}
+                                      />
+                                    </>
+                                  ) : null}</span>
 
 
-                              </Box>
+                                </Box>
+                              </div>
                             }
                           >
 
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId} />
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
                           </TreeItem>
                         </SimpleTreeView>
 
@@ -1687,13 +1546,9 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => {
-                              setSelectedItemId(item.id); // update selected
-                              item.objectTypeId === 0 || item.objectID === 0
-                                ? previewSublistObject(item, true)
-                                : previewObject(item, true)
-                            }
-                            }
+                            onClick={() => handleClick(item)}
+                            onDoubleClick={() => handleDoubleClick(item)}
+
                             className='my-1'
 
 
@@ -1721,35 +1576,44 @@ const DocumentList = (props) => {
                               },
                             }}
                             label={
-                              <Box display="flex" alignItems="center" sx={{ padding: '3px',backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                {item.objectTypeId || item.objectID === 0 ? (
-                                  <>
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  </>
-                                ) : (
-                                  <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                )}
-                                <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
-                                  <>
-                                    <FileExtText
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  </>
-                                ) : null}</span>
+                              <div
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  handleRightClick(e, item);
+
+                                }}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                              >
+                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+                                  {item.objectTypeId || item.objectID === 0 ? (
+                                    <>
+                                      <FileExtIcon
+                                        fontSize={'15px'}
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId || item.classID}
+                                      />
+                                    </>
+                                  ) : (
+                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                  )}
+                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
+                                    <>
+                                      <FileExtText
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId || item.classID}
+                                      />
+                                    </>
+                                  ) : null}</span>
 
 
-                              </Box>
+                                </Box>
+                              </div>
                             }
                           >
 
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId}  selectedItemId={selectedItemId}/>
+                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
                           </TreeItem>
                         </SimpleTreeView>
 
@@ -1804,7 +1668,7 @@ const DocumentList = (props) => {
               </>
             )}
 
-          </CustomTabPanel>
+          </CustomTabPanel >
 
           <CustomTabPanel
             value={value}
@@ -1836,13 +1700,9 @@ const DocumentList = (props) => {
                           <TreeItem
                             key={`tree-item-${index}`} // Unique key
                             itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => {
-                              setSelectedItemId(item.id); // update selected
-                              item.objectTypeId || item.objectID === 0
-                                ? previewSublistObject(item, true)
-                                : previewObject(item, true)
-                            }
-                            }
+                            onClick={() => handleClick(item)}
+                            onDoubleClick={() => handleDoubleClick(item)}
+
                             className='my-1'
 
 
@@ -1870,47 +1730,56 @@ const DocumentList = (props) => {
                               },
                             }}
                             label={
-                              <Box display="flex" alignItems="center" justifyContent="space-between" sx={{padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                <Box display="flex" alignItems="center">
-                                  {item.objectTypeId || item.objectID === 0 ? (
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  ) : (
-                                    <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                  )}
-                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 && (
-                                    <FileExtText
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId}
-                                    />
-                                  )}</span>
+                              <div
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  handleRightClick(e, item);
 
+                                }}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                              >
+                                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+                                  <Box display="flex" alignItems="center">
+                                    {item.objectTypeId || item.objectID === 0 ? (
+                                      <FileExtIcon
+                                        fontSize={'15px'}
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId || item.classID}
+                                      />
+                                    ) : (
+                                      <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                    )}
+                                    <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 && (
+                                      <FileExtText
+                                        guid={props.selectedVault.guid}
+                                        objectId={item.id}
+                                        classId={item.classId}
+                                      />
+                                    )}</span>
+
+                                  </Box>
+
+                                  {/* Button at the right */}
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="warning"
+                                    onClick={() => restoreObject(item)}
+                                    sx={{ textTransform: 'none' }}
+                                  >
+                                    <i
+                                      className="fas fa-trash-restore"
+                                      style={{
+                                        fontSize: '13px',
+                                        cursor: 'pointer',
+                                        marginRight: '4px'
+                                      }}
+                                    />
+                                    <small>Restore</small>
+                                  </Button>
                                 </Box>
-
-                                {/* Button at the right */}
-                                <Button
-                                  size="small"
-                                  variant="contained"
-                                  color="warning"
-                                  onClick={() => restoreObject(item)}
-                                  sx={{ textTransform: 'none' }}
-                                >
-                                  <i
-                                    className="fas fa-trash-restore"
-                                    style={{
-                                      fontSize: '13px',
-                                      cursor: 'pointer',
-                                      marginRight: '4px'
-                                    }}
-                                  />
-                                  <small>Restore</small>
-                                </Button>
-                              </Box>
+                              </div>
 
                             }
                           >
@@ -1976,7 +1845,7 @@ const DocumentList = (props) => {
 
 
 
-        </div>
+        </div >
 
         {!isMobile && (
           // <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#dedddd', height: '100vh' }}></div>
@@ -2030,6 +1899,19 @@ const DocumentList = (props) => {
           <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} checkedItems={checkedItems} setCheckedItems={setCheckedItems} loadingWFS={loadingWFS} />
         </div>
       </div >
+
+      {/* RightClickMenu rendered at the root level */}
+      {
+        rightClickActions.length > 0 && (
+          <RightClickMenu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+            item={menuItem}
+            actions={rightClickActions}
+          />
+        )
+      }
 
     </>
   );
