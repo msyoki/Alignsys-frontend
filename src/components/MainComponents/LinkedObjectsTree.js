@@ -42,11 +42,38 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
   // Right-click menu state
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuItem, setMenuItem] = useState(null);
+  const [file, setFile] = useState(null);
+
+  async function fetchObjectFile(item) {
+    // const objectType = item.objectTypeId ?? item.objectID;
+    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${selectedVault.guid}/${item.id}/0`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Accept: '*/*'
+        }
+      });
+
+      const file = response.data?.[0];
+      setFile(file);
+      // console.log('Fetched file:', file);
+      // alert(`File ID is: ${file.fileID}`)
+    } catch (error) {
+      console.error('Failed to fetch object file:', error);
+      throw error;
+    }
+  }
 
   const handleRightClick = (event, item) => {
     event.preventDefault();
     setMenuAnchor(event.currentTarget);
     setMenuItem(item);
+    // console.log(item)
+    if (item.objectID === 0 || item.objectTypeId === 0) {
+      fetchObjectFile(item);
+    }
+
   };
 
   const handleMenuClose = () => {
@@ -54,55 +81,55 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
     setMenuItem(null);
   };
 
-useEffect(() => {
-  fetchLinkedObjects();
-}, [id, objectType, selectedVault.guid]);
+  useEffect(() => {
+    fetchLinkedObjects();
+  }, [id, objectType, selectedVault.guid]);
 
-const fetchLinkedObjects = async () => {
-  setLoading(true);
-  try {
-    const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${mfilesId}`
-    const response = await axios.get(url);
-    setLinkedObjects(response.data || []);
-  } catch (error) {
-    setLinkedObjects([]);
-  }
-  setLoading(false);
-};
-
-const deleteObject = (item) => {
-  let data = JSON.stringify({
-    "vaultGuid": selectedVault.guid,
-    "objectId": item.id,
-    "classId": item.classID || item.classId,
-    "userID": mfilesId
-  });
-
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: `${constants.mfiles_api}/api/ObjectDeletion/DeleteObject`,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    data: data
+  const fetchLinkedObjects = async () => {
+    setLoading(true);
+    try {
+      const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${mfilesId}`
+      const response = await axios.get(url);
+      setLinkedObjects(response.data || []);
+    } catch (error) {
+      setLinkedObjects([]);
+    }
+    setLoading(false);
   };
 
-  axios.request(config)
-    .then((response) => {
-      setOpenAlert(true);
-      setAlertSeverity("success");
-      setAlertMsg("Object was deleted successsfully");
-      setDeleteDialogOpen(false);
-      fetchLinkedObjects(); // <-- Reload the component data after delete
-    })
-    .catch((error) => {
-      setOpenAlert(true);
-      setAlertSeverity("error");
-      setAlertMsg("Failed to delete, please try again later");
-      setDeleteDialogOpen(false);
+  const deleteObject = (item) => {
+    let data = JSON.stringify({
+      "vaultGuid": selectedVault.guid,
+      "objectId": item.id,
+      "classId": item.classID || item.classId,
+      "userID": mfilesId
     });
-}
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${constants.mfiles_api}/api/ObjectDeletion/DeleteObject`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    axios.request(config)
+      .then((response) => {
+        setOpenAlert(true);
+        setAlertSeverity("success");
+        setAlertMsg("Object was deleted successsfully");
+        setDeleteDialogOpen(false);
+        fetchLinkedObjects(); // <-- Reload the component data after delete
+      })
+      .catch((error) => {
+        setOpenAlert(true);
+        setAlertSeverity("error");
+        setAlertMsg("Failed to delete, please try again later");
+        setDeleteDialogOpen(false);
+      });
+  }
 
   function mergeObjects(objects) {
     const mergedMap = new Map();
@@ -124,6 +151,40 @@ const deleteObject = (item) => {
   const otherObjects = mergeObjects(linkedObjects.filter((item) => item.objecttypeID !== 0));
   const documents = linkedObjects.filter((item) => item.objecttypeID === 0);
 
+  async function convertToPDF(item, overWriteOriginal) {
+    // alert(file.fileID);
+    // console.log('Converting to PDF:', file);
+
+    console.log(item)
+    const payload = {
+      vaultGuid: selectedVault.guid,  // string
+      objectId: item.id,                      // number
+      classId: item.classID || item.classId,                       // number
+      fileID: file.fileID,                        // number
+      overWriteOriginal: overWriteOriginal,           // boolean
+      separateFile: overWriteOriginal ? false : true,                // boolean
+      userID: mfilesId                     // number
+    };
+
+    console.log(payload)
+    try {
+      const response = await axios.post(
+        `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
+        payload,
+        {
+          headers: {
+            'Accept': '*/*',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error converting to PDF:', error);
+      // throw error;
+    }
+  }
 
 
 
@@ -154,9 +215,17 @@ const deleteObject = (item) => {
     ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
       {
         label: (
-          <span>
-            <i className="fa-brands fa-windows" style={{ marginRight: '6px', color: '#2757aa' }}></i>
-            Open with Office
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <FileExtIcon
+              fontSize={'24px'}
+              guid={selectedVault.guid}
+              objectId={menuItem.id}
+              classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+            />
+            <span className='mx-2'>Open</span>
+            <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>
+              Open in default application
+            </span>
           </span>
         ),
         onClick: (itm) => {
@@ -165,16 +234,46 @@ const deleteObject = (item) => {
         }
       }
     ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+    // ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+    //   {
+    //     label: (
+    //         <span style={{fontSize: '13px'}}>
+    //         <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+    //         Delete
+    //       </span>
+    //     ),
+    //     onClick: (itm) => {
+    //       deleteObject(itm);
+    //       handleMenuClose();
+    //     }
+    //   }
+    // ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
       {
         label: (
-          <span>
-            <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
-            Delete
+          <span className='mx-3'>
+
+            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
+            Convert to PDF overwrite Original Copy
           </span>
         ),
         onClick: (itm) => {
-          deleteObject(itm);
+          convertToPDF(itm, false);
+          handleMenuClose();
+        }
+      }
+    ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
+      {
+        label: (
+          <span className='mx-3'>
+
+            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
+            Convert to PDF Keep Original Copy
+          </span>
+        ),
+        onClick: (itm) => {
+          convertToPDF(itm, true);
           handleMenuClose();
         }
       }
@@ -221,7 +320,7 @@ const deleteObject = (item) => {
                       borderBottom: '1px solid #dedddd'
                     }}
                   >
-                    <i style={{ fontSize: '15px', color: '#8d99ae' }} className="fa-solid fa-folder-tree mx-2"></i>
+                    <i style={{ fontSize: '15px', color: '#8d99ae' }} className="fa-regular fa-folder-open mx-2"></i>
                     {obj.propertyName.includes('(s)') ? obj.propertyName : `${obj.propertyName}(s)`}
                   </Box>
                 }

@@ -1,180 +1,126 @@
-import React from 'react'
-import { createContext, useState, useEffect } from 'react'
+import React, { createContext, useState, useEffect } from 'react';
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import Loading from '../Loaders/Loader';
-import axios from "axios"
-import * as constants from './configs'
-const Authcontext = createContext()
+import axios from "axios";
+import * as constants from './configs';
 
+const Authcontext = createContext();
 export default Authcontext;
 
 export const AuthProvider = ({ children }) => {
+  const [authTokens, setAuthTokens] = useState(() => {
+    const stored = sessionStorage.getItem('authTokens');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [user, setUser] = useState(() => {
+    const stored = sessionStorage.getItem('authTokens');
+    return stored ? jwt_decode(stored) : null;
+  });
+  const [loading, setLoading] = useState(true);
 
-    let [authTokens, setAuthtokens] = useState(() => sessionStorage.getItem('authTokens') ? JSON.parse(sessionStorage.getItem('authTokens')) : null)
-    let [user, setUser] = useState(() => sessionStorage.getItem('authTokens') ? jwt_decode(sessionStorage.getItem('authTokens')) : null)
-    let [loading, setLoading] = useState(true)
-    let navigate = useNavigate()
-  
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState('');
+  const [alertMsg, setAlertMsg] = useState('');
 
-    let [openAlert, setOpenAlert] = useState(false)
-    let [alertSeverity, setAlertSeverity] = useState('')
-    let [alertMsg, setAlertMsg] = useState('')
+  const navigate = useNavigate();
 
-
-    // login request
-    let loginUser = async (e) => {
-        e.preventDefault()
-        try {
-            const response = await axios.post(`${constants.auth_api}/api/token/`, {
-                email: e.target.email.value,
-                password: e.target.password.value
-            });
-
-            if (response.status === 200) {
-                const data = response.data;
-                
-                setAuthtokens(data);
-                setUser(jwt_decode(data.access))
-                sessionStorage.setItem('authTokens', JSON.stringify(data))
-                navigate('/vault')
-
-                // if (jwt_decode(response.data.access).is_superuser === 'True') {
-
-                //     navigate('/super/admin/dashboard', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
-
-                // }
-                // else {
-                //     navigate('/', { state: { openalert: true, alertmsg: "logged in successfully", alertseverity: "success" } })
-                // }
-            }
-        }
-        catch (error) {
-      
-            setOpenAlert(true);
-            setAlertSeverity("error");
-            setAlertMsg(`Invalid username or password`);
-            console.log(`${error.response?.data.error || error.message}!!`)
-            // alert("login failed")
-
-        }
+  // Login
+  const loginUser = async (e) => {
+    e.preventDefault();
+    try {
+      const { data, status } = await axios.post(`${constants.auth_api}/api/token/`, {
+        email: e.target.email.value,
+        password: e.target.password.value
+      });
+      if (status === 200) {
+        setAuthTokens(data);
+        setUser(jwt_decode(data.access));
+        sessionStorage.setItem('authTokens', JSON.stringify(data));
+        navigate('/vault');
+      }
+    } catch (error) {
+      setOpenAlert(true);
+      setAlertSeverity("error");
+      setAlertMsg("Invalid username or password");
+      console.log(`${error.response?.data.error || error.message}!!`);
     }
+  };
 
+  // Logout
+  const logoutUser = () => {
+    setAuthTokens(null);
+    setUser(null);
+    sessionStorage.clear();
+  };
 
-    // logout user
-    let logoutUser = () => {
-        var config = {
-            method: 'get',
-            maxBodyLength: Infinity,
-            url: 'https://ipapi.co/json',
-            headers: {}
-        };
-        setAuthtokens(null)
-        setUser(null)
-        sessionStorage.clear();
-
+  // Token refresh
+  const updateToken = async () => {
+    try {
+      const storedTokens = sessionStorage.getItem('authTokens');
+      const refresh = storedTokens ? JSON.parse(storedTokens).refresh : null;
+      const { data, status } = await axios.post(`${constants.auth_api}/api/token/refresh/`, { refresh });
+      if (status === 200) {
+        setAuthTokens(data);
+        setUser(jwt_decode(data.access));
+        sessionStorage.setItem('authTokens', JSON.stringify({ access: data.access, refresh }));
+      }
+    } catch {
+      logoutUser();
     }
+    if (loading) setLoading(false);
+  };
 
-
-
-    // Update token
-
-    
-
-    let updateToken = async () => {
-        try {
-            // Get refresh token directly from local storage
-            const storedTokens = sessionStorage.getItem('authTokens');
-            const refresh = storedTokens ? JSON.parse(storedTokens).refresh : null;
-    
-          
-    
-            const response = await axios.post(`${constants.auth_api}/api/token/refresh/`, {
-                refresh: refresh
-            });
-    
-            const data = response.data;
-    
-            if (response.status === 200) {
-                setAuthtokens(data);
-                setUser(jwt_decode(data.access));
-                let new_auth_token = { "access": data.access, "refresh": refresh };
-                sessionStorage.setItem('authTokens', JSON.stringify(new_auth_token));
-            }
-        } catch (error) {
-            logoutUser();
-        }
-    
-        if (loading) {
-            setLoading(false);
-        }
+  // Guest authentication
+  const authenticateGuest = async (rtoken) => {
+    try {
+      const response = await fetch(`${constants.auth_api}/api/token/refresh/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: rtoken })
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        setAuthTokens(data);
+        setUser(jwt_decode(data.access));
+        sessionStorage.setItem('authTokens', JSON.stringify(data));
+      } else {
+        logoutUser();
+      }
+    } catch {
+      logoutUser();
     }
-    
+    if (loading) setLoading(false);
+  };
 
-    let authenticateGuest = async (rtoken) => {
-        let response = await fetch(`${constants.auth_api}/api/token/refresh/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 'refresh': rtoken })
-        })
+  // Token auto-refresh
+  useEffect(() => {
+    if (loading) updateToken();
+    const interval = setInterval(() => {
+      if (authTokens) updateToken();
+    }, 1000 * 60 * 3);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line
+  }, [authTokens, loading]);
 
-        let data = await response.json()
-        // console.log('data:', data)
-        if (response.status === 200) {
-            setAuthtokens(data)
-            setUser(jwt_decode(data.access))
-            // console.log(data.refresh)
-            sessionStorage.setItem('authTokens', JSON.stringify(data))
-           
-        } else {
-            // console.log(response)
-            logoutUser()
-        }
+  const contextData = {
+    user,
+    updateToken,
+    authTokens,
+    loginUser,
+    logoutUser,
+    authenticateGuest,
+    alertMsg,
+    alertSeverity,
+    openAlert,
+    setOpenAlert,
+    setAlertMsg,
+    setAlertSeverity
+  };
 
-        if (loading) {
-            setLoading(false)
-        }
-
-    }
-
-    let contextData = {
-        user: user,
-        updateToken: updateToken,
-        authTokens: authTokens,
-        loginUser: loginUser,
-        logoutUser: logoutUser,
-        authenticateGuest: authenticateGuest,
-        alertMsg: alertMsg,
-        alertSeverity: alertSeverity,
-        openAlert: openAlert,
-        setOpenAlert: setOpenAlert,
-        setAlertMsg: setAlertMsg,
-        setAlertSeverity: setAlertSeverity
-
-    }
-
-
-    // Update token
-    useEffect(() => {
-
-        if (loading) {
-            updateToken()
-        }
-        let threeMinutes = 1000 * 60 * 3
-        let interval = setInterval(() => {
-            if (authTokens) {
-                updateToken()
-            }
-        }, threeMinutes)
-        return () => clearInterval(interval)
-    }, [authTokens, loading])
-    return (
-
-        <Authcontext.Provider value={contextData}>
-            {loading ? <Loading /> : children}
-        </Authcontext.Provider>
-
-    )
-}
+  return (
+    <Authcontext.Provider value={contextData}>
+      {loading ? <Loading /> : children}
+    </Authcontext.Provider>
+  );
+};

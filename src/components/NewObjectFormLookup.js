@@ -1,129 +1,156 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import CircularProgress from '@mui/material/CircularProgress'; // 👈 Import Material UI spinner
+import CircularProgress from '@mui/material/CircularProgress';
 import * as constants from './Auth/configs';
 
-const LookupSelect = ({ userId, propId, label, onChange, value, required, error, helperText, selectedVault, disabled }) => {
-  const [lookupOptions, setLookupOptions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false); // 👈 Add loading state
+const LookupSelect = ({
+  userId,
+  propId,
+  label,
+  onChange,
+  value,
+  required,
+  error,
+  helperText,
+  selectedVault,
+  disabled,
+}) => {
+  const [options, setOptions] = useState([]);
+  const [defaultOptions, setDefaultOptions] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const searchTimeout = useRef();
 
+  // Fetch initial/default options
   useEffect(() => {
-    const fetchLookupOptions = async () => {
-      setLoading(true); // 👈 Start loading
+    const fetchOptions = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`);
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`
+        );
         const formattedOptions = response.data.map(option => ({
           label: option.name,
           value: option.id,
         }));
-        setLookupOptions(formattedOptions);
+        setDefaultOptions(formattedOptions);
+        setOptions(formattedOptions);
       } catch (error) {
         console.error('Error fetching lookup options:', error);
       }
-      setLoading(false); // 👈 End loading
+      setLoading(false);
     };
-
-    fetchLookupOptions();
+    fetchOptions();
+    // eslint-disable-next-line
   }, [propId, selectedVault, userId]);
 
+  // Fetch options based on search term (debounced)
   useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (searchTerm.trim() === '') return;
-      setLoading(true); // 👈 Start loading
+    if (inputValue.trim() === '') {
+      setOptions(defaultOptions);
+      return;
+    }
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${searchTerm}/${propId}/${userId}`);
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/ValuelistInstance/Search/${selectedVault.guid}/${inputValue}/${propId}/${userId}`
+        );
         const formattedOptions = response.data.map(option => ({
           label: option.name,
           value: option.id,
         }));
-        setLookupOptions(formattedOptions);
+        // Always include the currently selected value in the options
+        const selectedOption = options.find(opt => opt.value === value) ||
+          defaultOptions.find(opt => opt.value === value);
+        const combined = selectedOption && !formattedOptions.some(opt => opt.value === value)
+          ? [selectedOption, ...formattedOptions]
+          : formattedOptions;
+        setOptions(combined);
       } catch (error) {
         console.error('Error fetching lookup options based on search term:', error);
       }
-      setLoading(false); // 👈 End loading
-    };
-
-    fetchSearchResults();
-  }, [searchTerm, selectedVault, propId, userId]);
+      setLoading(false);
+    }, 400);
+    return () => clearTimeout(searchTimeout.current);
+    // eslint-disable-next-line
+  }, [inputValue, defaultOptions, value, propId, selectedVault, userId]);
 
   const handleChange = (selectedOption) => {
     onChange(propId, selectedOption ? selectedOption.value : null);
+    setInputValue(''); // Clear search after selection
   };
 
-  const handleInputChange = (newValue) => {
-    setSearchTerm(newValue);
+  const handleInputChange = (newValue, { action }) => {
+    if (action === 'input-change') setInputValue(newValue);
+    if (action === 'menu-close') setInputValue('');
   };
 
   // Custom styles for react-select
-const customStyles = {
-  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-  control: (base, state) => ({
-    ...base,
-    borderColor: error ? 'red' : base.borderColor,
-    fontSize: '13px',
-    color: '#555',
-    backgroundColor: disabled ? '#f5f5f5' : 'white',
-    minHeight: '40px',
-  }),
-  singleValue: (base) => ({
-    ...base,
-    color: '#555',
-    fontSize: '13px',
-  }),
-  option: (base, state) => ({
-    ...base,
-    color: '#555',
-    fontSize: '13px',
-    backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
-  }),
-  placeholder: (base) => ({
-    ...base,
-    color: '#555',
-    fontSize: '13px',
-  }),
-  multiValue: (base) => ({
-    ...base,
-    fontSize: '13px',
-  }),
-  multiValueLabel: (base) => ({
-    ...base,
-    fontSize: '13px',
-  }),
-  input: (base) => ({
-    ...base,
-    fontSize: '13px',
-  }),
-};
+  const customStyles = {
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    control: (base) => ({
+      ...base,
+      borderColor: error ? 'red' : base.borderColor,
+      fontSize: '13px',
+      color: '#555',
+      backgroundColor: disabled ? '#f5f5f5' : 'white',
+      minHeight: '40px',
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#555',
+      fontSize: '13px',
+    }),
+    option: (base, state) => ({
+      ...base,
+      color: '#555',
+      fontSize: '13px',
+      backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: '#555',
+      fontSize: '13px',
+    }),
+    input: (base) => ({
+      ...base,
+      fontSize: '13px',
+    }),
+  };
+
+  // Find the selected option from the current options
+  const selectedOption = options.find(opt => opt.value === value) || null;
 
   return (
     <div style={{ position: 'relative' }}>
       <Select
         label={`Select ${label}`}
-        value={lookupOptions.find(option => option.value === value) || null}
+        value={selectedOption}
         onChange={handleChange}
-        options={lookupOptions}
+        options={options}
         isClearable
-        placeholder={loading ? "Loading..." : `Select ${label}`} // 👈 Dynamic placeholder
+        placeholder={loading ? "Loading..." : `Select ${label}`}
+        inputValue={inputValue}
         onInputChange={handleInputChange}
         noOptionsMessage={() => loading ? "Loading options..." : "No options found"}
         styles={customStyles}
         required={required}
-        // isDisabled={disabled || loading} // 👈 Disable while loading
+        disabled={disabled}
         menuPortalTarget={document.body}
         menuPosition="absolute"
       />
-      {/* 👇 Show CircularProgress when loading */}
       {loading && (
-        <div style={{ 
-          position: 'absolute', 
-          top: '10px', 
-          right: '10px', 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
-          pointerEvents: 'none' 
+          pointerEvents: 'none'
         }}>
           <CircularProgress size={20} />
         </div>

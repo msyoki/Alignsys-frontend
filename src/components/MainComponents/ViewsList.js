@@ -59,6 +59,66 @@ const ViewsList = (props) => {
     const [menuAnchor, setMenuAnchor] = useState(null);
     const [menuItem, setMenuItem] = useState(null);
 
+    const [file, setFile] = useState(null);
+
+    async function convertToPDF(item, overWriteOriginal) {
+        // alert(file.fileID);
+        // console.log('Converting to PDF:', file);
+
+        console.log(item)
+        const payload = {
+            vaultGuid: props.selectedVault.guid,  // string
+            objectId: item.id,                      // number
+            classId: item.classID || item.classId,                       // number
+            fileID: file.fileID,                        // number
+            overWriteOriginal: overWriteOriginal,           // boolean
+            separateFile: overWriteOriginal ? false : true,                // boolean
+            userID: props.mfilesId                     // number
+        };
+
+        console.log(payload)
+        try {
+            const response = await axios.post(
+                `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
+                payload,
+                {
+                    headers: {
+                        'Accept': '*/*',
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error('Error converting to PDF:', error);
+            // throw error;
+        }
+    }
+
+
+    async function fetchObjectFile(item) {
+        // const objectType = item.objectTypeId ?? item.objectID;
+        const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/0`;
+        console.log('Fetching object file from URL:', url);
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: '*/*'
+                }
+            });
+
+            const file = response.data?.[0];
+            setFile(file);
+            // console.log('Fetched file:', file);
+            // alert(`File ID is: ${file.fileID}`)
+        } catch (error) {
+            console.error('Failed to fetch object file:', error);
+            // throw error;
+        }
+    }
+
+
 
     // Memoized filtered views
     const filteredOtherViews = useMemo(
@@ -89,6 +149,7 @@ const ViewsList = (props) => {
 
     // Navigation and fetch logic
     const backToViews = () => {
+        props.resetPreview();
         setSelectedViewObjects([]);
         setViewNavigation([]);
         setSelectedViewCategory([]);
@@ -246,6 +307,9 @@ const ViewsList = (props) => {
         event.preventDefault();
         setMenuAnchor(event.currentTarget);
         setMenuItem(item);
+        if (item.objectID === 0 || item.objectTypeId === 0) {
+            fetchObjectFile(item);
+        }
     };
     const handleMenuClose = () => {
         setMenuAnchor(null);
@@ -256,9 +320,17 @@ const ViewsList = (props) => {
         ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
             {
                 label: (
-                    <span>
-                        <i className="fa-brands fa-windows" style={{ marginRight: '6px', color: '#2757aa' }}></i>
-                        Open with Office
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <FileExtIcon
+                            fontSize={'24px'}
+                            guid={props.selectedVault.guid}
+                            objectId={menuItem.id}
+                            classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+                        />
+                        <span className='mx-2'>Open</span>
+                        <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>
+                            Open in default application
+                        </span>
                     </span>
                 ),
                 onClick: (itm) => {
@@ -267,22 +339,51 @@ const ViewsList = (props) => {
                 }
             }
         ] : []),
-        ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+        // ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
+        //   {
+        //     label: (
+        //         <span style={{fontSize: '13px'}}>
+        //         <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
+        //         Delete
+        //       </span>
+        //     ),
+        //     onClick: (itm) => {
+        //       deleteObject(itm);
+        //       handleMenuClose();
+        //     }
+        //   }
+        // ] : []),
+        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
             {
                 label: (
-                    <span>
-                        <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
-                        Delete
+                    <span className='mx-3'>
+
+                        {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
+                        Convert to PDF overwrite Original Copy
                     </span>
                 ),
                 onClick: (itm) => {
-                    // deleteObject(itm); // Uncomment and implement if needed
+                    convertToPDF(itm, false);
+                    handleMenuClose();
+                }
+            }
+        ] : []),
+        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
+            {
+                label: (
+                    <span className='mx-3'>
+
+                        {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
+                        Convert to PDF Keep Original Copy
+                    </span>
+                ),
+                onClick: (itm) => {
+                    convertToPDF(itm, true);
                     handleMenuClose();
                 }
             }
         ] : [])
     ];
-
     // --- UI ---
     return (
         <>
@@ -355,6 +456,7 @@ const ViewsList = (props) => {
                                                     ? props.previewSublistObject(item, true)
                                                     : props.previewObject(item, true)
                                             }}
+
                                             className='my-1'
                                             sx={{
                                                 marginLeft: '10px',
@@ -375,6 +477,7 @@ const ViewsList = (props) => {
                                                         handleRightClick(e, item);
 
                                                     }}
+
                                                     style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                                                 >
                                                     <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
@@ -440,6 +543,7 @@ const ViewsList = (props) => {
                                             key={`${index}`}
                                             itemId={`${index}`}
                                             onClick={() => fetchMainViewObjects2(item)}
+
                                             className='my-1'
                                             sx={{
                                                 fontSize: "13px",
