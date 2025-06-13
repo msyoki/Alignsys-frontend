@@ -3,13 +3,23 @@ import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import * as constants from './Auth/configs';
 
+// Simple in-memory cache
+const extCache = {};
+
 const FileExtText = ({ guid, objectId, classId }) => {
-  const [extension, setExtension] = useState('');
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `${guid}_${objectId}_${classId}`;
+  const [extension, setExtension] = useState(extCache[cacheKey] || '');
+  const [loading, setLoading] = useState(!extCache[cacheKey]);
 
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
+
+    if (extCache[cacheKey]) {
+      setExtension(extCache[cacheKey]);
+      setLoading(false);
+      return;
+    }
 
     const fetchExtension = async () => {
       try {
@@ -17,6 +27,7 @@ const FileExtText = ({ guid, objectId, classId }) => {
         const { data } = await axios.get(url, { signal: controller.signal });
         if (isMounted) {
           const ext = data?.[0]?.extension?.replace(/^\./, '').toLowerCase() || '';
+          extCache[cacheKey] = ext;
           setExtension(ext);
         }
       } catch {
@@ -31,7 +42,7 @@ const FileExtText = ({ guid, objectId, classId }) => {
       isMounted = false;
       controller.abort();
     };
-  }, [guid, objectId, classId]);
+  }, [guid, objectId, classId, cacheKey]);
 
   if (loading) return <CircularProgress size={10} className="mx-2" />;
   if (!extension) return null;

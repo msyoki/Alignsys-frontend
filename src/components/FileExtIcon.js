@@ -2,20 +2,35 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
+// Simple in-memory cache for extensions
+const extCache = {};
+
 const FileExtIcon = (props) => {
-  const [extension, setExtension] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `${props.guid}_${props.objectId}_${props.classId}`;
+  const [extension, setExtension] = useState(extCache[cacheKey] || null);
+  const [loading, setLoading] = useState(!extCache[cacheKey]);
   const [is400, setIs400] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const controller = new AbortController();
+
+    if (extCache[cacheKey]) {
+      setExtension(extCache[cacheKey]);
+      setLoading(false);
+      return;
+    }
+
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
       try {
         const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
         const ext = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-        setExtension(ext);
+        if (isMounted) {
+          extCache[cacheKey] = ext;
+          setExtension(ext);
+        }
       } catch (err) {
         if (axios.isAxiosError(err) && err.response && err.response.status === 400) {
           setIs400(true);
@@ -23,16 +38,17 @@ const FileExtIcon = (props) => {
           console.error('Error fetching the extension:', err);
         }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchExtension();
 
     return () => {
+      isMounted = false;
       controller.abort();
     };
-  }, [props.guid, props.objectId, props.classId]);
+  }, [props.guid, props.objectId, props.classId, cacheKey]);
 
   const iconStyle = {
     fontSize: props.fontSize || '20px',

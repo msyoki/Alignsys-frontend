@@ -193,7 +193,7 @@ const DocumentList = (props) => {
 
       const file = response.data?.[0];
       setFile(file);
-      // console.log('Fetched file:', file);
+      console.log('Fetched file:', file);
       // alert(`File ID is: ${file.fileID}`)
     } catch (error) {
       console.error('Failed to fetch object file:', error);
@@ -209,6 +209,7 @@ const DocumentList = (props) => {
     setMenuItem(item);
     if (item.objectID === 0 || item.objectTypeId === 0) {
       fetchObjectFile(item);
+     
     }
   };
 
@@ -691,7 +692,7 @@ const DocumentList = (props) => {
   }
 
   const getObjectComments2 = async () => {
-    setLoadingComments(true)
+    setLoadingComments(true);
     let objectID = selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId;
 
     // Define the API URL
@@ -888,6 +889,21 @@ const DocumentList = (props) => {
 
   }
 
+  function toolTipTitle(item) {
+    return (
+      <span>
+        {item.title}
+        {item.objectTypeId || item.objectID === 0 ? (
+          <FileExtText
+            guid={props.selectedVault.guid}
+            objectId={item.id}
+            classId={item.classId || item.classID}
+          />
+        ) : null}
+      </span>
+    );
+  }
+
   function handleClick(item) {
     if (clickTimeout) {
       clearTimeout(clickTimeout);
@@ -962,36 +978,44 @@ const DocumentList = (props) => {
     //     }
     //   }
     // ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-      {
-        label: (
-          <span className='mx-3'>
-
-            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-            Convert to PDF overwrite Original Copy
-          </span>
-        ),
-        onClick: (itm) => {
-          convertToPDF(itm, false);
-          handleMenuClose();
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+      file?.extension &&
+      [
+        'docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv',
+        'jpg', 'jpeg', 'png', 'gif'
+      ].includes(file.extension.toLowerCase())
+      ? [
+        {
+          label: (
+            <span className='mx-3'>
+              Convert to PDF overwrite Original Copy
+            </span>
+          ),
+          onClick: (itm) => {
+            convertToPDF(itm, true);
+            handleMenuClose();
+          }
         }
-      }
-    ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-      {
-        label: (
-          <span className='mx-3'>
-
-            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-            Convert to PDF Keep Original Copy
-          </span>
-        ),
-        onClick: (itm) => {
-          convertToPDF(itm, true);
-          handleMenuClose();
+      ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+      file?.extension &&
+      [
+        'docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv',
+        'jpg', 'jpeg', 'png', 'gif'
+      ].includes(file.extension.toLowerCase())
+      ? [
+        {
+          label: (
+            <span className='mx-3'>
+              Convert to PDF Keep Original Copy
+            </span>
+          ),
+          onClick: (itm) => {
+            convertToPDF(itm, false);
+            handleMenuClose();
+          }
         }
-      }
-    ] : [])
+      ] : [])
   ];
 
 
@@ -1300,6 +1324,26 @@ const DocumentList = (props) => {
                           <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
                           Search Results
                         </h6>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px 10px 4px 10px',
+                            backgroundColor: '#fff',
+                            borderBottom: '1px solid #e0e0e0',
+                            fontWeight: 400,
+                            fontSize: '12px',
+                            color: '#555'
+                          }}
+                        >
+                          <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            Name
+                          </span>
+                          <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                            Date Modified
+                          </span>
+                        </div>
+
 
                         <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                           {props.data.map((item, index) => (
@@ -1348,30 +1392,74 @@ const DocumentList = (props) => {
                                     }}
                                     style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                                   >
-                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }} >
+                                    <Box
+                                      display="flex"
+                                      alignItems="center"
+                                      sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                                    >
                                       {item.objectTypeId || item.objectID === 0 ? (
-                                        <>
-                                          <FileExtIcon
-                                            fontSize={'15px'}
-                                            guid={props.selectedVault.guid}
-                                            objectId={item.id}
-                                            classId={item.classId || item.classID}
-                                          />
-                                        </>
+                                        <FileExtIcon
+                                          fontSize={'15px'}
+                                          guid={props.selectedVault.guid}
+                                          objectId={item.id}
+                                          classId={item.classId || item.classID}
+                                        />
                                       ) : (
                                         <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                       )}
-                                      <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 ? (
-                                        <>
+                                      <span
+                                        style={{
+                                          marginLeft: '8px',
+                                          flex: 1,
+                                          minWidth: 0,
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          paddingRight: '16px',
+                                          display: 'flex',
+                                          alignItems: 'center'
+                                        }}
+                                      >
+                                        <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                          <span
+                                            style={{
+                                              overflow: 'hidden',
+                                              textOverflow: 'ellipsis',
+                                              whiteSpace: 'nowrap',
+                                              maxWidth: 220,
+                                              display: 'inline-block',
+                                              verticalAlign: 'middle'
+                                            }}
+                                          >
+                                            {item.title}
+                                          </span>
+                                        </Tooltip>
+                                        {item.objectTypeId || item.objectID === 0 ? (
                                           <FileExtText
                                             guid={props.selectedVault.guid}
                                             objectId={item.id}
                                             classId={item.classId || item.classID}
                                           />
-                                        </>
-                                      ) : null}</span>
-
-
+                                        ) : null}
+                                      </span>
+                                      <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                        {item.lastModifiedUtc
+                                          ? (() => {
+                                            const date = new Date(item.lastModifiedUtc);
+                                            if (isNaN(date.getTime())) return '';
+                                            return date
+                                              .toLocaleString('en-US', {
+                                                year: 'numeric',
+                                                month: 'numeric',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                              })
+                                              .replace(',', '');
+                                          })()
+                                          : ''}
+                                      </span>
                                     </Box>
                                   </div>
                                 }
@@ -1487,6 +1575,26 @@ const DocumentList = (props) => {
 
                       Recently Modified By Me ({props.recentData.length})
                     </h6>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 10px 4px 10px',
+                        backgroundColor: '#fff',
+                        borderBottom: '1px solid #e0e0e0',
+                        fontWeight: 400,
+                        fontSize: '12px',
+                        color: '#555'
+                      }}
+                    >
+                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Name
+                      </span>
+                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                        Date Modified
+                      </span>
+                    </div>
+
 
                     <div className=' text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.recentData.map((item, index) => (
@@ -1533,30 +1641,74 @@ const DocumentList = (props) => {
                                 }}
                                 style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                               >
-                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                  {item.objectTypeId === 0 || item.objectID === 0 ? (
-                                    <>
-                                      <FileExtIcon
-                                        fontSize={'15px'}
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId || item.classID}
-                                      />
-                                    </>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                                >
+                                  {item.objectTypeId || item.objectID === 0 ? (
+                                    <FileExtIcon
+                                      fontSize={'15px'}
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
                                   ) : (
                                     <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                   )}
-                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
-                                    <>
+                                  <span
+                                    style={{
+                                      marginLeft: '8px',
+                                      flex: 1,
+                                      minWidth: 0,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      paddingRight: '16px',
+                                      display: 'flex',
+                                      alignItems: 'center'
+                                    }}
+                                  >
+                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                      <span
+                                        style={{
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          maxWidth: 220,
+                                          display: 'inline-block',
+                                          verticalAlign: 'middle'
+                                        }}
+                                      >
+                                        {item.title}
+                                      </span>
+                                    </Tooltip>
+                                    {item.objectTypeId || item.objectID === 0 ? (
                                       <FileExtText
                                         guid={props.selectedVault.guid}
                                         objectId={item.id}
                                         classId={item.classId || item.classID}
                                       />
-                                    </>
-                                  ) : null}</span>
-
-
+                                    ) : null}
+                                  </span>
+                                  <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                    {item.lastModifiedUtc
+                                      ? (() => {
+                                        const date = new Date(item.lastModifiedUtc);
+                                        if (isNaN(date.getTime())) return '';
+                                        return date
+                                          .toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          .replace(',', '');
+                                      })()
+                                      : ''}
+                                  </span>
                                 </Box>
                               </div>
                             }
@@ -1576,6 +1728,7 @@ const DocumentList = (props) => {
 
                       Recently Modified By Me
                     </h6>
+
 
                     <Box
                       sx={{
@@ -1643,6 +1796,26 @@ const DocumentList = (props) => {
 
                       Assigned ({props.assignedData.length})
                     </h6>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 10px 4px 10px',
+                        backgroundColor: '#fff',
+                        borderBottom: '1px solid #e0e0e0',
+                        fontWeight: 400,
+                        fontSize: '12px',
+                        color: '#555'
+                      }}
+                    >
+                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Name
+                      </span>
+                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                        Date Modified
+                      </span>
+                    </div>
+
 
                     <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.assignedData.map((item, index) => (
@@ -1689,30 +1862,74 @@ const DocumentList = (props) => {
                                 }}
                                 style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                               >
-                                <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                                >
                                   {item.objectTypeId || item.objectID === 0 ? (
-                                    <>
-                                      <FileExtIcon
-                                        fontSize={'15px'}
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId || item.classID}
-                                      />
-                                    </>
+                                    <FileExtIcon
+                                      fontSize={'15px'}
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
                                   ) : (
                                     <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
                                   )}
-                                  <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId === 0 || item.objectID === 0 ? (
-                                    <>
+                                  <span
+                                    style={{
+                                      marginLeft: '8px',
+                                      flex: 1,
+                                      minWidth: 0,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      paddingRight: '16px',
+                                      display: 'flex',
+                                      alignItems: 'center'
+                                    }}
+                                  >
+                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                      <span
+                                        style={{
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          maxWidth: 220,
+                                          display: 'inline-block',
+                                          verticalAlign: 'middle'
+                                        }}
+                                      >
+                                        {item.title}
+                                      </span>
+                                    </Tooltip>
+                                    {item.objectTypeId || item.objectID === 0 ? (
                                       <FileExtText
                                         guid={props.selectedVault.guid}
                                         objectId={item.id}
                                         classId={item.classId || item.classID}
                                       />
-                                    </>
-                                  ) : null}</span>
-
-
+                                    ) : null}
+                                  </span>
+                                  <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                    {item.lastModifiedUtc
+                                      ? (() => {
+                                        const date = new Date(item.lastModifiedUtc);
+                                        if (isNaN(date.getTime())) return '';
+                                        return date
+                                          .toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          .replace(',', '');
+                                      })()
+                                      : ''}
+                                  </span>
                                 </Box>
                               </div>
                             }
@@ -1732,6 +1949,7 @@ const DocumentList = (props) => {
 
                       Assigned
                     </h6>
+
                     <Box
                       sx={{
                         width: '100%',
@@ -1797,6 +2015,26 @@ const DocumentList = (props) => {
 
                       Deleted By Me ({props.deletedData.length})
                     </h6>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 10px 4px 10px',
+                        backgroundColor: '#fff',
+                        borderBottom: '1px solid #e0e0e0',
+                        fontWeight: 400,
+                        fontSize: '12px',
+                        color: '#555'
+                      }}
+                    >
+                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Name
+                      </span>
+                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                        Date Modified
+                      </span>
+                    </div>
+
 
                     <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
                       {props.deletedData.map((item, index) => (
@@ -1843,35 +2081,62 @@ const DocumentList = (props) => {
                                 }}
                                 style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                               >
-                                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
-                                  <Box display="flex" alignItems="center">
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                                >
+                                  {item.objectTypeId || item.objectID === 0 ? (
+                                    <FileExtIcon
+                                      fontSize={'15px'}
+                                      guid={props.selectedVault.guid}
+                                      objectId={item.id}
+                                      classId={item.classId || item.classID}
+                                    />
+                                  ) : (
+                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                  )}
+                                  <span
+                                    style={{
+                                      marginLeft: '8px',
+                                      flex: 1,
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      paddingRight: '16px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      minWidth: 0
+                                    }}
+                                  >
+                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                      <span
+                                        style={{
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                          maxWidth: 220,
+                                          display: 'inline-block',
+                                          verticalAlign: 'middle'
+                                        }}
+                                      >
+                                        {item.title}
+                                      </span>
+                                    </Tooltip>
                                     {item.objectTypeId || item.objectID === 0 ? (
-                                      <FileExtIcon
-                                        fontSize={'15px'}
+                                      <FileExtText
                                         guid={props.selectedVault.guid}
                                         objectId={item.id}
                                         classId={item.classId || item.classID}
                                       />
-                                    ) : (
-                                      <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                    )}
-                                    <span style={{ marginLeft: '8px' }}>{item.title}{item.objectTypeId || item.objectID === 0 && (
-                                      <FileExtText
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId}
-                                      />
-                                    )}</span>
-
-                                  </Box>
-
-                                  {/* Button at the right */}
+                                    ) : null}
+                                  </span>
                                   <Button
                                     size="small"
                                     variant="contained"
                                     color="warning"
                                     onClick={() => restoreObject(item)}
-                                    sx={{ textTransform: 'none' }}
+                                    sx={{ textTransform: 'none', marginLeft: 1 }}
                                   >
                                     <i
                                       className="fas fa-trash-restore"
@@ -1883,6 +2148,24 @@ const DocumentList = (props) => {
                                     />
                                     <small>Restore</small>
                                   </Button>
+                                  <span style={{ marginLeft: '12px', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                    {item.lastModifiedUtc
+                                      ? (() => {
+                                        const date = new Date(item.lastModifiedUtc);
+                                        if (isNaN(date.getTime())) return '';
+                                        return date
+                                          .toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          })
+                                          .replace(',', '');
+                                      })()
+                                      : ''}
+                                  </span>
                                 </Box>
                               </div>
 

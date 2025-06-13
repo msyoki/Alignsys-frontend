@@ -457,7 +457,7 @@ const ObjectData = (props) => {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      ID: {props.selectedObject.id} &nbsp;&nbsp; Version: {props.selectedObject.versionId}
+                      ID: {props.selectedObject.displayID} &nbsp;&nbsp; Version: {props.selectedObject.versionId}
                     </Box>
                   </Box>
                   <Box sx={{ textAlign: 'end', fontSize: '12px', maxWidth: '80%', color: '#555' }} className="mx-2">
@@ -921,10 +921,10 @@ const ObjectData = (props) => {
                       </>
                     ) : (
                       <p className="my-1">
-                        <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
-                        <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}
+                        {/* <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} /> */}
+                        {/* <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "} */}
                         <span className='text-muted' style={{ marginLeft: '0.5rem' }}>
-                          Loading workflows ... <CircularProgress size="10px" style={{ color: "#2757aa" }} />
+                          Cheking workflows ... <CircularProgress size="10px" style={{ color: "#2757aa" }} />
                         </span>
                       </p>
                     )}

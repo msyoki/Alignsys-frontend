@@ -61,6 +61,21 @@ const ViewsList = (props) => {
 
     const [file, setFile] = useState(null);
 
+    function toolTipTitle(item) {
+        return (
+            <span>
+                {item.title}
+                {item.objectTypeId === 0 ? (
+                    <FileExtText
+                        guid={props.selectedVault.guid}
+                        objectId={item.id}
+                        classId={item.classId}
+                    />
+                ) : null}
+            </span>
+        );
+    }
+
     async function convertToPDF(item, overWriteOriginal) {
         // alert(file.fileID);
         // console.log('Converting to PDF:', file);
@@ -192,6 +207,7 @@ const ViewsList = (props) => {
             setLoading(false);
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.viewName);
+            console.log(response.data)
         } catch {
             setLoading(false);
             props.setAlertPopOpen(true);
@@ -217,6 +233,7 @@ const ViewsList = (props) => {
             setLoading(false);
             setSelectedViewObjects(response.data);
             setSelectedViewName(item.title);
+            console.log(response.data)
         } catch {
             setLoading(false);
             props.setAlertPopOpen(true);
@@ -264,6 +281,7 @@ const ViewsList = (props) => {
                 setLoading(false);
                 setSelectedViewObjects(response.data);
                 setSelectedViewName(item.title);
+                console.log(response.data)
             } catch {
                 setLoading(false);
                 props.setAlertPopOpen(true);
@@ -305,6 +323,7 @@ const ViewsList = (props) => {
     // Right click menu
     const handleRightClick = (event, item) => {
         event.preventDefault();
+
         setMenuAnchor(event.currentTarget);
         setMenuItem(item);
         if (item.objectID === 0 || item.objectTypeId === 0) {
@@ -316,7 +335,10 @@ const ViewsList = (props) => {
         setMenuItem(null);
     };
 
+
+
     const rightClickActions = [
+
         ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
             {
                 label: (
@@ -353,36 +375,44 @@ const ViewsList = (props) => {
         //     }
         //   }
         // ] : []),
-        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-            {
-                label: (
-                    <span className='mx-3'>
-
-                        {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-                        Convert to PDF overwrite Original Copy
-                    </span>
-                ),
-                onClick: (itm) => {
-                    convertToPDF(itm, false);
-                    handleMenuClose();
+        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+            file?.extension &&
+            [
+                'docx', 'doc', 'xlsx', 'xls', 'ppt',
+                'jpg', 'jpeg', 'png', 'gif'
+            ].includes(file.extension.toLowerCase())
+            ? [
+                {
+                    label: (
+                        <span className='mx-3'>
+                            Convert to PDF overwrite Original Copy
+                        </span>
+                    ),
+                    onClick: (itm) => {
+                        convertToPDF(itm, false);
+                        handleMenuClose();
+                    }
                 }
-            }
-        ] : []),
-        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-            {
-                label: (
-                    <span className='mx-3'>
-
-                        {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-                        Convert to PDF Keep Original Copy
-                    </span>
-                ),
-                onClick: (itm) => {
-                    convertToPDF(itm, true);
-                    handleMenuClose();
+            ] : []),
+        ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+            file?.extension &&
+            [
+                'docx', 'doc', 'xlsx', 'xls', 'ppt',
+                'jpg', 'jpeg', 'png', 'gif'
+            ].includes(file.extension.toLowerCase())
+            ? [
+                {
+                    label: (
+                        <span className='mx-3'>
+                            Convert to PDF Keep Original Copy
+                        </span>
+                    ),
+                    onClick: (itm) => {
+                        convertToPDF(itm, true);
+                        handleMenuClose();
+                    }
                 }
-            }
-        ] : [])
+            ] : [])
     ];
     // --- UI ---
     return (
@@ -442,6 +472,27 @@ const ViewsList = (props) => {
                             ))}
                         </div>
                     </h6>
+                    {selectedViewObjects.some(item => item.type === "MFFolderContentItemTypeObjectVersion") && (
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px 10px 4px 10px',
+                                backgroundColor: '#fff',
+                                borderBottom: '1px solid #e0e0e0',
+                                fontWeight: 400,
+                                fontSize: '12px',
+                                color: '#555'
+                            }}
+                        >
+                            <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                Name
+                            </span>
+                            <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                                Date Modified
+                            </span>
+                        </div>
+                    )}
                     <div className='p-2 text-dark' style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                         {selectedViewObjects.map((item, index) => (
                             <React.Fragment key={index}>
@@ -480,21 +531,54 @@ const ViewsList = (props) => {
 
                                                     style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                                                 >
-                                                    <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit' }}>
+
+
+                                                    <Box
+                                                        display="flex"
+                                                        alignItems="center"
+                                                        sx={{
+                                                            padding: '3px',
+                                                            backgroundColor: props.selectedItemId === item.id ? '#fcf3c0' : 'inherit',
+                                                            width: '100%'
+                                                        }}
+                                                    >
                                                         {item.objectTypeId === 0 ? (
-                                                            <>
-                                                                <FileExtIcon
-                                                                    fontSize={'15px'}
-                                                                    guid={props.selectedVault.guid}
-                                                                    objectId={item.id}
-                                                                    classId={item.classId !== undefined ? item.classId : item.classID}
-                                                                />
-                                                            </>
+                                                            <FileExtIcon
+                                                                fontSize={'15px'}
+                                                                guid={props.selectedVault.guid}
+                                                                objectId={item.id}
+                                                                classId={item.classId !== undefined ? item.classId : item.classID}
+                                                            />
                                                         ) : (
                                                             <i className="fa-solid fa-folder" style={{ fontSize: '15px', color: '#2a68af', marginLeft: '8px' }}></i>
                                                         )}
-                                                        <span style={{ marginLeft: '8px' }}>
-                                                            {item.title}
+                                                        <span
+                                                            style={{
+                                                                marginLeft: '8px',
+                                                                flex: 1,
+                                                                minWidth: 0,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                paddingRight: '16px'
+                                                            }}
+                                                        >
+                                                            <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                                                <span
+                                                                    style={{
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        whiteSpace: 'nowrap',
+                                                                        maxWidth: 220,
+                                                                        display: 'inline-block',
+                                                                        verticalAlign: 'middle'
+                                                                    }}
+                                                                >
+                                                                    {item.title}
+                                                                </span>
+                                                            </Tooltip>
                                                             {item.objectTypeId === 0 ? (
                                                                 <FileExtText
                                                                     guid={props.selectedVault.guid}
@@ -503,7 +587,27 @@ const ViewsList = (props) => {
                                                                 />
                                                             ) : null}
                                                         </span>
+                                                        <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                                            {item.lastModifiedUtc
+                                                                ? (() => {
+                                                                    const date = new Date(item.lastModifiedUtc);
+                                                                    if (isNaN(date.getTime())) return '';
+                                                                    return date
+                                                                        .toLocaleString('en-US', {
+                                                                            year: 'numeric',
+                                                                            month: 'numeric',
+                                                                            day: 'numeric',
+                                                                            hour: '2-digit',
+                                                                            minute: '2-digit',
+                                                                            hour12: true
+                                                                        })
+                                                                        .replace(',', '');
+                                                                })()
+                                                                : ''}
+                                                        </span>
                                                     </Box>
+
+
                                                 </div>
                                             }
                                         >

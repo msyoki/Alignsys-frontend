@@ -7,6 +7,7 @@ import FileExtText from "../FileExtText";
 import * as constants from '../Auth/configs'
 import RightClickMenu from "../RightMenu";
 import OfficeApp from "../Modals/OfficeAppDialog";
+import { Tooltip } from '@mui/material';
 
 function useSessionState(key, defaultValue) {
   const getInitialValue = () => {
@@ -43,6 +44,22 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuItem, setMenuItem] = useState(null);
   const [file, setFile] = useState(null);
+
+  function toolTipTitle(subItem) {
+    return (
+      <span>
+        {subItem.title}
+        {subItem.objectID === 0 && (
+          <FileExtText
+            guid={selectedVault.guid}
+            objectId={subItem.id}
+            classId={subItem.classID}
+          />
+        )}
+      </span>
+    );
+  }
+
 
   async function fetchObjectFile(item) {
     // const objectType = item.objectTypeId ?? item.objectID;
@@ -91,6 +108,7 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
       const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${mfilesId}`
       const response = await axios.get(url);
       setLinkedObjects(response.data || []);
+      console.log(response.data)
     } catch (error) {
       setLinkedObjects([]);
     }
@@ -248,36 +266,44 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
     //     }
     //   }
     // ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-      {
-        label: (
-          <span className='mx-3'>
-
-            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-            Convert to PDF overwrite Original Copy
-          </span>
-        ),
-        onClick: (itm) => {
-          convertToPDF(itm, false);
-          handleMenuClose();
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+      file?.extension &&
+      [
+        'docx', 'doc', 'xlsx', 'xls', 'ppt',
+        'jpg', 'jpeg', 'png', 'gif'
+      ].includes(file.extension.toLowerCase())
+      ? [
+        {
+          label: (
+            <span className='mx-3'>
+              Convert to PDF overwrite Original Copy
+            </span>
+          ),
+          onClick: (itm) => {
+            convertToPDF(itm, false);
+            handleMenuClose();
+          }
         }
-      }
-    ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission && file ? [
-      {
-        label: (
-          <span className='mx-3'>
-
-            {/* <i className="fa-solid fa-arrows-spin" style={{ marginRight: '6px', color: '#2757aa', fontSize: '24px' }}></i> */}
-            Convert to PDF Keep Original Copy
-          </span>
-        ),
-        onClick: (itm) => {
-          convertToPDF(itm, true);
-          handleMenuClose();
+      ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+      file?.extension &&
+      [
+        'docx', 'doc', 'xlsx', 'xls', 'ppt',
+        'jpg', 'jpeg', 'png', 'gif'
+      ].includes(file.extension.toLowerCase())
+      ? [
+        {
+          label: (
+            <span className='mx-3'>
+              Convert to PDF Keep Original Copy
+            </span>
+          ),
+          onClick: (itm) => {
+            convertToPDF(itm, true);
+            handleMenuClose();
+          }
         }
-      }
-    ] : [])
+      ] : [])
   ];
 
   return (
@@ -335,27 +361,54 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                         onContextMenu={e => handleRightClick(e, subItem)}
                         style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                       >
-                        <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
-                          {subItem.objectID === 0 ? (
-                            <FileExtIcon
-                              fontSize={'15px'}
-                              guid={selectedVault.guid}
-                              objectId={subItem.id}
-                              classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
-                            />
-                          ) : (
-                            <i
-                              className="fas fa-folder mx-2"
-                              style={{ fontSize: "15px", color: "#2a68af" }}
-                            ></i>
-                          )}
-                          <span style={{ fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
-                            <FileExtText
-                              guid={selectedVault.guid}
-                              objectId={subItem.id}
-                              classId={subItem.classID}
-                            />
-                          )}</span>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                        >
+
+                          <i
+                            className="fas fa-folder mx-2"
+                            style={{ fontSize: "15px", color: "#2a68af" }}
+                          ></i>
+
+
+                          <Tooltip title={toolTipTitle(subItem)} placement="right" arrow>
+                            <span
+                              style={{
+                                marginLeft: '8px',
+                                flex: 1,
+                                minWidth: 0,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: 220, // or any reasonable width
+                                display: 'inline-block',
+                                verticalAlign: 'middle'
+                              }}
+                            >
+                              {subItem.title}
+                            </span>
+                          </Tooltip>
+
+                          <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                            {subItem.lastModifiedUtc
+                              ? (() => {
+                                const date = new Date(subItem.lastModifiedUtc);
+                                if (isNaN(date.getTime())) return '';
+                                return date
+                                  .toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                  })
+                                  .replace(',', '');
+                              })()
+                              : ''}
+                          </span>
                         </Box>
                       </div>
                     }
@@ -399,27 +452,68 @@ const LinkedObjectsTree = ({ id, objectType, selectedVault, mfilesId, handleRowC
                         onContextMenu={e => handleRightClick(e, subItem)}
                         style={{ width: '100%', display: 'flex', alignItems: 'center' }}
                       >
-                        <Box display="flex" alignItems="center" sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit' }}>
-                          {subItem.objectID === 0 ? (
-                            <FileExtIcon
-                              fontSize={'15px'}
-                              guid={selectedVault.guid}
-                              objectId={subItem.id}
-                              classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
-                            />
-                          ) : (
-                            <i
-                              className="fas fa-folder mx-1"
-                              style={{ fontSize: "15px", color: "#fff" }}
-                            ></i>
-                          )}
-                          <span style={{ marginLeft: '8px', fontSize: '13px' }}>{subItem.title}{subItem.objectID === 0 && (
-                            <FileExtText
-                              guid={selectedVault.guid}
-                              objectId={subItem.id}
-                              classId={subItem.classID}
-                            />
-                          )}</span>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          sx={{ padding: '3px', backgroundColor: selectedItemId === subItem.id ? '#fcf3c0' : 'inherit', width: '100%' }}
+                        >
+                          <FileExtIcon
+                            fontSize={'15px'}
+                            guid={selectedVault.guid}
+                            objectId={subItem.id}
+                            classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
+                          />
+                          <span
+                            style={{
+                              marginLeft: '8px',
+                              fontSize: '13px',
+                              flex: 1,
+                              minWidth: 0,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <Tooltip title={toolTipTitle(subItem)} placement="right" arrow>
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  maxWidth: 220,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  verticalAlign: 'middle'
+                                }}
+                              >
+                                {subItem.title}
+                              </span>
+                            </Tooltip>
+                            {subItem.objectID === 0 && (
+                              <FileExtText
+                                guid={selectedVault.guid}
+                                objectId={subItem.id}
+                                classId={subItem.classID}
+                              />
+                            )}
+                          </span>
+                          <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
+                            {subItem.lastModifiedUtc
+                              ? (() => {
+                                const date = new Date(subItem.lastModifiedUtc);
+                                if (isNaN(date.getTime())) return '';
+                                return date
+                                  .toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                  })
+                                  .replace(',', '');
+                              })()
+                              : ''}
+                          </span>
                         </Box>
                       </div>
                     }
