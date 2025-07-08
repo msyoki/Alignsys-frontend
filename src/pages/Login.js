@@ -18,6 +18,7 @@ import '../styles/Custombuttons.css';
 
 import image from '../images/ZFBLU.png';
 import logo2 from '../images/ZFWHITE.png';
+import * as constants from '../components/Auth/configs'
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -63,15 +64,17 @@ const Login = () => {
             <h6 className="mb-3">SIGN IN</h6>
 
             <FormControl variant="standard" fullWidth className="mb-3">
-              <InputLabel htmlFor="email">Email*</InputLabel>
+              <InputLabel htmlFor="email">
+                {constants.auth_type_email === "true" ? "Email" : "Username"}*
+              </InputLabel>
               <Input
                 id="email"
                 name="email"
-                type="email"
+                type={constants.auth_type_email === "true" ? "email" : "text"}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                placeholder={constants.auth_type_email === "true" ? "Email" : "Username"}
                 startAdornment={
                   <InputAdornment position="start">
                     <PersonIcon />
@@ -80,6 +83,7 @@ const Login = () => {
                 style={{ fontSize: '14px' }}
               />
             </FormControl>
+
 
             <FormControl variant="standard" fullWidth className="mb-2">
               <InputLabel htmlFor="password">Password*</InputLabel>
@@ -165,7 +169,7 @@ const Login = () => {
           <img src={logo2} alt="Banner Logo" width="300px" />
           <p
             className="text-white mt-4"
-            style={{ fontStyle: 'italic', fontSize: '15px' }}
+            style={{fontSize: '15px' }}
           >
             <strong>EDMS</strong> Software Solution
           </p>

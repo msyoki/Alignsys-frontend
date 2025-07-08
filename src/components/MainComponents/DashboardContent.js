@@ -28,6 +28,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import LinkedObjectsTree from './LinkedObjectsTree';
 import AddButtonWithMenu from '../AddButtonWithMenu';
+import MultifileFiles from '../MultifileFiles';
 
 
 function CustomTabPanel({ children, value, index, ...other }) {
@@ -40,7 +41,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#fff' }}>
+        <Box className='my-1'  sx={{  height: '100%', overflowY: 'auto', backgroundColor: '#fff' }}>
           {children}
         </Box>
       )}
@@ -72,8 +73,8 @@ const DocumentList = (props) => {
           return defaultValue;
         }
         return JSON.parse(stored);
-      } catch (e) {
-        console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
+      } catch {
+        // console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
         return defaultValue;
       }
     };
@@ -83,8 +84,8 @@ const DocumentList = (props) => {
     useEffect(() => {
       try {
         sessionStorage.setItem(key, JSON.stringify(value));
-      } catch (e) {
-        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      } catch  {
+        // console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
       }
     }, [key, value]);
 
@@ -148,7 +149,7 @@ const DocumentList = (props) => {
     // alert(file.fileID);
     // console.log('Converting to PDF:', file);
 
-    console.log(item)
+
     const payload = {
       vaultGuid: props.selectedVault.guid,  // string
       objectId: item.id,                      // number
@@ -159,7 +160,7 @@ const DocumentList = (props) => {
       userID: props.mfilesId                     // number
     };
 
-    console.log(payload)
+ 
     try {
       const response = await axios.post(
         `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
@@ -173,8 +174,8 @@ const DocumentList = (props) => {
       );
 
       return response.data;
-    } catch (error) {
-      console.error('Error converting to PDF:', error);
+    } catch  {
+      // console.error('Error converting to PDF:', error);
       // throw error;
     }
   }
@@ -182,7 +183,8 @@ const DocumentList = (props) => {
 
   async function fetchObjectFile(item) {
     // const objectType = item.objectTypeId ?? item.objectID;
-    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/0`;
+    const classId= item.classId || item.classID
+    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${classId}`;
 
     try {
       const response = await axios.get(url, {
@@ -193,23 +195,23 @@ const DocumentList = (props) => {
 
       const file = response.data?.[0];
       setFile(file);
-      console.log('Fetched file:', file);
+     
       // alert(`File ID is: ${file.fileID}`)
-    } catch (error) {
-      console.error('Failed to fetch object file:', error);
+    } catch  {
+      // console.error('Failed to fetch object file:', error);
       // throw error;
     }
   }
 
   // Handler for right-click
   const handleRightClick = (event, item) => {
-    console.log(item)
+ 
     event.preventDefault();
     setMenuAnchor(event.currentTarget);
     setMenuItem(item);
     if (item.objectID === 0 || item.objectTypeId === 0) {
       fetchObjectFile(item);
-     
+
     }
   };
 
@@ -310,9 +312,9 @@ const DocumentList = (props) => {
         }
       }, 5000);
 
-    } catch (error) {
+    } catch {
       setUpdatingObject(false)
-      console.error('Error updating object props:', error);
+      // console.error('Error updating object props:', error);
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
       setAlertPopMessage("something went wrong, please try again later!");
@@ -348,8 +350,8 @@ const DocumentList = (props) => {
       setAlertPopSeverity("success");
       setAlertPopMessage("Updated successfully!");
       setUpdatingObject(false)
-    } catch (error) {
-      console.error('Error transitioning state:', error);
+    } catch  {
+      // console.error('Error transitioning state:', error);
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
       setAlertPopMessage("something went wrong, please try again later!");
@@ -394,9 +396,9 @@ const DocumentList = (props) => {
         setAlertPopMessage("Updated successfully!");
         setNewWF(null)
         setNewWFState(null)
-      } catch (error) {
+      } catch  {
         setUpdatingObject(false);
-        console.error('Error transitioning state:', error);
+        // console.error('Error transitioning state:', error);
         setAlertPopOpen(true);
         setAlertPopSeverity("error");
         setAlertPopMessage("something went wrong, please try again later!");
@@ -453,146 +455,143 @@ const DocumentList = (props) => {
 
 
 
-  const previewObject = async (item, getLinkedItems) => {
-    setWorkflows([])
-    setCheckedItems({})
-    setNewWF(null)
-    setNewWFState(null)
-    setComments([])
-    setLoadingWFS(true)
-    setBase64('');
-    setExtension('');
-
-    setSelectedState({})
-    setLoadingObject(true)
-    setLoadingClick(true)
-
-    setFormValues({})
-
-    setSelectedObject(item)
-
-
-    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id, (item.classId || item.classID))
 
 
 
-    try {
-      const propsResponse = await axios.get(`${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`);
-      console.log(propsResponse.data)
-      setPreviewObjectProps(propsResponse.data);
-      setLoadingObject(false)
-      setLoadingClick(false)
-    } catch (error) {
-      setLoadingClick(false)
-      setLoadingObject(false)
-
-
-    }
-
-    // }
-    getObjectComments(item);
+  // Helper function to reset common state
+  const resetPreviewState = () => {
+    setWorkflows([]);
+    setCheckedItems({});
+    setNewWF(null);
+    setNewWFState(null);
+    setLoadingWFS(true);
+    setComments([]);
+    setSelectedState({});
+    setFormValues({});
   };
 
-  const previewSublistObject = async (item, getLinkedItems) => {
-    setWorkflows([])
-    setCheckedItems({})
-    setNewWF(null)
-    setNewWFState(null)
-    setLoadingWFS(true)
+  // Helper function to set loading states
+  const setLoadingStates = (loading) => {
+    setLoadingObject(loading);
+    setLoadingClick(loading);
+  };
 
-    setComments([]);
-
-
-    setSelectedState({});
-    setLoadingObject(true);
-    setLoadingClick(true)
-    setFormValues({});
-    setSelectedObject(item);
-    // console.log(item)
-
-    // Fetch the object workflow asynchronously
-    getSelectedObjWorkflow((item.objectTypeId || item.objectID), item.id, (item.classId || item.classID))
-
+  // Helper function to fetch object properties
+  const fetchObjectProperties = async (item) => {
+    const classId = item.classId !== undefined ? item.classId : item.classID;
+    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${classId}/${props.mfilesId}`;
 
     try {
-      // Fetch view object properties
-      const propsResponse = await axios.get(
-        `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${(item.classId !== undefined ? item.classId : item.classID)}/${props.mfilesId}`
-      );
-      console.log(propsResponse.data)
+      const response = await axios.get(url);
+   
+      setPreviewObjectProps(response.data);
+      return { success: true };
+    } catch  {
+      // console.error('Error fetching object properties:', error);
+      // return { success: false, error };
+    }
+  };
 
-      setPreviewObjectProps(propsResponse.data);
-      setLoadingObject(false)
-      setLoadingClick(false)
-    } catch (error) {
-      setLoadingObject(false);
-      setLoadingClick(false)
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("something went wrong, please try again later!");
+  // Helper function to handle file download for documents
+  const handleDocumentDownload = async (item) => {
+    const objectTypeId = item.objectTypeId ?? item.objectID;
 
-    } finally {
-      setLoadingObject(false);
-      setLoadingClick(false)
+    if (objectTypeId !== 0) {
+      setBase64('');
+      setExtension('');
+      return { success: true };
     }
 
-    // console.log(item.objectID)
-    // console.log(item.objectTypeId)
+    setLoadingFile(true);
 
-    // Handle document fetching if item is a document
-    if (item.objectTypeId === 0 || item.objectID === 0) {
+    try {
+      // Fetch object files
+      const filesUrl = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+      const filesResponse = await axios.get(filesUrl, { headers: { Accept: '*/*' } });
 
+      const fileId = filesResponse.data[0].fileID;
+      setSelectedFileId(fileId);
+    
+      // Download the file
+      const downloadUrl = `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${fileId}`;
+      // console.log(downloadUrl)
+      const downloadResponse = await axios.get(downloadUrl, { headers: { Accept: '*/*' } });
 
-      setLoadingFile(true);
+      setBase64(downloadResponse.data.base64);
+      setExtension(downloadResponse.data.extension.replace('.', ''));
+      // console.log(downloadResponse.data.base64)
+      // console.log(downloadResponse.data.extension.replace('.', ''))
 
-      let url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId ?? item.objectID)}`;
+      return { success: true };
+    } catch {
+      // console.error('Error handling document download:', error);
+      // return { success: false, error };
+    } finally {
+      setLoadingFile(false);
+    }
+  };
 
-      // console.log(url)
-      try {
-        // Fetch object files
-        const filesResponse = await axios.get(
-          url,
-          { headers: { Accept: '*/*' } }
-        );
+  // Helper function to show error alert
+  const showErrorAlert = (message = "Not found! object may be deleted or not available at the time") => {
+    setAlertPopOpen(true);
+    setAlertPopSeverity("error");
+    setAlertPopMessage(message);
+  };
 
-        const fileId = filesResponse.data[0].fileID;
+  // Main preview function that handles both cases
+  const previewObjectInternal = async (item, isSublist = false) => {
+    // Reset state
+    resetPreviewState();
+    setLoadingStates(true);
+    setSelectedObject(item);
 
-        setSelectedFileId(fileId);
-
-        // Download the file using the fileId
-        try {
-          const downloadResponse = await axios.get(
-            `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${(item.objectTypeId ?? item.objectID)}/${fileId}`,
-            { headers: { Accept: '*/*' } }
-          );
-
-          setLoadingClick(false)
-          setBase64(downloadResponse.data.base64);
-          setExtension(downloadResponse.data.extension.replace('.', ''));
-          let ext = downloadResponse.data.extension.replace('.', '')
-          // console.log(ext)
-        } catch (downloadError) {
-          console.error('Error downloading file:', downloadError);
-        } finally {
-          setLoadingFile(false);
-          setLoadingClick(false)
-        }
-      } catch (filesError) {
-        setLoadingClick(false)
-        setAlertPopOpen(true);
-        setAlertPopSeverity("error");
-        setAlertPopMessage("something went wrong, please try again later!");
-        console.error('Error fetching object files:', filesError);
-        setLoadingFile(false);
-        setLoadingClick(false)
-      }
-    } else {
+    // Reset file-related state only for regular preview
+    if (!isSublist) {
       setBase64('');
       setExtension('');
     }
 
-    // Fetch object comments
+    // Get workflow info
+    const objectTypeId = item.objectTypeId || item.objectID;
+    const classId = item.classId || item.classID;
+    getSelectedObjWorkflow(objectTypeId, item.id, classId);
+
+    try {
+      // Fetch object properties
+      const propsResult = await fetchObjectProperties(item);
+
+      if (!propsResult.success) {
+        throw propsResult.error;
+      }
+
+      // Handle document download for sublist objects
+      if (isSublist) {
+        const downloadResult = await handleDocumentDownload(item);
+        if (!downloadResult.success) {
+          throw downloadResult.error;
+        }
+      }
+
+    } catch {
+      // console.error('Error in preview operation:', error);
+      // if (isSublist) {
+      //   showErrorAlert();
+      // }
+    } finally {
+      setLoadingStates(false);
+    }
+
+    // Fetch comments
     getObjectComments(item);
+  };
+
+  // Public functions
+  const previewObject = async (item, getLinkedItems) => {
+    await previewObjectInternal(item, false);
+  };
+
+  const previewSublistObject = async (item, getLinkedItems) => {
+    await previewObjectInternal(item, true);
   };
 
   const discardChange = () => {
@@ -608,6 +607,32 @@ const DocumentList = (props) => {
 
   }
 
+  const downloadFile = async (fileId, item) => {
+    // Reset base64 and extension before starting download
+    setBase64('');
+    setExtension('');
+    setLoadingClick(true);
+    setLoadingFile(true);
+
+    try {
+      const downloadResponse = await axios.get(
+        `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${(item.classId ?? item.classID)}/${fileId}`,
+        { headers: { Accept: '*/*' } }
+      );
+
+      setBase64(downloadResponse.data.base64);
+      setExtension(downloadResponse.data.extension.replace('.', ''));
+      // let ext = downloadResponse.data.extension.replace('.', '');
+      // console.log(ext);
+    } catch {
+      // console.error('Error downloading file:', downloadError);
+    } finally {
+      setLoadingFile(false);
+      setLoadingClick(false);
+    }
+  };
+
+
   const fetchVaultWorkflows = async (objectTypeId, classId) => {
 
     try {
@@ -620,53 +645,51 @@ const DocumentList = (props) => {
       setWorkflows(response.data)
 
 
-    } catch (error) {
+    } catch  {
       setLoadingWFS(false)
-      console.error('Error fetching workflows:', error);
+      // console.error('Error fetching workflows:', error);
 
 
     }
   };
 
-  const getSelectedObjWorkflow = async (objectTypeId, objectsId, classId) => {
+const getSelectedObjWorkflow = async (objectTypeId, objectsId, classId) => {
+  const data = {
+    vaultGuid: props.selectedVault.guid,
+    objectTypeId: objectTypeId,
+    objectId: objectsId,
+    userEmail: props.user.email,
+    userID: props.mfilesId
+  };
 
-    const data = {
-      vaultGuid: props.selectedVault.guid,
-      objectTypeId: objectTypeId,
-      objectId: objectsId,
-      userEmail: props.user.email,
-      userID: props.mfilesId
-    };
-
-
-    await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/GetObjectworkflowstate`, data, {
-      headers: {
-        'accept': '*/*',
-        'Content-Type': 'application/json'
+  try {
+    const response = await axios.post(
+      `${constants.mfiles_api}/api/WorkflowsInstance/GetObjectworkflowstate`,
+      data,
+      {
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        }
       }
-    })
-      .then(response => {
-        setLoadingWFS(false)
-        setSelectedObjWf(response.data)
+    );
 
+    setLoadingWFS(false);
+    setSelectedObjWf(response.data);
 
-        setCurrentState({
-          title: response.data.currentStateTitle,
-          id: response.data.currentStateid
-        })
-        console.log(response.data)
-
-
-
-      })
-      .catch(error => {
-        fetchVaultWorkflows(objectTypeId, classId)
-        console.error('Error:', error);
-        setSelectedObjWf(null)
-
-
-      });
+    setCurrentState({
+      title: response.data.currentStateTitle,
+      id: response.data.currentStateid
+    });
+  } catch  {
+    fetchVaultWorkflows(objectTypeId, classId);
+    setSelectedObjWf(null);
+    setLoadingWFS(false);
+    // Optionally log the error:
+    // console.error('Workflow fetch error:', error);
   }
+};
+
 
   const getObjectComments = async (item) => {
     setLoadingComments(true)
@@ -745,7 +768,8 @@ const DocumentList = (props) => {
       setLoading(false)
       setSearched(true)
       props.setData(data);
-      console.log(data)
+      // console.log(data)
+ 
     });
 
   };
@@ -893,7 +917,7 @@ const DocumentList = (props) => {
     return (
       <span>
         {item.title}
-        {item.objectTypeId || item.objectID === 0 ? (
+        {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true) ? (
           <FileExtText
             guid={props.selectedVault.guid}
             objectId={item.id}
@@ -911,14 +935,16 @@ const DocumentList = (props) => {
     }
 
     clickTimeout = setTimeout(() => {
-      setSelectedItemId(item.id);
-      if (item.objectTypeId === 0 || item.objectID === 0) {
+      setSelectedItemId(`${item.id}-${item.title}`);
+      if ((item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true)) {
         previewSublistObject(item, true);
       } else {
         previewObject(item, true);
       }
     }, 250); // Delay to allow doubleClick to cancel it
   }
+
+
 
   function handleDoubleClick(item) {
     if (clickTimeout) {
@@ -942,7 +968,7 @@ const DocumentList = (props) => {
 
 
   const rightClickActions = [
-    ...(menuItem && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
       {
         label: (
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -1075,458 +1101,436 @@ const DocumentList = (props) => {
 
 
 
-  return (
-    <>
-      <ConfirmUpdateDialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        onConfirm={updateObjectMetadata}
-        uptatingObject={uptatingObject}
-        message={selectedObject.title}
-        discardChange={discardChange}
+ return (
+  <>
+    <ConfirmUpdateDialog
+      open={dialogOpen}
+      onClose={handleCloseDialog}
+      onConfirm={updateObjectMetadata}
+      uptatingObject={uptatingObject}
+      message={selectedObject.title}
+      discardChange={discardChange}
+    />
 
-      />
+    <TimedAlert
+      open={alertOpen}
+      onClose={handleAlertClose}
+      severity={severity}
+      message={message}
+      setSeverity={setAlertPopSeverity}
+      setMessage={setAlertPopMessage}
+    />
 
-      <TimedAlert
-        open={alertOpen}
-        onClose={handleAlertClose}
-        severity={severity}
-        message={message}
-        setSeverity={setAlertPopSeverity}
-        setMessage={setAlertPopMessage}
-      />
+    <OfficeApp
+      open={openOfficeApp}
+      close={() => setOpenOfficeApp(false)}
+      object={objectToEditOnOffice}
+      mfilesId={props.mfilesId}
+    />
 
-      <OfficeApp
-        open={openOfficeApp}
-        close={() => setOpenOfficeApp(false)}
-        object={objectToEditOnOffice}
-      />
-
-      <LoadingDialog opendialogloading={loadingClick} />
-
-
-      <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd', height: 'auto' }}>
-        {/* Object List */}
-        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '40%', backgroundColor: '#fff', minWidth: '25%' }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 2,
-              py: 1,
-              fontSize: '13px',
-              backgroundColor: '#fff',
-              color: '#1C4690',
-              overflowX: 'hidden'
-            }}
-          >
-            {/* Logo + Menu Icon */}
-            <Box display="flex" alignItems="center">
-              {/* Sidebar Toggle Icon */}
-              <Box
-                onClick={toggleSidebar}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 40,
-                  height: 40,
-                  cursor: 'pointer',
-                  borderRadius: 1,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    backgroundColor: '#f0f4fa',
-                    transform: 'scale(1.05)',
-                  },
-                }}
-              >
-                <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
-              </Box>
-
-              {/* Logo */}
-              <img
-                src={logo}
-                alt="Logo"
-                width="150"
-                className="mx-3"
-                style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
-              />
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: isMobile ? 'column' : 'row', 
+      backgroundColor: '#dedddd', 
+      height: '100vh' 
+    }} ref={containerRef}>
+      {/* Object List */}
+      <Box 
+        ref={col1Ref} 
+        sx={{ 
+          width: isMobile ? '100%' : '40%', 
+          backgroundColor: '#fff', 
+          minWidth: '25%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Header */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 1.5,
+          py: 1,
+          fontSize: '13px',
+          backgroundColor: '#fff',
+          color: '#1C4690',
+          overflow: 'hidden'
+        }}>
+          {/* Logo + Menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              onClick={toggleSidebar}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
+                cursor: 'pointer',
+                borderRadius: 1,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: '#f0f4fa',
+                  transform: 'scale(1.05)',
+                },
+              }}
+            >
+              <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
             </Box>
+            <img
+              src={logo}
+              alt="Logo"
+              width="150"
+              style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
+            />
+          </Box>
 
-            {/* Right Section: Vault + Avatar */}
-            <Box display="flex" alignItems="center">
-              {/* Vault Selector */}
-              <Tooltip title="Switch to a different vault" placement="left">
-                <Box className="mx-2" sx={{ cursor: 'pointer' }}>
-                  <VaultSelectForm activeVault={props.selectedVault} />
-                </Box>
-              </Tooltip>
+          {/* Right Section */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip title="Switch to a different vault" placement="left">
+              <Box sx={{ cursor: 'pointer' }}>
+                <VaultSelectForm activeVault={props.selectedVault} />
+              </Box>
+            </Tooltip>
+            <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
+              <Avatar
+                alt={`${props.user.first_name} ${props.user.last_name}`}
+                {...props.stringAvatar(
+                  props.user.first_name && props.user.last_name
+                    ? `${props.user.first_name} ${props.user.last_name}`
+                    : props.user.first_name || props.user.last_name || props.user.username
+                )}
+                sx={{
+                  width: 36,
+                  height: 36,
+                  backgroundColor: '#2757aa',
+                  fontSize: '13px',
+                }}
+              />
+            </Tooltip>
+          </Box>
+        </Box>
 
-              {/* User Avatar */}
-              <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
-                <Avatar
-                  alt={`${props.user.first_name} ${props.user.last_name}`}
-                  {...props.stringAvatar(
-                    props.user.first_name && props.user.last_name
-                      ? `${props.user.first_name} ${props.user.last_name}`
-                      : props.user.first_name || props.user.last_name || props.user.username
-                  )}
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    backgroundColor: '#2757aa',
-                    fontSize: '13px',
-                    ml: 2,
+        {/* Search Bar */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          backgroundColor: '#ecf4fc',
+          p: 1
+        }}>
+          <Box sx={{ display: 'flex', width: '100%', maxWidth: '900px', gap: 1 }}>
+            {/* Left Actions */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 , mx:2}}>
+              <Tooltip title="Go back home">
+                <i
+                  onClick={reloadPage}
+                  className="fas fa-home"
+                  style={{
+                    fontSize: '28px',
+                    cursor: 'pointer',
+                    color: '#1C4690',
+                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
                   }}
                 />
               </Tooltip>
+              <AddButtonWithMenu vaultObjectsList={props.vaultObjectsList} fetchItemData={props.fetchItemData} />
+            </Box>
+
+            {/* Search Input */}
+            <Box sx={{ flex: 1 }}>
+              <form onSubmit={handleSearch} style={{ position: 'relative', width: '100%' }}>
+                <input
+                  type="text"
+                  required
+                  placeholder="Search"
+                  value={props.searchTerm}
+                  onChange={(e) => props.setSearchTerm(e.target.value)}
+                  className="form-control form-control-md"
+                  style={{
+                    fontSize: '13px',
+                    borderRadius: '6px',
+                    width: '100%',
+                    paddingRight: '40px'
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <i className="fas fa-search text-muted" style={{ fontSize: '15px' }} />
+                </button>
+              </form>
             </Box>
           </Box>
+        </Box>
 
-          <div
-            className="d-flex justify-content-center shadow-sm p-2"
-            style={{ backgroundColor: '#ecf4fc' }}
-          >
-            <div className="d-flex w-100" style={{ maxWidth: '900px' }}>
-              {/* Left side: Vault Selector - 50% width */}
-              <div className="d-flex align-items-center " style={{ flex: '1 1 20%' }}>
-
-                <Tooltip title="Go back home">
-                  <i
-                    onClick={reloadPage}
-                    className="fas fa-home mx-3"
-                    style={{
-                      fontSize: '30px',
-                      cursor: 'pointer',
-                      color: '#1C4690',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                    }}
-                  ></i>
-                </Tooltip>
-
-                {/* <Tooltip title="Create/Add new object or document">
-                  <i
-                    onClick={props.getVaultObjects}
-                    className="fas fa-plus mx-2"
-                    style={{
-                      fontSize: '25px',
-                      cursor: 'pointer',
-                      color: '#1C4690',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                    }}
-                  ></i>
-                </Tooltip> */}
-                <AddButtonWithMenu vaultObjectsList={props.vaultObjectsList} fetchItemData={props.fetchItemData} />
-
-              </div>
-
-              {/* Right side: Action Icons - 50% width, right aligned */}
-              <div
-                className="d-flex align-items-center "
-                style={{ flex: '1 1 80%' }}
-              >
-                {/* Search Input */}
-                <form onSubmit={handleSearch} className="position-relative flex-grow-1 me-3">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Search"
-                    value={props.searchTerm}
-                    onChange={(e) => props.setSearchTerm(e.target.value)}
-                    className="form-control form-control-md ps-3 pe-5 mx-2"
-                    style={{
-                      fontSize: '13px',
-                      borderRadius: '6px',
-
-                      width: '100%',
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    className="btn position-absolute end-0 top-0 mt-1 me-2 p-0 border-0 bg-transparent"
-                    style={{ height: '30px', width: '30px' }}
-                  >
-                    <i className="fas fa-search text-muted" style={{ fontSize: '15px' }}></i>
-                  </button>
-                </form>
-
-              </div>
-            </div>
-          </div>
-
-
-
-
-
-          <Tabs
-            variant="scrollable"
-            value={value}
-            onChange={handleChange}
-            aria-label="Horizontal tabs example"
-            className="p-1"
-            sx={{
-              borderColor: 'divider',
-              // backgroundColor: '#fff',
+        {/* Tabs */}
+        <Tabs
+          variant="scrollable"
+          value={value}
+          onChange={handleChange}
+          sx={{
+            borderColor: 'divider',
+            backgroundColor: '#ecf4fc',
+            minHeight: '36px',
+            '& .MuiTab-root': {
+              minHeight: '36px',
+              height: '36px',
+              p: '4px 13px',
               backgroundColor: '#ecf4fc',
-              minHeight: '36px',  // Reduced overall tab bar height
-            }}
-          >
-            {['All', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
-              <Tab
-                key={index}
-                style={{ textTransform: 'none' }}
-                label={label}
-                onClick={() => {
-                  resetPreview();
-                  if (label === 'All') setSearched(false);
-                  if (label === 'Recent') props.getRecent?.();
-                  if (label === 'Assigned') props.getAssigned?.();
+              minWidth: 'auto',
+              textTransform: 'none'
+            }
+          }}
+        >
+          {['All', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
+            <Tab
+              key={index}
+              label={label}
+              onClick={() => {
+                resetPreview();
+                if (label === 'All') setSearched(false);
+                if (label === 'Recent') props.getRecent?.();
+                if (label === 'Assigned') props.getAssigned?.();
+              }}
+              {...a11yProps(index)}
+            />
+          ))}
+        </Tabs>
 
-                }}
-                {...a11yProps(index)}
-                sx={{
-                  minHeight: '36px',
-                  height: '36px',
-                  padding: '4px 13px',
-
-                  backgroundColor: '#ecf4fc',
-                  minWidth: 'auto',
-                }}
-              />
-            ))}
-          </Tabs>
-
-          <CustomTabPanel
-            value={value}
-            index={0}
-            style={{
-              backgroundColor: '#fff',
-              padding: '0%',
-              width: '100%',
-
-            }}
-          >
-
+        {/* Tab Content */}
+        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+          <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
             {loading ? (
               <Loader />
-
             ) : (
               <>
-                {searched ?
+                {searched ? (
                   <>
                     {props.data?.length > 0 ? (
-                      <div>
-                        <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                          {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
-                          {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
-                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                      <Box>
+                        {/* Header */}
+                        <Box  sx={{ 
+                          p: 1, 
+                          fontSize: '13px', 
+                          backgroundColor: '#ecf4fc',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#333'
+                        }}>
+                          <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#1C4690' }} />
                           Search Results
-                        </h6>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '4px 10px 4px 10px',
-                            backgroundColor: '#fff',
-                            borderBottom: '1px solid #e0e0e0',
-                            fontWeight: 400,
-                            fontSize: '12px',
-                            color: '#555'
-                          }}
-                        >
-                          <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            Name
-                          </span>
-                          <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
-                            Date Modified
-                          </span>
-                        </div>
+                        </Box>
 
+                        {/* Column Headers */}
+                        <Box sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          p: '4px 10px',
+                          backgroundColor: '#fff',
+                          borderBottom: '1px solid #e0e0e0',
+                          fontSize: '12px',
+                          color: '#555'
+                        }}>
+                          <Box sx={{ ml: '10%', flex: 1 }}>Name</Box>
+                          <Box sx={{ mr: '10%', width: 160, textAlign: 'right' }}>Date Modified</Box>
+                        </Box>
 
-                        <div className='p-2 text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
+                        {/* Items List */}
+                        <Box sx={{ 
+                          height: '60vh', 
+                          overflowY: 'auto',
+                          color: '#333'
+                        }}>
                           {props.data.map((item, index) => (
-
-                            <SimpleTreeView>
+                            <SimpleTreeView key={`search-view-${index}`}>
                               <TreeItem
-                                key={`tree-item-${index}`} // Unique key
-                                itemId={`tree-item-${index}`} // Unique itemId
+                                key={`tree-item-${index}`}
+                                itemId={`tree-item-${index}`}
                                 onClick={() => handleClick(item)}
-                                // onDoubleClick={() => handleDoubleClick(item)}
-
-
+                                onDoubleClick={() => handleDoubleClick(item)}
                                 sx={{
-
-                                  fontSize: "13px", // Apply directly to TreeItem
-                                  "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                                  "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
+                                  fontSize: "13px",
+                                  "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                  "& .MuiTypography-root": { fontSize: "13px !important" },
                                   backgroundColor: '#fff !important',
-                                  "&:hover": {
-                                    backgroundColor: '#fff !important', // Maintain white background on hover
-                                  },
-
-                                  borderRadius: "0px !important", // Remove border radius
-                                  "& .MuiTreeItem-content": {
-                                    borderRadius: "0px !important", // Remove border radius from content area
-                                  },
-                                  "& .MuiTreeItem-content.Mui-selected": {
-                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                  },
-                                  "& .MuiTreeItem-content:hover": {
-                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                  },
-
-
-                                  "& .MuiTreeItem-content.Mui-selected:hover": {
-                                    backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                                  },
+                                  "&:hover": { backgroundColor: '#fff !important' },
+                                  borderRadius: 0,
+                                  "& .MuiTreeItem-content": { borderRadius: 0 },
+                                  "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                  "& .MuiTreeItem-content:hover": { backgroundColor: '#fff !important' },
+                                  "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                 }}
                                 label={
-                                  <div
+                                  <Box
                                     onContextMenu={(e) => {
                                       e.preventDefault();
                                       handleRightClick(e, item);
-
                                     }}
-                                    style={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                                    sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
                                   >
-                                    <Box
-                                      display="flex"
-                                      alignItems="center"
-                                      sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
-                                    >
-                                      {item.objectTypeId || item.objectID === 0 ? (
+                                    <Box sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      p: 0.5,
+                                      backgroundColor: selectedItemId === `${item.id}-${item.title}` ? '#fcf3c0' : 'inherit',
+                                      width: '100%',
+                                      gap: 1
+                                    }}>
+                                      {/* Icon */}
+                                      {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true) ? (
                                         <FileExtIcon
                                           fontSize={'15px'}
                                           guid={props.selectedVault.guid}
                                           objectId={item.id}
                                           classId={item.classId || item.classID}
+                                          sx={{ flexShrink: 0 }}
                                         />
                                       ) : (
-                                        <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
+                                        <i 
+                                          className={
+                                            (item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false)
+                                              ? 'fas fa-book' 
+                                              : 'fa-solid fa-folder'
+                                          }
+                                          style={{ 
+                                            color: (item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false) 
+                                              ? '#7cb518' 
+                                              : '#2a68af',
+                                            fontSize: '15px',
+                                            flexShrink: 0
+                                          }}
+                                        />
                                       )}
-                                      <span
-                                        style={{
-                                          marginLeft: '8px',
-                                          flex: 1,
-                                          minWidth: 0,
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                          paddingRight: '16px',
-                                          display: 'flex',
-                                          alignItems: 'center'
-                                        }}
-                                      >
+
+                                      {/* Title */}
+                                      <Box sx={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                      }}>
                                         <Tooltip title={toolTipTitle(item)} placement="right" arrow>
-                                          <span
-                                            style={{
-                                              overflow: 'hidden',
-                                              textOverflow: 'ellipsis',
-                                              whiteSpace: 'nowrap',
-                                              maxWidth: 220,
-                                              display: 'inline-block',
-                                              verticalAlign: 'middle'
-                                            }}
-                                          >
+                                          <Box sx={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: 220,
+                                          }}>
                                             {item.title}
-                                          </span>
+                                          </Box>
                                         </Tooltip>
-                                        {item.objectTypeId || item.objectID === 0 ? (
+                                        {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true) && (
                                           <FileExtText
                                             guid={props.selectedVault.guid}
                                             objectId={item.id}
                                             classId={item.classId || item.classID}
                                           />
-                                        ) : null}
-                                      </span>
-                                      <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
-                                        {item.lastModifiedUtc
-                                          ? (() => {
-                                            const date = new Date(item.lastModifiedUtc);
-                                            if (isNaN(date.getTime())) return '';
-                                            return date
-                                              .toLocaleString('en-US', {
-                                                year: 'numeric',
-                                                month: 'numeric',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                hour12: true
-                                              })
-                                              .replace(',', '');
-                                          })()
-                                          : ''}
-                                      </span>
+                                        )}
+                                      </Box>
+
+                                      {/* Date */}
+                                      <Box sx={{ 
+                                        fontSize: '12px', 
+                                        color: '#888', 
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0 
+                                      }}>
+                                        {item.lastModifiedUtc ? (() => {
+                                          const date = new Date(item.lastModifiedUtc);
+                                          if (isNaN(date.getTime())) return '';
+                                          return date.toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                          }).replace(',', '');
+                                        })() : ''}
+                                      </Box>
                                     </Box>
-                                  </div>
+                                  </Box>
                                 }
                               >
-
-                                <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
+                                {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false) && (
+                                  <MultifileFiles 
+                                    item={item} 
+                                    downloadFile={downloadFile} 
+                                    selectedItemId={selectedItemId} 
+                                    setSelectedItemId={setSelectedItemId} 
+                                    selectedVault={props.selectedVault} 
+                                  />
+                                )}
+                                <LinkedObjectsTree 
+                                  id={item.id} 
+                                  classId={item.classId || item.classID}
+                                  objectType={(item.objectTypeId || item.objectID)} 
+                                  selectedVault={props.selectedVault} 
+                                  mfilesId={props.mfilesId} 
+                                  handleRowClick={handleRowClick} 
+                                  setSelectedItemId={setSelectedItemId} 
+                                  selectedItemId={selectedItemId} 
+                                  downloadFile={downloadFile} 
+                                />
                               </TreeItem>
                             </SimpleTreeView>
-
                           ))}
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
                     ) : (
                       <>
-                        <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                          {/* <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-                          <span onClick={() => props.setData([])} style={{ cursor: 'pointer', width: '0.05px' }}>Back to views</span> */}
-                          {/* <span className="fas fa-chevron-right mx-2" style={{ color: '#2a68af' }}></span> */}
-                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                        <Box sx={{ 
+                          p: 2, 
+                          fontSize: '13px', 
+                          backgroundColor: '#ecf4fc',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#333'
+                        }}>
+                          <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#1C4690' }} />
                           Search Results
-                        </h6>
-                        <Box
-                          sx={{
-                            width: '100%',
-
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mx: 'auto',
-                            padding: '20px',
-                            backgroundColor: '#fff'
-                          }}
-                        >
-                          <i
-                            className="fa-solid fa-search my-3"
-                            style={{ fontSize: '40px', color: '#2757aa' }}
-                          />
-
-
-                          <Typography
-                            variant="body2"
-                            className='my-2 text-dark'
-                            sx={{ textAlign: 'center' }}
-                          >
+                        </Box>
+                        <Box sx={{
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: 3,
+                          backgroundColor: '#fff'
+                        }}>
+                          <i className="fa-solid fa-search" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                             No Results Found
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            className='text-dark'
-                            sx={{ textAlign: 'center', fontSize: '13px' }}
-                          >
-                            Please try a different search paramenter
+                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                            Please try a different search parameter
                           </Typography>
-
                         </Box>
-
                       </>
                     )}
                   </>
-                  :
+                ) : (
                   <ViewsList
                     selectedFileId={selectedFileId}
                     viewableobjects={props.viewableobjects}
                     previewSublistObject={previewSublistObject}
                     selectedObject={selectedObject}
-
                     loadingobjects={loadingobjects}
                     selectedVault={props.selectedVault}
                     setPreviewObjectProps={setPreviewObjectProps}
@@ -1540,769 +1544,344 @@ const DocumentList = (props) => {
                     resetPreview={resetPreview}
                     setSelectedItemId={setSelectedItemId}
                     selectedItemId={selectedItemId}
-
-
-
+                    downloadFile={downloadFile}
                   />
-
-                }
-              </>
-            )}
-
-
-
-          </CustomTabPanel>
-
-          <CustomTabPanel
-            value={value}
-            index={1}
-            style={{
-              backgroundColor: '#fff',
-              // height: '100%',
-              padding: '0%',
-              width: '100%',
-              overflowY: 'auto'
-            }}
-          >
-            {loading ? (
-              <Loader />
-            ) : (
-              <>
-                {props.recentData.length > 0 ? (
-                  <div >
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-
-                      Recently Modified By Me ({props.recentData.length})
-                    </h6>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '4px 10px 4px 10px',
-                        backgroundColor: '#fff',
-                        borderBottom: '1px solid #e0e0e0',
-                        fontWeight: 400,
-                        fontSize: '12px',
-                        color: '#555'
-                      }}
-                    >
-                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Name
-                      </span>
-                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
-                        Date Modified
-                      </span>
-                    </div>
-
-
-                    <div className=' text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
-                      {props.recentData.map((item, index) => (
-
-                        <SimpleTreeView>
-                          <TreeItem
-                            key={`tree-item-${index}`} // Unique key
-                            itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => handleClick(item)}
-                            // onDoubleClick={() => handleDoubleClick(item)}
-
-                            className='my-1'
-
-
-                            sx={{
-                              marginLeft: '10px',
-                              fontSize: "13px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
-                              backgroundColor: '#fff !important',
-                              "&:hover": {
-                                backgroundColor: '#fff !important', // Maintain white background on hover
-                              },
-
-                              borderRadius: "0px !important", // Remove border radius
-                              "& .MuiTreeItem-content": {
-                                borderRadius: "0px !important", // Remove border radius from content area
-                              },
-                              "& .MuiTreeItem-content.Mui-selected": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-
-                              "& .MuiTreeItem-content.Mui-selected:hover": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-                            }}
-                            label={
-                              <div
-                                onContextMenu={(e) => {
-                                  e.preventDefault();
-                                  handleRightClick(e, item);
-
-                                }}
-                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
-                              >
-                                <Box
-                                  display="flex"
-                                  alignItems="center"
-                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
-                                >
-                                  {item.objectTypeId || item.objectID === 0 ? (
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  ) : (
-                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                  )}
-                                  <span
-                                    style={{
-                                      marginLeft: '8px',
-                                      flex: 1,
-                                      minWidth: 0,
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap',
-                                      paddingRight: '16px',
-                                      display: 'flex',
-                                      alignItems: 'center'
-                                    }}
-                                  >
-                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
-                                      <span
-                                        style={{
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                          maxWidth: 220,
-                                          display: 'inline-block',
-                                          verticalAlign: 'middle'
-                                        }}
-                                      >
-                                        {item.title}
-                                      </span>
-                                    </Tooltip>
-                                    {item.objectTypeId || item.objectID === 0 ? (
-                                      <FileExtText
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId || item.classID}
-                                      />
-                                    ) : null}
-                                  </span>
-                                  <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
-                                    {item.lastModifiedUtc
-                                      ? (() => {
-                                        const date = new Date(item.lastModifiedUtc);
-                                        if (isNaN(date.getTime())) return '';
-                                        return date
-                                          .toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          .replace(',', '');
-                                      })()
-                                      : ''}
-                                  </span>
-                                </Box>
-                              </div>
-                            }
-                          >
-
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
-                          </TreeItem>
-                        </SimpleTreeView>
-
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-
-                      Recently Modified By Me
-                    </h6>
-
-
-                    <Box
-                      sx={{
-                        width: '100%',
-
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mx: 'auto',
-                        padding: '20px',
-                        backgroundColor: '#fff'
-                      }}
-                    >
-                      <i
-                        className="fa-solid fa-ban my-3"
-                        style={{ fontSize: '40px', color: '#2757aa' }}
-                      />
-
-
-                      <Typography
-                        variant="body2"
-                        className='my-2 text-dark'
-                        sx={{ textAlign: 'center' }}
-                      >
-                        No Results Found
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className='text-dark'
-                        sx={{ textAlign: 'center', fontSize: '13px' }}
-                      >
-                        Recent is Empty
-                      </Typography>
-
-                    </Box>
-                  </>
                 )}
               </>
             )}
-
-
-
           </CustomTabPanel>
 
-          <CustomTabPanel
-            value={value}
-            index={2}
-            style={{
-              backgroundColor: '#fff',
-              // height: '100%',
-              padding: '0%',
-              width: '100%',
-              overflowY: 'auto'
-            }}
-          >
-            {loading ? (
-              <Loader />
-            ) : (
-              <>
-                {props.assignedData.length > 0 ? (
-                  <div >
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-
-                      Assigned ({props.assignedData.length})
-                    </h6>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '4px 10px 4px 10px',
-                        backgroundColor: '#fff',
-                        borderBottom: '1px solid #e0e0e0',
-                        fontWeight: 400,
-                        fontSize: '12px',
-                        color: '#555'
-                      }}
-                    >
-                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Name
-                      </span>
-                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
-                        Date Modified
-                      </span>
-                    </div>
-
-
-                    <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
-                      {props.assignedData.map((item, index) => (
-
-                        <SimpleTreeView>
-                          <TreeItem
-                            key={`tree-item-${index}`} // Unique key
-                            itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => handleClick(item)}
-                            // onDoubleClick={() => handleDoubleClick(item)}
-
-                            className='my-1'
-
-
-                            sx={{
-                              marginLeft: '10px',
-                              fontSize: "13px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
-                              backgroundColor: '#fff !important',
-                              "&:hover": {
-                                backgroundColor: '#fff !important', // Maintain white background on hover
-                              },
-
-                              borderRadius: "0px !important", // Remove border radius
-                              "& .MuiTreeItem-content": {
-                                borderRadius: "0px !important", // Remove border radius from content area
-                              },
-                              "& .MuiTreeItem-content.Mui-selected": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-
-                              "& .MuiTreeItem-content.Mui-selected:hover": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-                            }}
-                            label={
-                              <div
-                                onContextMenu={(e) => {
-                                  e.preventDefault();
-                                  handleRightClick(e, item);
-
-                                }}
-                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
-                              >
-                                <Box
-                                  display="flex"
-                                  alignItems="center"
-                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
-                                >
-                                  {item.objectTypeId || item.objectID === 0 ? (
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  ) : (
-                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                  )}
-                                  <span
-                                    style={{
-                                      marginLeft: '8px',
-                                      flex: 1,
-                                      minWidth: 0,
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap',
-                                      paddingRight: '16px',
-                                      display: 'flex',
-                                      alignItems: 'center'
-                                    }}
-                                  >
-                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
-                                      <span
-                                        style={{
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                          maxWidth: 220,
-                                          display: 'inline-block',
-                                          verticalAlign: 'middle'
-                                        }}
-                                      >
-                                        {item.title}
-                                      </span>
-                                    </Tooltip>
-                                    {item.objectTypeId || item.objectID === 0 ? (
-                                      <FileExtText
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId || item.classID}
-                                      />
-                                    ) : null}
-                                  </span>
-                                  <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
-                                    {item.lastModifiedUtc
-                                      ? (() => {
-                                        const date = new Date(item.lastModifiedUtc);
-                                        if (isNaN(date.getTime())) return '';
-                                        return date
-                                          .toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: true
-                                          })
-                                          .replace(',', '');
-                                      })()
-                                      : ''}
-                                  </span>
-                                </Box>
-                              </div>
-                            }
-                          >
-
-                            <LinkedObjectsTree id={item.id} objectType={(item.objectTypeId || item.objectID)} selectedVault={props.selectedVault} mfilesId={props.mfilesId} handleRowClick={handleRowClick} setSelectedItemId={setSelectedItemId} selectedItemId={selectedItemId} />
-                          </TreeItem>
-                        </SimpleTreeView>
-
-                      ))}
-                    </div>
-                  </div>
+          {/* Other Tab Panels with similar optimization pattern */}
+          {[1, 2, 3].map((tabIndex) => {
+            const dataKey = tabIndex === 1 ? 'recentData' : tabIndex === 2 ? 'assignedData' : 'deletedData';
+            const title = tabIndex === 1 ? 'Recent' : tabIndex === 2 ? 'Assigned' : 'Deleted By Me';
+            const emptyTitle = tabIndex === 1 ? 'Recently Accessed By Me' : tabIndex === 2 ? 'Assigned' : 'Deleted By Me';
+            const emptySubtitle = tabIndex === 1 ? 'Recent is Empty' : tabIndex === 2 ? 'Assigned to me is empty' : 'Deleted is empty';
+            
+            return (
+              <CustomTabPanel 
+                key={tabIndex}
+                value={value} 
+                index={tabIndex} 
+                style={{ backgroundColor: '#fff', padding: 0, width: '100%', overflowY: 'auto' }}
+              >
+                {loading ? (
+                  <Loader />
                 ) : (
                   <>
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
+                    {props[dataKey].length > 0 ? (
+                      <Box>
+                        {/* Header */}
+                        <Box sx={{ 
+                          p: 1, 
+                          fontSize: '13px', 
+                          backgroundColor: '#ecf4fc',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#333'
+                        }}>
+                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                          {title} ({props[dataKey].length})
+                        </Box>
 
-                      Assigned
-                    </h6>
+                        {/* Column Headers */}
+                        <Box sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          p: '4px 10px',
+                          backgroundColor: '#fff',
+                          borderBottom: '1px solid #e0e0e0',
+                          fontSize: '12px',
+                          color: '#555'
+                        }}>
+                          <Box sx={{ ml: '10%', flex: 1 }}>Name</Box>
+                          <Box sx={{ mr: '10%', width: 160, textAlign: 'right' }}>Date Modified</Box>
+                        </Box>
 
-                    <Box
-                      sx={{
-                        width: '100%',
-
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mx: 'auto',
-                        padding: '20px',
-                        backgroundColor: '#fff'
-                      }}
-                    >
-                      <i
-                        className="fa-solid fa-ban my-3"
-                        style={{ fontSize: '40px', color: '#2757aa' }}
-                      />
-
-
-                      <Typography
-                        variant="body2"
-                        className='my-2 text-dark'
-                        sx={{ textAlign: 'center' }}
-                      >
-                        No Results Found
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className='text-dark'
-                        sx={{ textAlign: 'center', fontSize: '13px' }}
-                      >
-                        Assigned to me is empty
-                      </Typography>
-
-                    </Box>
-
-                  </>
-                )}
-              </>
-            )}
-
-          </CustomTabPanel >
-
-          <CustomTabPanel
-            value={value}
-            index={3}
-            style={{
-              backgroundColor: '#fff',
-              // height: '100%',
-              padding: '0%',
-              width: '100%',
-              overflowY: 'auto'
-            }}
-          >
-            {loading ? (
-              <Loader />
-            ) : (
-              <>
-                {props.deletedData.length > 0 ? (
-                  <div >
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-
-                      Deleted By Me ({props.deletedData.length})
-                    </h6>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '4px 10px 4px 10px',
-                        backgroundColor: '#fff',
-                        borderBottom: '1px solid #e0e0e0',
-                        fontWeight: 400,
-                        fontSize: '12px',
-                        color: '#555'
-                      }}
-                    >
-                      <span style={{ marginLeft: '10%', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Name
-                      </span>
-                      <span style={{ marginRight: '10%', width: 160, textAlign: 'right', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
-                        Date Modified
-                      </span>
-                    </div>
-
-
-                    <div className='text-dark' style={{ marginLeft: '20px', height: '60vh', overflowY: 'auto' }}>
-                      {props.deletedData.map((item, index) => (
-
-                        <SimpleTreeView>
-                          <TreeItem
-                            key={`tree-item-${index}`} // Unique key
-                            itemId={`tree-item-${index}`} // Unique itemId
-                            onClick={() => handleClick(item)}
-                            // onDoubleClick={() => handleDoubleClick(item)}
-
-                            className='my-1'
-
-
-                            sx={{
-                              marginLeft: '10px',
-                              fontSize: "13px", // Apply directly to TreeItem
-                              "& .MuiTreeItem-label": { fontSize: "13px !important" }, // Force label font size
-                              "& .MuiTypography-root": { fontSize: "13px !important" }, // Ensure all text respects this
-
-                              backgroundColor: '#fff !important',
-                              "&:hover": {
-                                backgroundColor: '#fff !important', // Maintain white background on hover
-                              },
-
-                              borderRadius: "0px !important", // Remove border radius
-                              "& .MuiTreeItem-content": {
-                                borderRadius: "0px !important", // Remove border radius from content area
-                              },
-                              "& .MuiTreeItem-content.Mui-selected": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-
-                              "& .MuiTreeItem-content.Mui-selected:hover": {
-                                backgroundColor: '#fff !important', // Keep white even when selected and hovered
-                              },
-                            }}
-                            label={
-                              <div
-                                onContextMenu={(e) => {
-                                  e.preventDefault();
-                                  handleRightClick(e, item);
-
+                        {/* Items List */}
+                        <Box sx={{ height: '60vh', overflowY: 'auto', color: '#333' }}>
+                          {props[dataKey].map((item, index) => (
+                            <SimpleTreeView key={`${dataKey}-view-${index}`}>
+                              <TreeItem
+                                key={`tree-item-${index}`}
+                                itemId={`tree-item-${index}`}
+                                onClick={() => handleClick(item)}
+                                onDoubleClick={() => handleDoubleClick(item)}
+                                sx={{
+                                  ml: 1,
+                                  fontSize: "13px",
+                                  "& .MuiTreeItem-label": { fontSize: "13px !important" },
+                                  "& .MuiTypography-root": { fontSize: "13px !important" },
+                                  backgroundColor: '#fff !important',
+                                  "&:hover": { backgroundColor: '#fff !important' },
+                                  borderRadius: 0,
+                                  "& .MuiTreeItem-content": { borderRadius: 0 },
+                                  "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+                                  "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
                                 }}
-                                style={{ width: '100%', display: 'flex', alignItems: 'center' }}
-                              >
-                                <Box
-                                  display="flex"
-                                  alignItems="center"
-                                  sx={{ padding: '3px', backgroundColor: selectedItemId === item.id ? '#fcf3c0' : 'inherit', width: '100%' }}
-                                >
-                                  {item.objectTypeId || item.objectID === 0 ? (
-                                    <FileExtIcon
-                                      fontSize={'15px'}
-                                      guid={props.selectedVault.guid}
-                                      objectId={item.id}
-                                      classId={item.classId || item.classID}
-                                    />
-                                  ) : (
-                                    <i className="fa-solid fa-folder " style={{ fontSize: '15px', color: '#2a68af' }}></i>
-                                  )}
-                                  <span
-                                    style={{
-                                      marginLeft: '8px',
-                                      flex: 1,
-                                      whiteSpace: 'nowrap',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      paddingRight: '16px',
+                                label={
+                                  <Box
+                                    onContextMenu={(e) => {
+                                      e.preventDefault();
+                                      handleRightClick(e, item);
+                                    }}
+                                    sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                                  >
+                                    <Box sx={{
                                       display: 'flex',
                                       alignItems: 'center',
-                                      minWidth: 0
-                                    }}
-                                  >
-                                    <Tooltip title={toolTipTitle(item)} placement="right" arrow>
-                                      <span
-                                        style={{
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                          maxWidth: 220,
-                                          display: 'inline-block',
-                                          verticalAlign: 'middle'
-                                        }}
-                                      >
-                                        {item.title}
-                                      </span>
-                                    </Tooltip>
-                                    {item.objectTypeId || item.objectID === 0 ? (
-                                      <FileExtText
-                                        guid={props.selectedVault.guid}
-                                        objectId={item.id}
-                                        classId={item.classId || item.classID}
-                                      />
-                                    ) : null}
-                                  </span>
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="warning"
-                                    onClick={() => restoreObject(item)}
-                                    sx={{ textTransform: 'none', marginLeft: 1 }}
-                                  >
-                                    <i
-                                      className="fas fa-trash-restore"
-                                      style={{
-                                        fontSize: '13px',
-                                        cursor: 'pointer',
-                                        marginRight: '4px'
-                                      }}
-                                    />
-                                    <small>Restore</small>
-                                  </Button>
-                                  <span style={{ marginLeft: '12px', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
-                                    {item.lastModifiedUtc
-                                      ? (() => {
-                                        const date = new Date(item.lastModifiedUtc);
-                                        if (isNaN(date.getTime())) return '';
-                                        return date
-                                          .toLocaleString('en-US', {
+                                      p: 0.5,
+                                      backgroundColor: selectedItemId === `${item.id}-${item.title}` ? '#fcf3c0' : 'inherit',
+                                      width: '100%',
+                                      gap: 1
+                                    }}>
+                                      {/* Icon */}
+                                      {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true) ? (
+                                        <FileExtIcon
+                                          fontSize={'15px'}
+                                          guid={props.selectedVault.guid}
+                                          objectId={item.id}
+                                          classId={item.classId || item.classID}
+                                          sx={{ flexShrink: 0 }}
+                                        />
+                                      ) : (
+                                        <i 
+                                          className={
+                                            (item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false)
+                                              ? 'fas fa-book' 
+                                              : 'fa-solid fa-folder'
+                                          }
+                                          style={{ 
+                                            color: (item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false) 
+                                              ? '#7cb518' 
+                                              : '#2a68af',
+                                            fontSize: '15px',
+                                            flexShrink: 0
+                                          }}
+                                        />
+                                      )}
+
+                                      {/* Title */}
+                                      <Box sx={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                      }}>
+                                        <Tooltip title={toolTipTitle(item)} placement="right" arrow>
+                                          <Box sx={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: 220,
+                                          }}>
+                                            {item.title}
+                                          </Box>
+                                        </Tooltip>
+                                        {(item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true) && (
+                                          <FileExtText
+                                            guid={props.selectedVault.guid}
+                                            objectId={item.id}
+                                            classId={item.classId || item.classID}
+                                          />
+                                        )}
+                                      </Box>
+
+                                      {/* Special handling for deleted items */}
+                                      {tabIndex === 3 && (
+                                        <Button
+                                          size="small"
+                                          variant="contained"
+                                          color="warning"
+                                          onClick={() => restoreObject(item)}
+                                          sx={{ textTransform: 'none' }}
+                                          startIcon={<i className="fas fa-trash-restore" style={{ fontSize: '13px' }} />}
+                                        >
+                                          Restore
+                                        </Button>
+                                      )}
+
+                                      {/* Date */}
+                                      <Box sx={{ 
+                                        fontSize: '12px', 
+                                        color: '#888', 
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0,
+                                        ml: tabIndex === 3 ? 1 : 0
+                                      }}>
+                                        {item.lastModifiedUtc ? (() => {
+                                          const date = new Date(item.lastModifiedUtc);
+                                          if (isNaN(date.getTime())) return '';
+                                          return date.toLocaleString('en-US', {
                                             year: 'numeric',
                                             month: 'numeric',
                                             day: 'numeric',
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: true
-                                          })
-                                          .replace(',', '');
-                                      })()
-                                      : ''}
-                                  </span>
-                                </Box>
-                              </div>
-
-                            }
-                          >
-
-
-                          </TreeItem>
-                        </SimpleTreeView>
-
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h6 className='p-2 text-dark my-1' style={{ fontSize: '13px', backgroundColor: '#ecf4fc' }}>
-                      <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }}></i>
-
-                      Deleted By Me
-                    </h6>
-                    <Box
-                      sx={{
-                        width: '100%',
-
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mx: 'auto',
-                        padding: '20px',
-                        backgroundColor: '#fff'
-                      }}
-                    >
-                      <i
-                        className="fa-solid fa-ban my-3"
-                        style={{ fontSize: '40px', color: '#2757aa' }}
-                      />
-
-
-                      <Typography
-                        variant="body2"
-                        className='my-2 text-dark'
-                        sx={{ textAlign: 'center' }}
-                      >
-                        No Results Found
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className='text-dark'
-                        sx={{ textAlign: 'center', fontSize: '13px' }}
-                      >
-                        Deleted is empty
-                      </Typography>
-
-                    </Box>
-
+                                          }).replace(',', '');
+                                        })() : ''}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                }
+                              >
+                                {tabIndex !== 3 && (item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === false) && (
+                                  <MultifileFiles 
+                                    item={item} 
+                                    downloadFile={downloadFile} 
+                                    selectedItemId={selectedItemId} 
+                                    setSelectedItemId={setSelectedItemId} 
+                                    selectedVault={props.selectedVault} 
+                                  />
+                                )}
+                                {tabIndex !== 3 && (
+                                  <LinkedObjectsTree 
+                                    id={item.id} 
+                                     classId={item.classId || item.classID}
+                                    objectType={(item.objectTypeId || item.objectID)} 
+                                    selectedVault={props.selectedVault} 
+                                    mfilesId={props.mfilesId} 
+                                    handleRowClick={handleRowClick} 
+                                    setSelectedItemId={setSelectedItemId} 
+                                    selectedItemId={selectedItemId} 
+                                    downloadFile={downloadFile} 
+                                  />
+                                )}
+                              </TreeItem>
+                            </SimpleTreeView>
+                          ))}
+                        </Box>
+                      </Box>
+                    ) : (
+                      <>
+                        <Box sx={{ 
+                          p: 1, 
+                          fontSize: '13px', 
+                          backgroundColor: '#ecf4fc',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#333'
+                        }}>
+                          <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                          {emptyTitle}
+                        </Box>
+                        <Box sx={{
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: 3,
+                          backgroundColor: '#fff'
+                        }}>
+                          <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                            No Results Found
+                          </Typography>
+                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                            {emptySubtitle}
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
                   </>
                 )}
-              </>
-            )}
+              </CustomTabPanel>
+            );
+          })}
+        </Box>
+      </Box>
 
-          </CustomTabPanel>
+      {/* Resizer */}
+      {!isMobile && (
+        <Box
+          onMouseDown={handleMouseDown}
+          sx={{
+            width: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#ddd',
+            cursor: 'ew-resize',
+            transition: 'width 0.2s ease',
+            height: '100vh'
+          }}
+        />
+      )}
 
+      {/* Object View */}
+      <Box 
+        ref={col2Ref} 
+        sx={{ 
+          width: isMobile ? '100%' : '60%', 
+          backgroundColor: '#ecf4fc', 
+          minWidth: '48%',
+          height: '100%'
+        }}
+      >
+        <ObjectData 
+          setPreviewObjectProps={setPreviewObjectProps}
+          setSelectedObject={setSelectedObject}
+          resetViews={props.resetViews}
+          mfilesId={props.mfilesId}
+          user={props.user}
+          getObjectComments={getObjectComments2}
+          comments={comments}
+          loadingcomments={loadingcomments}
+          discardChange={discardChange}
+          openDialog={() => setDialogOpen(true)}
+          updateObjectMetadata={updateObjectMetadata}
+          selectedState={selectedState}
+          setSelectedState={setSelectedState}
+          currentState={currentState}
+          selectedObkjWf={selectedObkjWf}
+          transformFormValues={transformFormValues}
+          formValues={formValues}
+          setFormValues={setFormValues}
+          vault={props.selectedVault}
+          email={props.user.email}
+          selectedFileId={selectedFileId}
+          previewObjectProps={previewObjectProps}
+          loadingPreviewObject={loadingPreviewObject}
+          selectedObject={selectedObject}
+          extension={extension}
+          base64={base64}
+          loadingobjects={loadingobjects}
+          loadingfile={loadingfile}
+          loadingobject={loadingobject}
+          windowWidth={previewWindowWidth}
+          newWF={newWF}
+          newWFState={newWFState}
+          setNewWFState={setNewWFState}
+          setNewWF={setNewWF}
+          workflows={workflows}
+          approvalPayload={approvalPayload}
+          setApprovalPayload={setApprovalPayload}
+          checkedItems={checkedItems}
+          setCheckedItems={setCheckedItems}
+          loadingWFS={loadingWFS}
+        />
+      </Box>
+    </Box>
 
-
-
-
-        </div >
-
-        {!isMobile && (
-          // <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#dedddd', height: '100vh' }}></div>
-          <div
-            style={{
-              width: '5px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#ddd',
-              cursor: 'ew-resize',
-              transition: 'width 0.2s ease',
-              height: '100vh'
-            }}
-            // onMouseEnter={(e) => (e.currentTarget.style.width = '10px')}
-            // onMouseLeave={(e) => (e.currentTarget.style.width = '5px')}
-            onMouseDown={handleMouseDown}
-          >
-            {/* <button
-            onMouseDown={handleMouseDown}
-            style={{
-              width: '4px',
-              height: '50px',
-              background: '#2757aa',
-              border: 'none',
-              cursor: 'ew-resize',
-              borderRadius: '4px',
-              boxShadow: '0 0 4px rgba(0, 0, 0, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.2s ease',
-            }}
-            title="Drag to resize"
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#1e4b96')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#2757aa')}
-          >
-            <i
-              className="fa-solid fa-bars"
-              style={{ fontSize: '10px', color: '#fff' }}
-            ></i>
-          </button> */}
-          </div>
-
-
-        )}
-
-
-        {/* Object View List */}
-        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '60%', backgroundColor: '#ecf4fc', minWidth: '48%', height: 'auto' }}>
-          <ObjectData setPreviewObjectProps={setPreviewObjectProps} setSelectedObject={setSelectedObject} resetViews={props.resetViews} mfilesId={props.mfilesId} user={props.user} getObjectComments={getObjectComments2} comments={comments} loadingcomments={loadingcomments} discardChange={discardChange} openDialog={() => setDialogOpen(true)} updateObjectMetadata={updateObjectMetadata} selectedState={selectedState} setSelectedState={setSelectedState} currentState={currentState} selectedObkjWf={selectedObkjWf} transformFormValues={transformFormValues} formValues={formValues} setFormValues={setFormValues} vault={props.selectedVault} email={props.user.email} selectedFileId={selectedFileId} previewObjectProps={previewObjectProps} loadingPreviewObject={loadingPreviewObject} selectedObject={selectedObject} extension={extension} base64={base64} loadingobjects={loadingobjects} loadingfile={loadingfile} loadingobject={loadingobject} windowWidth={previewWindowWidth} newWF={newWF} newWFState={newWFState} setNewWFState={setNewWFState} setNewWF={setNewWF} workflows={workflows} approvalPayload={approvalPayload} setApprovalPayload={setApprovalPayload} checkedItems={checkedItems} setCheckedItems={setCheckedItems} loadingWFS={loadingWFS} />
-        </div>
-      </div >
-
-      {/* RightClickMenu rendered at the root level */}
-      {
-        rightClickActions.length > 0 && (
-          <RightClickMenu
-            anchorEl={menuAnchor}
-            open={Boolean(menuAnchor)}
-            onClose={handleMenuClose}
-            item={menuItem}
-            actions={rightClickActions}
-          />
-        )
-      }
-
-    </>
-  );
+    {/* Right Click Menu */}
+    {rightClickActions.length > 0 && (
+      <RightClickMenu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleMenuClose}
+        item={menuItem}
+        actions={rightClickActions}
+      />
+    )}
+  </>
+);
 };
 
 export default DocumentList;

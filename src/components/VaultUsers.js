@@ -42,11 +42,11 @@ function VaultUsersTable(props) {
       props.setOpenAlert(true);
       props.setAlertSeverity("success");
       props.setAlertMsg("Detached successfully");
-    } catch (error) {
+    } catch  {
       props.setOpenAlert(true);
       props.setAlertSeverity("error");
       props.setAlertMsg("Failed to detach, please try later");
-      console.error('Error detaching user from vault:', error);
+      // console.error('Error detaching user from vault:', error);
     }
   };
 

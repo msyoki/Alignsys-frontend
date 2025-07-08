@@ -1,189 +1,285 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
+import { Box, Tooltip } from '@mui/material';
 import axios from 'axios';
-import { useDropzone } from 'react-dropzone';
-import { format } from 'date-fns'; // Import the format function
-import '../styles/Chatbot.css';
-import { Box } from '@mui/material';
-function Bot(props) {
-    const [index, setIndex] = useState(0);
-    const [messages, setMessages] = useState([]);
+import '../styles/Bot.css';
+
+// Lazy load heavy dependencies
+const ReactMarkdown = lazy(() => import('react-markdown'));
+const SyntaxHighlighter = lazy(() => import('react-syntax-highlighter').then(module => ({ 
+    default: module.Prism 
+})));
+const vscDarkPlus = lazy(() => import('react-syntax-highlighter/dist/esm/styles/prism').then(module => ({
+    default: module.vscDarkPlus
+})));
+
+const API_URL = 'https://chatbot.alignsys.tech/query-topic-base64';
+
+// Memoized CodeBlock component
+const CodeBlock = memo(({ language, value }) => (
+    <Suspense fallback={<pre>{value}</pre>}>
+        <SyntaxHighlighter language={language} style={vscDarkPlus}>
+            {value}
+        </SyntaxHighlighter>
+    </Suspense>
+));
+
+// Memoized Message component to prevent unnecessary re-renders
+const Message = memo(({ message, index }) => (
+    <div className={`message ${message.type}`}>
+        {message.type !== 'user' && (
+            <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+        )}
+        <div className={`message-content ${message.type}-message`}>
+            <Suspense fallback={<div>{message.content}</div>}>
+                <ReactMarkdown components={{ code: CodeBlock }}>
+                    {message.content}
+                </ReactMarkdown>
+            </Suspense>
+        </div>
+        {message.type === 'user' && (
+            <i className="fas fa-user" style={{ color: '#555', fontSize: '20px' }}></i>
+        )}
+    </div>
+));
+
+// Memoized LoadingIndicator component
+const LoadingIndicator = memo(() => (
+    <div className="message">
+        <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+        <div className="loading-indicator">
+            Analysing <span>.</span><span>.</span><span>.</span>
+        </div>
+    </div>
+));
+
+// Memoized SuggestedActions component
+const SuggestedActions = memo(({ onSubmit, summarized }) => {
+    const actions = useMemo(() => [
+        "Summarize this document",
+        "What are the main themes of this document?",
+        "What conclusions does the author make?"
+    ], []);
+
+    return (
+        <div className="d-flex flex-column align-items-start justify-content-center p-3">
+            {actions.map((action, index) => (
+                <button
+                    key={index}
+                    onClick={(e) => onSubmit(e, action)}
+                    disabled={summarized}
+                    className="summarize-btn btn btn-sm rounded-pill m-2 text-dark d-flex align-items-center p-2"
+                >
+                    <span className="mx-auto">{action}</span>
+                </button>
+            ))}
+        </div>
+    );
+});
+
+const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
-    const [uploadedFileName, setUploadedFileName] = useState(null);
-    const chatLogsEndRef = useRef(null);
+    const messagesEndRef = useRef(null);
+    const [summarized, setSummarized] = useState(false);
+    const abortControllerRef = useRef(null);
 
-    const generateMessage = (msg, type) => {
-        setIndex(prevIndex => prevIndex + 1);
-        const timestamp = new Date();
-        const formattedTime = format(timestamp, 'hh:mm a'); // Format the timestamp
-        const newMessage = {
-            id: index,
-            type,
-            msg,
-            timestamp: formattedTime // Add timestamp to the message
-        };
-        setMessages(prevMessages => [...prevMessages, newMessage]);
-    };
+    // Memoized scroll function
+    const scrollToBottom = useCallback(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
 
-    const handleChatSubmit = async (e) => {
-        e.preventDefault();
-        const msg = inputValue.trim();
-        if (msg === '') return;
+    // Optimized scroll effect with cleanup
+    useEffect(() => {
+        const timeoutId = setTimeout(scrollToBottom, 100);
+        return () => clearTimeout(timeoutId);
+    }, [messages.length, scrollToBottom]);
 
-        generateMessage(msg, 'self');
-        setInputValue('');
-        setLoading(true);
+    // Memoized API call function
+    const makeAPICall = useCallback(async (topic) => {
+        // Cancel previous request if still pending
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
 
-        generateMessage("...", 'user');
+        abortControllerRef.current = new AbortController();
 
         try {
-            const filename = uploadedFileName || 'Individual-Sanlam Unit Trust Investment Application form[1]-SHERRY KISILUII.pdf';
-            const response = await axios.post('https://chatbot.alignsys.tech/query-topic-base64', new URLSearchParams({
-                topic: msg,
-                base64_data: props.base64
-            }), {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/x-www-form-urlencoded'
+            const response = await axios.post(
+                API_URL,
+                new URLSearchParams({
+                    topic,
+                    base64_data: base64
+                }),
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    signal: abortControllerRef.current.signal
                 }
-            });
+            );
 
-            const data = response.data;
+            return response.data.response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                return null; // Request was cancelled
+            }
+            throw error;
+        }
+    }, [base64]);
 
-            setMessages(prevMessages => prevMessages.filter(message => message.msg !== '...'));
+    // Optimized submit handler with error boundary
+    const handleSubmit = useCallback(async (e, value = inputValue) => {
+        if (e) e.preventDefault();
+        if (!value?.trim() || loading) return;
 
-            if (data.response) {
-                data.response.forEach((text, index) => {
-                    setTimeout(() => {
-                        generateMessage(text, 'user');
-                        if (index === data.response.length - 1) {
-                            setLoading(false);
-                        }
-                    }, 1000 * (index + 1));
-                });
-            } else {
-                generateMessage("Sorry, I didn't get that. Could you please try again?", 'user');
-                setLoading(false);
+        const userMessage = {
+            type: 'user',
+            content: value,
+            timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+        
+        // Only clear input if using the input field
+        if (value === inputValue) {
+            setInputValue('');
+        }
+        
+        setLoading(true);
+
+        try {
+            const responseData = await makeAPICall(value);
+            
+            if (responseData) {
+                const copilotMessage = {
+                    type: 'copilot',
+                    content: responseData.join('\n\n'),
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, copilotMessage]);
             }
         } catch (error) {
             console.error('Error:', error);
-            generateMessage("There was an error communicating with the server. Please try again later.", 'user');
+            setMessages(prev => [...prev, {
+                type: 'copilot',
+                content: 'Sorry, I encountered an error. Please try again.',
+                timestamp: new Date()
+            }]);
+        } finally {
             setLoading(false);
         }
-    };
+    }, [inputValue, loading, makeAPICall, setMessages]);
 
+    // Separate handler for suggested actions
+    const handleSubmit2 = useCallback(async (e, value) => {
+        setSummarized(true);
+        await handleSubmit(e, value);
+    }, [handleSubmit]);
 
+    // Memoized input change handler
+    const handleInputChange = useCallback((e) => {
+        setInputValue(e.target.value);
+    }, []);
 
+    // Memoized keydown handler
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit(e);
+        }
+    }, [handleSubmit]);
+
+    // Memoized clear chat handler
+    const handleClearChat = useCallback(() => {
+        setMessages([]);
+        setSummarized(false);
+    }, [setMessages]);
+
+    // Memoized messages rendering
+    const renderedMessages = useMemo(() => 
+        messages.map((message, index) => (
+            <Message key={`${message.timestamp.getTime()}-${index}`} message={message} index={index} />
+        )), [messages]
+    );
+
+    // Memoized form submission state
+    const isSubmitDisabled = useMemo(() => 
+        loading || !inputValue.trim(), [loading, inputValue]
+    );
+
+    // Cleanup on unmount
     useEffect(() => {
-        chatLogsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     return (
-        <div>
-            <Box
-                className="p-2"
-                sx={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: 'important 13px',
-                    backgroundColor: '#ecf4fc',
-                    height: '53px',
-                    color: '#1d3557'
+        <div className="copilot-chat">
+            {/* Chat Header */}
+            <Box className="chat-header">
+                <span className='mx-2' style={{ fontWeight: 500, fontSize: '14px' }}>
+                    Hello, how can I help with this document?
+                </span>
 
-                }}
-            >
-
-
-                <i className="fas fa-file-pdf mx-2 text-danger" style={{ fontSize: '25px' }}></i>
-                <span style={{ fontSize: '13px' }}>{props.objectTitle}.pdf</span>
-
-
-
-            </Box>
-
-
-            <Box sx={{ backgroundColor: '#fff', p: 2 }}>
-                <form onSubmit={handleChatSubmit}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <textarea
-                            id="chat-input"
-                            className="form-control"
-                            placeholder="Prompt document..."
-                            rows="2"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-
-                            required
-
-                            style={{ resize: 'vertical', width: '100%' }}
-                        />
-                        <Box textAlign="right">
-                            <button
-                                type="submit"
-                                className="btn text-white btn-sm rounded-pill"
-
-                                style={{ backgroundColor: '#6a994e', height: '38px' }}
-                            >
-                                <small className="mx-2"> Submit Prompt</small>
-                            </button>
-                        </Box>
-                    </Box>
-                </form>
-            </Box>
-
-
-            <div
-                className=' p-2'
-                style={{
-                    height: '50vh',
-                    overflowY: 'auto',
-                    scrollbarColor: '#1d3557',
-                    scrollBehavior: 'smooth',
-                    backgroundColor: '#fff'
-                }}
-            >
-
-
-
-                {messages.map((message) => (
-                    <div key={message.id} className={`chat-msg ${message.type}`}>
-                        <span className="msg-avatar">
-                            <i
-                                className={`fas ${message.type === 'self' ? 'fa-user' : 'fa-robot'}`}
-                                style={{ color: '#2757aa', fontSize: '20px' }}
-                            />
-
-                        </span>
-
-                        <div
-                            className="cm-msg-text"
-                            style={{
-                                backgroundColor: message.type === 'self' ? '#e76f51' : '#2a68af'
-                            }}
+                {messages?.length > 0 && (
+                    <Tooltip title="Clear chat and start new ...">
+                        <div 
+                            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                            onClick={handleClearChat}
                         >
-                            {message.msg === "..." ? (
-                                <div className="loading-dots">
-                                    <small>
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </small>
-                                </div>
-                            ) : (
-                                <span>{message.msg}</span>
-                            )}
+                            <span className="fa-solid fa-eraser mx-2" style={{ fontSize: '20px', color: '#2757aa' }}></span>
                         </div>
+                    </Tooltip>
+                )}
+            </Box>
 
-                        <div className="timestamp mx-2" style={{ fontSize: '10px' }}>
-                            <small>{message.timestamp}</small>
-                        </div>
-                    </div>
-                ))}
-                <div ref={chatLogsEndRef} />
+            {/* Document Info Header */}
+            <Box className="chat-header p-2">
+                <span className="mx-2">
+                    <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '20px' }}></i>
+                    <span style={{ fontSize: '13px' }}>{objectTitle}.pdf</span>
+                </span>
+            </Box>
+
+            {/* Chat Messages */}
+            <div className="chat-messages">
+                {messages?.length < 1 ? (
+                    <SuggestedActions onSubmit={handleSubmit2} summarized={summarized} />
+                ) : (
+                    renderedMessages
+                )}
+
+                {loading && <LoadingIndicator />}
+                <div ref={messagesEndRef} />
             </div>
+
+            {/* Chat Input Form */}
+            <form onSubmit={handleSubmit} className="input-container">
+                <div>
+                    <textarea
+                        className="chat-input"
+                        placeholder="Ask your own question..."
+                        value={inputValue}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                    />
+                    <button
+                        type="submit"
+                        className="send-button"
+                        disabled={isSubmitDisabled}
+                    >
+                        <i className="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
         </div>
     );
-}
+});
+
+Bot.displayName = 'Bot';
 
 export default Bot;

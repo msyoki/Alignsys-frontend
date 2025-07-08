@@ -37,13 +37,14 @@ const FileUploadComponent = (props) => {
                     ) : props.uploadedFile ? (
                         <>
                             <p style={{fontWeight:'bold' }} >Uploaded File</p>
-                            <p style={{ fontSize:'13px',  color:'black', fontWeight:'bold'  }} className='my-4'>{props.uploadedFile.name}</p>
+                            <p style={{ fontSize:'13px',  color:'#2757aa', fontWeight:'bold'  }} className='my-4'>{props.uploadedFile.name}</p>
                             <p>Drag 'n' drop a file here, or click to browse device to change file</p>
+                           
                         </>
                     ) : (
                         <>
                             <p>Upload a file </p>
-                            <p><i className="fas fa-upload my-4" style={{ fontSize: '50px' }}></i></p>
+                            <p><i className="fas fa-file-upload my-4" style={{ fontSize: '40px' , color:'#2757aa'}}></i></p>
 
 
 

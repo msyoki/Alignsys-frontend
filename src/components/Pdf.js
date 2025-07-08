@@ -249,7 +249,7 @@ const PDFViewerPreview = (props) => {
     <>
       {/* File Info Bar */}
       <Tooltip title={props.selectedObject?.title}>
-        <Box
+        {/* <Box
           sx={{
             width: '100%',
             display: 'flex',
@@ -262,6 +262,11 @@ const PDFViewerPreview = (props) => {
         >
           <i style={{ fontSize: '25px', marginLeft: '15px', marginRight: '8px' }} className='fas fa-file-pdf text-danger '></i>
           <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
+        </Box> */}
+        <Box className="chat-header2 p-2">
+
+          <span className='mx-2' >  <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }} ></i> <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span> </span>
+
         </Box>
       </Tooltip>
 
@@ -350,7 +355,9 @@ const PDFViewerPreview = (props) => {
             className="pdf-container"
             file={props.document}
             onLoadSuccess={onDocumentLoadSuccess}
-            loading={<div>Loading PDF...</div>}
+            loading={<div className="loading-indicator text-dark">
+              Loading PDF<span>.</span><span>.</span><span>.</span>
+            </div>}
             error={<div>Error loading PDF!</div>}
           >
             {[...Array(numPages).keys()].map((pageIndex) => (

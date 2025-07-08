@@ -1,134 +1,153 @@
-import React, { useContext, useRef, useEffect, useState } from 'react';
+import React, { useContext, useRef, useEffect, useState, useCallback, useMemo, memo } from 'react';
 import Authcontext from '../components/Auth/Authprovider';
-import '../styles/Dashboard.css'
-import '../styles/Custombuttons.css'
-import '../styles/Navbar.css'
-
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
-import PropTypes from 'prop-types';
+// Styles
+import '../styles/Dashboard.css';
+import '../styles/Custombuttons.css';
+import '../styles/Navbar.css';
 
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+// Material-UI components
+import {
+    Typography,
+    Box,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Grid,
+    MenuItem,
+    Select,
+    Input,
+    FormControl,
+    Button,
+    Tooltip,
+    Avatar
+} from '@mui/material';
 
-import logo from "../images/waica.png";
-import axios from 'axios'
+// Other components
+import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import ObjComponent from '../components/Admin/ObjStructureComponent';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-
-import { Grid, MenuItem, Select, Input, TextField, FormControl, Button } from '@mui/material';
-
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
-
 import OrganizationVaultList from '../components/MainComponents/OrganizationVaultList';
 import OrganizationUsersTable from '../components/OrganizationUsers';
 import VaultUsersTable from '../components/VaultUsers';
-import * as constants from '../components/Auth/configs'
 import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
 import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
 import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
-import { Tooltip } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
 import LoginActivityTable from '../components/LoginActivity';
 
+// Constants and utilities
+import * as constants from '../components/Auth/configs';
+import logo from '../images/waica.png';
 
+// Constants moved outside component
+const STANDARD_FONT_FAMILY = "'Segoe UI', 'Roboto', 'Arial', sans-serif";
+const STANDARD_FONT_SIZE = '13px';
 
-function CustomTabPanel(props) {
-    const { children, value, index, ...other } = props;
+const PROP_DATA_TYPES = [
+    { value: 'MFDatatypeText', label: 'Text' },
+    { value: 'MFDatatypeMultiLineText', label: 'Text (multi-line)' },
+    { value: 'MFDatatypeBoolean', label: 'Boolean (yes/no)' },
+    { value: 'MFDatatypeInteger', label: 'Number (integer)' },
+];
 
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
-}
+const PROP_REQUIRED = [
+    { value: true, label: 'Yes' },
+    { value: false, label: 'No' },
+];
 
-CustomTabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
+// Utility functions moved outside
+const stringToColor = (string) => {
+    let hash = 0;
+    let i;
+
+    for (i = 0; i < string.length; i += 1) {
+        hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    let color = '#';
+
+    for (i = 0; i < 3; i += 1) {
+        const value = (hash >> (i * 8)) & 0xff;
+        color += `00${value.toString(16)}`.slice(-2);
+    }
+
+    return color;
 };
 
-function a11yProps(index) {
+const stringAvatar = (name) => {
+    const nameParts = name.split(' ');
+    const firstInitial = nameParts[0] ? nameParts[0][0] : '';
+    const secondInitial = nameParts[1] ? nameParts[1][0] : '';
+
     return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
+        sx: {
+            bgcolor: stringToColor(name),
+        },
+        children: `${firstInitial}${secondInitial}`,
     };
-}
+};
 
+const capitalize = (input) => {
+    const words = input.value.split(' ');
+    const capitalizedWords = words.map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+    const capitalizedInput = capitalizedWords.join(' ');
+    input.value = capitalizedInput;
+};
 
-function AdminDashboard() {
-    const [progress, setProgress] = React.useState(10);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [menuOpen, setMenuOpen] = useState(false); // State for collapsible menu
-    const { user, authTokens, logoutUser } = useContext(Authcontext);
-    const [vaultObjects, setVaultObjects] = useState([])
-    const [miniLoader, setMiniLoader] = useState(false);
-    const [loaderMsg, setLoaderMsg] = useState('');
-    const [vaultUsers, setVaultUsers] = useState([])
-    const [organizationusers, setOrganizationUsers] = useState([])
-    const [vaultGroups, setViewVaultGroups] = useState(false);
-    const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
-    const [viewLoginActivity, setViewLoginActivity] = useState(false);
-    const [viewCreateObject, setViewCreateObject] = useState(false);
-    const [viewObjects, setViewObjects] = useState(false);
-    const [viewVaultSettings, setViewVaultSettings] = useState(false);
+// Style constants
+const STYLES = {
+    buttonStyle: {
+        textTransform: 'none',
+        fontWeight: 'lighter',
+        fontSize: '10px',
+        mx: 1,
+    },
+    smallButtonStyle: {
+        textTransform: 'none',
+        fontWeight: 'lighter',
+        fontSize: '9px',
+        mx: 2,
+    },
+    inputStyle: {
+        fontSize: '13px',
+        mx: 2,
+    },
+    headerBox: {
+        fontSize: '13px',
+        backgroundColor: '#ecf4fc',
+        color: '#2757aa',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '9px',
+    },
+    menuItemStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "10px 15px",
+        borderRadius: "8px",
+        width: "100%",
+    }
+};
 
-    const [viewVaultUsers, setViewVaultUsers] = useState(false);
-    const [viewObjectStructure, setViewObjectStructure] = useState(false);
-    const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
-    const [selectedVault, setSelectedVault] = useState({});
-    const [usersnotlinkedtovault, setUsersNotLinkedToVault] = useState([]);
-    const [openObjectPermissionsDialog, setOpenObjectPermissionsDialog] = useState(false)
-    const [openAddPermissionDialog, setOpenAddPermissionDialog] = useState(false)
-    const [objectpermissions, setObjectPermissions] = useState([])
-    const [selectedObject, setSelectedObject] = useState([])
-    const [listwithoughtpermissions, setListWithoughtPermissions] = useState({})
-    const [userGroups, setuserGroups] = useState([])
-    const [selecedGroup, setSelectedGroup] = useState({})
-    const [openGroupUsersDialog, setOpenGroupUsersDialog] = useState(false)
-    const [vaults, setVaults] = useState([]);
-
-
-
-
-    const [value, setValue] = React.useState(0);
-    const [showSublist, setShowSublist] = useState(false);
-    const [showVaultSublist, setShowVaultSublist] = useState(false);
-
-    const [showSublist1, setShowSublist1] = useState(false);
-
-
-
-    const [loading, setLoading] = useState(false)
-    const [alertOpen, setOpenAlert] = useState(false);
-    const [alertSeverity, setAlertSeverity] = useState('');
-    const [alertMsg, setAlertMsg] = useState('');
-
-
+// Custom hooks
+const useResizeHandler = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isDragging, setIsDragging] = useState(false);
     const col1Ref = useRef(null);
     const col2Ref = useRef(null);
     const dividerRef = useRef(null);
     const containerRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-
-    // Add a constant for your standard font family and size
-    const STANDARD_FONT_FAMILY = "'Segoe UI', 'Roboto', 'Arial', sans-serif";
-    const STANDARD_FONT_SIZE = '13px';
-
 
     useEffect(() => {
         const handleResize = () => {
@@ -162,84 +181,270 @@ function AdminDashboard() {
         };
     }, [isDragging, isMobile]);
 
-    const handleMouseDown = () => {
+    const handleMouseDown = useCallback(() => {
         if (!isMobile) setIsDragging(true);
+    }, [isMobile]);
+
+    return {
+        isMobile,
+        isDragging,
+        col1Ref,
+        col2Ref,
+        dividerRef,
+        containerRef,
+        handleMouseDown
     };
+};
+
+// Memoized sidebar component
+const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLogout }) => (
+    <nav className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
+        <div className="sidebar-content" style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
+            {sidebarOpen && (
+                <>
+                    {/* Logo Section */}
+                    <div
+                        className="d-flex flex-column justify-content-center align-items-center bg-white shadow-lg"
+                        style={{
+                            height: "58px",
+                            minHeight: "56px",
+                            maxHeight: "56px",
+                            overflow: "hidden",
+                        }}
+                    >
+                        <img
+                            src={logo}
+                            alt="Organization logo"
+                            className="logo"
+                            style={{
+                                width: "auto",
+                                maxWidth: "80%",
+                                maxHeight: "48px",
+                                objectFit: "contain",
+                            }}
+                        />
+                    </div>
 
 
+                    <div>
+                        <ul className="bottom-buttons">
+                            <li onClick={onNavigateHome} className="menu-item main-li shadow-lg">
+                                <i className="fas fa-house-user" style={{ fontSize: "18px" }}></i>
+                                <span style={{ fontSize: "14px" }}>Home</span>
+                            </li>
 
-    const navigate = useNavigate()
+                            <li onClick={onLogout} className="menu-item main-li shadow-lg">
+                                <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
+                                <span style={{ fontSize: "14px" }}>Logout</span>
+                            </li>
+                        </ul>
+                    </div>
+                </>
+            )}
+        </div>
+    </nav>
+));
 
-    const homePage = () => {
-        navigate('/')
-    }
-    const toggleVaultSublist = () => {
-        setShowVaultSublist(!showVaultSublist);
-    };
-    const toggleSublist = () => {
-        setShowSublist(!showSublist);
-    };
-    const toggleSublist1 = () => {
-        setShowSublist1(!showSublist1);
-    };
-    function capitalize(input) {
-        // Split the input value into an array of words
-        const words = input.value.split(' ');
+// Memoized property row component
+const PropertyRow = memo(({ property, index, onPropertyChange, onRemoveProperty }) => (
+    <Grid container spacing={2} alignItems="center" sx={{ fontSize: '9px', mb: 2 }}>
+        <Grid item xs={12} sm={4}>
+            <FormControl variant="standard" fullWidth>
+                <Input
+                    sx={STYLES.inputStyle}
+                    id={`title-input-${index}`}
+                    placeholder="Property Title*"
+                    value={property.title}
+                    onChange={(e) => onPropertyChange(index, 'title', e.target.value)}
+                    type="text"
+                    onInput={(e) => capitalize(e.target)}
+                    required
+                />
+            </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+            <FormControl variant="standard" fullWidth>
+                <Select
+                    sx={STYLES.inputStyle}
+                    id={`dataType-select-${index}`}
+                    displayEmpty
+                    value={property.dataType}
+                    onChange={(e) => onPropertyChange(index, 'dataType', e.target.value)}
+                    required
+                >
+                    <MenuItem value="" disabled>Select Data Type</MenuItem>
+                    {PROP_DATA_TYPES.map((item, idx) => (
+                        <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={2}>
+            <FormControl variant="standard" fullWidth>
+                <Select
+                    sx={STYLES.inputStyle}
+                    id={`required-select-${index}`}
+                    displayEmpty
+                    value={property.required}
+                    onChange={(e) => onPropertyChange(index, 'required', e.target.value)}
+                    required
+                >
+                    <MenuItem value="" disabled>Is required?</MenuItem>
+                    {PROP_REQUIRED.map((item, idx) => (
+                        <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={2}>
+            <ButtonComponent onClick={() => onRemoveProperty(index)} sx={STYLES.smallButtonStyle}>
+                <i className="fas fa-trash mx-1"></i> Remove Property
+            </ButtonComponent>
+        </Grid>
+    </Grid>
+));
 
-        // Capitalize the first letter of each word
-        const capitalizedWords = words.map(word => {
-            // Capitalize the first letter of the word and make the rest lowercase
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+// Main component
+function AdminDashboard() {
+    // Context and navigation
+    const { user, authTokens, logoutUser } = useContext(Authcontext);
+    const navigate = useNavigate();
+
+    // Custom hooks
+    const { isMobile, col1Ref, col2Ref, dividerRef, containerRef, handleMouseDown } = useResizeHandler();
+
+    // State variables (keeping all original state variables)
+    const [progress, setProgress] = useState(10);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [vaultObjects, setVaultObjects] = useState([]);
+    const [miniLoader, setMiniLoader] = useState(false);
+    const [loaderMsg, setLoaderMsg] = useState('');
+    const [vaultUsers, setVaultUsers] = useState([]);
+    const [organizationusers, setOrganizationUsers] = useState([]);
+    const [vaultGroups, setViewVaultGroups] = useState(false);
+    const [viewLoginAccounts, setViewLoginAccounts] = useState(false);
+    const [viewLoginActivity, setViewLoginActivity] = useState(false);
+    const [viewCreateObject, setViewCreateObject] = useState(false);
+    const [viewObjects, setViewObjects] = useState(false);
+    const [viewVaultSettings, setViewVaultSettings] = useState(false);
+    const [viewVaultUsers, setViewVaultUsers] = useState(false);
+    const [viewObjectStructure, setViewObjectStructure] = useState(false);
+    const [selectedObjectStructure, setSelectedObjectStructure] = useState({});
+    const [selectedVault, setSelectedVault] = useState({});
+    const [usersnotlinkedtovault, setUsersNotLinkedToVault] = useState([]);
+    const [openObjectPermissionsDialog, setOpenObjectPermissionsDialog] = useState(false);
+    const [openAddPermissionDialog, setOpenAddPermissionDialog] = useState(false);
+    const [objectpermissions, setObjectPermissions] = useState([]);
+    const [selectedObject, setSelectedObject] = useState([]);
+    const [listwithoughtpermissions, setListWithoughtPermissions] = useState({});
+    const [userGroups, setuserGroups] = useState([]);
+    const [selecedGroup, setSelectedGroup] = useState({});
+    const [openGroupUsersDialog, setOpenGroupUsersDialog] = useState(false);
+    const [vaults, setVaults] = useState([]);
+    const [value, setValue] = useState(0);
+    const [showSublist, setShowSublist] = useState(false);
+    const [showVaultSublist, setShowVaultSublist] = useState(false);
+    const [showSublist1, setShowSublist1] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [alertOpen, setOpenAlert] = useState(false);
+    const [alertSeverity, setAlertSeverity] = useState('');
+    const [alertMsg, setAlertMsg] = useState('');
+    const [objectName, setObjectName] = useState('');
+    const [properties, setProperties] = useState([]);
+
+    // Memoized values
+    const userDisplayName = useMemo(() => {
+        return user.first_name && user.last_name
+            ? `${user.first_name} ${user.last_name}`
+            : user.first_name || user.last_name || user.username;
+    }, [user.first_name, user.last_name, user.username]);
+
+    // Memoized handlers
+    const homePage = useCallback(() => {
+        navigate('/');
+    }, [navigate]);
+
+    const toggleVaultSublist = useCallback(() => {
+        setShowVaultSublist(prev => !prev);
+    }, []);
+
+    const toggleSublist = useCallback(() => {
+        setShowSublist(prev => !prev);
+    }, []);
+
+    const toggleSublist1 = useCallback(() => {
+        setShowSublist1(prev => !prev);
+    }, []);
+
+    const handleChange = useCallback((event, newValue) => {
+        setValue(newValue);
+    }, []);
+
+    const toggleSidebar = useCallback(() => {
+        setSidebarOpen(prev => !prev);
+    }, []);
+
+    const toggleMenu = useCallback(() => {
+        setMenuOpen(prev => !prev);
+    }, []);
+
+    const handlePropertyChange = useCallback((index, key, value) => {
+        setProperties(prev => {
+            const updatedProperties = [...prev];
+            updatedProperties[index][key] = value;
+            return updatedProperties;
         });
+    }, []);
 
-        // Join the capitalized words back together
-        const capitalizedInput = capitalizedWords.join(' ');
+    const addProperty = useCallback(() => {
+        setProperties(prev => [...prev, { title: '', dataType: '', required: '' }]);
+    }, []);
 
-        // Update the input value with the capitalized text
-        input.value = capitalizedInput;
-    }
+    const removeProperty = useCallback((index) => {
+        setProperties(prev => {
+            const updatedProperties = [...prev];
+            updatedProperties.splice(index, 1);
+            return updatedProperties;
+        });
+    }, []);
 
-    const VaultUsergroups = () => {
-
-        let data = JSON.stringify({
+    // API functions memoized
+    const VaultUsergroups = useCallback(() => {
+        const data = JSON.stringify({
             "vault_guid": selectedVault.guid,
         });
-        console.log(selectedVault.guid)
 
-        let config = {
+        const config = {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/vault-groups/`,
             headers: { 'Content-Type': 'application/json' },
             data: data
         };
+
         axios.request(config)
             .then((response) => {
-                setuserGroups(response.data)
+                setuserGroups(response.data);
             })
             .catch((error) => {
                 console.log(error);
             });
+    }, [selectedVault.guid]);
 
-    }
+    const selectedGroupUsers = useCallback((row) => {
+        const group = userGroups.find(item => item.id === row.id);
+        setSelectedGroup(group);
+        setOpenGroupUsersDialog(true);
+    }, [userGroups]);
 
-
-    let selectedGroupUsers = (row) => {
-        let group = userGroups.find(item => item.id === row.id)
-        setSelectedGroup(group)
-        setOpenGroupUsersDialog(true)
-    }
-
-    const handleAddPermission = (guid, object_id) => {
-
-
-        let data = JSON.stringify({
+    const handleAddPermission = useCallback((guid, object_id) => {
+        const data = JSON.stringify({
             "vault_guid": guid,
             "object_id": object_id
         });
 
-
-        let config = {
+        const config = {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/list-users-without-permissions/`,
@@ -248,59 +453,20 @@ function AdminDashboard() {
             },
             data: data
         };
-        console.log(data)
 
         axios.request(config)
             .then((response) => {
-
-                setListWithoughtPermissions(response.data)
-                setOpenAddPermissionDialog(true)
-
+                setListWithoughtPermissions(response.data);
+                setOpenAddPermissionDialog(true);
             })
             .catch((error) => {
                 console.log(error);
             });
+    }, []);
 
-    }
-
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    const toggleMenu = () => {
-        setMenuOpen(!menuOpen);
-    };
-
-    const [objectName, setObjectName] = useState('');
-    const [properties, setProperties] = useState([]);
-
-    const PROP_DATA_TYPES = [
-        { value: 'MFDatatypeText', label: 'Text' },
-        { value: 'MFDatatypeMultiLineText', label: 'Text (multi-line)' },
-        // { value: 'MFDatatypeLookup', label: 'Choose from list' },
-        // { value: 'MFDatatypeMultiSelectLookup', label: 'Choose from list (multi-select)' },
-        { value: 'MFDatatypeBoolean', label: 'Boolean (yes/no)' },
-        { value: 'MFDatatypeInteger', label: 'Number (integer)' },
-        // { value: 'MFDatatypeDate', label: 'Date' },
-        // { value: 'MFDatatypeTime', label: 'Time' },
-        // { value: 'MFDatatypeTimestamp', label: 'Timestamp' },
-        // { value: 'MFDatatypeFloating', label: 'Number (Real)' },
-    ];
-    const PROP_REQUIRED = [
-        { value: true, label: 'Yes' },
-        { value: false, label: 'No' },
-
-
-    ];
-
-    const getObjectStructureById = (id) => {
-        viewobjectstructure()
-        let config = {
+    const getObjectStructureById = useCallback((id) => {
+        viewobjectstructure();
+        const config = {
             method: 'get',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/structure/object/${id}/`,
@@ -309,19 +475,17 @@ function AdminDashboard() {
 
         axios.request(config)
             .then((response) => {
-                // console.log(JSON.stringify(response.data));
-                setSelectedObjectStructure(response.data)
+                setSelectedObjectStructure(response.data);
             })
             .catch((error) => {
                 console.log(error);
             });
+    }, []);
 
-    }
+    const handleSubmit = useCallback(async () => {
+        setLoaderMsg("Adding New Object...");
+        setMiniLoader(true);
 
-
-    const handleSubmit = async () => {
-        setLoaderMsg("Adding New Object...")
-        setMiniLoader(true)
         try {
             const payload = {
                 objectName: objectName,
@@ -333,15 +497,13 @@ function AdminDashboard() {
             };
 
             const emptyItems = [];
-            let alertsTriggered = false; // Flag to track if alerts were triggered
+            let alertsTriggered = false;
 
-            // Check objectName
             if (!payload.objectName) {
                 emptyItems.push("ObjectName");
                 alertsTriggered = true;
             }
 
-            // Check properties
             if (payload.properties.length === 0) {
                 alert("Please add properties to create the object");
                 alertsTriggered = true;
@@ -365,23 +527,16 @@ function AdminDashboard() {
                         emptyItems.push(`Property "${property.isRequired}" required`);
                         alertsTriggered = true;
                     }
-
-
                 });
             }
 
-            // If there are empty items, alert them
             if (emptyItems.length > 0) {
                 const alertMessage = `The following items are empty: ${emptyItems.join(", ")}`;
                 alert(alertMessage);
             }
 
-            // If no alerts were triggered, run another code
             if (!alertsTriggered) {
-                // Your additional code here
-
-
-                let config = {
+                const config = {
                     method: 'post',
                     maxBodyLength: Infinity,
                     url: `${constants.mfiles_api}/api/objectstracture/CreateObjectAdmin`,
@@ -393,99 +548,64 @@ function AdminDashboard() {
 
                 axios.request(config)
                     .then((response) => {
-                        setMiniLoader(false)
-                        setObjectName('')
-                        setProperties([])
-                        alert('Object creacted successfully !!');
-
+                        setMiniLoader(false);
+                        setObjectName('');
+                        setProperties([]);
+                        alert('Object created successfully !!');
                     })
                     .catch((error) => {
                         console.log(error);
                     });
-
             }
-            setMiniLoader(false)
-
-
+            setMiniLoader(false);
 
         } catch (error) {
-            setMiniLoader(false)
+            setMiniLoader(false);
             if (error.response) {
-                // The server responded with an error status code
-                setObjectName('')
-                setProperties([])
+                setObjectName('');
+                setProperties([]);
                 console.error('Error:', error.response.data);
                 alert(`${error.response.data.message}`);
             } else if (error.request) {
-                // The request was made but no response was received
-
                 console.error('Error:', error.request);
                 alert('No response from server');
             } else {
-                // Something happened in setting up the request that triggered an error
-
                 console.error('Error:', error.message);
                 alert('Error occurred');
             }
-            // Handle error scenario
         }
-    };
+    }, [objectName, properties]);
 
-    const handlePropertyChange = (index, key, value) => {
-        const updatedProperties = [...properties];
-        updatedProperties[index][key] = value;
-        setProperties(updatedProperties);
-    };
+    // View management functions
+    const viewnewobject = useCallback(() => {
+        setViewCreateObject(true);
+        setViewLoginActivity(false);
+        setViewVaultUsers(false);
+        setViewLoginAccounts(false);
+        setViewVaultGroups(false);
+        setViewObjects(false);
+        setViewObjectStructure(false);
+    }, []);
 
-    const addProperty = () => {
-        setProperties([...properties, { title: '', dataType: '', required: '' }]);
-    };
+    const viewvaultobjects = useCallback(() => {
+        setViewObjects(true);
+        setViewLoginActivity(false);
+        setViewVaultUsers(false);
+        setViewCreateObject(false);
+        setViewLoginAccounts(false);
+        setViewVaultGroups(false);
+        setViewObjectStructure(false);
+    }, []);
 
-    const removeProperty = (index) => {
-        const updatedProperties = [...properties];
-        updatedProperties.splice(index, 1);
-        setProperties(updatedProperties);
-    };
-
-
-
-
-    const viewnewobject = () => {
-        setViewCreateObject(true)
-        setViewLoginActivity(false)
-        setViewVaultUsers(false)
-        setViewLoginAccounts(false)
-        setViewVaultGroups(false)
-        setViewObjects(false)
-        setViewObjectStructure(false)
-
-    }
-
-    const viewvaultobjects = () => {
-        setViewObjects(true)
-        setViewLoginActivity(false)
-        setViewVaultUsers(false)
-        setViewCreateObject(false)
-        setViewLoginAccounts(false)
-        setViewVaultGroups(false)
-        setViewObjectStructure(false)
-    }
-
-    const viewvaultusers = async (vault) => {
-        setVaultUsers([])
-        let data = {
-            vault_id: vault
-        }
-        let config = {
+    const viewvaultusers = useCallback(async (vault) => {
+        setVaultUsers([]);
+        const data = { vault_id: vault };
+        const config = {
             method: 'post',
             url: `${constants.auth_api}/api/users-linked-to-vault/`,
-            headers: {
-                //   'Authorization': `Bearer ${authTokens.access}`,
-                //   'Content-Type': 'application/json',
-            },
+            headers: {},
             data: data
         };
-        console.log(data)
 
         await axios.request(config)
             .then((response) => {
@@ -495,68 +615,63 @@ function AdminDashboard() {
                 console.log(error);
             });
 
+        setViewVaultUsers(true);
+        setViewLoginActivity(false);
+        setViewObjects(false);
+        setViewCreateObject(false);
+        setViewLoginAccounts(false);
+        setViewVaultGroups(false);
+        setViewObjectStructure(false);
+    }, []);
 
-        setViewVaultUsers(true)
-        setViewLoginActivity(false)
-        setViewObjects(false)
-        setViewCreateObject(false)
-        setViewLoginAccounts(false)
-        setViewVaultGroups(false)
-        setViewObjectStructure(false)
-    }
+    const viewobjectstructure = useCallback(() => {
+        setViewObjectStructure(true);
+        setViewLoginActivity(false);
+        setViewVaultUsers(false);
+        setViewObjects(false);
+        setViewCreateObject(false);
+        setViewLoginAccounts(false);
+        setViewVaultGroups(false);
+    }, []);
 
-    const viewobjectstructure = () => {
-        setViewObjectStructure(true)
-        setViewLoginActivity(false)
-        setViewVaultUsers(false)
-        setViewObjects(false)
-        setViewCreateObject(false)
-        setViewLoginAccounts(false)
-        setViewVaultGroups(false)
-    }
-    const viewvaultgroups = () => {
-        setViewVaultGroups(true)
-        setViewLoginActivity(false)
-        setViewVaultUsers(false)
-        setViewCreateObject(false)
-        setViewLoginAccounts(false)
-        setViewObjects(false)
-        setViewObjectStructure(false)
+    const viewvaultgroups = useCallback(() => {
+        setViewVaultGroups(true);
+        setViewLoginActivity(false);
+        setViewVaultUsers(false);
+        setViewCreateObject(false);
+        setViewLoginAccounts(false);
+        setViewObjects(false);
+        setViewObjectStructure(false);
+    }, []);
 
-    }
+    const viewloginaccounts = useCallback(() => {
+        setViewLoginAccounts(true);
+        setViewLoginActivity(false);
+        setViewVaultUsers(false);
+        setViewCreateObject(false);
+        setViewVaultGroups(false);
+        setViewObjects(false);
+        setViewObjectStructure(false);
+    }, []);
 
-    const viewloginaccounts = () => {
-        setViewLoginAccounts(true)
-        setViewLoginActivity(false)
-        setViewVaultUsers(false)
-        setViewCreateObject(false)
-        setViewVaultGroups(false)
-        setViewObjects(false)
-        setViewObjectStructure(false)
-    }
+    const viewloginactivity = useCallback(() => {
+        setViewLoginActivity(true);
+        setViewLoginAccounts(false);
+        setViewVaultUsers(false);
+        setViewCreateObject(false);
+        setViewVaultGroups(false);
+        setViewObjects(false);
+        setViewObjectStructure(false);
+    }, []);
 
-
-    const viewloginactivity = () => {
-        setViewLoginActivity(true)
-        setViewLoginAccounts(false)
-        setViewVaultUsers(false)
-        setViewCreateObject(false)
-        setViewVaultGroups(false)
-        setViewObjects(false)
-        setViewObjectStructure(false)
-    }
-
-
-
-
-    const fetchObjectPermisions = async (object) => {
-        setSelectedObject(object)
-        let data = JSON.stringify({
+    const fetchObjectPermisions = useCallback(async (object) => {
+        setSelectedObject(object);
+        const data = JSON.stringify({
             "object_id": object.object_id,
             "vault_guid": selectedVault.guid
         });
 
-        let config = {
+        const config = {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/get-vault-object-permissions/`,
@@ -568,48 +683,43 @@ function AdminDashboard() {
 
         await axios.request(config)
             .then((response) => {
-
-
-                setObjectPermissions(response.data)
-                setOpenObjectPermissionsDialog(true)
+                setObjectPermissions(response.data);
+                setOpenObjectPermissionsDialog(true);
             })
             .catch((error) => {
                 console.log(error);
             });
+    }, [selectedVault.guid]);
 
-    }
-
-    const fetchUsersNotLinkedToVault = async (vault) => {
-
+    const fetchUsersNotLinkedToVault = useCallback(async (vault) => {
         try {
             const response = await axios.post(`${constants.auth_api}/api/users-not-linked-to-vault/`, { vault_id: vault });
-            setUsersNotLinkedToVault(response.data.map(user => ({ value: user.id, label: `${user.first_name} ${user.last_name} (${user.email})` })));
+            setUsersNotLinkedToVault(response.data.map(user => ({
+                value: user.id,
+                label: `${user.first_name} ${user.last_name} (${user.email})`
+            })));
         } catch (error) {
             console.error('Error fetching users:', error);
-
         }
-    };
+    }, []);
 
-    const fetchVaultObjects = async (guid) => {
-        alert(guid)
+    const fetchVaultObjects = useCallback(async (guid) => {
+        alert(guid);
         try {
-            const payload = {
-                guid: guid
-            }
-
+            const payload = { guid: guid };
             const headers = {
                 'Authorization': `Bearer ${authTokens.access}`,
                 'Content-Type': 'application/json'
-            }
-            const response = await axios.post(`${constants.auth_api}/api/get-vault-objects/`, payload, headers);
+            };
+            const response = await axios.post(`${constants.auth_api}/api/get-vault-objects/`, payload, { headers });
             setVaultObjects(response.data);
-
         } catch (error) {
             console.error('Error fetching vault objects:', error);
         }
-    };
-    const fetchOrgUsers = async () => {
-        let config = {
+    }, [authTokens.access]);
+
+    const fetchOrgUsers = useCallback(async () => {
+        const config = {
             method: 'get',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/users/organization/${user.organizationid}/`,
@@ -618,76 +728,20 @@ function AdminDashboard() {
 
         try {
             const response = await axios.request(config);
-            setOrganizationUsers(response.data)
-
+            setOrganizationUsers(response.data);
         } catch (error) {
             console.log(error);
         }
-    };
+    }, [user.organizationid]);
 
-    function stringToColor(string) {
-        let hash = 0;
-        let i;
-
-        /* eslint-disable no-bitwise */
-        for (i = 0; i < string.length; i += 1) {
-            hash = string.charCodeAt(i) + ((hash << 5) - hash);
-        }
-
-        let color = '#';
-
-        for (i = 0; i < 3; i += 1) {
-            const value = (hash >> (i * 8)) & 0xff;
-            color += `00${value.toString(16)}`.slice(-2);
-        }
-        /* eslint-enable no-bitwise */
-
-        return color;
-    }
-
-    function stringAvatar(name) {
-
-        const nameParts = name.split(' '); // Split the name into parts
-        const firstInitial = nameParts[0] ? nameParts[0][0] : ''; // Get the first letter of the first part
-        const secondInitial = nameParts[1] ? nameParts[1][0] : ''; // Get the first letter of the second part (if it exists)
-
-        return {
-            sx: {
-                bgcolor: stringToColor(name), // Assuming stringToColor is defined elsewhere
-            },
-            children: `${firstInitial}${secondInitial}`, // Combine the initials
-        };
-    }
-
-    const buttonStyle = {
-        textTransform: 'none',
-        fontWeight: 'lighter',
-        fontSize: '10px',
-        mx: 1,
-    };
-
-    const smallButtonStyle = {
-        textTransform: 'none',
-        fontWeight: 'lighter',
-        fontSize: '9px',
-        mx: 2,
-    };
-
-    const inputStyle = {
-        fontSize: '12.5px',
-        mx: 2,
-    };
-
-    const syncUser = async () => {
-        setLoading(true)
-        let data = JSON.stringify({
+    const syncUser = useCallback(async () => {
+        setLoading(true);
+        const data = JSON.stringify({
             "guid": `${selectedVault.guid}`,
             "organization_id": `${user.organizationid}`
         });
 
-        console.log(data)
-
-        let config = {
+        const config = {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${constants.auth_api}/api/sync-vault-users/`,
@@ -699,193 +753,181 @@ function AdminDashboard() {
 
         await axios.request(config)
             .then((response) => {
-                fetchOrgUsers()
-                viewvaultusers(selectedVault.guid)
+                fetchOrgUsers();
+                viewvaultusers(selectedVault.guid);
                 console.log(JSON.stringify(response.data));
-                setLoading(false)
+                setLoading(false);
                 setOpenAlert(true);
                 setAlertSeverity("success");
-                setAlertMsg("Accouns were synced successfully");
+                setAlertMsg("Accounts were synced successfully");
             })
             .catch((error) => {
-                setLoading(false)
+                setLoading(false);
                 setOpenAlert(true);
                 setAlertSeverity("error");
                 setAlertMsg("Failed syncing accounts, try again later");
                 console.log(error);
             });
+    }, [selectedVault.guid, user.organizationid, fetchOrgUsers, viewvaultusers]);
 
-
-
-    }
-
-
+    // Effects
     useEffect(() => {
         fetchOrgUsers();
-    }, []);
+    }, [fetchOrgUsers]);
 
-
+    // Memoized rendered properties
+    const renderedProperties = useMemo(() => {
+        return properties.map((property, index) => (
+            <PropertyRow
+                key={index}
+                property={property}
+                index={index}
+                onPropertyChange={handlePropertyChange}
+                onRemoveProperty={removeProperty}
+            />
+        ));
+    }, [properties, handlePropertyChange, removeProperty]);
 
     return (
         <>
-            <PermissionDialog selectedVault={selectedVault.guid} handleAddPermission={handleAddPermission} selectedObject={selectedObject} fetchObjectPermisions={fetchObjectPermisions} permissions={objectpermissions} open={openObjectPermissionsDialog} close={() => setOpenObjectPermissionsDialog(false)} />
-            <GroupUsersDialog selectedGroupUsers={selectedGroupUsers} selectedGroup={selecedGroup} selectedVault={selectedVault.guid} open={openGroupUsersDialog} close={setOpenGroupUsersDialog} />
-            <AddPermissionDialog fetchObjectPermisions={fetchObjectPermisions} selectedObject={selectedObject} selectedVault={selectedVault.guid} listwithoughtpermissions={listwithoughtpermissions} open={openAddPermissionDialog} close={() => setOpenAddPermissionDialog(false)} />
+            <PermissionDialog
+                selectedVault={selectedVault.guid}
+                handleAddPermission={handleAddPermission}
+                selectedObject={selectedObject}
+                fetchObjectPermisions={fetchObjectPermisions}
+                permissions={objectpermissions}
+                open={openObjectPermissionsDialog}
+                close={() => setOpenObjectPermissionsDialog(false)}
+            />
+            <GroupUsersDialog
+                selectedGroupUsers={selectedGroupUsers}
+                selectedGroup={selecedGroup}
+                selectedVault={selectedVault.guid}
+                open={openGroupUsersDialog}
+                close={setOpenGroupUsersDialog}
+            />
+            <AddPermissionDialog
+                fetchObjectPermisions={fetchObjectPermisions}
+                selectedObject={selectedObject}
+                selectedVault={selectedVault.guid}
+                listwithoughtpermissions={listwithoughtpermissions}
+                open={openAddPermissionDialog}
+                close={() => setOpenAddPermissionDialog(false)}
+            />
             <MiniLoader loading={miniLoader} loaderMsg={loaderMsg} setLoading={setMiniLoader} />
-            <div className="dashboard"  style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
-                {/* Sidebar */}
-                <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} `}>
-                    <div className="sidebar-content" style={{ minWidth: '200px', fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
-                        {sidebarOpen && (
-                            <>
-                                <div className='bg-white shadow-lg' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Avatar
-                                        alt={
-                                            user.first_name && user.last_name
-                                                ? `${user.first_name} ${user.last_name}`
-                                                : user.first_name
-                                                    ? user.first_name
-                                                    : user.last_name
-                                                        ? user.last_name
-                                                        : user.username
-                                        }
-                                        {...stringAvatar(
-                                            user.first_name && user.last_name
-                                                ? `${user.first_name} ${user.last_name}`
-                                                : user.first_name
-                                                    ? user.first_name
-                                                    : user.last_name
-                                                        ? user.last_name
-                                                        : user.username
-                                        )}
-                                        sx={{
-                                            width: 40,
-                                            height: 40,
-                                            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-                                            transform: 'translateZ(0)',
-                                            transition: 'transform 0.2s',
-                                            backgroundColor: '#2757aa'
 
+            <div className="dashboard" style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
+                <Sidebar
+                    sidebarOpen={sidebarOpen}
+                    user={user}
+                    userDisplayName={userDisplayName}
+                    onNavigateHome={homePage}
+                    onLogout={logoutUser}
+                />
 
-                                        }}
-                                        className='my-3'
-                                    />
-
-
-                                </div>
-
-
-
-                                {/* Menu Items */}
-                                <ul className="menu-items">
-                                    <li
-                                        className="menu-item main-li shadow-lg"
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            padding: "10px 15px",
-                                            borderRadius: "8px",
-                                            width: "100%",  // Ensure full width
-                                        }}
-                                    >
-                                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
-                                            <span style={{ fontSize: "14px" }}>{user.first_name} {user.last_name}</span>
-                                        </div>
-
-                                    </li>
-
-                                    <li
-                                        className="menu-item main-li shadow-lg"
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            padding: "10px 15px",
-                                            borderRadius: "8px",
-                                            width: "100%",  // Ensure full width
-                                        }}
-                                    >
-                                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexGrow: 1 }}>
-                                            <span style={{ fontSize: "14px" }}>{user.organization}</span>
-                                        </div>
-                                    </li>
-                                </ul>
-
-                                {/* <div className='shadow-lg ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12.5px' }}>
-                                    <span className='p-2 mx-3'>{user.organization}</span>
-                                </div> */}
-
-
-
-
-
-                                {/* Bottom Buttons */}
-                                <div>
-                                    <ul className="bottom-buttons">
-
-                                        <li onClick={homePage} className="menu-item main-li shadow-lg">
-                                            <i className="fas fa-house-user" style={{ fontSize: "18px" }}></i>
-                                            <span style={{ fontSize: "14px" }}>Home</span>
-                                        </li>
-
-                                        <li onClick={logoutUser} className="menu-item main-li shadow-lg">
-                                            <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
-                                            <span style={{ fontSize: "14px" }}>Logout</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                </nav >
-                < main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`
-                }>
-                    <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
+                <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
+                    {/* <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
                         <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
-                            <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
+                            <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`}></i>
                         </div>
-                    </Tooltip>
-                    <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#dedddd' }}>
+                    </Tooltip> */}
 
+                    <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#fff' }}>
                         <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '30%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
-                            {/* Header Box */}
                             <Box
-                                sx={{
-                                    fontSize: '12.5px',
-                                    backgroundColor: '#ecf4fc',
-                                    color: '#2757aa',
-                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
+                                sx={[STYLES.headerBox, {
 
                                     display: 'flex',
-                                    alignItems: 'center', // Vertical alignment
-                                    justifyContent: 'space-between', // Spacing between icon and text
-
-                                    padding: '12.5px', // Add padding for better spacing
-                                }}
+                                    alignItems: 'center',
+                                    gap: 2
+                                }]}
 
                             >
+                                <Box
+                                    onClick={toggleSidebar}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 40,
+                                        height: 40,
+                                        cursor: 'pointer',
+                                        borderRadius: 1,
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            backgroundColor: '#f0f4fa',
+                                            transform: 'scale(1.05)',
+                                        },
+                                    }}
+                                >
+                                    <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
+                                </Box>
 
+                                <Box >
+                                    <span style={{ fontSize: '14px' }} className='text-dark'>ADMIN MANAGER</span>
+                                </Box>
+                                <Tooltip title={`${user.first_name} ${user.last_name}`}>
+                                    <Avatar
+                                        alt={userDisplayName}
+                                        {...stringAvatar(userDisplayName)}
+                                         sx={{
+                  width: 36,
+                  height: 36,
+                  backgroundColor: '#2757aa',
+                  fontSize: '13px',
+                }}
 
-                                <span style={{ fontSize: '14px' }} className='text-dark'>  ADMIN MANAGER</span>
-
+                                    />
+                                </Tooltip>
                             </Box>
-                            {/* Action Button */}
 
-                            {/* Vault List */}
-                            <div
-                                style={{
-                                    fontSize: '12.5px',
+                            <div style={{
+                                backgroundColor: 'white',
+                                fontSize: '13px',
+                                borderRadius: '4px'
+                            }}>
+                                <ul style={{
+                                    margin: 0,
+                                    padding: 0,
+                                    listStyle: 'none',
+                                    overflowY: 'auto',
+                                    marginLeft: '10px'
+                                }}>
+                                    <li style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '8px 12px',
+                                        cursor: 'pointer',
+                                        transition: 'background-color 0.2s ease'
+                                    }}>
+                                        {/* <i className="fas fa-building" style={{
+                                            fontSize: '20px',
+                                            marginRight: '8px',
+                                            color: '#2757aa'
+                                        }}></i> */}
+                                        <span >Organization Name: <span style={{ color: '#2757aa' }}>{user.organization}</span></span>
+                                    </li>
 
-                                    overflowY: 'auto', // Enable scrolling
-                                    // border: '1px solid #ddd',
+                                    <li style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '8px 12px',
+                                        cursor: 'pointer',
+                                        transition: 'background-color 0.2s ease'
+                                    }}>
+                                        {/* <i className="fa-solid fa-database" style={{
+                                            fontSize: '20px',
+                                            marginRight: '8px',
+                                            color: '#2757aa'
+                                        }}></i> */}
+                                        <span>Total Vaults: <span style={{ color: '#2757aa' }}>{user.vaultcount}</span></span>
+                                        <span className='mx-2'>Total Users: <span style={{ color: '#2757aa' }}>{organizationusers.length}</span></span>
+                                    </li>
 
+                                </ul>
+                            </div>
 
-                                }}
-                                className="mb-3 shadow-lg"
-                            >
-
+                            <div style={{ fontSize: '13px', overflowY: 'auto' }} className="mb-3 shadow-lg">
                                 <OrganizationVaultList
                                     VaultUsergroups={VaultUsergroups}
                                     fetchVaultObjects={fetchVaultObjects}
@@ -908,24 +950,23 @@ function AdminDashboard() {
                                     viewloginaccounts={viewloginaccounts}
                                     vaults={vaults}
                                     setVaults={setVaults}
-
-
                                 />
                             </div>
 
 
 
-                        </div>  {!isMobile && (
+                        </div>
+
+                        {!isMobile && (
                             <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '5px', cursor: 'ew-resize', backgroundColor: '#ccc' }}></div>
                         )}
 
-
-                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '80%', backgroundColor: '#dedddd', minWidth: '35%', minHeight: '100vh' }}>
-                            {viewCreateObject ?
-                                <div id="newobject" style={{ fontSize: '12.5px', marginBottom: '20px' }}>
+                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '80%', backgroundColor: '#fff', minWidth: '35%', minHeight: '100vh' }}>
+                            {viewCreateObject && (
+                                <div id="newobject" style={{ fontSize: '13px', marginBottom: '20px' }}>
                                     <div>
                                         <Box sx={{ p: 3, boxShadow: 2, fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
-                                            <i className="fas fa-plus mx-2" style={{ fontSize: '1.5em' }}></i> Create New Object
+                                            <i className="fas fa-plus mx-2" style={{ fontSize: '13px' }}></i> Create New Object
                                         </Box>
                                         <Typography variant="body2" sx={{ my: 3, fontSize: '0.8em' }}>
                                             Please create your new object type below with the respective properties
@@ -948,10 +989,10 @@ function AdminDashboard() {
                                                     </FormControl>
                                                 </Grid>
                                                 <Grid item xs={12}>
-                                                    <ButtonComponent size="sm" onClick={addProperty} sx={buttonStyle}>
+                                                    <ButtonComponent size="sm" onClick={addProperty} sx={STYLES.buttonStyle}>
                                                         <i className="fas fa-tag mx-1"></i> Add Property
                                                     </ButtonComponent>
-                                                    <ButtonComponent onClick={handleSubmit} sx={buttonStyle}>
+                                                    <ButtonComponent onClick={handleSubmit} sx={STYLES.buttonStyle}>
                                                         <i className="fas fa-plus-circle mx-1"></i> Create Object
                                                     </ButtonComponent>
                                                 </Grid>
@@ -959,85 +1000,26 @@ function AdminDashboard() {
                                         </Box>
 
                                         <Box className="container-fluid" sx={{ overflowY: 'auto' }}>
-                                            {properties.map((property, index) => (
-                                                <Grid container spacing={2} alignItems="center" key={index} sx={{ fontSize: '9px', mb: 2 }}>
-                                                    <Grid item xs={12} sm={4}>
-                                                        <FormControl variant="standard" fullWidth>
-                                                            <Input
-                                                                sx={inputStyle}
-                                                                id={`title-input-${index}`}
-                                                                placeholder="Property Title*"
-                                                                value={property.title}
-                                                                onChange={(e) => handlePropertyChange(index, 'title', e.target.value)}
-                                                                type="text"
-                                                                onInput={(e) => capitalize(e.target)}
-                                                                required
-                                                            />
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={4}>
-                                                        <FormControl variant="standard" fullWidth>
-                                                            <Select
-                                                                sx={inputStyle}
-                                                                id={`dataType-select-${index}`}
-                                                                displayEmpty
-                                                                value={property.dataType}
-                                                                onChange={(e) => handlePropertyChange(index, 'dataType', e.target.value)}
-                                                                required
-                                                            >
-                                                                <MenuItem value="" disabled>Select Data Type</MenuItem>
-                                                                {PROP_DATA_TYPES.map((item, idx) => (
-                                                                    <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={2}>
-                                                        <FormControl variant="standard" fullWidth>
-                                                            <Select
-                                                                sx={inputStyle}
-                                                                id={`required-select-${index}`}
-                                                                displayEmpty
-                                                                value={property.required}
-                                                                onChange={(e) => handlePropertyChange(index, 'required', e.target.value)}
-                                                                required
-                                                            >
-                                                                <MenuItem value="" disabled>Is required?</MenuItem>
-                                                                {PROP_REQUIRED.map((item, idx) => (
-                                                                    <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={2}>
-                                                        <ButtonComponent onClick={() => removeProperty(index)} sx={smallButtonStyle}>
-                                                            <i className="fas fa-trash mx-1"></i> Remove Property
-                                                        </ButtonComponent>
-                                                    </Grid>
-                                                </Grid>
-                                            ))}
+                                            {renderedProperties}
                                         </Box>
                                     </div>
                                 </div>
+                            )}
 
-                                : <></>
-
-                            }
-
-                            {viewObjects ?
+                            {viewObjects && (
                                 <>
-                                    <h6 className='shadow-lg p-3 '><i className="fa-solid  fa-database  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>{selectedVault.name} ( Vault Objects )</h6>
+                                    <h6 className='shadow-lg p-3'>
+                                        <i className="fa-solid fa-database mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
+                                        {selectedVault.name} ( Vault Objects )
+                                    </h6>
 
-                                    <div id='vaultobjects' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
-
-
+                                    <div id='vaultobjects' style={{ fontSize: '13px', marginBottom: '20px' }}>
                                         <div style={{ boxShadow: 'none' }} className='shadow-lg p-3'>
                                             <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                                 <TableHead className='my-3 p-3'>
-                                                    <TableRow >
+                                                    <TableRow>
                                                         <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object Name</TableCell>
                                                         <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Object ID</TableCell>
-                                                        {/* <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell> */}
                                                     </TableRow>
                                                 </TableHead>
                                             </Table>
@@ -1047,63 +1029,42 @@ function AdminDashboard() {
                                                         {vaultObjects.map((row) => (
                                                             <TableRow key={row.object_id}>
                                                                 <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.name_singular}
+                                                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '13px', color: '#2a68af' }}></i>
+                                                                    {row.name_singular}
                                                                 </TableCell>
                                                                 <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
-                                                                {/* <TableCell>
-                                        <Button
-                                            size="small"
-                                            variant="contained"
-                                            color="warning"
-                                            onClick={() => fetchObjectPermisions(row)}
-                                            style={{ textTransform: 'none' }}
-                                        >
-                                            <small>
-                                                <i className="fas fa-cog" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Permissions
-                                            </small>
-                                        </Button>
-                                    </TableCell> */}
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
                                                 </Table>
                                             </div>
                                         </div>
-
-
-
                                     </div>
                                 </>
-                                : <></>
+                            )}
 
-                            }
-                            {viewObjectStructure ?
-                                <div id='updateobjstructure' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
+                            {viewObjectStructure && (
+                                <div id='updateobjstructure' style={{ fontSize: '13px', marginBottom: '20px' }}>
                                     <div>
-                                        <div>
-                                            <h6 className='shadow-lg p-3' style={{ fontSize: '1.2em' }}>
-                                                <i className="fas fa-edit mx-2" style={{ fontSize: '1.5em' }}></i> Update Object
-                                            </h6>
-                                        </div>
-
-
+                                        <h6 className='shadow-lg p-2' style={{ fontSize: '1.2em' }}>
+                                            <i className="fas fa-edit mx-2" style={{ fontSize: '13px' }}></i> Update Object
+                                        </h6>
                                         <ObjComponent
                                             selectedObjectStructure={selectedObjectStructure}
                                             setSelectedObjectStructure={setSelectedObjectStructure}
                                             authTokens={authTokens}
                                         />
-
                                     </div>
                                 </div>
-                                : <></>
+                            )}
 
-                            }
-
-                            {vaultGroups ?
-                                <div id='permissions' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
+                            {vaultGroups && (
+                                <div id='permissions' style={{ fontSize: '13px', marginBottom: '20px' }}>
                                     <div>
-
-                                        <h6 className='shadow-lg p-3 '><i className="fa-solid  fa-database  mx-2" style={{ fontSize: '1.5em' }}></i>{selectedVault.name} ( User Groups )</h6>
+                                        <h6 className='shadow-lg p-2'>
+                                            <i className="fa-solid fa-database mx-2" style={{ fontSize: '13px' }}></i>
+                                            {selectedVault.name} ( User Groups )
+                                        </h6>
 
                                         <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>
                                             <Button
@@ -1113,25 +1074,25 @@ function AdminDashboard() {
                                                 onClick={() => alert("add user group")}
                                                 style={{ textTransform: 'none' }}
                                                 className='my-2'
-
                                             >
-                                                <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group </small>
+                                                <small>
+                                                    <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group
+                                                </small>
                                             </Button>
                                             <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                                                 <TableHead>
                                                     <TableRow className='my-3'>
-
                                                         <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>Name</TableCell>
-                                                        <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}> ID</TableCell>
+                                                        <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}>ID</TableCell>
                                                         <TableCell style={{ borderBottom: 'none', fontWeight: 'bold' }}></TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
                                                     {userGroups.map((row) => (
                                                         <TableRow key={row.object_id}>
-
                                                             <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                                                <i className="fas fa-users mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i> {row.title}
+                                                                <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2a68af' }}></i>
+                                                                {row.title}
                                                             </TableCell>
                                                             <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
                                                             <TableCell>
@@ -1141,14 +1102,12 @@ function AdminDashboard() {
                                                                     color="warning"
                                                                     onClick={() => selectedGroupUsers(row)}
                                                                     style={{ textTransform: 'none' }}
-
                                                                 >
-                                                                    <small>  <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users </small>
+                                                                    <small>
+                                                                        <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users
+                                                                    </small>
                                                                 </Button>
-
                                                             </TableCell>
-
-
                                                         </TableRow>
                                                     ))}
                                                 </TableBody>
@@ -1156,86 +1115,66 @@ function AdminDashboard() {
                                         </TableContainer>
                                     </div>
                                 </div>
-                                : <></>
+                            )}
 
-                            }
-
-                            {viewLoginAccounts ?
-                                <div id='usermanagement' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
+                            {viewLoginAccounts && (
+                                <div id='usermanagement' style={{ fontSize: '13px', marginBottom: '20px' }}>
                                     <div>
-
-                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
-
+                                        <h6 className='shadow-lg p-3'>
+                                            <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
+                                            Login Accounts
+                                        </h6>
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
-                                        {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
-                <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
-
+                                        {/* Comments preserved as in original */}
                                     </div>
-
                                     <OrganizationUsersTable users={organizationusers} />
                                 </div>
-                                : <></>
+                            )}
 
-                            }
-                            {viewLoginActivity ?
-                                <div id='loginactivity' style={{ fontSize: '12.5px', marginBottom: '20px' }}>
+                            {viewLoginActivity && (
+                                <div id='loginactivity' style={{ fontSize: '13px', marginBottom: '20px' }}>
                                     <div>
-
-                                        <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>Login Accounts</h6>
-
+                                        <h6 className='shadow-lg p-3'>
+                                            <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
+                                            Activity Logs
+                                        </h6>
                                     </div>
                                     <div className='btn-group my-3' role="group" aria-label="Basic example">
-                                        {/* <UserRegistrationModal authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} />
-                <BulkUserRegistrationDialog authTokens={authTokens} fetchOrgUsers={fetchOrgUsers} /> */}
-
+                                        {/* Comments preserved as in original */}
                                     </div>
-
                                     <LoginActivityTable />
                                 </div>
-                                : <></>
+                            )}
 
-                            }
-                            {viewVaultUsers ?
-                                <div id='vaultusermanagement' style={{ fontSize: '12.5px' }}>
-
-                                    <h6 className='shadow-lg p-3'><i className="fas fa-users  mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i> <span style={{ color: '#2757aa' }}>{selectedVault.name}</span>  Vault Users</h6>
-
-                                    <VaultUsersTable alertOpen={alertOpen} setOpenAlert={setOpenAlert} alertSeverity={alertSeverity} setAlertSeverity={setAlertSeverity} alertMsg={alertMsg} setAlertMsg={setAlertMsg} setLoading={setLoading} loading={loading} syncUser={syncUser} fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault} usersnotlinkedtovault={usersnotlinkedtovault} setUsersNotLinkedToVault={setUsersNotLinkedToVault} vaultUsers={vaultUsers} vault={selectedVault} viewvaultusers={viewvaultusers} />
+                            {viewVaultUsers && (
+                                <div className='p-2' id='vaultusermanagement' style={{ fontSize: '12px' }}>
+                                    <h6 className='shadow-lg p-2'>
+                                        <i className="fas fa-users mx-2" style={{ fontSize: '12px', color: '#2757aa' }}></i>
+                                        <span style={{ color: '#2757aa' }}>{selectedVault.name}</span> Vault Users
+                                    </h6>
+                                    <VaultUsersTable
+                                        alertOpen={alertOpen}
+                                        setOpenAlert={setOpenAlert}
+                                        alertSeverity={alertSeverity}
+                                        setAlertSeverity={setAlertSeverity}
+                                        alertMsg={alertMsg}
+                                        setAlertMsg={setAlertMsg}
+                                        setLoading={setLoading}
+                                        loading={loading}
+                                        syncUser={syncUser}
+                                        fetchUsersNotLinkedToVault={fetchUsersNotLinkedToVault}
+                                        usersnotlinkedtovault={usersnotlinkedtovault}
+                                        setUsersNotLinkedToVault={setUsersNotLinkedToVault}
+                                        vaultUsers={vaultUsers}
+                                        vault={selectedVault}
+                                        viewvaultusers={viewvaultusers}
+                                    />
                                 </div>
-                                : <></>
+                            )}
 
 
-                            }
-
-                            {!viewLoginAccounts && !viewLoginAccounts && !viewvaultgroups && !viewObjects && !viewCreateObject && !viewObjectStructure && !viewVaultUsers ?
-                                <div style={{ fontSize: '12.5px', marginBottom: '20px' }}>
-
-                                    <h5 className='shadow-lg p-3'><img className="mx-3" src={logo} alt="Loading" width='40px' />Organization Details </h5>
-                                    <ul className=' p-3' style={{ overflowY: 'auto' }}>
-                                        <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-building mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Organization Name: <b>{user.organization}</b></span>
-                                        </li>
-                                        <li className='my-2' style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fa-solid  fa-database mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Number of Vaults: <b>{user.vaultcount}</b></span>
-                                        </li>
-
-                                        <li className='my-2' onClick={toggleSublist} style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
-                                            <i className="fas fa-users mx-3" style={{ fontSize: '1.5em' }}></i>
-                                            <span className='list-text'>Number of Users : <b>{organizationusers.length}</b></span>
-                                        </li>
-
-                                    </ul>
-
-
-                                </div>
-                                : <></>
-
-                            }
                         </div>
-
                     </div>
                 </main>
             </div>

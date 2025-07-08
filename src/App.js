@@ -11,8 +11,11 @@ import VaultSelectForm from './pages/Vault';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 
+import * as constants from './components/Auth/configs'
+
 function App() {
-  registerLicense('NDAxNEAzMjM4MkUzMTJFMzlMeXJkaVJFV2Z5R3o5ZXNEVnNOQjFqUmx2MW0xZkR2TGdud2MrVGNJRlBzPQ==');
+  registerLicense(constants.syncfusion_key);
+
   return (
     <Router>
       <AuthProvider>

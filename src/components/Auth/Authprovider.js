@@ -29,22 +29,32 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async (e) => {
     e.preventDefault();
     try {
-      const { data, status } = await axios.post(`${constants.auth_api}/api/token/`, {
-        email: e.target.email.value,
-        password: e.target.password.value
-      });
+      const emailOrUsername = e.target.email.value;
+      const password = e.target.password.value;
+
+      const isEmailAuth = constants.auth_type_email === 'true';
+
+      const payload = isEmailAuth
+        ? { email: emailOrUsername, password }
+        : { username: emailOrUsername, password };
+
+      const response = await axios.post(`${constants.auth_api}/api/token/`, payload);
+      const { data, status } = response;
+
       if (status === 200) {
         setAuthTokens(data);
         setUser(jwt_decode(data.access));
         sessionStorage.setItem('authTokens', JSON.stringify(data));
         navigate('/vault');
       }
+
     } catch (error) {
       setOpenAlert(true);
       setAlertSeverity("error");
       setAlertMsg("Invalid username or password");
-      console.log(`${error.response?.data.error || error.message}!!`);
+      console.log(`${error.response?.data?.error || error.message}!!`);
     }
+
   };
 
   // Logout

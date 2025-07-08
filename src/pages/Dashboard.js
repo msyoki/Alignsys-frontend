@@ -10,7 +10,7 @@ import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import ObjectStructureList from '../components/Modals/ObjectStructureListDialog';
 import * as constants from '../components/Auth/configs';
-import logo from '../images/TechEdgeLogo.png';
+import logo from '../images/waica.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
@@ -104,8 +104,12 @@ function Dashboard() {
         `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
       );
       setRecentData(data);
-      return data;
-    } catch { return null; }
+
+
+    } catch { 
+      setRecentData([])
+     
+    }
   };
 
   const getDeleted = async () => {
@@ -114,8 +118,10 @@ function Dashboard() {
         `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
       );
       setDeletedData(response.data);
-      return response.data;
-    } catch (error) {}
+     
+    } catch (error) {
+      setDeletedData([]);
+    }
   };
 
   const getAssigned = async () => {
@@ -124,8 +130,10 @@ function Dashboard() {
         `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
       );
       setAssignedData(response.data);
-      return response.data;
-    } catch (error) {}
+
+    } catch (error) {
+      setAssignedData([]);
+    }
   };
 
   const getVaultObjects = () => {
@@ -619,11 +627,11 @@ function Dashboard() {
         </nav>
         {/* Content Section */}
         <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
-          <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
+          {/* <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
             <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
               <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
             </div>
-          </Tooltip>
+          </Tooltip> */}
           <DashboardContent
             searchTerm={searchTerm}
             data={data}

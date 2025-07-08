@@ -47,8 +47,8 @@ const LookupSelect = ({
         }
 
         setOptions(formattedOptions);
-      } catch (error) {
-        console.error('Error fetching lookup options:', error);
+      } catch {
+        // console.error('Error fetching lookup options:', error);
       }
     };
 
@@ -75,8 +75,8 @@ const LookupSelect = ({
         ];
 
         setOptions(merged);
-      } catch (error) {
-        console.error('Error searching lookup options:', error);
+      } catch  {
+        // console.error('Error searching lookup options:', error);
       }
     };
 

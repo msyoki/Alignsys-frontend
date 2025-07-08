@@ -25,7 +25,7 @@ const AddButtonWithMenu = (props) => {
           onClick={handleIconClick}
           className="fas fa-plus mx-2"
           style={{
-            fontSize: '30px',
+            fontSize: '28px',
             cursor: 'pointer',
             color: '#1C4690',
             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',

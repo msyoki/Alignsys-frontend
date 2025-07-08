@@ -56,8 +56,8 @@ const LookupMultiSelect = ({
         ];
 
         setOptions(combined);
-      } catch (error) {
-        console.error('Error fetching lookup options:', error);
+      } catch  {
+        // console.error('Error fetching lookup options:', error);
       }
     };
 
@@ -87,8 +87,8 @@ const LookupMultiSelect = ({
         ];
 
         setOptions(combined);
-      } catch (error) {
-        console.error('Error fetching lookup options based on search term:', error);
+      } catch  {
+        // console.error('Error fetching lookup options based on search term:', error);
       }
     };
 

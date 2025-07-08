@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Box } from '@mui/material';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button } from '@mui/material';
+import { Tabs, Tab, List, ListItem, Typography, Select, MenuItem, Button } from '@mui/material';
+import { Tooltip } from '@mui/material';
+import FileExtIcon from './FileExtIcon';
+import FileExtText from './FileExtText';
 
 const CommentsComponent = (props) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [props.comments]);
 
   const handleInputChange = (e) => {
     setNewComment(e.target.value);
@@ -29,9 +42,7 @@ const CommentsComponent = (props) => {
         vaultGuid: `${props.guid}`,
         objectTypeId: objectID,
         userID: props.mfilesID
-
       };
-      console.log(data)
 
       try {
         await axios.post(url, data, {
@@ -42,8 +53,8 @@ const CommentsComponent = (props) => {
         });
         props.getObjectComments();
         setNewComment('');
-      } catch (err) {
-        console.error('Error posting comment:', err);
+      } catch {
+        // console.error('Error posting comment:', err);
       } finally {
         setLoading(false);
       }
@@ -51,123 +62,161 @@ const CommentsComponent = (props) => {
   };
 
   return (
-    <div>
-      {props.selectedObject?.id && (
+    <div className="copilot-chat">
+      {props.selectedObject?.id ? (
         <>
+
+
+          {/* Chat Title */}
+          <Box className="chat-header">
+
+            {/* <i className="fas fa-comment-alt mx-2" style={{ color: '#2f81f7', fontSize: '35px' }}></i> */}
+            <span className='mx-2' style={{ fontWeight: 500, fontSize: '14px' }}>
+              Comments & Discussion
+            </span>
+
+            {props.comments?.length > 0 && (
+              <Tooltip onClick={refreshComments} title="Refresh comments">
+                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <span style={{ fontSize: '20px', color: '#2757aa' }} className="fas fa-sync-alt mx-2 "></span>
+                </div>
+              </Tooltip>
+            )}
+          </Box>
           {/* Header */}
-          <Box
-            className="p-2"
-            sx={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: '#ecf4fc',
-              height: '53px',
-              fontSize: '13px',
-              px: 2,
-              color: '#1d3557',
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <i className="fas fa-file-pdf text-danger" style={{ fontSize: '24px' }}></i>
-              <span>{props.docTitle}.pdf</span>
-            </Box>
+          {props.docTitle && (
 
-            <i
-              className="fas fa-sync-alt"
-              onClick={refreshComments}
-              style={{ cursor: 'pointer', fontSize: '15px', padding: '8px' }}
-            />
-          </Box>
+            <Box className="chat-header p-2">
+              {/* Icon Logic */}
+              {props.selectedObject &&
+                (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
+                props.selectedObject.isSingleFile === true ? (
+                <>
+                  <span className='mx-2'>
+                    <FileExtIcon
+                      fontSize="20px"
+                      guid={props.guid}
+                      objectId={props.selectedObject.id}
+                      classId={props.selectedObject.classId ?? props.selectedObject.classID}
+                      sx={{ fontSize: '25px !important', mr: '10px', flexShrink: 0 }}
 
-          {/* Comment Input */}
-          <Box sx={{ backgroundColor: '#fff', p: 2 }}>
-            <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <textarea
-                  className="form-control"
-                  rows="2"
-                  value={newComment}
-                  onChange={handleInputChange}
-                  placeholder="Write a comment..."
-                  required
-                  disabled={loading}
-                  style={{ resize: 'vertical', width: '100%' }}
-                />
-                <Box textAlign="right">
-                  <button
-                    type="submit"
-                    className="btn text-white btn-sm rounded-pill"
-                    disabled={loading}
-                    style={{ backgroundColor: '#6a994e', height: '38px' }}
-                  >
-                    <small className="mx-2">{loading ? 'Submitting...' : 'Submit Comment'}</small>
-                  </button>
-                </Box>
-              </Box>
-            </form>
-          </Box>
-        </>
-      )}
-
-      {/* Comments List */}
-      <>
-        {props.selectedObject?.id && props.comments.length > 0 ? (
-           <Box sx={{ backgroundColor: '#fff', px: 2, py: 1 }}>
-          <ul
-            style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              maxHeight: '50vh',
-              overflowY: 'auto',
-            }}
-          >
-            {props.comments.map((comment, index) => {
-              const [boldText, regularText] = comment.coment.split(':');
-              return (
-                <li key={index} style={{ marginBottom: '12px' }}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <i className="fas fa-comment-alt" style={{ color: '#a7c957', fontSize: '18px' }} />
-                    <span style={{ fontSize: '13px', color: '#555' }}>
-                      <strong>{boldText}:</strong> {comment.modifiedDate}
-                    </span>
+                    />
+                  </span>
+                  <Box sx={{
+                    fontSize: '13px',
+                    color: '#212529',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {props.selectedObject.title}
+                    <FileExtText
+                      guid={props.guid}
+                      objectId={props.selectedObject.id}
+                      classId={props.selectedObject.classId ?? props.selectedObject.classID}
+                    />
                   </Box>
-                  <Box sx={{ fontSize: '13px', color: '#333', ml: '26px', lineHeight: 1.4 }}>
-                    {regularText}
+                </>
+              ) : (
+                <>
+                  <i
+                    className={
+                      (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
+                        props.selectedObject.isSingleFile === false
+                        ? 'fas fa-book'
+                        : 'fa-solid fa-folder'
+                    }
+                    style={{
+                      color: (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
+                        props.selectedObject.isSingleFile === false ? '#7cb518' : '#2a68af',
+                      fontSize: '20px',
+                      marginRight: '10px',
+                      flexShrink: 0
+                    }}
+                  />
+                  <Box sx={{
+                    fontSize: '13px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {props.selectedObject.title}
                   </Box>
-                </li>
-              );
-            })}
-          </ul>
-           </Box>
-        ) : (
-          !props.selectedObject?.id && (
-            <Box
-              sx={{
-                mt: '20%',
-                textAlign: 'center',
-                color: '#2757aa',
-                backgroundColor: '#ecf4fc',
-                py: 4,
-              }}
-            >
-              <i className="fas fa-comment-alt" style={{ fontSize: '120px' }} />
-              <Typography variant="body2" className="my-2" sx={{color: 'black'}}>
-                {props.loadingcomments ? 'Searching comments...' : 'Comments'}
-              </Typography>
-              {!props.loadingcomments && (
-                <Typography variant="body2" sx={{ fontSize: '13px', color: 'black' }}>
-                  Please select an object to preview comments
-                </Typography>
+                </>
               )}
             </Box>
-          )
-        )}
-      </>
-    </div>
 
+          )}
+
+
+
+
+          {/* Chat Messages */}
+          <div className="chat-messages">
+            {props.comments?.length > 0 &&
+              props.comments.map((comment, index) => {
+                const [boldText, regularText] = comment.coment.split(':');
+                return (
+                  <div key={index} className="message">
+                    <i className="fas fa-user" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+                    <div className="message-content user-message">
+                      <div style={{ fontSize: '12px', color: '#555', marginBottom: '4px' }}>
+                        <strong>{boldText}</strong> • {comment.modifiedDate}
+                      </div>
+                      <div style={{ fontSize: '14px', lineHeight: 1.4 }}>
+                        {regularText}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+            {loading && (
+              <div className="message">
+                <i className="fas fa-comment-alt" style={{ color: '#2757aa' }}></i>
+                <div className="loading-indicator">
+                  Posting<span>.</span><span>.</span><span>.</span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Section */}
+          <div className="d-flex">
+            <div style={{ flex: 1, position: 'relative' }}>
+              <form onSubmit={handleSubmit} className="input-container">
+                <div style={{ position: 'relative' }}>
+                  <textarea
+                    className="chat-input"
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={handleInputChange}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="submit"
+                    className="send-button"
+                    disabled={loading || !newComment.trim()}
+                  >
+                    <i className="fas fa-paper-plane"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
+    </div>
 
   );
 };

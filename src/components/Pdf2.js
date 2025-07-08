@@ -201,7 +201,9 @@ const PDFViewerPreview = (props) => {
                         className="pdf-container"
                         file={props.document}
                         onLoadSuccess={onDocumentLoadSuccess}
-                        loading={<div>Loading PDF...</div>}
+                        loading={<div className="loading-indicator text-dark">
+                            Loading PDF<span>.</span><span>.</span><span>.</span>
+                        </div>}
                         error={<div>Error loading PDF!</div>}
                     >
                         {[...Array(numPages).keys()].map((pageIndex) => (

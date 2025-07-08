@@ -12,6 +12,7 @@ const FileExtIcon = (props) => {
   const [is400, setIs400] = useState(false);
 
   useEffect(() => {
+
     let isMounted = true;
     const controller = new AbortController();
 
@@ -20,6 +21,7 @@ const FileExtIcon = (props) => {
       setLoading(false);
       return;
     }
+
 
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
@@ -44,11 +46,13 @@ const FileExtIcon = (props) => {
 
     fetchExtension();
 
+
+
     return () => {
       isMounted = false;
       controller.abort();
     };
-  }, [props.guid, props.objectId, props.classId, cacheKey]);
+  }, [props.isMultifile, props.guid, props.objectId, props.classId, cacheKey]);
 
   const iconStyle = {
     fontSize: props.fontSize || '20px',
@@ -61,7 +65,9 @@ const FileExtIcon = (props) => {
 
   if (is400) {
     // Show book icon if 400 error
-    return <i className="fas fa-book" style={iconStyle}></i>;
+    console.log(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`)
+    return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+    
   }
 
   // Render icons based on extension
@@ -69,7 +75,7 @@ const FileExtIcon = (props) => {
     case 'pdf':
       return <i className="fas fa-file-pdf" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
     case 'csv':
-      return <i className="fas fa-file-csv" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+      return <i className="fas fa-file-csv" style={{ ...iconStyle, color: '#6a994e' }}></i>;
     case 'txt':
       return <i className="fas fa-file-alt" style={{ ...iconStyle, color: '#6c757d' }}></i>;
     case 'xlsx':
@@ -86,11 +92,13 @@ const FileExtIcon = (props) => {
       return <i className="fas fa-file-image" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     default:
       // If extension exists but is not handled, show grey file icon
-      if (extension) {
-        return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
-      }
-      // If no extension (shouldn't happen), show book icon as fallback
-      return <i className="fas fa-book" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+      // if (extension) {
+      //   return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      // }
+      // // If no extension (shouldn't happen), show book icon as fallback
+      // return <i className="fas fa-book" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+      return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      
   }
 };
 

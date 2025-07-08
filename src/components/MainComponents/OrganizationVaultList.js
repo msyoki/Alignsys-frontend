@@ -4,18 +4,22 @@ import Authcontext from "../Auth/Authprovider";
 import * as constants from "../Auth/configs";
 import {
   Box,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Collapse,
   Typography,
+  Button,
+  Stack,
 } from "@mui/material";
-import { ExpandLess, ExpandMore, People, Storage } from "@mui/icons-material";
+import { TreeView, TreeItem } from "@mui/x-tree-view";
+import {
+  ExpandMore,
+  ChevronRight,
+  People,
+  Storage,
+  AccountBox,
+  Timeline
+} from "@mui/icons-material";
 
 function OrganizationVaultList(props) {
-  const [openVaults, setOpenVaults] = useState({});
+  const [expanded, setExpanded] = useState([]);
   const { authTokens } = useContext(Authcontext);
 
   useEffect(() => {
@@ -38,126 +42,165 @@ function OrganizationVaultList(props) {
     getOrganizationVaults();
   }, [authTokens, props.setVaults]);
 
-  const toggleVaultSublist = (vault) => {
-    props.setSelectedVault(vault);
-    props.fetchUsersNotLinkedToVault(vault.guid);
-    setOpenVaults((prevState) => ({
-      ...prevState,
-      [vault.guid]: !prevState[vault.guid],
-    }));
+  const handleToggle = (event, nodeIds) => {
+    setExpanded(nodeIds);
   };
 
+  const handleVaultExpand = (vault) => {
+    props.setSelectedVault(vault);
+    props.fetchUsersNotLinkedToVault(vault.guid);
+  };
+
+  const handleVaultUsersClick = (vault) => {
+    props.setSelectedVault(vault);
+    props.viewvaultusers(vault.guid);
+  };
+
+  const TREE_ITEM_STYLES = {
+    backgroundColor: '#fff !important',
+    "&:hover": { backgroundColor: '#fff !important' },
+    borderRadius: "0px !important",
+    "& .MuiTreeItem-content": { borderRadius: "0px !important" },
+    "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
+    "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
+  };
+
+
   return (
-    <Box sx={{ backgroundColor: "#fff" }}>
-      {/* Total Vaults Section */}
-      <Box sx={{ p: 1, backgroundColor: "#ecf4fc" }}>
-        <Typography variant="caption">
-          <i className="fas fa-list mx-1"></i>
-          Total Vaults:{" "}
-          <strong style={{ color: "#2757aa" }}>
-            ({props.vaults ? props.vaults.length : 0})
-          </strong>
-        </Typography>
+    <Box sx={{ backgroundColor: "#fff",  color: 'black' }}>
+      {/* Vaults TreeView */}
+      <Box sx={{ maxHeight: '330px', overflowY: "auto", backgroundColor: "#fff", color: 'black' }}>
+        <TreeView
+          defaultCollapseIcon={<ExpandMore />}
+          defaultExpandIcon={<ChevronRight />}
+          expanded={expanded}
+          onNodeToggle={handleToggle}
+          sx={{
+            "& .MuiTreeItem-root": {
+              "& .MuiTreeItem-content": {
+                borderRadius: 1,
+                color: 'black',
+                mb: 0.5,
+              },
+            },
+          }}
+        >
+          {props.vaults?.map((vault, index) => (
+            <TreeItem
+              key={`vault-${vault.guid}`}
+
+              sx={[TREE_ITEM_STYLES, { backgroundColor: '#fff' }]}
+              nodeId={`vault-${vault.guid}`}
+              itemId={`vault-${vault.guid}`}
+              onIconClick={() => handleVaultExpand(vault)}
+              label={
+                <Box
+                  sx={{
+
+                    color: "#2757aa",
+
+                    borderRadius: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+
+                    cursor: "pointer",
+                    padding: '5px'
+                  }}
+                  onClick={() => handleVaultExpand(vault)}
+                >
+                  <i
+                    className="fa-solid fa-database"
+                    style={{ fontSize: "16px" }}
+                  />
+                  <Typography variant="caption" sx={{ fontWeight: 500, color: 'black' }}>
+                    {vault.name}
+                  </Typography>
+                </Box>
+              }
+            >
+              {/* Vault Users Sub-item */}
+              <TreeItem
+                key={`vault-${vault.guid}-users`}
+                nodeId={`vault-${vault.guid}-users`}
+                itemId={`vault-${vault.guid}-users`}
+                sx={{ backgroundColor: '#ecf4fc' }}
+                label={
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        p: 0.5,
+
+                        borderRadius: 1,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleVaultUsersClick(vault)}
+                    >
+                      <People sx={{ color: "black", fontSize: 16 }} />
+                      <Typography variant="caption">Vault Users</Typography>
+                    </Box>
+                    {/* Vault GUID Sub-item */}
+                    <Box >
+                      <Typography
+                        variant="caption"
+
+                        sx={{ fontSize: 10, fontFamily: "monospace" }}
+                      >
+                        GUID: {vault.guid}
+                      </Typography>
+                    </Box>
+                  </>
+                }
+              />
+
+
+            </TreeItem>
+          ))}
+        </TreeView>
       </Box>
 
-      {/* Vaults List */}
-      <List sx={{ maxHeight: "80%", overflowY: "auto", p: 3 }}>
-        {props.vaults.map((vault) => (
-          <Box key={vault.guid}>
-            {/* Vault Item */}
-            <ListItemButton
-              onClick={() => toggleVaultSublist(vault)}
-              sx={{
-                backgroundColor: "#2757aa",
-                color: "#fff",
-              
-               
-                my: 0.5,
-                "&:hover": { backgroundColor: "#1e4686" },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                {/* <Storage sx={{ color: "#fff", fontSize: 18 }} /> */}
-                <i class="fa-solid fa-database" style={{ color: "#fff", fontSize: "18px" }}></i>
-              </ListItemIcon>
-              <ListItemText primaryTypographyProps={{ variant: "caption" }} primary={vault.name} />
-              {openVaults[vault.guid] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-            </ListItemButton>
+      {/* Management Buttons */}
+      <Stack spacing={1} sx={{p:2}}>
+        <Button
+          variant="contained"
+          color='warning'
+          startIcon={<People />}
+          onClick={() => {
+            props.fetchOrgUsers();
+            props.viewloginaccounts();
+          }}
+          sx={{
+            // backgroundColor: "#2757aa",
+            // color: "#fff",
+            textTransform: "none",
+            // "&:hover": { backgroundColor: "#1e4686" },
+          }}
+        >
+          <Typography variant="caption">Login Accounts</Typography>
+        </Button>
 
-            {/* Vault Sublist */}
-            <Collapse in={openVaults[vault.guid]} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding sx={{ pl: 2 }} className="shadow-lg bg-white">
-                {/* Vault Users */}
-                <ListItemButton
-                  onClick={() => {
-                    props.setSelectedVault(vault);
-                    props.viewvaultusers(vault.guid);
-                  }}
-                  sx={{ "&:hover": { backgroundColor: "#f0f0f0" }, p: 1 }}
-                >
-                  <ListItemIcon sx={{ minWidth: 30 }}>
-                    <People sx={{ color: "#2757aa", fontSize: 18 }} />
-                  </ListItemIcon>
-                  <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Vault Users" />
-                </ListItemButton>
-
-                {/* Vault GUID */}
-                <ListItem sx={{ py: 0.5 }}>
-                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: 10 }}>
-                    GUID: {vault.guid}
-                  </Typography>
-                </ListItem>
-              </List>
-            </Collapse>
-          </Box>
-        ))}
-        {/* Login Accounts Section */}
-        <List sx={{ p: 0, my: 3 }}>
-          <ListItemButton
-            onClick={() => {
-              props.fetchOrgUsers();
-              props.viewloginaccounts();
-            }}
-            sx={{
-              backgroundColor: "#2757aa",
-              color: "#fff",
-              borderRadius: 1,
-              p: 1,
-              "&:hover": { backgroundColor: "#1e4686" },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 30 }}>
-              <People sx={{ color: "#fff", fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Login Accounts" />
-          </ListItemButton>
-
-
-          <ListItemButton
-            onClick={() => {
-              props.fetchOrgUsers();
-              props.viewloginactivity();
-            }}
-            sx={{
-              backgroundColor: "#2757aa",
-              color: "#fff",
-              borderRadius: 1,
-              p: 1,
-              mt:1,
-              "&:hover": { backgroundColor: "#1e4686" },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 30 }}>
-              <People sx={{ color: "#fff", fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primaryTypographyProps={{ variant: "caption" }} primary="Login Activity" />
-          </ListItemButton>
-        </List>
-      </List>
-
-
+        <Button
+          variant="contained"
+          color='warning'
+          startIcon={<Timeline />}
+          onClick={() => {
+            props.fetchOrgUsers();
+            props.viewloginactivity();
+          }}
+          sx={{
+            // backgroundColor: "#2757aa",
+            color: "#fff",
+            textTransform: "none",
+            // "&:hover": { backgroundColor: "#1e4686" },
+          }}
+        >
+          <Typography variant="caption">Login Activity</Typography>
+        </Button>
+      </Stack>
     </Box>
-
   );
 }
 

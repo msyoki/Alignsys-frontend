@@ -36,8 +36,8 @@ const LookupSelect = ({
         }));
         setDefaultOptions(formattedOptions);
         setOptions(formattedOptions);
-      } catch (error) {
-        console.error('Error fetching lookup options:', error);
+      } catch  {
+        // console.error('Error fetching lookup options:', error);
       }
       setLoading(false);
     };
@@ -69,8 +69,8 @@ const LookupSelect = ({
           ? [selectedOption, ...formattedOptions]
           : formattedOptions;
         setOptions(combined);
-      } catch (error) {
-        console.error('Error fetching lookup options based on search term:', error);
+      } catch  {
+        // console.error('Error fetching lookup options based on search term:', error);
       }
       setLoading(false);
     }, 400);
