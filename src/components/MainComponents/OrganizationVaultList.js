@@ -22,6 +22,7 @@ function OrganizationVaultList(props) {
   const [expanded, setExpanded] = useState([]);
   const { authTokens } = useContext(Authcontext);
 
+
   useEffect(() => {
     const getOrganizationVaults = async () => {
       try {
@@ -48,7 +49,8 @@ function OrganizationVaultList(props) {
 
   const handleVaultExpand = (vault) => {
     props.setSelectedVault(vault);
-    props.fetchUsersNotLinkedToVault(vault.guid);
+    props.viewvaultusers(vault.guid);
+  
   };
 
   const handleVaultUsersClick = (vault) => {
@@ -56,18 +58,28 @@ function OrganizationVaultList(props) {
     props.viewvaultusers(vault.guid);
   };
 
-  const TREE_ITEM_STYLES = {
-    backgroundColor: '#fff !important',
-    "&:hover": { backgroundColor: '#fff !important' },
+  // Function to get TreeItem styles based on selection state
+  const getTreeItemStyles = (isSelected) => ({
+    backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important',
+    "&:hover": { 
+      backgroundColor: isSelected ? '#fcf3c0 !important' : '#f5f5f5 !important' 
+    },
     borderRadius: "0px !important",
-    "& .MuiTreeItem-content": { borderRadius: "0px !important" },
-    "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
-    "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
-  };
-
+    "& .MuiTreeItem-content": { 
+      borderRadius: "0px !important",
+      backgroundColor: isSelected ? '#fcf3c0 !important' : 'inherit !important'
+    },
+    "& .MuiTreeItem-content.Mui-selected": { 
+      backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important' 
+    },
+    "& .MuiTreeItem-content.Mui-selected:hover": { 
+      backgroundColor: isSelected ? '#fcf3c0 !important' : '#f5f5f5 !important' 
+    },
+  });
 
   return (
     <Box sx={{ backgroundColor: "#fff",  color: 'black' }}>
+
       {/* Vaults TreeView */}
       <Box sx={{ maxHeight: '330px', overflowY: "auto", backgroundColor: "#fff", color: 'black' }}>
         <TreeView
@@ -85,121 +97,88 @@ function OrganizationVaultList(props) {
             },
           }}
         >
-          {props.vaults?.map((vault, index) => (
-            <TreeItem
-              key={`vault-${vault.guid}`}
-
-              sx={[TREE_ITEM_STYLES, { backgroundColor: '#fff' }]}
-              nodeId={`vault-${vault.guid}`}
-              itemId={`vault-${vault.guid}`}
-              onIconClick={() => handleVaultExpand(vault)}
-              label={
-                <Box
-                  sx={{
-
-                    color: "#2757aa",
-
-                    borderRadius: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-
-                    cursor: "pointer",
-                    padding: '5px'
-                  }}
-                  onClick={() => handleVaultExpand(vault)}
-                >
-                  <i
-                    className="fa-solid fa-database"
-                    style={{ fontSize: "16px" }}
-                  />
-                  <Typography variant="caption" sx={{ fontWeight: 500, color: 'black' }}>
-                    {vault.name}
-                  </Typography>
-                </Box>
-              }
-            >
-              {/* Vault Users Sub-item */}
+          {props.vaults?.map((vault, index) => {
+            // Check if this vault is currently selected
+            const isSelected = props.selectedVault?.guid === vault.guid;
+            
+            return (
               <TreeItem
-                key={`vault-${vault.guid}-users`}
-                nodeId={`vault-${vault.guid}-users`}
-                itemId={`vault-${vault.guid}-users`}
-                sx={{ backgroundColor: '#ecf4fc' }}
+                key={`vault-${vault.guid}`}
+                sx={getTreeItemStyles(isSelected)}
+                nodeId={`vault-${vault.guid}`}
+                itemId={`vault-${vault.guid}`}
+                onIconClick={() => handleVaultExpand(vault)}
                 label={
-                  <>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        p: 0.5,
-
-                        borderRadius: 1,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleVaultUsersClick(vault)}
-                    >
-                      <People sx={{ color: "black", fontSize: 16 }} />
-                      <Typography variant="caption">Vault Users</Typography>
-                    </Box>
-                    {/* Vault GUID Sub-item */}
-                    <Box >
-                      <Typography
-                        variant="caption"
-
-                        sx={{ fontSize: 10, fontFamily: "monospace" }}
-                      >
-                        GUID: {vault.guid}
-                      </Typography>
-                    </Box>
-                  </>
+                  <Box
+                    sx={{
+                      color: "#2757aa",
+                      borderRadius: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      cursor: "pointer",
+                      padding: '5px',
+                      backgroundColor: isSelected ? '#fcf3c0' : 'transparent'
+                    }}
+                    onClick={() => handleVaultExpand(vault)}
+                  >
+                    <i
+                      className="fa-solid fa-database"
+                      style={{ fontSize: "16px" }}
+                    />
+                    <Typography variant="caption" sx={{ fontWeight: 500, color: 'black' }}>
+                      {vault.name}  
+                    </Typography>
+                  </Box>
                 }
-              />
-
-
-            </TreeItem>
-          ))}
+              >
+                {/* Vault Users Sub-item */}
+                <TreeItem
+                  key={`vault-${vault.guid}-users`}
+                  nodeId={`vault-${vault.guid}-users`}
+                  itemId={`vault-${vault.guid}-users`}
+                  sx={{ 
+                    backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important',
+                    "& .MuiTreeItem-content": {
+                      backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important'
+                    }
+                  }}
+                  label={
+                    <>
+                      {/* <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          p: 0.5,
+                          borderRadius: 1,
+                          cursor: "pointer",
+                          backgroundColor: isSelected ? '#fcf3c0' : 'transparent'
+                        }}
+                        onClick={() => handleVaultUsersClick(vault)}
+                      >
+                        <People sx={{ color: "black", fontSize: 16 }} />
+                        <Typography variant="caption">User accounts</Typography>
+                      </Box> */}
+                      {/* Vault GUID Sub-item */}
+                      <Box sx={{ backgroundColor: isSelected ? '#fcf3c0' : 'transparent' }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: 10, fontFamily: "monospace" }}
+                        >
+                          GUID: {vault.guid}
+                        </Typography>
+                      </Box>
+                    </>
+                  }
+                />
+              </TreeItem>
+            );
+          })}
         </TreeView>
       </Box>
 
-      {/* Management Buttons */}
-      <Stack spacing={1} sx={{p:2}}>
-        <Button
-          variant="contained"
-          color='warning'
-          startIcon={<People />}
-          onClick={() => {
-            props.fetchOrgUsers();
-            props.viewloginaccounts();
-          }}
-          sx={{
-            // backgroundColor: "#2757aa",
-            // color: "#fff",
-            textTransform: "none",
-            // "&:hover": { backgroundColor: "#1e4686" },
-          }}
-        >
-          <Typography variant="caption">Login Accounts</Typography>
-        </Button>
-
-        <Button
-          variant="contained"
-          color='warning'
-          startIcon={<Timeline />}
-          onClick={() => {
-            props.fetchOrgUsers();
-            props.viewloginactivity();
-          }}
-          sx={{
-            // backgroundColor: "#2757aa",
-            color: "#fff",
-            textTransform: "none",
-            // "&:hover": { backgroundColor: "#1e4686" },
-          }}
-        >
-          <Typography variant="caption">Login Activity</Typography>
-        </Button>
-      </Stack>
+    
     </Box>
   );
 }

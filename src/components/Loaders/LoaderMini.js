@@ -1,33 +1,37 @@
 import React from "react";
-import loading from "../../images/loading.svg";
-import logo from "../../images/ZFBLU.webp";
 import Box from '@mui/material/Box';
-import PropTypes from 'prop-types';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import PropTypes from 'prop-types';
 
+const LoadingMini = ({ msg }) => (
+  <Box
+    sx={{
+      minHeight: '150px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      p: 2
+    }}
+  >
+    {/* <CircularProgress size={40} sx={{ color: '#2757aa', mb: 2 }} /> */}
 
-
-
-const LoadingMini = (props) => (
-    <div className='App'>
-        <div className='text-center p-3'>
-          <div className="spinner ">
-         
-         
-            <img className="my-4" src={logo} alt="Loading" width='150px' />
-         
-            <Box  className='d-flex justify-content-center main-loader '>
-             
-              <CircularProgress size="40px" style={{ color: "#2757aa" }} />
-            
-            </Box>
-            <p className="my-2 text-dark" style={{fontSize:'13px'}}>{props.msg?<>{props.msg}</>:<>Please wait, processing request ...</>}</p>
-           
-          </div>
-        </div>
-    </div>
-  
+    <Typography variant="body2" color="textPrimary">
+      {msg ? (
+        msg
+      ) : (
+        <span className="loading-indicator text-muted">
+          Fetching, please wait <span>.</span><span>.</span><span>.</span>
+        </span>
+      )}
+    </Typography>
+  </Box>
 );
+
+LoadingMini.propTypes = {
+  msg: PropTypes.string,
+};
 
 export default LoadingMini;

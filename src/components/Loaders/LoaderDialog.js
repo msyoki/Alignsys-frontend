@@ -17,7 +17,7 @@ const LoadingDialog = ({ opendialogloading }) => {
         aria-describedby="alert-dialog-slide-description"
       >
         <div className="text-center m-4 p-4 ">
-          <img className="my-3" src={logo} alt="logo" width="200px" />
+          <img className="my-3" src={logo} alt="logo" width="300px" />
           <Box className="my-2" sx={{ width: '100%', margin: 'auto' }}>
             <CircularProgress size="40px" style={{ color: "#2757aa" }} />
           </Box>

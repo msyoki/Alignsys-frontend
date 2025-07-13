@@ -31,7 +31,7 @@ function useSessionState(key, defaultValue) {
 
 // Optimized constants with minimal spacing
 const TREE_ITEM_STYLES = {
-  ml: 1, // Reduced from 13px to 8px
+  ml: 1, // Reduced from 12.5px to 8px
   backgroundColor: '#fff',
   "&:hover": { backgroundColor: "#fff !important" },
   "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
@@ -45,10 +45,10 @@ const LOADING_STYLES = {
   backgroundColor: '#fff',
   p: 0.5, // Reduced padding
   color: '#555',
-  borderBottom: '1px solid #dedddd',
+
   fontSize: "12px",
-  "& .MuiTreeItem-label": { fontSize: "13px !important" },
-  "& .MuiTypography-root": { fontSize: "13px !important" },
+  "& .MuiTreeItem-label": { fontSize: "12px !important" },
+  "& .MuiTypography-root": { fontSize: "12px !important" },
 };
 
 const BOX_STYLES = {
@@ -92,7 +92,7 @@ const mergeObjects = (objects) => {
   return Array.from(mergedMap.values());
 };
 
-// Optimized TreeSubItem with minimal spacing
+// Updated TreeSubItem with unique itemId generation and selection highlighting
 const TreeSubItem = memo(({
   subItem,
   selectedItemId,
@@ -101,7 +101,8 @@ const TreeSubItem = memo(({
   onRightClick,
   onItemClick,
   isDocument,
-  downloadFile
+  downloadFile,
+  parentKey // Add this new prop to ensure uniqueness
 }) => {
   const toolTipTitle = useMemo(() => (
     <span>
@@ -130,11 +131,22 @@ const TreeSubItem = memo(({
   const isObjectType0 = subItem.objectTypeId === 0 || subItem.objectID === 0;
   const isSingleFile = subItem.isSingleFile === true;
 
+  // Generate unique itemId using parentKey to avoid duplicates
+  const uniqueItemId = `${parentKey}-${subItem.id}-${subItem.title?.replace(/[^a-zA-Z0-9]/g, '')?.substring(0, 10)}`;
+
   return (
     <TreeItem
       onClick={handleClick}
-      key={`grid-${isDocument ? 'document' : 'object'}-sub-${subItem.id}`}
-      itemId={`grid-${isDocument ? 'document' : 'object'}-sub-${subItem.id}`}
+      key={uniqueItemId}
+      itemId={uniqueItemId}
+      sx={{
+        "& .MuiTreeItem-content": { 
+          backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important' 
+        },
+        "& .MuiTreeItem-content:hover": { 
+          backgroundColor: isSelected ? '#f0e68c !important' : '#f9f9f9 !important' 
+        }
+      }}
       label={
         <>
           <div
@@ -142,10 +154,10 @@ const TreeSubItem = memo(({
             style={{ width: '100%', display: 'flex', alignItems: 'center' }}
           >
             <Box
+              className="p-1"
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                p: 0.5, // Reduced padding
                 backgroundColor: isSelected ? '#fcf3c0' : 'inherit',
                 width: '100%',
                 gap: 1 // Using gap instead of margins
@@ -171,9 +183,9 @@ const TreeSubItem = memo(({
               ) : (
                 <i className="fas fa-folder" style={{ fontSize: "15px", color: "#2a68af", flexShrink: 0 }} />
               )}
-         
+
               {/* Title with optimized spacing */}
-              <Tooltip title={toolTipTitle} placement="right" arrow>
+              <Tooltip title={toolTipTitle} placement="top" arrow>
                 <Box
                   sx={{
                     flex: 1,
@@ -181,8 +193,7 @@ const TreeSubItem = memo(({
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    maxWidth: 220,
-                    fontSize: '13px'
+                    fontSize: '12.5px'
                   }}
                 >
                   {subItem.title}
@@ -196,12 +207,12 @@ const TreeSubItem = memo(({
                 </Box>
               </Tooltip>
 
-              {/* Date with minimal spacing */}
+              {/* Date flexed to the end */}
               <Box sx={{
-                fontSize: '12px',
-                color: '#888',
+                fontSize: '12.5px',
                 whiteSpace: 'nowrap',
-                flexShrink: 0
+                flexShrink: 0,
+                marginLeft: 'auto'  // This pushes the date to the far right
               }}>
                 {formattedDate}
               </Box>
@@ -262,9 +273,9 @@ const LinkedObjectsTree = ({
     return { otherObjects: merged, documents: docs };
   }, [linkedObjects]);
 
-  // API calls and handlers remain the same...
+  // API calls and handlers
   const fetchObjectFile = useCallback(async (item) => {
-    const classId= item.classId || item.classID
+    const classId = item.classId || item.classID
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${selectedVault.guid}/${item.id}/${classId}`;
     try {
       const response = await axios.get(url, {
@@ -284,8 +295,8 @@ const LinkedObjectsTree = ({
       const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${classId}/${mfilesId}`;
       const response = await axios.get(url);
       setLinkedObjects(response.data || []);
-    
-    } catch  {
+
+    } catch {
       setLinkedObjects([]);
     }
     setLoading(false);
@@ -406,7 +417,7 @@ const LinkedObjectsTree = ({
               classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
             />
             <Box>Open</Box>
-            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12px' }}>
+            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12.5px' }}>
               Open in default application
             </Box>
           </Box>
@@ -459,7 +470,7 @@ const LinkedObjectsTree = ({
           sx={LOADING_STYLES}
           itemId="loading"
           label={
-            <Box sx={{ color: '#555' }}>
+            <Box >
               <span className="loading-indicator text-muted">
                 Searching Relationships<span>.</span><span>.</span><span>.</span>
               </span>
@@ -483,20 +494,18 @@ const LinkedObjectsTree = ({
                     ...BOX_STYLES
                   }}>
                     <i className="fa-regular fa-folder-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                    <Box sx={{ fontSize: '13px' }}>
+                    <Box sx={{ fontSize: '12.5px' }}>
                       {obj.propertyName?.replace(/\(s\)/g, '')}
-
-
                     </Box>
-                    <Box sx={{ fontSize: '13px', color: '#666' }}>
+                    <Box sx={{ fontSize: '12.5px', color: '#666' }}>
                       ({obj.items?.length})
                     </Box>
                   </Box>
                 }
               >
-                {obj.items?.map((subItem) => (
+                {obj.items?.map((subItem, subIndex) => (
                   <TreeSubItem
-                    key={`sub-${obj.propertyName}-${subItem.id}`}
+                    key={`sub-${obj.propertyName}-${subItem.id}-${subIndex}`}
                     subItem={subItem}
                     selectedItemId={selectedItemId}
                     setSelectedItemId={setSelectedItemId}
@@ -505,6 +514,7 @@ const LinkedObjectsTree = ({
                     onItemClick={handleItemClick}
                     isDocument={false}
                     downloadFile={downloadFile}
+                    parentKey={`obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                   />
                 ))}
               </TreeItem>
@@ -524,26 +534,28 @@ const LinkedObjectsTree = ({
                   ...BOX_STYLES
                 }}>
                   <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                  <Box sx={{ fontSize: '13px' }}>Document</Box>
+                  <Box sx={{ fontSize: '12.5px' }}>Document</Box>
                   {documents.map((doc) => (
-                    <Box key={doc.propertyName} sx={{ fontSize: '13px', color: '#666' }}>
+                    <Box key={doc.propertyName} sx={{ fontSize: '12.5px', color: '#666' }}>
                       ({doc.items.length})
                     </Box>
                   ))}
                 </Box>
               }
             >
-              {documents.map((doc) =>
-                doc.items?.map((subItem) => (
+              {documents.map((doc, docIndex) =>
+                doc.items?.map((subItem, subIndex) => (
                   <TreeSubItem
-                    key={`doc-${subItem.id}`}
+                    key={`doc-${docIndex}-${subItem.id}-${subIndex}`}
                     subItem={subItem}
                     selectedItemId={selectedItemId}
+                    setSelectedItemId={setSelectedItemId}
                     selectedVault={selectedVault}
                     onRightClick={handleRightClick}
                     onItemClick={handleItemClick}
                     isDocument={true}
                     downloadFile={downloadFile}
+                    parentKey={`doc-${docIndex}`}
                   />
                 ))
               )}
@@ -568,5 +580,3 @@ const LinkedObjectsTree = ({
 };
 
 export default LinkedObjectsTree;
-
-

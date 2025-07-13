@@ -17,8 +17,8 @@ const Loading = () => (
     overflow: "hidden"
   }}
 >
-  <Box className="my-3 text-center">
-    <img src={logo} style={{ width: "250px", height: "auto" }} />
+  <Box className="my-4 text-center">
+    <img src={logo} style={{ width: "300px", height: "auto" }} />
   </Box>
 
   <Box className="text-center">

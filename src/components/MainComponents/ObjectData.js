@@ -1,27 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import DynamicFileViewer from '../DynamicFileViewer';
+import DynamicFileViewer from '../Viewer/DynamicFileViewer';
 import SignButton from '../SignDocument';
 import axios from 'axios';
 import * as constants from '../Auth/configs';
-import LookupMultiSelect from '../UpdateObjectLookupMultiSelect';
-import LookupSelect from '../UpdateObjectLookup';
+import LookupMultiSelect from '../CustomFormTags/UpdateObjectLookupMultiSelect';
+import LookupSelect from '../CustomFormTags/UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
 import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
-import Bot from '../Bot';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Bot from '../Bot/Bot';
+
 import CommentsComponent from '../ObjectComments';
 import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import BotLLM from '../BotLLM';
+import BotLLM from '../Bot/BotLLM';
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -89,6 +84,54 @@ const ObjectData = (props) => {
   const [alertSeverity, setAlertSeverity] = useState('');
   const [alertMsg, setAlertMsg] = useState('');
   const [messages, setMessages] = useState([]);
+
+  // Common styles - extracted to avoid repetition
+  const commonInputStyle = useMemo(() => ({
+    fontSize: '13px',
+    color: '#333',
+    margin: 0,
+  }), []);
+
+  const getInputStyle = useCallback((isAutomatic) => ({
+    ...commonInputStyle,
+    backgroundColor: isAutomatic ? '#f5f5f5' : '#fff',
+  }), [commonInputStyle]);
+
+  const textareaStyle = useMemo(() => ({
+    minHeight: '48px',
+    height: 'auto',
+    resize: 'none',
+    overflow: 'hidden',
+    lineHeight: '1.3',
+  }), []);
+
+  const selectSxStyle = useMemo(() => ({
+    fontSize: '13px',
+    height: '24px',
+    m: 0,
+    '& .MuiSelect-select': {
+      fontSize: '13px',
+      color: '#333',
+      padding: '3px 6px',
+      minHeight: 'unset',
+      height: '18px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    '& .MuiInputBase-root': {
+      height: '24px',
+    },
+    '& .MuiOutlinedInput-input': {
+      padding: '3px 6px',
+      fontSize: '13px',
+    },
+    '& .MuiMenuItem-root': {
+      fontSize: '13px',
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#ccc',
+    },
+  }), []);
 
   const handleWFChangeEmpty = useCallback((event) => {
     const selected = props.workflows.find((wf) => wf.workflowId === event.target.value);
@@ -276,6 +319,296 @@ const ObjectData = (props) => {
     return String(value);
   }, []);
 
+  // Optimized render functions for different input types
+  const renderLinkOrText = useCallback((value, isReadOnly = false) => {
+    if (isLink(value)) {
+      return (
+        <Typography variant="body2" sx={{ fontSize: '13px' }}>
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            {renderValue(value)}
+          </a>
+        </Typography>
+      );
+    }
+    
+    if (isReadOnly) {
+      return <span>{renderValue(value)}</span>;
+    }
+    
+    return null;
+  }, [isLink, renderValue]);
+
+  const renderTextInput = useCallback((item) => {
+    const linkOrText = renderLinkOrText(item.value);
+    if (linkOrText) return linkOrText;
+
+    return (
+      <input
+        value={props.formValues?.[item.id]?.value || ''}
+        placeholder={renderValue(item.value)}
+        onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+        className="form-control"
+        disabled={item.isAutomatic}
+        style={getInputStyle(item.isAutomatic)}
+      />
+    );
+  }, [props.formValues, renderValue, handleInputChange, getInputStyle, renderLinkOrText]);
+
+  const renderTextarea = useCallback((item) => (
+    <textarea
+      ref={(el) => {
+        if (el) {
+          const autoResize = () => {
+            el.style.height = 'auto';
+            el.style.height = Math.max(48, el.scrollHeight) + 'px';
+          };
+          setTimeout(autoResize, 0);
+          el.addEventListener('input', autoResize);
+        }
+      }}
+      placeholder={renderValue(item.value)}
+      value={props.formValues?.[item.id]?.value || ''}
+      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+      className="form-control"
+      disabled={item.isAutomatic}
+      style={{
+        ...getInputStyle(item.isAutomatic),
+        ...textareaStyle,
+      }}
+    />
+  ), [props.formValues, renderValue, handleInputChange, getInputStyle, textareaStyle]);
+
+  const renderDateTimeInput = useCallback((item, type = 'date') => (
+    <input
+      type={type}
+      placeholder={type === 'date' ? renderValue(item.value) : undefined}
+      value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
+      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+      className="form-control"
+      disabled={item.isAutomatic}
+      style={getInputStyle(item.isAutomatic)}
+    />
+  ), [props.formValues, renderValue, handleInputChange, getInputStyle]);
+
+  const renderBooleanSelect = useCallback((item) => (
+    <Select
+      size="small"
+      value={
+        props.formValues?.[item.id]?.value ??
+        (item.value === 'Yes' ? true : item.value === 'No' ? false : '')
+      }
+      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+      displayEmpty
+      fullWidth
+      disabled={item.isAutomatic}
+      sx={{
+        ...selectSxStyle,
+        backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
+      }}
+    >
+      <MenuItem value=""><em>None</em></MenuItem>
+      <MenuItem value={true}>Yes</MenuItem>
+      <MenuItem value={false}>No</MenuItem>
+    </Select>
+  ), [props.formValues, handleInputChange, selectSxStyle]);
+
+  const renderMultiSelectLookup = useCallback((item) => {
+    const isAssignmentProperty = (props.selectedObject.objectID === 10 || props.selectedObject.objectTypeId === 10) && item.propName === 'Assigned to';
+    const isCompletedByProperty = item.propName === 'Marked as complete by';
+
+    if (isAssignmentProperty) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+          {Array.isArray(item.value) && item.value.map((i, index) => (
+            <FormGroup key={index} sx={{ m: 0 }}>
+              <FormControlLabel
+                control={
+                  <Tooltip title={`Mark as complete for ${i.title || ''}`} placement="left">
+                    <Checkbox
+                      checked={props.checkedItems[i.id] || false}
+                      onChange={() => setAssignmentPayload(item, i)}
+                      sx={{ p: 0.25 }}
+                      size="small"
+                    />
+                  </Tooltip>
+                }
+                label={
+                  <span style={{ fontSize: '13px', color: '#333' }}>
+                    {renderValue(i.title?.value || i.title)}
+                  </span>
+                }
+                labelPlacement="end"
+                sx={{ alignItems: 'center', ml: 0, mr: 0 }}
+              />
+            </FormGroup>
+          ))}
+        </Box>
+      );
+    }
+
+    if (isCompletedByProperty) {
+      return (
+        <Typography fontSize="13px" sx={{ color: '#333', lineHeight: 1.3, m: 0 }}>
+          {Array.isArray(item.value) ? 
+            item.value
+              .map(i => renderValue(i.title?.value || i.title))
+              .filter(Boolean)
+              .join('; ') 
+            : renderValue(item.value)
+          }
+        </Typography>
+      );
+    }
+
+    return (
+      <LookupMultiSelect
+        propId={item.id}
+        label={item.propName}
+        value={props.formValues?.[item.id]?.value || []}
+        onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
+        selectedVault={props.vault}
+        itemValue={item.value}
+        disabled={item.isAutomatic}
+        mfilesid={props.mfilesId}
+      />
+    );
+  }, [props.selectedObject, props.checkedItems, props.formValues, props.vault, props.mfilesId, setAssignmentPayload, handleInputChange, renderValue]);
+
+  const renderSingleLookup = useCallback((item) => (
+    <LookupSelect
+      propId={item.id}
+      label={item.propName}
+      value={props.formValues?.[item.id]?.value || []}
+      onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
+      selectedVault={props.vault}
+      itemValue={item.value}
+      disabled={item.isAutomatic}
+      mfilesid={props.mfilesId}
+    />
+  ), [props.formValues, props.vault, props.mfilesId, handleInputChange]);
+
+  // Main render function for property items
+  const renderPropertyItem = useCallback((item, index) => {
+    // Extract common conditions
+    const hasReadPermission = item.userPermission.readPermission;
+    const isVisible = !item.isHidden && hasReadPermission;
+    const isReadOnly = item.isAutomatic && !item.userPermission?.editPermission && hasReadPermission;
+    const isClassProperty = item.propName === 'Class';
+    
+    // Datatype checks
+    const datatypeMap = {
+      text: ['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(item.datatype),
+      multiLineText: item.datatype === 'MFDatatypeMultiLineText',
+      date: item.datatype === 'MFDatatypeDate',
+      time: item.datatype === 'MFDatatypeTimestamp',
+      boolean: item.datatype === 'MFDatatypeBoolean',
+      multiSelectLookup: item.datatype === 'MFDatatypeMultiSelectLookup',
+      singleLookup: item.datatype === 'MFDatatypeLookup' && !isClassProperty,
+    };
+
+    return (
+      <ListItem key={index} sx={{ py: 0.5, px: 1 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '40% 60%',
+            gap: 1,
+            width: '100%',
+            alignItems: 'flex-start',
+          }}
+        >
+          {isVisible && (
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: '13px',
+                fontWeight: 400,
+                color: '#333',
+                textAlign: 'right',
+                pr: 1,
+                mt: datatypeMap.multiLineText ? 0.25 : 0,
+              }}
+            >
+              {item.propName}
+              {item.isRequired && (
+                <span style={{ color: '#d32f2f', marginLeft: '2px' }}>*</span>
+              )}
+              :
+            </Typography>
+          )}
+
+          <Box
+            sx={{
+              fontSize: '13px',
+              color: '#333',
+              width: '85%',
+              '& input, & textarea, & .MuiSelect-root': {
+                fontSize: '13px !important',
+                width: '100%',
+              },
+              '& .form-control': {
+                border: '1px solid #ccc',
+                borderRadius: '2px',
+                padding: '3px 6px',
+                height: '24px',
+                '&:focus': {
+                  borderColor: '#0078d4',
+                  outline: 'none',
+                  boxShadow: 'none',
+                }
+              },
+              '& textarea.form-control': {
+                minHeight: '48px',
+                height: 'auto',
+                resize: 'none',
+                overflow: 'hidden',
+                lineHeight: '1.3',
+              }
+            }}
+          >
+            {isReadOnly ? (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: '13px',
+                  color: '#333',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.3,
+                  m: 0,
+                }}
+              >
+                {renderLinkOrText(item.value, true) || renderValue(item.value)}
+              </Typography>
+            ) : (
+              <>
+                {/* Class property display */}
+                {isClassProperty && (
+                  <Typography variant="body2" sx={{ fontSize: '13px', color: '#333' }}>
+                    {renderValue(item.value)}
+                  </Typography>
+                )}
+          
+                {/* Render different input types based on datatype */}
+                {datatypeMap.text && isVisible && renderTextInput(item)}
+                {datatypeMap.multiLineText && isVisible && renderTextarea(item)}
+                {datatypeMap.date && isVisible && renderDateTimeInput(item, 'date')}
+                {datatypeMap.time && isVisible && renderDateTimeInput(item, 'time')}
+                {datatypeMap.boolean && isVisible && renderBooleanSelect(item)}
+                {datatypeMap.multiSelectLookup && isVisible && renderMultiSelectLookup(item)}
+                {datatypeMap.singleLookup && isVisible && renderSingleLookup(item)}
+              </>
+            )}
+          </Box>
+        </Box>
+      </ListItem>
+    );
+  }, [renderLinkOrText, renderValue, renderTextInput, renderTextarea, renderDateTimeInput, renderBooleanSelect, renderMultiSelectLookup, renderSingleLookup]);
+
   return (
     <>
       <ConfirmDeleteObject open={deleteDialogOpen} Delete={deleteObject} Close={() => setDeleteDialogOpen(false)} objectTitle={props.selectedObject.title} />
@@ -348,9 +681,10 @@ const ObjectData = (props) => {
               }}>
                 <i className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingobject ? (
-                  <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
-                    Loading metadata...
+                  <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
+                    Loading metadata<span>.</span><span>.</span><span>.</span>
                   </Typography>
+                 
                 ) : (
                   <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                     Metadata Card
@@ -521,7 +855,7 @@ const ObjectData = (props) => {
                       ID: {props.selectedObject.displayID || ''} &nbsp;&nbsp; Version: {props.selectedObject.versionId || ''}
                     </Box>
                   </Box>
-                  <Box sx={{ textAlign: 'end', fontSize: '12px', maxWidth: '80%', color: '#555' }} className="mx-2">
+                  <Box sx={{ textAlign: 'end', fontSize: '13px', maxWidth: '80%', color: '#555' }} className="mx-2">
                     {["Created", "Last modified"].map((label) => (
                       <Box key={label}>
                         {label}: {getPropValue(label) || ''} {getPropValue(`${label} by`) || ''}
@@ -578,321 +912,7 @@ const ObjectData = (props) => {
                     </ListItem>
 
                     {/* Dynamic properties */}
-                    {filteredProps.map((item, index) => (
-                      <ListItem key={index} sx={{ py: 0.5, px: 1 }}>
-                        <Box
-                          sx={{
-                            display: 'grid',
-                            gridTemplateColumns: '40% 60%',
-                            gap: 1,
-                            width: '100%',
-                            alignItems: 'flex-start',
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontSize: '13px',
-                              fontWeight: 400,
-                              color: '#333',
-                              textAlign: 'right',
-                              pr: 1,
-                              mt: item.datatype === 'MFDatatypeMultiLineText' ? 0.25 : 0,
-                            }}
-                          >
-                            {item.propName}
-                            {item.isRequired && (
-                              <span style={{ color: '#d32f2f', marginLeft: '2px' }}>*</span>
-                            )}
-                            :
-                          </Typography>
-
-                          <Box
-                            sx={{
-                              fontSize: '13px',
-                              color: '#333',
-                              width: '100%',
-                              '& input, & textarea, & .MuiSelect-root': {
-                                fontSize: '13px !important',
-                                width: '100%',
-                              },
-                              '& .form-control': {
-                                border: '1px solid #ccc',
-                                borderRadius: '2px',
-                                padding: '3px 6px',
-                                height: '24px',
-                                '&:focus': {
-                                  borderColor: '#0078d4',
-                                  outline: 'none',
-                                  boxShadow: 'none',
-                                }
-                              },
-                              '& textarea.form-control': {
-                                minHeight: '48px',
-                                height: 'auto',
-                                resize: 'none',
-                                overflow: 'hidden',
-                                lineHeight: '1.3',
-                              }
-                            }}
-                          >
-                            {item.isAutomatic || !item.userPermission?.editPermission ? (
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: '13px',
-                                  color: '#333',
-                                  wordBreak: 'break-word',
-                                  lineHeight: 1.3,
-                                  m: 0,
-                                }}
-                              >
-                                {isLink(item.value) ? (
-                                  <a
-                                    href={item.value}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      color: '#1976d2',
-                                      textDecoration: 'none',
-                                      '&:hover': { textDecoration: 'underline' }
-                                    }}
-                                  >
-                                    {renderValue(item.value)}
-                                  </a>
-                                ) : (
-                                  <span>{renderValue(item.value)}</span>
-                                )}
-                              </Typography>
-                            ) : (
-                              <>
-                                {item.propName === 'Class' && (
-                                  <Typography variant="body2" sx={{ fontSize: '13px', color: '#333' }}>
-                                    {renderValue(item.value)}
-                                  </Typography>
-                                )}
-
-                                {/* Text inputs */}
-                                {['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(item.datatype) &&
-                                  !item.isHidden && (
-                                    <>
-                                      {isLink(item.value) ? (
-                                        <Typography variant="body2" sx={{ fontSize: '13px' }}>
-                                          <a
-                                            href={item.value}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ color: '#1976d2', textDecoration: 'none' }}
-                                          >
-                                            {renderValue(item.value)}
-                                          </a>
-                                        </Typography>
-                                      ) : (
-                                        <input
-                                          value={props.formValues?.[item.id]?.value || ''}
-                                          placeholder={renderValue(item.value)}
-                                          onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                          className="form-control"
-                                          disabled={item.isAutomatic}
-                                          style={{
-                                            fontSize: '13px',
-                                            color: '#333',
-                                            backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
-                                            margin: 0,
-                                          }}
-                                        />
-                                      )}
-                                    </>
-                                  )}
-
-                                {/* Multi-line text */}
-                                {item.datatype === 'MFDatatypeMultiLineText' && !item.isHidden && (
-                                  <textarea
-                                    ref={(el) => {
-                                      if (el) {
-                                        const autoResize = () => {
-                                          el.style.height = 'auto';
-                                          el.style.height = Math.max(48, el.scrollHeight) + 'px';
-                                        };
-                                        setTimeout(autoResize, 0);
-                                        el.addEventListener('input', autoResize);
-                                      }
-                                    }}
-                                    placeholder={renderValue(item.value)}
-                                    value={props.formValues?.[item.id]?.value || ''}
-                                    onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                    className="form-control"
-                                    disabled={item.isAutomatic}
-                                    style={{
-                                      fontSize: '13px',
-                                      color: '#333',
-                                      backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
-                                      margin: 0,
-                                      minHeight: '48px',
-                                      height: 'auto',
-                                      resize: 'none',
-                                      overflow: 'hidden',
-                                      lineHeight: '1.3',
-                                    }}
-                                  />
-                                )}
-
-                                {/* Date input */}
-                                {item.datatype === 'MFDatatypeDate' && !item.isHidden && (
-                                  <input
-                                    type="date"
-                                    placeholder={renderValue(item.value)}
-                                    value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                    onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                    className="form-control"
-                                    disabled={item.isAutomatic}
-                                    style={{
-                                      fontSize: '13px',
-                                      backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
-                                      margin: 0,
-                                    }}
-                                  />
-                                )}
-
-                                {/* Time input */}
-                                {item.datatype === 'MFDatatypeTimestamp' && !item.isHidden && (
-                                  <input
-                                    type="time"
-                                    className="form-control"
-                                    value={props.formValues?.[item.id]?.value || formatDateForInput(item.value) || ''}
-                                    onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                    disabled={item.isAutomatic}
-                                    style={{
-                                      fontSize: '13px',
-                                      backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
-                                      margin: 0,
-                                    }}
-                                  />
-                                )}
-
-                                {/* Boolean select */}
-                                {item.datatype === 'MFDatatypeBoolean' && !item.isHidden && (
-                                  <Select
-                                    size="small"
-                                    value={
-                                      props.formValues?.[item.id]?.value ??
-                                      (item.value === 'Yes' ? true : item.value === 'No' ? false : '')
-                                    }
-                                    onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-                                    displayEmpty
-                                    fullWidth
-                                    disabled={item.isAutomatic}
-                                    sx={{
-                                      backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
-                                      fontSize: '13px',
-                                      height: '24px',
-                                      m: 0,
-                                      '& .MuiSelect-select': {
-                                        fontSize: '13px',
-                                        color: '#333',
-                                        padding: '3px 6px',
-                                        minHeight: 'unset',
-                                        height: '18px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                      },
-                                      '& .MuiInputBase-root': {
-                                        height: '24px',
-                                      },
-                                      '& .MuiOutlinedInput-input': {
-                                        padding: '3px 6px',
-                                        fontSize: '13px',
-                                      },
-                                      '& .MuiMenuItem-root': {
-                                        fontSize: '13px',
-                                      },
-                                      '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#ccc',
-                                      },
-                                    }}
-                                  >
-                                    <MenuItem value=""><em>None</em></MenuItem>
-                                    <MenuItem value={true}>Yes</MenuItem>
-                                    <MenuItem value={false}>No</MenuItem>
-                                  </Select>
-                                )}
-
-                                {/* Multi-select lookup */}
-                                {item.datatype === 'MFDatatypeMultiSelectLookup' && !item.isHidden && (
-                                  <>
-                                    {(
-                                      (props.selectedObject.objectID === 10 && item.propName === 'Assigned to') ||
-                                      (props.selectedObject.objectTypeId === 10 && item.propName === 'Assigned to')
-                                    ) ? (
-                                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                                        {Array.isArray(item.value) && item.value.map((i, index) => (
-                                          <FormGroup key={index} sx={{ m: 0 }}>
-                                            <FormControlLabel
-                                              control={
-                                                <Tooltip title={`Mark as complete for ${i.title || ''}`} placement="left">
-                                                  <Checkbox
-                                                    checked={props.checkedItems[i.id] || false}
-                                                    onChange={() => setAssignmentPayload(item, i)}
-                                                    sx={{ p: 0.25 }}
-                                                    size="small"
-                                                  />
-                                                </Tooltip>
-                                              }
-                                              label={
-                                                <span style={{ fontSize: '13px', color: '#333' }}>
-                                                  {renderValue(i.title?.value || i.title)}
-                                                </span>
-                                              }
-                                              labelPlacement="end"
-                                              sx={{ alignItems: 'center', ml: 0, mr: 0 }}
-                                            />
-                                          </FormGroup>
-                                        ))}
-                                      </Box>
-                                    ) : item.propName === 'Marked as complete by' ? (
-                                      <Typography fontSize="13px" sx={{ color: '#333', lineHeight: 1.3, m: 0 }}>
-                                        {Array.isArray(item.value) ? 
-                                          item.value
-                                            .map(i => renderValue(i.title?.value || i.title))
-                                            .filter(Boolean)
-                                            .join('; ') 
-                                          : renderValue(item.value)
-                                        }
-                                      </Typography>
-                                    ) : (
-                                      <LookupMultiSelect
-                                        propId={item.id}
-                                        label={item.propName}
-                                        value={props.formValues?.[item.id]?.value || []}
-                                        onChange={(id, newValues) => handleInputChange(id, newValues, item.datatype)}
-                                        selectedVault={props.vault}
-                                        itemValue={item.value}
-                                        disabled={item.isAutomatic}
-                                        mfilesid={props.mfilesId}
-                                      />
-                                    )}
-                                  </>
-                                )}
-
-                                {/* Single lookup */}
-                                {item.datatype === 'MFDatatypeLookup' && item.propName !== 'Class' && (
-                                  <LookupSelect
-                                    propId={item.id}
-                                    label={item.propName}
-                                    value={props.formValues?.[item.id]?.value || ''}
-                                    onChange={(id, newValue) => handleInputChange(id, newValue, item.datatype)}
-                                    selectedVault={props.vault}
-                                    itemValue={item.value}
-                                    disabled={item.isAutomatic}
-                                    mfilesid={props.mfilesId}
-                                  />
-                                )}
-                              </>
-                            )}
-                          </Box>
-                        </Box>
-                      </ListItem>
-                    ))}
+                    {filteredProps.map(renderPropertyItem)}
                   </List>
                 </Box>
                 <Box
@@ -1091,7 +1111,7 @@ const ObjectData = (props) => {
                   ) && (
                       <Box sx={{ display: 'flex', gap: 1 }}>
                         <Button
-                          className=' rounded-pill'
+                          className='rounded-pill'
                           size="medium"
                           variant="contained"
                           color="primary"
@@ -1149,11 +1169,11 @@ const ObjectData = (props) => {
                   <>
                     <Typography variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                        Loading file<span>.</span><span>.</span><span>.</span>
+                        Buffering file<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
-                      Please wait as we load the document
+                      Please wait as we load the file content
                     </Typography>
                   </>
                 ) : (

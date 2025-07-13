@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
-import logo from '../images/ZFBLU.webp';
+import logo from '../images/ZFBLU.png';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
 import axios from 'axios';

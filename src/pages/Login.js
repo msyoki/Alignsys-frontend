@@ -6,6 +6,7 @@ import {
   FormControl,
   Input,
   Button,
+  Box
 } from '@mui/material';
 import KeyIcon from '@mui/icons-material/Key';
 import PersonIcon from '@mui/icons-material/Person';
@@ -56,13 +57,22 @@ const Login = () => {
         setMessage={setAlertMsg}
       />
 
-      <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
+ <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
         {/* Left Side - Form */}
         <div className="left-side d-flex align-items-center justify-content-center w-100 w-md-50 bg-white p-4">
           <form onSubmit={loginUser} className="text-center text-dark w-100" style={{ maxWidth: '360px' }}>
-            <img src={image} alt="Logo" className="mb-3" style={{ width: '180px' }} />
-            <h6 className="mb-3">SIGN IN</h6>
+            {/* Logo for small screens */}
+            <Box className="d-block d-md-none text-center mb-3">
+              <img src={image} alt="Logo" style={{ width: '300px' }} />
 
+            </Box>
+             <h5 className="mb-3 " style={{fontWeight:'800px'}}>LOGIN</h5>
+            <Box className="d-block d-md-none text-center mb-3">
+
+              <p className="mt-2 text-dark" style={{ fontSize: '14px' }}>
+                <strong>EDMS</strong> Software Solution
+              </p>
+            </Box>
             <FormControl variant="standard" fullWidth className="mb-3">
               <InputLabel htmlFor="email">
                 {constants.auth_type_email === "true" ? "Email" : "Username"}*
@@ -141,7 +151,7 @@ const Login = () => {
                 textTransform: 'none',
               }}
             >
-              Login
+              LOGIN
             </Button>
 
             <p className="mt-3" style={{ fontSize: '13px' }}>
@@ -160,20 +170,18 @@ const Login = () => {
 
         {/* Right Side - Banner */}
         <div
-          className="right-side w-100 w-md-50 d-flex flex-column justify-content-center align-items-center"
+          className="d-none d-md-flex right-side w-100 w-md-50 flex-column justify-content-center align-items-center"
           style={{
             backgroundColor: '#007bff',
             padding: '20px',
           }}
         >
           <img src={logo2} alt="Banner Logo" width="300px" />
-          <p
-            className="text-white mt-4"
-            style={{fontSize: '15px' }}
-          >
+          <p className="text-white mt-4" style={{ fontSize: '15px' }}>
             <strong>EDMS</strong> Software Solution
           </p>
         </div>
+
       </div>
 
     </>

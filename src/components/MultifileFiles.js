@@ -106,9 +106,9 @@ const MultifileFiles = React.memo((props) => {
 
     // Memoized tree item styles to prevent recreation
     const treeItemStyles = useMemo(() => ({
-        fontSize: "13px",
-        "& .MuiTreeItem-label": { fontSize: "13px !important" },
-        "& .MuiTypography-root": { fontSize: "13px !important" },
+        fontSize: "12.5px",
+        "& .MuiTreeItem-label": { fontSize: "12.5px !important" },
+        "& .MuiTypography-root": { fontSize: "12.5px !important" },
         backgroundColor: '#fff !important',
         "&:hover": { backgroundColor: '#fff !important' },
         borderRadius: "0px !important",
@@ -156,7 +156,7 @@ const MultifileFiles = React.memo((props) => {
                                 >
                                     <span 
                                         style={{ 
-                                            fontSize: '13px',
+                                            fontSize: '12.5px',
                                             minWidth: '100%',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
@@ -187,8 +187,7 @@ const MultifileFiles = React.memo((props) => {
                 fontSize: '12px'
             }}
         >
-            {/* <CircularProgress size={16} sx={{ marginRight: '8px' }} />
-            <span style={{ fontSize: '13px', color: '#888' }}>Loading files...</span> */}
+          
             <span className="loading-indicator text-muted">
             Searching Files<span>.</span><span>.</span><span>.</span>
           </span>
@@ -232,9 +231,9 @@ const MultifileFiles = React.memo((props) => {
     ), []);
 
     // Main render logic
-    if (loading) {
-        return loadingComponent;
-    }
+    // if (loading) {
+    //     return loadingComponent;
+    // }
 
     if (error) {
         return errorComponent;

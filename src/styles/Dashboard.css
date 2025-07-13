@@ -25,7 +25,7 @@
   color: #edf4f7;
   transition: width 0.3s ease;
   overflow: hidden;
-
+ 
   
 }
 
@@ -94,8 +94,8 @@
   top: 40%;
   width: 15px;
   height: 70px;
-  background: #2757aa;
-  color: var(--text-color);
+  background: #ddd;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,12 +127,11 @@
   flex-grow: 1;
   transition: margin-left 0.0s ease-in-out;
   width: 100%; /* Make the content width flexible */
-  background-color: var(--secondary-color);
   color: #555; /* Remove single quotes */
   height: 100vh; /* Let it fill the height of its parent container */
   overflow-y: hidden; /* Prevent unnecessary scroll */
   overflow-x: hidden;
-  background-color: #fff;
+  background-color: #ecf4fc;
 }
 
 

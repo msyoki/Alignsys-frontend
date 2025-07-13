@@ -73,23 +73,27 @@ const FileExtIcon = (props) => {
   // Render icons based on extension
   switch (extension) {
     case 'pdf':
-      return <i className="fas fa-file-pdf" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
+      return <i className="fas fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
     case 'csv':
-      return <i className="fas fa-file-csv" style={{ ...iconStyle, color: '#6a994e' }}></i>;
+      return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#6a994e' }}></i>;
     case 'txt':
-      return <i className="fas fa-file-alt" style={{ ...iconStyle, color: '#6c757d' }}></i>;
+      return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#6c757d' }}></i>;
+    case 'msg':
+      return <i className="fa-solid fa-envelope shadow-sm" style={{ ...iconStyle, color: '#ffb703' }}></i>;
+    case 'webp':
+      return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
     case 'xlsx':
     case 'xls':
-      return <i className="far fa-file-excel" style={{ ...iconStyle, color: '#3e8914' }}></i>;
+      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#3e8914' }}></i>;
     case 'ppt':
-      return <i className="fa-solid fa-file-powerpoint" style={{ ...iconStyle, color: '#ef6351' }}></i>;
+      return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#ef6351' }}></i>;
     case 'docx':
     case 'doc':
-      return <i className="fas fa-file-word" style={{ ...iconStyle, color: '#0077b6' }}></i>;
+      return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#0077b6' }}></i>;
     case 'png':
     case 'jpeg':
     case 'jpg':
-      return <i className="fas fa-file-image" style={{ ...iconStyle, color: '#2a68af' }}></i>;
+      return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     default:
       // If extension exists but is not handled, show grey file icon
       // if (extension) {
@@ -97,7 +101,7 @@ const FileExtIcon = (props) => {
       // }
       // // If no extension (shouldn't happen), show book icon as fallback
       // return <i className="fas fa-book" style={{ ...iconStyle, color: '#7cb518' }}></i>;
-      return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
       
   }
 };

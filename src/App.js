@@ -12,6 +12,7 @@ import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 
 import * as constants from './components/Auth/configs'
+import NetworkSnackbarAlert from './components/Snackbar';
 
 function App() {
   registerLicense(constants.syncfusion_key);
@@ -20,6 +21,7 @@ function App() {
     <Router>
       <AuthProvider>
       <div className="App bg-dark text-white">
+         <NetworkSnackbarAlert/>
         <Routes>
           <Route path="/"  exact={true} element={<PrivateRoute><Dashboard/></PrivateRoute>} />
           <Route path="/reset/:uid/:token" element={<PasswordResetConfirm/>}  />
