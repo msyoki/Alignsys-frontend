@@ -9,6 +9,7 @@
 /venv
 /env
 *.egg-info
+.exe
 
 # ---- Testing ----
 /coverage
