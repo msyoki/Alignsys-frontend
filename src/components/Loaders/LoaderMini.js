@@ -20,9 +20,12 @@ const LoadingMini = ({ msg }) => (
 
     <Typography variant="body2" color="textPrimary">
       {msg ? (
-        msg
+
+        <span style={{ color: '#555' }} className="loading-indicator ">
+          {msg} <span>.</span><span>.</span><span>.</span>
+        </span>
       ) : (
-        <span className="loading-indicator text-muted">
+        <span style={{ color: '#555' }} className="loading-indicator ">
           Fetching, please wait <span>.</span><span>.</span><span>.</span>
         </span>
       )}

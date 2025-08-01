@@ -37,7 +37,7 @@ import axios from 'axios';
 import LookupSelect from '../CustomFormTags/NewObjectFormLookup';
 import LookupMultiSelect from '../CustomFormTags/NewObjectFormLookupMultiSelect';
 import MiniLoader from './MiniLoaderDialog';
-import logo from '../../images/ZFWHITE.webp';
+import logo from '../../images/ZFWHITE.png';
 import FileUploadComponent from '../FileUpload';
 import * as constants from '../Auth/configs';
 import TimedAlert from '../TimedAlert';
@@ -1073,7 +1073,7 @@ const NewObjectDialog = (props) => {
                     />
                     <MiniLoader
                         loading={miniLoader}
-                        loaderMsg={'Creating new object...'}
+                        loaderMsg={'Creating new object'}
                         setLoading={setMiniLoader}
                     />
 

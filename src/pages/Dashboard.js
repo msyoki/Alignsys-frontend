@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Authcontext from '../components/Auth/Authprovider';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Dashboard.css';
@@ -23,9 +23,9 @@ const allIcons = {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends,
 };
 
-// Custom hook for session storage
+// Optimized session storage hook with debouncing
 function useSessionState(key, defaultValue) {
-  const getInitialValue = () => {
+  const getInitialValue = useCallback(() => {
     try {
       const stored = sessionStorage.getItem(key);
       if (stored === null || stored === 'undefined') return defaultValue;
@@ -34,19 +34,31 @@ function useSessionState(key, defaultValue) {
       console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
       return defaultValue;
     }
-  };
+  }, [key, defaultValue]);
+
   const [value, setValue] = useState(getInitialValue);
+  const timeoutRef = useRef();
+
   useEffect(() => {
-    try {
-      sessionStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
+      }
+    }, 100); // 100ms debounce
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [key, value]);
+
   return [value, setValue];
 }
 
-// Sidebar Menu Component
+// Sidebar Menu Component - optimized with better memoization
 const SidebarMenu = React.memo(({
   sidebarOpen,
   isSublistVisible,
@@ -76,6 +88,7 @@ const SidebarMenu = React.memo(({
           minHeight: "56px",
           maxHeight: "56px",
           overflow: "hidden",
+      
         }}
       >
         <img
@@ -84,8 +97,7 @@ const SidebarMenu = React.memo(({
           className="logo"
           style={{
             width: "auto",
-            maxWidth: "80%",
-            maxHeight: "48px",
+            maxHeight: "30px",
             objectFit: "contain",
           }}
         />
@@ -123,17 +135,18 @@ const SidebarMenu = React.memo(({
           fetchItemData={fetchItemData}
         />
 
-        {user.is_admin === "True" && (
-          <li onClick={adminPage} className="menu-item main-li shadow-lg">
-            <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
-            <span style={{ fontSize: "14px" }}>Administration</span>
-          </li>
-        )}
+
       </ul>
 
       {/* Bottom Buttons */}
       <div>
         <ul className="bottom-buttons">
+          {user.is_admin === "True" && (
+            <li onClick={adminPage} className="menu-item main-li shadow-lg">
+              <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
+              <span style={{ fontSize: "14px" }}>Admin</span>
+            </li>
+          )}
           <li onClick={logoutUser} className="menu-item main-li shadow-lg">
             <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
             <span style={{ fontSize: "14px" }}>Logout</span>
@@ -144,7 +157,9 @@ const SidebarMenu = React.memo(({
   );
 });
 
-// SubList Component
+SidebarMenu.displayName = 'SidebarMenu';
+
+// SubList Component - optimized
 const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fetchItemData }) => (
   <List
     dense
@@ -157,9 +172,8 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
       opacity: isVisible ? "1" : "0",
       transition: "max-height 0.4s ease, opacity 0.3s ease",
       padding: isVisible ? "10px 20px" : "0",
-      backgroundColor: "#ecf4fc",
-      borderRight: "1px solid #2757aa",
-      direction: "rtl",
+      backgroundColor: "#fff",
+   
       "& *": { direction: "ltr" },
       "&::-webkit-scrollbar": { width: "3px" },
       "&::-webkit-scrollbar-track": {
@@ -168,14 +182,14 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
         boxShadow: "inset 0 0 5px rgba(255, 255, 255, 0.2)",
       },
       "&::-webkit-scrollbar-thumb": {
-        background: "rgba(255, 255, 255, 0.6)",
+        background: "#2757aa",
         borderRadius: "10px",
-        minHeight: "25px",
+        minHeight: "10px",
         transition: "background 0.3s",
         border: "2px solid rgba(255, 255, 255, 0.2)",
       },
       "&::-webkit-scrollbar-thumb:hover": {
-        background: "#ffffff",
+        background: "#2757aa",
         boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
       },
       "&::-webkit-scrollbar-button:single-button": {
@@ -213,7 +227,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
-          backgroundColor: hoveredItem === item.objectid ? "#fff" : "ecf4fc",
+          backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff",
           color: hoveredItem === item.objectid ? "black" : "black",
           py: 0,
           px: 1,
@@ -232,13 +246,28 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
   </List>
 ));
 
-// API Functions Hook
+SubList.displayName = 'SubList';
+
+// API Functions Hook - optimized with caching
 const useApiCalls = (selectedVault, mfilesId) => {
+  const cacheRef = useRef(new Map());
+
+  // Clear cache when vault changes
+  useEffect(() => {
+    cacheRef.current.clear();
+  }, [selectedVault?.guid, mfilesId]);
+
   const searchObject = useCallback(async (search, vault) => {
+    const cacheKey = `search_${vault}_${search}`;
+    if (cacheRef.current.has(cacheKey)) {
+      return cacheRef.current.get(cacheKey);
+    }
+
     try {
       const response = await axios.get(
         `${constants.mfiles_api}/api/objectinstance/Search/${vault}/${search}/${mfilesId}`
       );
+      cacheRef.current.set(cacheKey, response.data);
       return response.data;
     } catch (error) {
       return null;
@@ -246,10 +275,17 @@ const useApiCalls = (selectedVault, mfilesId) => {
   }, [mfilesId]);
 
   const getRecent = useCallback(async (setRecentData) => {
+    const cacheKey = `recent_${selectedVault?.guid}`;
+    if (cacheRef.current.has(cacheKey)) {
+      setRecentData(cacheRef.current.get(cacheKey));
+      return;
+    }
+
     try {
       const { data } = await axios.get(
         `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
       );
+      cacheRef.current.set(cacheKey, data);
       setRecentData(data);
     } catch {
       setRecentData([]);
@@ -257,21 +293,36 @@ const useApiCalls = (selectedVault, mfilesId) => {
   }, [selectedVault?.guid, mfilesId]);
 
   const getDeleted = useCallback(async (setDeletedData) => {
+    const cacheKey = `deleted_${selectedVault?.guid}`;
+    if (cacheRef.current.has(cacheKey)) {
+      setDeletedData(cacheRef.current.get(cacheKey));
+      return;
+    }
+
     try {
       const response = await axios.get(
         `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
       );
+      cacheRef.current.set(cacheKey, response.data);
       setDeletedData(response.data);
+      console.log('Fetched deleted data:', response.data);
     } catch (error) {
       setDeletedData([]);
     }
   }, [selectedVault?.guid, mfilesId]);
 
   const getAssigned = useCallback(async (setAssignedData) => {
+    const cacheKey = `assigned_${selectedVault?.guid}`;
+    if (cacheRef.current.has(cacheKey)) {
+      setAssignedData(cacheRef.current.get(cacheKey));
+      return;
+    }
+
     try {
       const response = await axios.get(
         `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
       );
+      cacheRef.current.set(cacheKey, response.data);
       setAssignedData(response.data);
     } catch (error) {
       setAssignedData([]);
@@ -288,12 +339,20 @@ const useApiCalls = (selectedVault, mfilesId) => {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
+        console.log('Fetched vault objects:', response.data);
         setOpenObjectModal(true);
       })
       .catch(() => { });
   }, [selectedVault?.guid, mfilesId]);
 
   const getVaultObjects2 = useCallback((setVaultObjectsList) => {
+    const cacheKey = `vaultObjects_${selectedVault?.guid}`;
+    if (cacheRef.current.has(cacheKey)) {
+      setVaultObjectsList(cacheRef.current.get(cacheKey));
+
+      return;
+    }
+
     const config = {
       method: 'get',
       url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`,
@@ -302,7 +361,9 @@ const useApiCalls = (selectedVault, mfilesId) => {
     axios
       .request(config)
       .then((response) => {
+        cacheRef.current.set(cacheKey, response.data);
         setVaultObjectsList(response.data);
+        console.log('Fetched vault objects:', response.data);
       })
       .catch(() => { });
   }, [selectedVault?.guid, mfilesId]);
@@ -322,7 +383,7 @@ function Dashboard() {
   const { user, authTokens, departments, logoutUser } = useContext(Authcontext);
   const navigate = useNavigate();
 
-  // --- State ---
+  // --- State (keeping original structure) ---
   const [openObjectModal, setOpenObjectModal] = useSessionState('ss_openObjectModal', false);
   const [viewableobjects, setViewableObjects] = useSessionState('ss_viewableObjects', []);
   const [data, setData] = useSessionState('ss_data', []);
@@ -372,7 +433,7 @@ function Dashboard() {
     getVaultObjects2
   } = useApiCalls(selectedVault, mfilesId);
 
-  // --- Helper Functions ---
+  // --- Helper Functions (memoized for performance) ---
   const getViewableObjects = useCallback(() => {
     const config = {
       method: 'get',
@@ -384,7 +445,7 @@ function Dashboard() {
       .request(config)
       .then((response) => setViewableObjects(response.data))
       .catch(() => { });
-  }, [authTokens.access]);
+  }, [authTokens.access, setViewableObjects]);
 
   const getVaultId = useCallback(async (guid) => {
     let data = JSON.stringify({ "user_id": user.id, "guid": guid });
@@ -398,7 +459,7 @@ function Dashboard() {
     axios.request(config)
       .then((response) => setMfilesId(response.data.mfilesID))
       .catch(() => { });
-  }, [user.id]);
+  }, [user.id, setMfilesId]);
 
   const getNetworkStatus = useCallback(() => {
     if (navigator.connection) {
@@ -438,7 +499,7 @@ function Dashboard() {
   const [base64, setBase64] = useSessionState('ss_base64', '');
   const [extension, setExtension] = useSessionState('ss_extension', '');
 
-  // Preview functions
+  // Preview functions (memoized)
   const previewObject = useCallback(async (item, isMain = true) => {
     setSelectedObject(item);
     try {
@@ -448,7 +509,7 @@ function Dashboard() {
     } catch (error) {
       setPreviewObjectProps([]);
     }
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, mfilesId, setSelectedObject, setPreviewObjectProps]);
 
   const previewSublistObject = useCallback(async (item, isMain = true) => {
     setSelectedObject(item);
@@ -459,9 +520,9 @@ function Dashboard() {
     } catch (error) {
       setPreviewObjectProps([]);
     }
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, mfilesId, setSelectedObject, setPreviewObjectProps]);
 
-  // --- Event Handlers ---
+  // --- Event Handlers (memoized) ---
   const adminPage = useCallback(() => navigate('/admin'), [navigate]);
   const handleChange = useCallback((event, newValue) => setValue(newValue), [setValue]);
   const toggleSidebar = useCallback(() => setSidebarOpen(!sidebarOpen), [sidebarOpen, setSidebarOpen]);
@@ -471,7 +532,7 @@ function Dashboard() {
   const closeModal = useCallback(() => setOpenObjectModal(false), [setOpenObjectModal]);
   const closeDataDialog = useCallback(() => setIsDataOpen(false), [setIsDataOpen]);
 
-  // --- Data Fetching & Handling ---
+  // --- Data Fetching & Handling (keeping original logic) ---
   const fetchItemData = useCallback(async (objectId, objectName) => {
     setIsLoading(true);
     setSelectedObjectName(objectName);
@@ -502,7 +563,7 @@ function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, mfilesId, setSelectedObjectName, setSelectedObjectId, setGroupedItems, setUngroupedItems, setIsDataOpen]);
 
   const handleClassSelection = useCallback(async (classId, className, objectId) => {
     setLoadingDialog(true);
@@ -518,9 +579,10 @@ function Dashboard() {
           { headers: { accept: '*/*' } }
         );
         setTemplates(response.data);
-        dontUseTemplates();
+
         console.log('Templates fetched:', response.data);
         setLoadingDialog(false);
+        setIsFormOpen(true);
       } catch (error) {
         console.error('Error fetching templates:', error);
         await proceedNoneTemplate();
@@ -551,13 +613,10 @@ function Dashboard() {
       }
     };
 
-    if (objectId === 0) {
-      await fetchTemplates();
-    } else {
+    await proceedNoneTemplate();
+    await fetchTemplates();
 
-      await proceedNoneTemplate();
-    }
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, mfilesId, setSelectedClassName, setSelectedClassId, setSelectedObjectId, setTemplates, setLoadingDialog, setIsFormOpen, setFormProperties, setFormValues, closeDataDialog]);
 
   const UseTemplate = useCallback(async (item) => {
     setLoadingDialog(true);
@@ -582,7 +641,7 @@ function Dashboard() {
       setLoadingDialog(false);
       closeDataDialog();
     }
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, mfilesId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setFormValues, setIsFormOpen, closeDataDialog]);
 
   const dontUseTemplates = useCallback(async () => {
     setLoadingDialog(true);
@@ -608,9 +667,9 @@ function Dashboard() {
       setLoadingDialog(false);
       closeDataDialog();
     }
-  }, [selectedVault?.guid, selectedObjectId, selectedClassId, mfilesId]);
+  }, [selectedVault?.guid, selectedObjectId, selectedClassId, mfilesId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setTemplateModalOpen, setFormValues, setIsFormOpen, closeDataDialog]);
 
-  // --- Derived/Computed Values ---
+  // --- Derived/Computed Values (memoized) ---
   const data2 = useMemo(() => [], []);
   const allrequisitionsnew = useMemo(() =>
     allrequisitions.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)),
@@ -641,9 +700,9 @@ function Dashboard() {
     getRecent(setRecentData);
     getAssigned(setAssignedData);
     getDeleted(setDeletedData);
-  }, [getRecent, getAssigned, getDeleted]);
+  }, [getRecent, getAssigned, getDeleted, setRecentData, setAssignedData, setDeletedData]);
 
-  // --- useEffect Hooks ---
+  // --- useEffect Hooks (keeping original logic) ---
   useEffect(() => {
     getViewableObjects();
     getNetworkStatus();
@@ -660,7 +719,7 @@ function Dashboard() {
       setAlertSeverity(location.state.alertSeverity);
       navigate(location.pathname, { replace: true });
     }
-  }, []);
+  }, [getViewableObjects, getNetworkStatus, getVaultId, setSelectedVault, location.state, setOpenAlert, setAlertMsg, setAlertSeverity, navigate]);
 
   useEffect(() => {
     if (selectedVault) getVaultId(selectedVault.guid);
@@ -673,7 +732,7 @@ function Dashboard() {
       getAssigned(setAssignedData);
       getDeleted(setDeletedData);
     }
-  }, [selectedVault, mfilesId, getVaultObjects2, getRecent, getAssigned, getDeleted]);
+  }, [selectedVault, mfilesId, getVaultObjects2, getRecent, getAssigned, getDeleted, setVaultObjectsList, setRecentData, setAssignedData, setDeletedData]);
 
   // --- Render ---
   return (
@@ -734,7 +793,7 @@ function Dashboard() {
 
       <div className="dashboard">
         {/* Sidebar */}
-        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`}>
+        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`} style={{  borderRight: "3px solid #ddd"}}>
           <SidebarMenu
             sidebarOpen={sidebarOpen}
             isSublistVisible={isSublistVisible}

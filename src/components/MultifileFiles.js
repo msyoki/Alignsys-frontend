@@ -11,6 +11,7 @@ const MultifileFiles = React.memo((props) => {
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [expandedItems, setExpandedItems] = useState(['multifile-root']); // Start expanded by default
 
     // Memoized icon style to prevent recreation
     const iconStyle = useMemo(() => ({
@@ -124,6 +125,11 @@ const MultifileFiles = React.memo((props) => {
         }
     }, [props.downloadFile, props.item]);
 
+    // Handle expand/collapse
+    const handleExpandedItemsChange = useCallback((event, itemIds) => {
+        setExpandedItems(itemIds);
+    }, []);
+
     // Memoized document items to prevent unnecessary re-renders
     const documentItems = useMemo(() => {
         return documents.map((doc, index) => {
@@ -131,46 +137,48 @@ const MultifileFiles = React.memo((props) => {
             const itemId = `${doc.fileID}-multifile-${index}`;
             
             return (
-                <SimpleTreeView key={doc.fileID || index}>
-                    <TreeItem
-                        itemId={itemId}
-                        onClick={() => {handleDownload(doc.fileID); props.setSelectedItemId(`${doc.fileID}-${doc.fileTitle}`)}}
-                        sx={treeItemStyles}
-                        label={
-                            <Box 
-                                display="flex" 
-                                alignItems="center" 
-                                sx={{ 
-                                    padding: '3px', 
-                                    backgroundColor: isSelected ? '#fcf3c0' : 'inherit',
-                                    borderRadius: '2px'
-                                }}
+                <TreeItem
+                    key={doc.fileID || index}
+                    itemId={itemId}
+                    onClick={() => {
+                        handleDownload(doc.fileID); 
+                        props.setSelectedItemId(`${doc.fileID}-${doc.fileTitle}`)
+                    }}
+                    sx={treeItemStyles}
+                    label={
+                        <Box 
+                            display="flex" 
+                            alignItems="center" 
+                            sx={{ 
+                                padding: '3px', 
+                                backgroundColor: isSelected ? '#fcf3c0' : 'fff',
+                                borderRadius: '2px'
+                            }}
+                        >
+                            {getIcon(doc.extension)}
+                            <Tooltip 
+                                title={`${doc.fileTitle}.${doc.extension}` || 'No title'} 
+                                placement="right"
+                                arrow
+                                enterDelay={500}
+                                leaveDelay={200}
                             >
-                                {getIcon(doc.extension)}
-                                <Tooltip 
-                                    title={`${doc.fileTitle}.${doc.extension}` || 'No title'} 
-                                    placement="right"
-                                    arrow
-                                    enterDelay={500}
-                                    leaveDelay={200}
+                                <span 
+                                    style={{ 
+                                        fontSize: '12.5px',
+                                        minWidth: '100%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }} 
+                                    className='list-text mx-2'
                                 >
-                                    <span 
-                                        style={{ 
-                                            fontSize: '12.5px',
-                                            minWidth: '100%',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap'
-                                        }} 
-                                        className='list-text mx-2'
-                                    >
-                                        {doc.fileTitle}
-                                    </span>
-                                </Tooltip>
-                            </Box>
-                        }
-                    />
-                </SimpleTreeView>
+                                    {doc.fileTitle}.{doc.extension}
+                                </span>
+                            </Tooltip>
+                        </Box>
+                    }
+                />
             );
         });
     }, [documents, props.selectedItemId, getIcon, handleDownload, treeItemStyles]);
@@ -196,45 +204,15 @@ const MultifileFiles = React.memo((props) => {
 
     // Memoized error component
     const errorComponent = useMemo(() => (
-        // <Box 
-        //     display="flex" 
-        //     alignItems="center" 
-        //     sx={{ 
-        //         padding: '8px', 
-        //         marginLeft:'10px',
-        //         color: '#555',
-        //         fontSize: '12px'
-        //     }}
-        // >
-        //     {/* <i className="fas fa-exclamation-triangle" style={{ marginRight: '8px' }}></i> */}
-        //     <span className='mx-3'>No files found</span>
-        // </Box>
         <></>
-      
     ), []);
 
     // Memoized empty state component
     const emptyComponent = useMemo(() => (
-        // <Box 
-        //     display="flex" 
-        //     alignItems="center" 
-        //     sx={{ 
-        //         padding: '8px', 
-        //         color: '#888',
-        //         fontSize: '12px'
-        //     }}
-        // >
-        //     <i className="fas fa-folder-open" style={{ marginRight: '8px' }}></i>
-        //     <span>No files found</span>
-        // </Box>
         <></>
     ), []);
 
     // Main render logic
-    // if (loading) {
-    //     return loadingComponent;
-    // }
-
     if (error) {
         return errorComponent;
     }
@@ -243,7 +221,44 @@ const MultifileFiles = React.memo((props) => {
         return emptyComponent;
     }
 
-    return <>{documentItems}</>;
+    return (
+        <SimpleTreeView
+            expandedItems={expandedItems}
+            onExpandedItemsChange={handleExpandedItemsChange}
+            sx={{
+                "& .MuiTreeItem-root": {
+                    "& .MuiTreeItem-content": {
+                        padding: "2px 0",
+                    }
+                }
+            }}
+        >
+            <TreeItem
+                itemId="multifile-root"
+                   sx={{
+                        ...treeItemStyles,
+                        marginLeft: '15px'
+                    }}
+                label={
+                    <Box 
+                        display="flex" 
+                        alignItems="center" 
+                        sx={{ 
+                            padding: '3px',
+                        
+                            color: '#333'
+                        }}
+                    >
+                        {/* <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
+                        */}
+                         <Box sx={{ fontSize: '12.5px' }}> Files ({documents.length})</Box>
+                    </Box>
+                }
+            >
+                {documentItems}
+            </TreeItem>
+        </SimpleTreeView>
+    );
 }, (prevProps, nextProps) => {
     // Custom comparison function for memoization
     return (

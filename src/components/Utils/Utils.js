@@ -7,3 +7,5 @@ export function toSentenceCase(text) {
   // Capitalize the first letter
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
+
+export const toUpperCase = (text) => text?.toUpperCase();

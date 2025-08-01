@@ -833,7 +833,7 @@ const ObjectData = (props) => {
                     )}
                   </Box>
                 </Box>
-                <Box className="p-2" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
+                <Box className="p-1" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
                   <Box sx={{ textAlign: 'start', fontSize: '13px', maxWidth: '30%' }} className="mx-2">
                     <Box sx={{ fontSize: '13px', color: '#555' }}>
                       {props.selectedObject.objectTypeName || getPropValue('Class') || ''}
@@ -1291,7 +1291,7 @@ ObjectData.propTypes = {
   ).isRequired,
   base64: PropTypes.string,
   extension: PropTypes.string,
-  selectedFileId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  selectedFileId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])?.isRequired,
   selectedObject: PropTypes.shape({
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,

@@ -17,7 +17,7 @@ const FileUploadComponent = (props) => {
                 <div
                     {...getRootProps({ className: 'dropzone' })}
                     style={{
-                        height: '300px',
+                        height: '100%',
                         backgroundColor: '#ecf4fc',
                         display: 'flex',
                         alignItems: 'center',

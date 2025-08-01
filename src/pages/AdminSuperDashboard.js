@@ -40,9 +40,6 @@ import {
     Stack,
 } from '@mui/material';
 
-import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
-
 import { People, Timeline } from "@mui/icons-material";
 
 // Other components
@@ -56,12 +53,13 @@ import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog'
 import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
 import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
 import LoginActivityTable from '../components/LoginActivity';
-import { toSentenceCase, toUpperCase } from '../components/Utils/Utils';
+import { toSentenceCase } from '../components/Utils/Utils';
 
 // Constants and utilities
 import * as constants from '../components/Auth/configs';
 import logo from '../images/TechEdgeLogo.png';
 import VaultFormDialog from '../components/Modals/AddVaultModal';
+import RegisterVaultUsersForm from '../components/Registration/Register_vault_and _newUsers';
 
 // ============= CONSTANTS =============
 const STANDARD_FONT_FAMILY = "'Segoe UI', 'Roboto', 'Arial', sans-serif";
@@ -202,7 +200,7 @@ const useResizeHandler = () => {
 
 // ============= MEMOIZED COMPONENTS =============
 const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLogout }) => (
-    <nav className={`sidebar ${sidebarOpen ? "open" : "closed"}`} style={{ borderRight: "3px solid #ddd" }}>
+    <nav className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="sidebar-content" style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
             {sidebarOpen && (
                 <>
@@ -221,7 +219,8 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                             className="logo"
                             style={{
                                 width: "auto",
-                                maxHeight: "30px",
+                                maxWidth: "80%",
+                                maxHeight: "48px",
                                 objectFit: "contain",
                             }}
                         />
@@ -229,7 +228,7 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                     {/* Menu Items */}
                     <ul className="menu-items">
                         <li onClick={onNavigateHome} className="menu-item main-li shadow-lg">
-                            <i className="fa-solid fa-home" style={{ fontSize: "18px" }}></i>
+                            <i className="fa-solid fa-arrow-left" style={{ fontSize: "18px" }}></i>
                             <span style={{ fontSize: "14px" }}>Return Home</span>
                         </li>
 
@@ -357,7 +356,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                 color="primary"
                 onClick={() => alert("add user group")}
                 style={{ textTransform: 'none' }}
-                className='my-2 rounded-pill'
+                className='my-2'
             >
                 <small>
                     <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group
@@ -386,7 +385,6 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                                     color="warning"
                                     onClick={() => onSelectedGroupUsers(row)}
                                     style={{ textTransform: 'none' }}
-                                    className='rounded-pill'
                                 >
                                     <small>
                                         <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users
@@ -402,7 +400,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
 ));
 
 // ============= MAIN COMPONENT =============
-function AdminDashboard() {
+function SuperAdminDashboard() {
     // Context and navigation
     const { user, authTokens, logoutUser } = useContext(Authcontext);
     const navigate = useNavigate();
@@ -423,12 +421,20 @@ function AdminDashboard() {
     const [vaults, setVaults] = useState([]);
     const [objectpermissions, setObjectPermissions] = useState([]);
     const [usersnotlinkedtovault, setUsersNotLinkedToVault] = useState([]);
-    const [addNewVault, setAddNewVault] = useState(false);
+    const [addNewVault, setAddNewVault] = useState(true);
 
-    const vaultUserEmails = vaultUsers.map(user => user.email);
-    const filteredAvailableUsers = organizationusers.filter(
-        user => !vaultUserEmails.includes(user.email)
-    );
+    const [showForm, setShowForm] = useState(true);
+
+    const handleSuccess = (data) => {
+        console.log('Registration successful:', data);
+        alert('Vault and users registered successfully!');
+        // You can handle success here - maybe redirect or refresh data
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        // Handle cancel - maybe go back to previous page
+    };
 
     // UI state
     const [viewStates, setViewStates] = useState({
@@ -772,36 +778,7 @@ function AdminDashboard() {
 
     return (
         <>
-
-            <PermissionDialog
-                selectedVault={selectedItems.vault.guid}
-                handleAddPermission={additionalHandlers.handleAddPermission}
-                selectedObject={selectedItems.object}
-                fetchObjectPermisions={apiHandlers.fetchObjectPermisions}
-                permissions={objectpermissions}
-                open={dialogStates.objectPermissions}
-                close={() => setDialogStates(prev => ({ ...prev, objectPermissions: false }))}
-            />
-            <GroupUsersDialog
-                selectedGroupUsers={additionalHandlers.selectedGroupUsers}
-                selectedGroup={selectedItems.group}
-                selectedVault={selectedItems.vault.guid}
-                open={dialogStates.groupUsers}
-                close={() => setDialogStates(prev => ({ ...prev, groupUsers: false }))}
-            />
-            <AddPermissionDialog
-                fetchObjectPermisions={apiHandlers.fetchObjectPermisions}
-                selectedObject={selectedItems.object}
-                selectedVault={selectedItems.vault.guid}
-                listwithoughtpermissions={listwithoughtpermissions}
-                open={dialogStates.addPermission}
-                close={() => setDialogStates(prev => ({ ...prev, addPermission: false }))}
-            />
-            <MiniLoader
-                loading={uiState.miniLoader}
-                loaderMsg={uiState.loaderMsg}
-                setLoading={(loading) => setUiState(prev => ({ ...prev, miniLoader: loading }))}
-            />
+            <VaultFormDialog open={addNewVault} onClose={() => setAddNewVault(false)} />
 
             <div className="dashboard" style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
                 <Sidebar
@@ -812,286 +789,19 @@ function AdminDashboard() {
                     onLogout={logoutUser}
                 />
 
+
+
                 <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
-                    <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
-                        <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={navigationHandlers.toggleSidebar}>
-                            <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
-                        </div>
-                    </Tooltip>
-                    <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#fff' }}>
-                        <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '30%', backgroundColor: '#fff', minWidth: '25%', minHeight: '100vh' }}>
-                            <HeaderBox className="shadow-lg" sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: '56px', maxHeight: '56px' }}>
-                                <Box
-                                    onClick={navigationHandlers.toggleSidebar}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 35,
-                                        height: 35,
-                                        cursor: 'pointer',
-                                        borderRadius: 1,
-                                        transition: 'all 0.3s ease',
-                                        '&:hover': {
-                                            backgroundColor: '#f0f4fa',
-                                            transform: 'scale(1.05)',
-                                        },
-                                    }}
-                                >
-                                    <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
-                                </Box>
-                                <Box>
-                                    <span style={{ fontSize: '14px' }} className='text-dark'>ADMIN MANAGER</span>
-                                </Box>
-                                <Tooltip title={`${user.first_name} ${user.last_name}`}>
-                                    <Avatar
-                                        alt={userDisplayName}
-                                        {...stringAvatar(userDisplayName)}
-                                        sx={{
-                                            width: 36,
-                                            height: 36,
-                                            backgroundColor: '#2757aa',
-                                            fontSize: '13px',
-                                        }}
-                                    />
-                                </Tooltip>
-                            </HeaderBox>
-
-                            <div style={{
-                                backgroundColor: '#eef2f7',
-                                fontSize: '13px',
-                                borderRadius: '4px',
-                                textAlign: 'center',
-                                padding: '10px',
-                            }}>
-                                <span>Organization: <span style={{ color: '#2757aa' }}>{user.organization}</span></span>
-                            </div>
-
-                            {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
-                                <span style={{ fontSize: '14px' }} className='text-dark'>Login Accounts ({organizationusers.length})</span>
-                            </HeaderBox> */}
-
-
-
-
-
-                            {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
-                                <span style={{ fontSize: '14px' }} className='text-dark'>Repository/repositories ({user.vaultcount})</span>
-                            </HeaderBox> */}
-
-                            <div style={{ fontSize: '13px', overflowY: 'auto' }}>
-
-                                <OrganizationVaultList
-                                    VaultUsergroups={apiHandlers.VaultUsergroups}
-                                    fetchVaultObjects={apiHandlers.fetchVaultObjects}
-                                    fetchOrgUsers={apiHandlers.fetchOrgUsers}
-                                    fetchUsersNotLinkedToVault={apiHandlers.fetchUsersNotLinkedToVault}
-                                    setSelectedVault={(vault) => setSelectedItems(prev => ({ ...prev, vault }))}
-                                    selectedVault={selectedItems.vault}
-                                    viewvaultusers={apiHandlers.viewvaultusers}
-                                    getObjectStructureById={additionalHandlers.getObjectStructureById}
-                                    viewnewobject={viewFunctions.viewnewobject}
-                                    showSublist={uiState.showSublist}
-                                    showSublist1={uiState.showSublist1}
-                                    toggleSublist={viewHandlers.toggleSublist}
-                                    toggleSublist1={viewHandlers.toggleSublist1}
-                                    viewvaultobjects={viewFunctions.viewvaultobjects}
-                                    viewLoginAccounts={viewStates.loginAccounts}
-                                    viewLoginActivity={viewStates.loginActivity}
-                                    viewloginactivity={viewFunctions.viewloginactivity}
-                                    viewvaultgroups={viewFunctions.viewvaultgroups}
-                                    vaultObjects={vaultObjects}
-                                    viewloginaccounts={viewFunctions.viewloginaccounts}
-                                    vaults={vaults}
-                                    setVaults={setVaults}
-                                    alertOpen={uiState.alertOpen}
-                                    setOpenAlert={(open) => setUiState(prev => ({ ...prev, alertOpen: open }))}
-                                    alertSeverity={uiState.alertSeverity}
-                                    setAlertSeverity={(severity) => setUiState(prev => ({ ...prev, alertSeverity: severity }))}
-                                    alertMsg={uiState.alertMsg}
-                                    setAlertMsg={(msg) => setUiState(prev => ({ ...prev, alertMsg: msg }))}
-                                    user={user}
-                                />
-                            </div>
-
-
-
-                            <Box sx={{ minHeight: 352, minWidth: 250 }}>
-                                <SimpleTreeView>
-                                    <TreeItem startIcon={<People />}
-                                        onClick={() => {
-                                            apiHandlers.fetchOrgUsers();
-                                            viewFunctions.viewloginaccounts();
-                                        }} itemId="grid" label={<div
-                                            onClick={() => {
-                                                apiHandlers.fetchOrgUsers();
-                                                viewFunctions.viewloginaccounts();
-                                            }}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            <People style={{ fontSize: '16px', color: '#1976d2' }} />
-                                            <Typography variant="body2">Login Accounts ({organizationusers.length})</Typography>
-                                        </div>}>
-
-                                    </TreeItem>
-                                    <TreeItem startIcon={<Timeline />}
-                                        onClick={() => {
-                                            apiHandlers.fetchOrgUsers();
-                                            viewFunctions.viewloginactivity();
-                                        }} itemId="pickers" label={<div
-                                            onClick={() => {
-                                                apiHandlers.fetchOrgUsers();
-                                                viewFunctions.viewloginactivity();
-                                            }}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            <Timeline style={{ fontSize: '16px', color: '#1976d2' }} />
-                                            <Typography variant="body2">Login Activity</Typography>
-                                        </div>}>
-
-                                    </TreeItem>
-
-                                </SimpleTreeView>
-                            </Box>
-
-                        </div>
-
-                        {!isMobile && (
-                            <div id="divider" ref={dividerRef} onMouseDown={handleMouseDown} style={{ width: '3px', cursor: 'ew-resize', backgroundColor: '#ddd' }}></div>
-                        )}
-
-                        <div id="col2" ref={col2Ref} style={{ width: isMobile ? '100%' : '70%', backgroundColor: '#fff', minWidth: '50%', minHeight: '100vh' }}>
-                            {viewStates.createObject && (
-                                <div id="newobject" style={{ fontSize: '13px', marginBottom: '20px' }}>
-                                    <Box sx={{ p: 3, boxShadow: 2, fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
-                                        <i className="fas fa-plus mx-2" style={{ fontSize: '13px' }}></i> Create New Object
-                                    </Box>
-                                    <Typography variant="body2" sx={{ my: 3, fontSize: '0.8em' }}>
-                                        Please create your new object type below with the respective properties
-                                    </Typography>
-                                    <Box className="card-body" sx={{ my: 4, overflowY: 'auto' }}>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12}>
-                                                <FormControl variant="standard" fullWidth>
-                                                    <Input
-                                                        id="objectName"
-                                                        placeholder="Object name"
-                                                        className="mx-2"
-                                                        value={formData.objectName}
-                                                        onChange={(e) => formHandlers.setObjectName(e.target.value)}
-                                                        type="text"
-                                                        required
-                                                        onInput={(e) => capitalize(e.target)}
-                                                    />
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <ButtonComponent size="sm" onClick={formHandlers.addProperty} sx={STYLES.buttonStyle}>
-                                                    <i className="fas fa-tag mx-1"></i> Add Property
-                                                </ButtonComponent>
-                                                <ButtonComponent onClick={additionalHandlers.handleSubmit} sx={STYLES.buttonStyle}>
-                                                    <i className="fas fa-plus-circle mx-1"></i> Create Object
-                                                </ButtonComponent>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    <Box className="container-fluid" sx={{ overflowY: 'auto' }}>
-                                        {renderedProperties}
-                                    </Box>
-                                </div>
-                            )}
-
-                            {viewStates.objects && (
-                                <ObjectsTable vaultObjects={vaultObjects} selectedVault={selectedItems.vault} />
-                            )}
-
-                            {viewStates.objectStructure && (
-                                <div id='updateobjstructure' style={{ fontSize: '13px', marginBottom: '20px' }}>
-                                    <h6 className='shadow-lg p-2' style={{ fontSize: '1.2em' }}>
-                                        <i className="fas fa-edit mx-2" style={{ fontSize: '13px' }}></i> Update Object
-                                    </h6>
-                                    <ObjComponent
-                                        selectedObjectStructure={selectedItems.objectStructure}
-                                        setSelectedObjectStructure={(structure) => setSelectedItems(prev => ({ ...prev, objectStructure: structure }))}
-                                        authTokens={authTokens}
-                                    />
-                                </div>
-                            )}
-
-                            {viewStates.vaultGroups && (
-                                <VaultGroupsTable
-                                    userGroups={userGroups}
-                                    selectedVault={selectedItems.vault}
-                                    onSelectedGroupUsers={additionalHandlers.selectedGroupUsers}
-                                />
-                            )}
-
-                            {viewStates.loginAccounts && (
-                                <div id='usermanagement' style={{ fontSize: '13px', marginBottom: '20px' }}>
-                                    <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
-                                        LOGIN ACCOUNTS
-                                    </p>
-                                    <OrganizationUsersTable users={organizationusers} />
-                                </div>
-                            )}
-
-                            {viewStates.loginActivity && (
-                                <div id='loginactivity' style={{ fontSize: '13px', marginBottom: '20px' }}>
-                                    <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
-                                        ACTIVITY LOGS
-                                    </p>
-                                    <LoginActivityTable user={user} />
-                                </div>
-                            )}
-
-                            {viewStates.vaultUsers && (
-                                <div className='p-2' id='vaultusermanagement' style={{ fontSize: '13px' }}>
-                                    <p className='shadow-lg p-2'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12px', color: '#2757aa' }}></i>
-                                        <span style={{ color: '#2757aa' }}>  {toUpperCase(selectedItems.vault.name)}</span>  ACCOUNTS
-
-                                    </p>
-                                    <VaultUsersTable
-                                        alertOpen={uiState.alertOpen}
-                                        setOpenAlert={(open) => setUiState(prev => ({ ...prev, alertOpen: open }))}
-                                        alertSeverity={uiState.alertSeverity}
-                                        setAlertSeverity={(severity) => setUiState(prev => ({ ...prev, alertSeverity: severity }))}
-                                        alertMsg={uiState.alertMsg}
-                                        setAlertMsg={(msg) => setUiState(prev => ({ ...prev, alertMsg: msg }))}
-                                        setLoading={(loading) => setUiState(prev => ({ ...prev, loading }))}
-                                        loading={uiState.loading}
-                                        syncUser={apiHandlers.syncUser}
-                                        fetchUsersNotLinkedToVault={apiHandlers.fetchUsersNotLinkedToVault}
-                                        usersnotlinkedtovault={usersnotlinkedtovault}
-                                        setUsersNotLinkedToVault={setUsersNotLinkedToVault}
-                                        vaultUsers={vaultUsers}
-                                        vault={selectedItems.vault}
-                                        viewvaultusers={apiHandlers.viewvaultusers}
-                                        authTokens={authTokens}
-                                        user={user}
-                                        availableUsers={filteredAvailableUsers}
-
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                 
+                        <RegisterVaultUsersForm
+                            onSuccess={handleSuccess}
+                            onCancel={handleCancel}
+                        />
+                
                 </main>
             </div>
         </>
     );
 }
 
-export default AdminDashboard;
+export default SuperAdminDashboard;

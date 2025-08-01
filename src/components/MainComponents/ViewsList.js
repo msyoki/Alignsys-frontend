@@ -15,6 +15,7 @@ import RightClickMenu from '../RightMenu';
 import TimedAlert from '../TimedAlert';
 import MultifileFiles from '../MultifileFiles';
 import ColumnSimpleTree from '../ColumnSimpleTree';
+import Typography from '@mui/material/Typography';
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -146,16 +147,16 @@ const NavigationBreadcrumb = memo(({
                 className="mx-2"
             />
         </div> */}
-      <div 
-  className="d-flex align-items-center flex-wrap" 
-  style={{ 
-    gap: '6px', 
-    flex: 1,
-    minHeight: '24px' // Reduced from 32px to 24px
-  }}
->
-  {/* Back Button */}
-  {/* <span 
+        <div
+            className="d-flex align-items-center flex-wrap"
+            style={{
+                gap: '6px',
+                flex: 1,
+                minHeight: '24px' // Reduced from 32px to 24px
+            }}
+        >
+            {/* Back Button */}
+            {/* <span 
     onClick={onBackToViews}
     style={{
       display: 'flex',
@@ -176,14 +177,14 @@ const NavigationBreadcrumb = memo(({
     />
     Back
   </span> */}
-     <FontAwesomeIcon
+            <FontAwesomeIcon
                 icon={faTable}
                 style={{ color: '#1C4690', fontSize: '18px' }}
                 className="mx-2"
             />
 
-  {/* First Separator */}
-  {/* {viewNavigation.length > 0 && (
+            {/* First Separator */}
+            {/* {viewNavigation.length > 0 && (
     <i 
       className="fas fa-chevron-right" 
       style={{ 
@@ -194,53 +195,53 @@ const NavigationBreadcrumb = memo(({
     />
   )} */}
 
-  {/* Navigation Items */}
-  {viewNavigation.map((item, index) => (
-    <React.Fragment key={index}>
-      <Tooltip title={item.title} placement="top" arrow>
-        <span
-          onClick={() => {
-            onNavClick(item);
-            onResetPreview();
-          }}
-          style={{
-            cursor: 'pointer',
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            // maxWidth: '150px',
-            fontSize: '12.5px', // Reduced from 13px
-            color: '#333',
-            padding: '2px 4px', // Reduced from 4px 6px
-            borderRadius: '3px', // Reduced from 4px
-            transition: 'background-color 0.2s ease',
-            display: 'inline-block',
-            lineHeight: '1.1' // Reduced from 1.2
-          }}
-        //   onMouseEnter={(e) => {
-        //     e.target.style.backgroundColor = '#f0f0f0';
-        //   }}
-        //   onMouseLeave={(e) => {
-        //     e.target.style.backgroundColor = 'transparent';
-        //   }}
-        >
-          {trimTitle(item.title)}
-        </span>
-      </Tooltip>
-      
-      {/* Separator after each item except the last */}
-      {index < viewNavigation.length - 1 && (
-        <i 
-          className="fas fa-chevron-right" 
-          style={{ 
-            color: '#2a68af', 
-            fontSize: '10px', // Reduced from 12px
-            opacity: 0.7 
-          }} 
-        />
-      )}
-    </React.Fragment>
-  ))}
-</div>
+            {/* Navigation Items */}
+            {viewNavigation.map((item, index) => (
+                <React.Fragment key={index}>
+                    <Tooltip title={item.title} placement="top" arrow>
+                        <span
+                            onClick={() => {
+                                onNavClick(item);
+                                onResetPreview();
+                            }}
+                            style={{
+                                cursor: 'pointer',
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                // maxWidth: '150px',
+                                fontSize: '12.5px', // Reduced from 13px
+                                color: '#333',
+                                padding: '2px 4px', // Reduced from 4px 6px
+                                borderRadius: '3px', // Reduced from 4px
+                                transition: 'background-color 0.2s ease',
+                                display: 'inline-block',
+                                lineHeight: '1.1' // Reduced from 1.2
+                            }}
+                        //   onMouseEnter={(e) => {
+                        //     e.target.style.backgroundColor = '#f0f0f0';
+                        //   }}
+                        //   onMouseLeave={(e) => {
+                        //     e.target.style.backgroundColor = 'transparent';
+                        //   }}
+                        >
+                            {trimTitle(item.title)}
+                        </span>
+                    </Tooltip>
+
+                    {/* Separator after each item except the last */}
+                    {index < viewNavigation.length - 1 && (
+                        <i
+                            className="fas fa-chevron-right"
+                            style={{
+                                color: '#2a68af',
+                                fontSize: '10px', // Reduced from 12px
+                                opacity: 0.7
+                            }}
+                        />
+                    )}
+                </React.Fragment>
+            ))}
+        </div>
     </h6>
 ));
 
@@ -512,10 +513,11 @@ const ViewsList = (props) => {
             props.setSelectedViewObjects(response.data);
             // setSelectedViewName(item.viewName);
         } catch {
+            props.setSelectedViewObjects([]);
             setLoading(false);
-            props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("info");
-            props.setAlertPopMessage("Sorry, we couldn't find any objects!");
+            // props.setAlertPopOpen(true);
+            // props.setAlertPopSeverity("info");
+            // props.setAlertPopMessage("Sorry, we couldn't find any objects!");
         }
     }, [props.selectedVault, props.mfilesId, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
 
@@ -537,10 +539,11 @@ const ViewsList = (props) => {
             props.setSelectedViewObjects(response.data);
             // setSelectedViewName(item.title);
         } catch {
+            props.setSelectedViewObjects([]);
             setLoading(false);
-            props.setAlertPopOpen(true);
-            props.setAlertPopSeverity("info");
-            props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
+            // props.setAlertPopOpen(true);
+            // props.setAlertPopSeverity("info");
+            // props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
         }
     }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
 
@@ -584,10 +587,11 @@ const ViewsList = (props) => {
                 props.setSelectedViewObjects(response.data);
                 // setSelectedViewName(item.title);
             } catch {
+                props.setSelectedViewObjects([]);
                 setLoading(false);
-                props.setAlertPopOpen(true);
-                props.setAlertPopSeverity("info");
-                props.setAlertPopMessage("Sorry, we couldn't find any objects!");
+                // props.setAlertPopOpen(true);
+                // props.setAlertPopSeverity("info");
+                // props.setAlertPopMessage("Sorry, we couldn't find any objects!");
             }
         }
     }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
@@ -694,7 +698,7 @@ const ViewsList = (props) => {
                 mfilesId={props.mfilesId}
             />
 
-            {props.selectedViewObjects.length > 0 ? (
+            {props.selectedViewObjects.length > 0 || props.viewNavigation.length > 0 ? (
                 <>
                     <NavigationBreadcrumb
                         viewNavigation={props.viewNavigation}
@@ -705,10 +709,11 @@ const ViewsList = (props) => {
 
 
                     <div >
-                        <div className=' text-dark' style={MAIN_CONTENT_STYLES}>
-                            {props.selectedViewObjects.map((item, index) => (
-                                <React.Fragment key={index}>
-                                    {/* {item.type === "MFFolderContentItemTypeObjectVersion" && (
+                        {props.selectedViewObjects.length > 0 ? <>
+                            <div className=' text-dark' style={MAIN_CONTENT_STYLES}>
+                                {props.selectedViewObjects.map((item, index) => (
+                                    <React.Fragment key={index}>
+                                        {/* {item.type === "MFFolderContentItemTypeObjectVersion" && (
                                     <ObjectTreeItem
                                         item={item}
                                         index={index}
@@ -725,58 +730,88 @@ const ViewsList = (props) => {
                                         downloadFile={props.downloadFile}
                                     />
                                 )} */}
-                                    {item.type === "MFFolderContentItemTypePropertyFolder" && (
-                                        <PropertyFolderItem
-                                            item={item}
-                                            index={index}
-                                            selectedItemId={props.selectedItemId}
-                                            onFetchViewData={fetchViewData}
-                                        />
-                                    )}
-                                    {item.type === "MFFolderContentItemTypeViewFolder" && (
-                                        <ViewFolderItem
-                                            item={item}
-                                            index={index}
-                                            selectedItemId={props.selectedItemId}
-                                            onFetchMainViewObjects2={fetchMainViewObjects2}
-                                        />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </div>
+                                        {item.type === "MFFolderContentItemTypePropertyFolder" && (
+                                            <PropertyFolderItem
+                                                item={item}
+                                                index={index}
+                                                selectedItemId={props.selectedItemId}
+                                                onFetchViewData={fetchViewData}
+                                            />
+                                        )}
+                                        {item.type === "MFFolderContentItemTypeViewFolder" && (
+                                            <ViewFolderItem
+                                                item={item}
+                                                index={index}
+                                                selectedItemId={props.selectedItemId}
+                                                onFetchMainViewObjects2={fetchMainViewObjects2}
+                                            />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
 
-                        {(() => {
-                            const versions = props.selectedViewObjects.filter(
-                                item => item.type === "MFFolderContentItemTypeObjectVersion"
-                            );
-                            return versions.length > 0 ? (
-                                <ColumnSimpleTree
-                                    data={versions}
-                                    selectedVault={props.selectedVault}
-                                    mfilesId={props.mfilesId}
-                                    selectedItemId={props.selectedItemId}
-                                    setSelectedItemId={props.setSelectedItemId}
-                                    onItemClick={props.handleClick}
-                                    onItemDoubleClick={props.handleDoubleClick}
-                                    onItemRightClick={props.handleRightClick}
-                                    onRowClick={props.handleRowClick}
-                                    downloadFile={props.downloadFile}
-                                    headerTitle="Search Results"
-                                    nameColumnLabel="Name"
-                                    dateColumnLabel="Date Modified"
+                            {(() => {
+                                const versions = props.selectedViewObjects.filter(
+                                    item => item.type === "MFFolderContentItemTypeObjectVersion"
+                                );
+                                return versions.length > 0 ? (
+                                    <ColumnSimpleTree
+                                        data={versions}
+                                        selectedVault={props.selectedVault}
+                                        mfilesId={props.mfilesId}
+                                        selectedItemId={props.selectedItemId}
+                                        setSelectedItemId={props.setSelectedItemId}
+                                        onItemClick={props.handleClick}
+                                        onItemDoubleClick={props.handleDoubleClick}
+                                        onItemRightClick={props.handleRightClick}
+                                        onRowClick={props.handleRowClick}
+                                        downloadFile={props.downloadFile}
+                                        headerTitle="Search Results"
+                                        nameColumnLabel="Name"
+                                        dateColumnLabel="Date Modified"
+                                    />
+                                ) : null;
+                            })()}
+
+                            {rightClickActions.length > 0 && (
+                                <RightClickMenu
+                                    anchorEl={menuAnchor}
+                                    open={Boolean(menuAnchor)}
+                                    onClose={handleMenuClose}
+                                    item={menuItem}
+                                    actions={rightClickActions}
                                 />
-                            ) : null;
-                        })()}
+                            )}
+                        </> : <>
 
-                        {rightClickActions.length > 0 && (
-                            <RightClickMenu
-                                anchorEl={menuAnchor}
-                                open={Boolean(menuAnchor)}
-                                onClose={handleMenuClose}
-                                item={menuItem}
-                                actions={rightClickActions}
-                            />
-                        )}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: 'inherit', // or whatever height you want the parent to have
+                                width: '100%'
+                            }}>
+                                <Box sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    p: 3,
+                                    backgroundColor: '#fff'
+                                }}>
+                                    <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                                    <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                                        No Results Found
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                                        No items found in this view
+                                    </Typography>
+
+
+                                </Box>
+                            </div>
+                        </>}
                     </div>
 
                 </>

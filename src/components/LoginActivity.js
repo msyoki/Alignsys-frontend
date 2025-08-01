@@ -2,11 +2,25 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    TablePagination, Button, TextField
+    TablePagination, Button, TextField, Typography, Avatar, Chip, Box
 } from '@mui/material';
 import * as constants from './Auth/configs';
 
-function LoginActivityTable() {
+
+const cellStyle = {
+    fontSize: '13px',
+    py: 0.5,
+    borderBottom: '1px solid #f5f5f5'
+};
+
+const typographyStyle = {
+    fontSize: '13px',
+    color: '#495057',
+    fontWeight: 400,
+    lineHeight: 1.2
+};
+
+function LoginActivityTable(props) {
     const [logs, setLogs] = useState([]);
     const [filteredLogs, setFilteredLogs] = useState([]);
     const [page, setPage] = useState(0);
@@ -16,6 +30,8 @@ function LoginActivityTable() {
     const [endDate, setEndDate] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
+
+
     const fetchLogs = async () => {
         const storedTokens = JSON.parse(sessionStorage.getItem('authTokens'));
         const accessToken = storedTokens?.access;
@@ -23,6 +39,7 @@ function LoginActivityTable() {
         const response = await axios.post(`${constants.auth_api}/api/login-activity/`, {
             start_date: startDate,
             end_date: endDate,
+            organization_id: props.user?.organizationid || null
         }, {
             headers: { Authorization: `Bearer ${accessToken}` }
         });
@@ -64,9 +81,9 @@ function LoginActivityTable() {
         if (!email || typeof email !== 'string') return '';
         return email.split('@')[0];
     }
-    
+
     return (
-        <Paper className="p-2">
+        <div className="p-1">
             <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
                 <div className="d-flex gap-2">
                     <input
@@ -94,73 +111,152 @@ function LoginActivityTable() {
                     style={{ minWidth: '200px' }}
                     className="mx-2"
                 />
+              
 
                 <Button
                     onClick={fetchLogs}
-                    className="rounded-pill"
-                    style={{
-                        fontSize: '12.5px',
-                        color: '#fff',
-                        backgroundColor: '#2757aa',
-                        padding: '10px 16px',
-                        textTransform: 'none',
-                    }}
                     variant="contained"
+                    color="primary"
+                    className="mx-2"
+                    sx={{
+                        fontSize: '11px',
+                        textTransform: 'none',
+                        py: 1,
+                        px:2
+
+
+                    }}
+                 
                 >
-                    Filter
+                    <i class="fa-solid fa-filter"></i><span className='mx-2'>Filter</span>
                 </Button>
             </div>
 
-
-            <TableContainer style={{ maxHeight: 325, overflowX: 'auto' }}>
-                <Table stickyHeader className='table table-sm table-responsive'>
-                    <TableHead>
+            <TableContainer className="shadow-lg">
+                <Table stickyHeader className="table table-sm table-responsive p-2">
+                    <TableHead className="bg-white">
                         <TableRow>
-                            <TableCell align="center">User</TableCell>
-                            <TableCell align="center">Timestamp</TableCell>
-                            <TableCell align="center">IP Address</TableCell>
-                            {/* <TableCell align="center">Auth Source</TableCell> */}
-                            <TableCell align="center">Device Type</TableCell>
-                            <TableCell align="center">Browser</TableCell>
-                            {/* <TableCell align="center">OS</TableCell> */}
-                            {/* <TableCell align="center">Platform</TableCell> */}
-                            {/* <TableCell align="center">User Agent</TableCell> */}
+                            {['User', 'Timestamp', 'IP Address', 'Device Type', 'Browser'].map((label, idx) => (
+                                <TableCell
+                                    key={idx}
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: '#ffffff !important',
+                                        borderBottom: '2px solid #e0e0e0',
+                                        position: 'sticky',
+                                        top: 0,
+                                        zIndex: 100,
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        py: 1
+                                    }}
+                                >
+                                    {label}
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
-
-                    <TableBody>
-                        {paginatedLogs.map((log, index) => (
-                            <TableRow key={index}>
-                                <TableCell align="center">{log.user}</TableCell>
-                                <TableCell align="center">{log.timestamp}</TableCell>
-                                <TableCell align="center">{log.ip_address}</TableCell>
-                                {/* <TableCell align="center">{log.auth_source}</TableCell> */}
-                                <TableCell align="center">{log.device_type || '-'}</TableCell>
-                                <TableCell align="center">{log.browser || '-'}</TableCell>
-                                {/* <TableCell align="center">{log.os || '-'}</TableCell> */}
-                                {/* <TableCell align="center">{log.platform || '-'}</TableCell> */}
-                                {/* <TableCell align="center">
-                                    <span style={{ wordBreak: 'break-word', maxWidth: 200, display: 'inline-block' }}>
-                                        {log.user_agent || '-'}
-                                    </span>
-                                </TableCell> */}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-
                 </Table>
+
+                {/* Scrollable Table Body */}
+                <Box
+                    sx={{
+                        maxHeight: '55vh', // 👈 you can adjust height here
+                        overflowY: 'auto',
+                        borderTop: '1px solid #f0f0f0'
+                    }}
+                >
+                    <Table>
+                        <TableBody>
+                            {paginatedLogs.map((log, index) => (
+                                <TableRow
+                                    key={index}
+                                    sx={{
+                                        '&:hover': { backgroundColor: '#f8f9fa' },
+                                        '&:nth-of-type(even)': { backgroundColor: '#fdfdfd' }
+                                    }}
+                                >
+                                    <TableCell align="center" sx={cellStyle}>
+                                        <Typography sx={typographyStyle}>{log.user || 'N/A'}</Typography>
+                                    </TableCell>
+
+                                    <TableCell align="center" sx={cellStyle}>
+                                        <Typography sx={typographyStyle}>{log.timestamp || 'N/A'}</Typography>
+                                    </TableCell>
+
+                                    <TableCell align="center" sx={cellStyle}>
+                                        <Typography sx={typographyStyle}>{log.ip_address || 'N/A'}</Typography>
+                                    </TableCell>
+
+                                    <TableCell align="center" sx={cellStyle}>
+                                        {log.device_type ? (
+                                            <Chip
+                                                label={log.device_type}
+                                                size="small"
+                                                sx={{
+                                                    fontSize: '10px',
+                                                    height: '20px',
+                                                    backgroundColor: '#e3f2fd',
+                                                    color: '#2757aa',
+                                                    fontWeight: 500
+                                                }}
+                                            />
+                                        ) : (
+                                            <Typography sx={{ fontSize: '11px', color: '#9e9e9e' }}>N/A</Typography>
+                                        )}
+                                    </TableCell>
+
+                                    <TableCell align="center" sx={cellStyle}>
+                                        <Typography sx={typographyStyle}>{log.browser || 'N/A'}</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+
+                            {paginatedLogs.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center" sx={{ py: 2 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                color: '#9e9e9e'
+                                            }}
+                                        >
+                                            <Avatar sx={{ width: 48, height: 48, backgroundColor: '#f0f0f0' }}>
+                                                <Typography sx={{ fontSize: '20px', color: '#ccc' }}>?</Typography>
+                                            </Avatar>
+                                            <Typography sx={{ fontSize: '12px' }}>No logs found</Typography>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </Box>
+
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={filteredLogs.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    sx={{
+                        borderTop: '1px solid #f0f0f0',
+                        backgroundColor: '#fafafa',
+                        '& .MuiTablePagination-toolbar': { fontSize: '11px' },
+                        '& .MuiTablePagination-selectLabel': { fontSize: '11px' },
+                        '& .MuiTablePagination-displayedRows': { fontSize: '11px' },
+                        '& .MuiTablePagination-select': { fontSize: '11px' }
+                    }}
+                />
             </TableContainer>
 
-            <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredLogs.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-        </Paper>
+        </div>
     );
 }
 

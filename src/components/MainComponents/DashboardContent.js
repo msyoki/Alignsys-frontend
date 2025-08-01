@@ -485,12 +485,12 @@ const DocumentList = (props) => {
   const fetchObjectProperties = async (item) => {
     const classId = item.classId !== undefined ? item.classId : item.classID;
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${classId}/${props.mfilesId}`;
-
+    console.log(url)
     try {
       const response = await axios.get(url);
 
       setPreviewObjectProps(response.data);
-      // console.log('Fetched object properties:', response.data);
+      console.log('Fetched object properties:', response.data);
       return { success: true };
     } catch {
       // console.error('Error fetching object properties:', error);
@@ -1226,7 +1226,7 @@ const DocumentList = (props) => {
             backgroundColor: '#ecf4fc',
             p: 1.5
           }}>
-            <Box sx={{ display: 'flex', width: '100%', maxWidth: '900px' }}>
+            <Box sx={{ display: 'flex', width: '100%' }}>
 
               {/* Search Input - Now on the LEFT */}
               <Box sx={{ flex: 1 }}>
@@ -1264,18 +1264,7 @@ const DocumentList = (props) => {
 
               {/* Right Actions - Now on the RIGHT */}
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {/* <Tooltip title="Go back home">
-        <i
-          onClick={()=>{setSelectedViewObjects([]);setViewNavigation([]); setSearched(false);}}
-          className="fas fa-home"
-          style={{
-            fontSize: '28px',
-            cursor: 'pointer',
-            color: '#1C4690',
-            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
-          }}
-        />
-      </Tooltip> */}
+         
                 <AddButtonWithMenu vaultObjectsList={props.vaultObjectsList} fetchItemData={props.fetchItemData} />
               </Box>
 
@@ -1553,8 +1542,9 @@ const DocumentList = (props) => {
                             justifyContent: 'center',
                             p: 3,
                             backgroundColor: '#fff'
-                          }}>
+                          }}> 
                             <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          
                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                               No Results Found
                             </Typography>
@@ -1577,7 +1567,7 @@ const DocumentList = (props) => {
           <Box
             onMouseDown={handleMouseDown}
             sx={{
-              width: '5px',
+              width: '3px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

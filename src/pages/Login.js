@@ -19,15 +19,18 @@ import '../styles/Custombuttons.css';
 
 import image from '../images/ZFBLU.png';
 import logo2 from '../images/ZFWHITE.png';
-import * as constants from '../components/Auth/configs'
+import * as constants from '../components/Auth/configs';
+import { CircularProgress } from '@mui/material';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const navigate = useNavigate();
 
   const {
     loginUser,
+    miniLoader,
     openAlert,
     setOpenAlert,
     setAlertMsg,
@@ -57,7 +60,7 @@ const Login = () => {
         setMessage={setAlertMsg}
       />
 
- <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
+      <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
         {/* Left Side - Form */}
         <div className="left-side d-flex align-items-center justify-content-center w-100 w-md-50 bg-white p-4">
           <form onSubmit={loginUser} className="text-center text-dark w-100" style={{ maxWidth: '360px' }}>
@@ -66,13 +69,21 @@ const Login = () => {
               <img src={image} alt="Logo" style={{ width: '300px' }} />
 
             </Box>
-             <h5 className="mb-3 " style={{fontWeight:'800px'}}>LOGIN</h5>
-            <Box className="d-block d-md-none text-center mb-3">
+            <div className="d-flex justify-content-center align-items-center mb-3">
+              <h5 className="mb-0">
+                LOGIN
+              </h5>
+              <span className="d-block d-md-none ms-2" style={{ fontSize: '14px' }}>
+                to <strong>EDMS</strong> Software Solution
+              </span>
+            </div>
 
-              <p className="mt-2 text-dark" style={{ fontSize: '14px' }}>
+            {/* <Box className="d-block d-md-none text-center mb-3">
+
+              <p className="mt-2" style={{ fontSize: '14px', color:'#2757aa' }}>
                 <strong>EDMS</strong> Software Solution
               </p>
-            </Box>
+            </Box> */}
             <FormControl variant="standard" fullWidth className="mb-3">
               <InputLabel htmlFor="email">
                 {constants.auth_type_email === "true" ? "Email" : "Username"}*
@@ -142,29 +153,51 @@ const Login = () => {
               type="submit"
               variant="contained"
               className="mb-3 rounded-pill"
+              disabled={miniLoader}
+              startIcon={miniLoader ? <CircularProgress size={14} color="inherit" /> : null}
+
               style={{
                 fontSize: '13px',
-                color: '#fff',
-                backgroundColor: '#2757aa',
-                width: '40%',
-                padding: '10px',
                 textTransform: 'none',
+                px: 2,
+                py: 1,
+                minWidth: '40%',
+                backgroundColor: miniLoader ? '#ccc' : '#2757aa',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: miniLoader ? '#ccc' : '#1e4794',
+                },
               }}
             >
-              LOGIN
+
+              {miniLoader ? 'Logging in ...' : 'LOGIN'}
             </Button>
 
             <p className="mt-3" style={{ fontSize: '13px' }}>
               Go to{' '}
+
+              {process.env.REACT_APP_ONSITE === "true" ? null : (
+                <>
+                  <span className="mx-1">
+                    <Link to="/register" style={{ color: '#2757aa', textDecoration: 'none' }}>
+                      Register an Organization
+                    </Link>
+                  </span>
+                  <span className="mx-1"> | </span>
+                </>
+              )}
+
+
               <a
                 href="https://dss.alignsys.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#1C4690', textDecoration: 'none' }}
+                style={{ color: '#2757aa', textDecoration: 'none' }}
               >
-                DSS - Digital Signing Service
+                DSS – Digital Signing Service
               </a>
             </p>
+
           </form>
         </div>
 
