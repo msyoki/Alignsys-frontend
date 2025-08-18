@@ -93,7 +93,7 @@ const LookupMultiSelect = ({
     };
 
     fetchSearchResults();
-  }, [searchTerm]);
+  }, [mfilesid, options, propId, searchTerm, selectedVault.guid]);
 
   const handleChange = (selected) => {
     setSelectedOptions(selected || []);

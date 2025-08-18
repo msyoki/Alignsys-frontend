@@ -131,8 +131,8 @@ const loginUser = async (e) => {
     const isEmailAuth = constants.auth_type_email === 'true';
 
     const payload = isEmailAuth
-      ? { email: emailOrUsername, password }
-      : { username: emailOrUsername, password };
+      ? { username: emailOrUsername, password , auth_type : "email"}
+      : { username: emailOrUsername, password, auth_type: "username" };
 
     const response = await axios.post(`${constants.auth_api}/api/token/`, payload);
     const { data, status } = response;

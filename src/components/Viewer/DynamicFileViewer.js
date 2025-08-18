@@ -1,37 +1,18 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import mammoth from 'mammoth';
 import styled from 'styled-components';
-import * as XLSX from 'xlsx';
-import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
-import SignButton from '../SignDocument';
 import PDFViewerPreview from './Pdf';
 import axios from 'axios';
 import { Table, Typography, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Tooltip, CircularProgress } from '@mui/material';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import * as constants from '../Auth/configs';
 import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-// Styled components (unchanged for brevity)
-const FileViewerContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: #555;
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
-  padding: 16px 24px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-`;
-
+// Styled components
 const ControlsContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -109,12 +90,11 @@ const StyledImage = styled.img`
   object-fit: contain;
 `;
 
-// Optimized ImageViewer with better memoization
+// ImageViewer component
 const ImageViewer = React.memo(({ src }) => {
   const [zoom, setZoom] = useState(0.8);
   const [rotation, setRotation] = useState(0);
 
-  // Memoized handlers to prevent re-creation on every render
   const handlers = useMemo(() => ({
     zoomIn: () => setZoom(prev => Math.min(prev + 0.1, 5)),
     zoomOut: () => setZoom(prev => Math.max(prev - 0.1, 0.1)),
@@ -132,7 +112,6 @@ const ImageViewer = React.memo(({ src }) => {
     }
   }), [src]);
 
-  // Memoized zoom display
   const zoomDisplay = useMemo(() => Math.round(zoom * 100), [zoom]);
 
   return (
@@ -175,18 +154,16 @@ const ImageViewer = React.memo(({ src }) => {
   );
 }, (prevProps, nextProps) => prevProps.src === nextProps.src);
 
-// Optimized TextViewer
+// TextViewer component
 const TextViewer = React.memo(({ content }) => {
   const [fontSize, setFontSize] = useState(14);
   const [lineHeight, setLineHeight] = useState(1.5);
   const [darkMode, setDarkMode] = useState(false);
 
-  // Memoized styles to prevent recreation
   const containerStyle = useMemo(() => ({
     backgroundColor: darkMode ? '#1a1a1a' : '#ffffff',
     color: darkMode ? '#ffffff' : '#000000',
     padding: '20px',
-    borderRadius: '8px',
     maxHeight: '80vh',
     overflowY: 'auto',
     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -201,7 +178,6 @@ const TextViewer = React.memo(({ content }) => {
     fontFamily: 'monospace'
   }), [fontSize, lineHeight]);
 
-  // Memoized handlers
   const handlers = useMemo(() => ({
     decreaseFontSize: () => setFontSize(prev => Math.max(8, prev - 2)),
     increaseFontSize: () => setFontSize(prev => Math.min(24, prev + 2)),
@@ -211,8 +187,8 @@ const TextViewer = React.memo(({ content }) => {
   }), []);
 
   return (
-    <div>
-      <ControlsContainer>
+    <div >
+      <ControlsContainer className='p-3'>
         <ButtonContainer>
           <Button onClick={handlers.decreaseFontSize}>
             <i className="fas fa-minus"></i> Font Size
@@ -255,42 +231,69 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-// Optimized CSVViewer with better performance
+// CSVViewer component
 const CSVViewer = React.memo(({ csvString }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Debounce search to prevent excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Memoized CSV parsing
   const data = useMemo(() => {
     const parseCSV = (csv) => {
-      const rows = csv.split('\n').filter(Boolean);
+      if (!csv || typeof csv !== 'string') return [];
+
+      const rows = csv.split('\n').filter(row => row.trim() !== '');
       return rows.map(row => {
-        const regex = /("([^"]|"")*"|[^,]*)/g;
         const cells = [];
-        let match;
-        while ((match = regex.exec(row)) !== null) {
-          let cell = match[0];
-          if (cell.startsWith('"') && cell.endsWith('"')) {
-            cell = cell.slice(1, -1).replace(/""/g, '"');
+        let current = '';
+        let inQuotes = false;
+        let i = 0;
+
+        while (i < row.length) {
+          const char = row[i];
+
+          if (char === '"') {
+            if (inQuotes && row[i + 1] === '"') {
+              // Handle escaped quotes
+              current += '"';
+              i += 2;
+            } else {
+              // Toggle quote state
+              inQuotes = !inQuotes;
+              i++;
+            }
+          } else if (char === ',' && !inQuotes) {
+            // End of cell
+            cells.push(current.trim());
+            current = '';
+            i++;
+          } else {
+            current += char;
+            i++;
           }
-          cells.push(cell.trim());
-          if (row[regex.lastIndex] === ',') regex.lastIndex++;
         }
-        return cells;
+
+        // Add the last cell
+        cells.push(current.trim());
+
+        // Ensure we don't exceed reasonable cell count to prevent memory issues
+        return cells.length > 1000 ? cells.slice(0, 1000) : cells;
       });
     };
-    return parseCSV(csvString);
+
+    try {
+      return parseCSV(csvString);
+    } catch (error) {
+      console.error('CSV parsing error:', error);
+      return [];
+    }
   }, [csvString]);
 
   const headers = useMemo(() => data[0] || [], [data]);
   const rows = useMemo(() => data.slice(1), [data]);
 
-  // Memoized filtering and sorting
   const filteredRows = useMemo(() =>
     rows.filter(row =>
       row.some(cell =>
@@ -314,7 +317,6 @@ const CSVViewer = React.memo(({ csvString }) => {
     [sortedRows, page, rowsPerPage]
   );
 
-  // Memoized handlers
   const handleSort = useCallback((header) => {
     setSortConfig(prev =>
       prev.key === header
@@ -325,7 +327,7 @@ const CSVViewer = React.memo(({ csvString }) => {
 
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
-    setPage(0); // Reset page when searching
+    setPage(0);
   }, []);
 
   const handleShowMoreRows = useCallback(() => {
@@ -344,7 +346,6 @@ const CSVViewer = React.memo(({ csvString }) => {
     setPage(p => Math.min(Math.ceil(sortedRows.length / rowsPerPage) - 1, p + 1));
   }, [sortedRows.length, rowsPerPage]);
 
-  // Memoized pagination info
   const paginationInfo = useMemo(() => ({
     start: page * rowsPerPage + 1,
     end: Math.min((page + 1) * rowsPerPage, sortedRows.length),
@@ -354,34 +355,44 @@ const CSVViewer = React.memo(({ csvString }) => {
   }), [page, rowsPerPage, sortedRows.length]);
 
   return (
-    <Box sx={{ width: '100%', p: 2, background: '#fff', borderRadius: 2, boxShadow: 1 }}>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+    <Box sx={{ width: '100%', p: 1, background: '#fff', boxShadow: 1 }}>
+      <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
         <TextField
           size="small"
           label="Search"
           variant="outlined"
           value={searchTerm}
           onChange={handleSearchChange}
-          sx={{ width: 200 }}
+          sx={{ width: 180, '& .MuiInputBase-root': { height: 32 } }}
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button onClick={handleShowMoreRows}>Show More Rows</Button>
-          <Button onClick={handleShowLessRows}>Show Less Rows</Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button onClick={handleShowMoreRows} sx={{ minWidth: 'auto', p: '4px 8px', fontSize: '11px' }}>+Rows</Button>
+          <Button onClick={handleShowLessRows} sx={{ minWidth: 'auto', p: '4px 8px', fontSize: '11px' }}>-Rows</Button>
         </Box>
       </Box>
-      <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
-        <Table stickyHeader size="small">
+      <TableContainer component={Paper} sx={{ maxHeight: 400, '& .MuiPaper-root': { boxShadow: 'none', border: '1px solid #e0e0e0' } }}>
+        <Table stickyHeader size="small" sx={{ '& .MuiTableCell-root': { py: 0.5, px: 1 } }}>
           <TableHead>
             <TableRow>
               {headers.map((header, idx) => (
                 <TableCell
                   key={idx}
                   onClick={() => handleSort(header)}
-                  sx={{ cursor: 'pointer', fontWeight: 'bold' }}
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    py: 0.5,
+                    px: 1,
+                    background: '#f5f5f5',
+                    borderBottom: '2px solid #e0e0e0'
+                  }}
                 >
                   {header}
                   {sortConfig.key === header && (
-                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                    <span style={{ fontSize: '10px', marginLeft: '4px' }}>
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
                   )}
                 </TableCell>
               ))}
@@ -389,58 +400,61 @@ const CSVViewer = React.memo(({ csvString }) => {
           </TableHead>
           <TableBody>
             {paginatedRows.map((row, rowIdx) => (
-              <TableRow key={rowIdx} hover>
+              <TableRow
+                key={rowIdx}
+                hover
+                sx={{
+                  '&:hover': { backgroundColor: '#f9f9f9' },
+                  '& .MuiTableCell-root': { fontSize: '12px', py: 0.25, px: 1 }
+                }}
+              >
                 {row.map((cell, cellIdx) => (
-                  <TableCell key={cellIdx}>{cell}</TableCell>
+                  <TableCell
+                    key={cellIdx}
+                    sx={{
+                      maxWidth: '150px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                    title={cell}
+                  >
+                    {cell}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <span>
+      <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+        <span style={{ fontSize: '11px', color: '#666' }}>
           Showing {paginationInfo.start} to {paginationInfo.end} of {paginationInfo.total} entries
         </span>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button onClick={handlePreviousPage} disabled={paginationInfo.isFirstPage}>Previous</Button>
-          <Button onClick={handleNextPage} disabled={paginationInfo.isLastPage}>Next</Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            onClick={handlePreviousPage}
+            disabled={paginationInfo.isFirstPage}
+            sx={{ minWidth: 'auto', p: '4px 8px', fontSize: '11px' }}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={handleNextPage}
+            disabled={paginationInfo.isLastPage}
+            sx={{ minWidth: 'auto', p: '4px 8px', fontSize: '11px' }}
+          >
+            Next
+          </Button>
         </Box>
       </Box>
     </Box>
   );
 }, (prevProps, nextProps) => prevProps.csvString === nextProps.csvString);
 
-// Custom hook for session state with better performance
-const useSessionState = (key, defaultValue) => {
-  const [value, setValue] = useState(() => {
-    try {
-      const stored = sessionStorage.getItem(key);
-      if (stored === null || stored === 'undefined') {
-        return defaultValue;
-      }
-      return JSON.parse(stored);
-    } catch (e) {
-      // console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
-      return defaultValue;
-    }
-  });
-
-  const setValueWithStorage = useCallback((newValue) => {
-    setValue(newValue);
-    try {
-      sessionStorage.setItem(key, JSON.stringify(newValue));
-    } catch (e) {
-      // console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
-    }
-  }, [key]);
-
-  return [value, setValueWithStorage];
-};
-
-// Optimized main component
+// Main component
 const DynamicFileViewer = ({
-  base64Content,
+  blob,
   fileExtension,
   objectid,
   fileId,
@@ -451,133 +465,11 @@ const DynamicFileViewer = ({
   windowWidth,
   mfilesId
 }) => {
-  const [fileUrl, setFileUrl] = useSessionState('ss_fileUrl', '');
+  const [fileUrl, setFileUrl] = useState('');
+  const [textContent, setTextContent] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const processedContentRef = useRef(null);
-  const currentFileRef = useRef(null);
+  const currentBlobRef = useRef(null);
 
-  // Memoized MIME type mapping
-  const mimeTypeMap = useMemo(() => ({
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    pdf: 'application/pdf',
-    txt: 'text/plain',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    xls: 'application/vnd.ms-excel',
-    doc: 'application/msword',
-    ppt: 'application/vnd.ms-powerpoint',
-    csv: 'text/csv',
-  }), []);
-
-  // Memoized base64 URL generator with cleanup
-  const generateBase64Url = useCallback((base64Content, ext) => {
-    if (mimeTypeMap[ext]) {
-      return `data:${mimeTypeMap[ext]};base64,${base64Content}`;
-    }
-    return '';
-  }, [mimeTypeMap]);
-
-  // Optimized upload function with abort controller
-  const uploadBase64WithExtension = useCallback(async (base64String, extension, abortSignal) => {
-    try {
-      const mimeType = mimeTypeMap[extension.toLowerCase()] || 'application/octet-stream';
-      const base64Data = base64String.split(',').pop();
-      const byteCharacters = atob(base64Data);
-      const byteArray = new Uint8Array([...byteCharacters].map(char => char.charCodeAt(0)));
-      const blob = new Blob([byteArray], { type: mimeType });
-      const formData = new FormData();
-      formData.append('file', blob, `file.${extension}`);
-
-      const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData, {
-        signal: abortSignal
-      });
-
-      const fileUrl = response.data?.data?.url;
-      if (fileUrl) {
-        const urlObj = new URL(fileUrl);
-        const pathParts = urlObj.pathname.split('/');
-        pathParts.splice(1, 0, 'dl');
-        urlObj.pathname = pathParts.join('/');
-        return urlObj.toString();
-      }
-      return null;
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        // console.log('Upload cancelled');
-      } else {
-        // console.error('Error uploading file:', error);
-      }
-      return null;
-    }
-  }, [mimeTypeMap]);
-
-  // Memoized file identifier to prevent unnecessary processing
-  const fileIdentifier = useMemo(() => {
-    if (!base64Content || !fileExtension) return null;
-    return `${base64Content.slice(0, 100)}_${fileExtension}`;
-  }, [base64Content, fileExtension]);
-
-  // Optimized file processing with abort controller
-  const handleViewFile = useCallback(async () => {
-    if (!base64Content || !fileExtension || isProcessing) return;
-
-    const ext = fileExtension.toLowerCase();
-    const fileId = `${base64Content.slice(0, 100)}_${ext}`;
-
-    // Skip processing if same file
-    if (currentFileRef.current === fileId && fileUrl) {
-      return;
-    }
-
-    setIsProcessing(true);
-    currentFileRef.current = fileId;
-
-    const abortController = new AbortController();
-
-    try {
-      let src = '';
-
-      if (['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt'].includes(ext)) {
-        src = generateBase64Url(base64Content, ext);
-      } else if (['docx', 'xlsx', 'xls', 'doc', 'ppt'].includes(ext)) {
-        src = await uploadBase64WithExtension(base64Content, ext, abortController.signal);
-      }
-
-      if (src && currentFileRef.current === fileId) {
-        setFileUrl(src);
-      }
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        // console.error('Error processing file:', error);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-
-    // Cleanup function
-    return () => {
-      abortController.abort();
-    };
-  }, [base64Content, fileExtension, fileUrl, generateBase64Url, uploadBase64WithExtension, isProcessing]);
-
-  // Effect with proper cleanup
-  useEffect(() => {
-    // console.log(base64Content)
-    // console.log(fileExtension)
-    if (fileIdentifier) {
-      const cleanup = handleViewFile();
-      return () => {
-        if (cleanup && typeof cleanup === 'function') {
-          cleanup();
-        }
-      };
-    }
-  }, [fileIdentifier, handleViewFile]);
-
-  // Memoized file type detection
   const fileType = useMemo(() => {
     if (!fileExtension) return 'none';
     const ext = fileExtension.toLowerCase();
@@ -589,44 +481,132 @@ const DynamicFileViewer = ({
     return 'unsupported';
   }, [fileExtension]);
 
-  // Memoized decoded content for text/csv files
-  const decodedContent = useMemo(() => {
-    if (!base64Content || (fileType !== 'text' && fileType !== 'csv')) return null;
-    try {
-      return atob(base64Content);
-    } catch {
+  const uploadBlobWithExtension = useCallback(async (blob, ext) => {
+    if (!(blob instanceof Blob)) {
+      console.error("Invalid blob passed to upload function");
       return null;
     }
-  }, [base64Content, fileType]);
 
-  // Render content with better performance
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, `file.${ext}`);
+
+      const response = await axios.post(
+        "https://tmpfiles.org/api/v1/upload",
+        formData
+      );
+
+      const fileUrl = response.data?.data?.url;
+      if (fileUrl) {
+        const urlObj = new URL(fileUrl);
+        const pathParts = urlObj.pathname.split("/");
+        pathParts.splice(1, 0, "dl");
+        urlObj.pathname = pathParts.join("/");
+        return urlObj.toString();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error uploading blob:", error);
+      return null;
+    }
+  }, []);
+
+  const processBlobContent = useCallback(async (blob, ext) => {
+    if (!blob) return;
+
+    setIsProcessing(true);
+    currentBlobRef.current = blob;
+
+    try {
+      switch (fileType) {
+        case 'image':
+        case 'pdf':
+          const objectUrl = URL.createObjectURL(blob);
+          setFileUrl(objectUrl);
+          break;
+
+        case 'text':
+        case 'csv':
+          const text = await blob.text();
+          setTextContent(text);
+          break;
+
+        case 'office':
+          const uploadedUrl = await uploadBlobWithExtension(blob, ext);
+          if (uploadedUrl) {
+            setFileUrl(uploadedUrl);
+          }
+          break;
+
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error('Error processing blob:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [fileType, uploadBlobWithExtension]);
+
+  useEffect(() => {
+    if (blob instanceof Blob && fileExtension) {
+      processBlobContent(blob, fileExtension.toLowerCase());
+    }
+
+    return () => {
+      if (fileUrl && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [blob, fileExtension, processBlobContent]);
+
+  useEffect(() => {
+    return () => {
+      if (fileUrl && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [fileUrl]);
+
   const renderContent = useMemo(() => {
-    if (!base64Content || !fileExtension) {
+    if (!blob || !fileExtension) {
       return (
-        <div className="d-flex justify-content-center align-items-center text-dark" style={{ width: "100%", height: "60vh", overflowY: 'scroll' }}>
-          <div>
-            <p className="text-center">
-              <i className="fas fa-tv" style={{ fontSize: "100px" }}></i>
-            </p>
-            <p className="text-center">Select a file to preview</p>
-          </div>
-        </div>
+        <Box
+          sx={{
+            width: '100%',
+            marginTop: '20%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mx: 'auto'
+          }}
+        >
+          <>
+            <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+            <Typography className='mt-3' variant="body2" sx={{ textAlign: 'center', fontSize: '12.5px' }}>
+              Nothing to preview, please select a file
+            </Typography>
+          </>
+
+        </Box>
       );
     }
 
-    // if (isProcessing) {
-    //   return (
-    //     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-    //       <CircularProgress sx={{ width: '50%' }} />
-    //     </Box>
-    //   );
-    // }
+    if (isProcessing) {
+      return (
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
 
     switch (fileType) {
       case 'image':
-        return <ImageViewer src={fileUrl} />;
+        return fileUrl ? <ImageViewer src={fileUrl} /> : null;
+
       case 'pdf':
-        return (
+        return fileUrl ? (
           <PDFViewerPreview
             windowWidth={windowWidth}
             document={fileUrl}
@@ -634,30 +614,26 @@ const DynamicFileViewer = ({
             fileId={fileId}
             vault={vault}
             email={email}
-            base64Content={base64Content}
             fileExtension={fileExtension}
             fileName={fileName}
             selectedObject={selectedObject}
             mfilesId={mfilesId}
+            fileUrl={fileUrl}
+            blob={blob}
           />
-        );
+        ) : null;
+
       case 'text':
-        return <TextViewer content={decodedContent} />;
+        return textContent ? <TextViewer content={textContent} /> : null;
+
+      case 'csv':
+        return textContent ? <CSVViewer csvString={textContent} /> : null;
+
       case 'office':
         return (
-          // <iframe
-          //   src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
-          //   width="100%"
-          //   height="500px"
-          //   frameBorder="0"
-          //   title="Office File"
-          // />
           <div className="viewer-container">
             <Box className='chat-header'>
-
-
               <button
-
                 onClick={() =>
                   window.open(`https://view.officeapps.live.com/op/view.aspx?src=${fileUrl}`, "_blank")
                 }
@@ -673,15 +649,11 @@ const DynamicFileViewer = ({
               >
                 Open in New Tab
               </button>
-
-
             </Box>
 
             <Box className="chat-header">
-
               <Box>
                 <span className="mx-2">
-                  {/* <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '20px' }}></i> */}
                   <FileExtIcon
                     fontSize="20px"
                     guid={vault}
@@ -689,7 +661,7 @@ const DynamicFileViewer = ({
                     classId={selectedObject.classId ?? selectedObject.classID}
                     sx={{ fontSize: '25px !important', marginRight: '10px' }}
                   />
-                  <span className='mx-2' style={{ fontSize: '13px' }}>{fileName}
+                  <span className='mx-2' style={{ fontSize: '12.5px' }}>{fileName}
                     <FileExtText
                       guid={vault}
                       objectId={selectedObject.id}
@@ -700,17 +672,16 @@ const DynamicFileViewer = ({
               </Box>
             </Box>
 
-
-            <iframe
-              src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
-              style={{ width: "100%", height: "calc(100vh - 140px)", border: "none" }}
-              title="Office File"
-            />
+            {fileUrl && (
+              <iframe
+                src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
+                style={{ width: "100%", height: "calc(100vh - 140px)", border: "none" }}
+                title="Office File"
+              />
+            )}
           </div>
-
         );
-      case 'csv':
-        return <CSVViewer csvString={decodedContent} />;
+
       default:
         return (
           <Box
@@ -737,21 +708,21 @@ const DynamicFileViewer = ({
             </Typography>
             <Typography
               variant="body2"
-              sx={{ textAlign: 'center', fontSize: '13px' }}
+              sx={{ textAlign: 'center', fontSize: '12.5px' }}
             >
               Please select a different file, type not supported
             </Typography>
           </Box>
         );
     }
-  }, [base64Content, fileExtension, fileType, fileUrl, isProcessing, decodedContent, windowWidth, objectid, fileId, vault, email, fileName, selectedObject, mfilesId]);
+  }, [blob, fileExtension, fileType, fileUrl, textContent, isProcessing, windowWidth, objectid, fileId, vault, email, fileName, selectedObject, mfilesId]);
 
   return <div>{renderContent}</div>;
 };
 
 export default React.memo(DynamicFileViewer, (prevProps, nextProps) => {
   return (
-    prevProps.base64Content === nextProps.base64Content &&
+    prevProps.blob === nextProps.blob &&
     prevProps.fileExtension === nextProps.fileExtension &&
     prevProps.objectid === nextProps.objectid &&
     prevProps.fileId === nextProps.fileId &&

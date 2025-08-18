@@ -13,21 +13,22 @@ async function testConnectivity() {
     const startTime = performance.now();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000); // Reduced timeout
-    
-    const response = await fetch('https://www.google.com/favicon.ico', {
+
+    const response = await fetch('https://httpbin.org/status/204', {
       method: 'HEAD',
       cache: 'no-cache',
       signal: controller.signal
     });
-    
+
+
     clearTimeout(timeoutId);
     const endTime = performance.now();
     const responseTime = endTime - startTime;
-    
+
     if (!response.ok) {
       throw new Error('Network request failed');
     }
-    
+
     return {
       isOnline: true,
       responseTime,
@@ -58,10 +59,10 @@ async function testConnectivity() {
 
 // Get network information from Network Information API
 function getNetworkInfo() {
-  const connection = navigator.connection || 
-                    navigator.mozConnection || 
-                    navigator.webkitConnection;
-  
+  const connection = navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
+
   if (connection) {
     return {
       effectiveType: connection.effectiveType || '4g',
@@ -69,7 +70,7 @@ function getNetworkInfo() {
       rtt: connection.rtt || 0
     };
   }
-  
+
   return {
     effectiveType: '4g',
     downlink: 10,
@@ -86,12 +87,12 @@ async function measureDownloadSpeed() {
   // Test actual connectivity
   const connectivityTest = await testConnectivity();
   const networkInfo = getNetworkInfo();
-  
+
   // If connectivity test fails, we're truly offline
   if (!connectivityTest.isOnline) {
     return 0;
   }
-  
+
   // Check multiple criteria for extremely slow connection
   const slowCriteria = [
     networkInfo.effectiveType === 'slow-2g',
@@ -99,17 +100,17 @@ async function measureDownloadSpeed() {
     networkInfo.rtt > 3000, // Increased threshold
     connectivityTest.responseTime > 8000 // Increased threshold
   ];
-  
+
   // If any slow criteria is met, return appropriate speed
   if (slowCriteria.some(criteria => criteria)) {
     return Math.max(networkInfo.downlink, 0.2); // Ensure minimum value
   }
-  
+
   // For better connections, return network API downlink or do speed test
   if (networkInfo.downlink && networkInfo.downlink > 0) {
     return networkInfo.downlink;
   }
-  
+
   // Fallback to original speed test if Network API not available
   const testFileUrl = 'https://via.placeholder.com/1000x1000.png';
   const startTime = Date.now();
@@ -156,7 +157,7 @@ const NetworkSnackbarAlert = () => {
   const updateNetworkStatus = useCallback(async () => {
     const online = navigator.onLine;
     let downlink = 10; // Default to good connection
-    
+
     // Only test speed if navigator says we're online
     if (online) {
       try {
@@ -202,7 +203,7 @@ const NetworkSnackbarAlert = () => {
 
     // Initial check with delay
     setTimeout(updateNetworkStatus, 1000);
-    
+
     // Check every 45 seconds
     intervalId = setInterval(updateNetworkStatus, 45000);
 
@@ -226,10 +227,10 @@ const NetworkSnackbarAlert = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    const connection = navigator.connection || 
-                      navigator.mozConnection || 
-                      navigator.webkitConnection;
-    
+    const connection = navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+
     if (connection) {
       connection.addEventListener('change', handleConnectionChange);
     }
@@ -239,7 +240,7 @@ const NetworkSnackbarAlert = () => {
       clearTimeout(timeoutId);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      
+
       if (connection) {
         connection.removeEventListener('change', handleConnectionChange);
       }

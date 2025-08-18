@@ -1,37 +1,54 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import Loader from '../Loaders/LoaderMini';
-import { Avatar, Button } from '@mui/material';
-import { Typography } from '@mui/material';
+import { Avatar, Box, Tabs, Tab, Typography, Tooltip } from '@mui/material';
+import PropTypes from 'prop-types';
 
-import Box from '@mui/material/Box';
+// Components
+import Loader from '../Loaders/LoaderMini';
 import ObjectData from './ObjectData';
 import RightClickMenu from '../RightMenu';
-
 import ViewsList from './ViewsList';
 import VaultSelectForm from '../SelectVault';
 import FileExtIcon from '../FileExtIcon';
+import FileExtText from '../FileExtText';
 import ConfirmUpdateDialog from '../Modals/ConfirmUpdateObjectDialog';
 import TimedAlert from '../TimedAlert';
-
 import OfficeApp from '../Modals/OfficeAppDialog';
-import * as constants from '../Auth/configs'
-import LoadingDialog from '../Loaders/LoaderDialog';
-import FileExtText from '../FileExtText';
-import logo from '../../images/ZFBLU.png';
-import { Tabs, Tab } from '@mui/material';
-import PropTypes from 'prop-types';
-import { Tooltip } from '@mui/material';
-
-
-import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import LinkedObjectsTree from './LinkedObjectsTree';
 import AddButtonWithMenu from '../AddButtonWithMenu';
-import MultifileFiles from '../MultifileFiles';
 import ColumnSimpleTree from '../ColumnSimpleTree';
 
+// Constants and assets
+import * as constants from '../Auth/configs';
+import logo from '../../images/ZFBLU.png';
 
+// Custom Hooks
+function useSessionState(key, defaultValue) {
+  const getInitialValue = () => {
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (stored === null || stored === 'undefined') {
+        return defaultValue;
+      }
+      return JSON.parse(stored);
+    } catch {
+      return defaultValue;
+    }
+  };
+
+  const [value, setValue] = useState(getInitialValue);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Silently fail if sessionStorage is unavailable
+    }
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+// Tab Panel Component
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
     <div
@@ -63,111 +80,77 @@ function a11yProps(index) {
   };
 }
 
-
 const DocumentList = (props) => {
-
-  function useSessionState(key, defaultValue) {
-    const getInitialValue = () => {
-      try {
-        const stored = sessionStorage.getItem(key);
-        if (stored === null || stored === 'undefined') {
-          return defaultValue;
-        }
-        return JSON.parse(stored);
-      } catch {
-        // console.warn(`Failed to parse sessionStorage item for key "${key}":`, e);
-        return defaultValue;
-      }
-    };
-
-    const [value, setValue] = useState(getInitialValue);
-
-    useEffect(() => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify(value));
-      } catch {
-        // console.warn(`Failed to save sessionStorage item for key "${key}":`, e);
-      }
-    }, [key, value]);
-
-    return [value, setValue];
-  }
-
+  // Session state
   const [value, setValue] = useSessionState('ss_value', 0);
-
-  const [loading, setLoading] = useState(false);
-
-  let [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
-
-  let [loadingobjects, setLoadingObjects] = useState(false);
-  let [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
-
-  const [openAlert, setOpenAlert] = useSessionState('ss_openAlert', false);
-  const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
-  const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
-  const [loadingPreviewObject, setLoadingPreviewObject] = useState(false);
-
-
+  const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
+  const [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
   const [selectedViewObjects, setSelectedViewObjects] = useSessionState('ss_selectedViewObjects', []);
   const [viewNavigation, setViewNavigation] = useSessionState('ss_viewNavigation', []);
-
-
   const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
   const [formValues, setFormValues] = useSessionState('ss_formValues', {});
   const [base64, setBase64] = useSessionState('ss_base64', '');
   const [extension, setExtension] = useSessionState('ss_extension', '');
-  const [loadingfile, setLoadingFile] = useState(false);
-  const [loadingobject, setLoadingObject] = useState(false);
   const [dialogOpen, setDialogOpen] = useSessionState('ss_dialogOpen', false);
-  const [uptatingObject, setUpdatingObject] = useSessionState('ss_updatingObject', false);
-  const [selectedObkjWf, setSelectedObjWf] = useSessionState('ss_selectedObjWf', {});
+  const [updatingObject, setUpdatingObject] = useSessionState('ss_updatingObject', false);
+  const [selectedObjWf, setSelectedObjWf] = useSessionState('ss_selectedObjWf', {});
   const [currentState, setCurrentState] = useSessionState('ss_currentState', {});
   const [selectedState, setSelectedState] = useSessionState('ss_selectedState', {});
   const [comments, setComments] = useSessionState('ss_comments', []);
-  const [loadingcomments, setLoadingComments] = useState(false);
   const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
   const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
-  const [loadingClick, setLoadingClick] = useState(false);
   const [searched, setSearched] = useSessionState('ss_searched', false);
   const [previewWindowWidth, setPreviewWindowWidth] = useSessionState('ss_previewWindowWidth', 40);
-  const [newWFState, setNewWFState] = useState(null)
-  const [newWF, setNewWF] = useState(null)
   const [workflows, setWorkflows] = useSessionState('ss_vaultWorkflows', []);
+
+  // Local state
+  const [loading, setLoading] = useState(false);
+  const [loadingobjects, setLoadingObjects] = useState(false);
+  const [loadingPreviewObject, setLoadingPreviewObject] = useState(false);
+  const [loadingfile, setLoadingFile] = useState(false);
+  const [loadingobject, setLoadingObject] = useState(false);
+  const [loadingcomments, setLoadingComments] = useState(false);
+  const [loadingClick, setLoadingClick] = useState(false);
+  const [newWFState, setNewWFState] = useState(null);
+  const [newWF, setNewWF] = useState(null);
   const [approvalPayload, setApprovalPayload] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [loadingWFS, setLoadingWFS] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [alertOpen, setAlertPopOpen] = useState(false);
+  const [severity, setAlertPopSeverity] = useState("success");
+  const [message, setAlertPopMessage] = useState("This is a success message!");
+  const [file, setFile] = useState(null);
+  const [blob, setBlob] = useState(null);
 
-  const col1Ref = useRef(null);
-  const col2Ref = useRef(null);
-  const dividerRef = useRef(null);
-  const containerRef = useRef(null);
+  // Layout and interaction state
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuItem, setMenuItem] = useState(null);
 
-  const [file, setFile] = useState(null);
+  // Refs
+  const col1Ref = useRef(null);
+  const col2Ref = useRef(null);
+  const containerRef = useRef(null);
 
+  // Click handling
+  let clickTimeout = null;
 
-  async function convertToPDF(item, overWriteOriginal) {
-    // alert(file.fileID);
-    // console.log('Converting to PDF:', file);
-
-
+  // API Functions
+  const convertToPDF = async (item, overWriteOriginal) => {
     const payload = {
-      vaultGuid: props.selectedVault.guid,  // string
-      objectId: item.id,                      // number
-      classId: item.classID || item.classId,                       // number
-      fileID: file.fileID,                        // number
-      overWriteOriginal: overWriteOriginal,           // boolean
-      separateFile: overWriteOriginal ? false : true,                // boolean
-      userID: props.mfilesId                     // number
+      vaultGuid: props.selectedVault.guid,
+      objectId: item.id,
+      classId: item.classID || item.classId,
+      fileID: file.fileID,
+      overWriteOriginal: overWriteOriginal,
+      separateFile: !overWriteOriginal,
+      userID: props.mfilesId
     };
 
-
     try {
-      const response = await axios.post(
+      await axios.post(
         `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
         payload,
         {
@@ -177,484 +160,119 @@ const DocumentList = (props) => {
           }
         }
       );
-
-      return response.data;
-    } catch {
-      // console.error('Error converting to PDF:', error);
-      // throw error;
+    } catch (error) {
+      console.error('Error converting to PDF:', error);
     }
-  }
+  };
 
-
-  async function fetchObjectFile(item) {
-    // const objectType = item.objectTypeId ?? item.objectID;
-    const classId = item.classId || item.classID
+  const fetchObjectFile = async (item) => {
+    const classId = item.classId || item.classID;
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${classId}`;
 
     try {
       const response = await axios.get(url, {
-        headers: {
-          Accept: '*/*'
-        }
+        headers: { Accept: '*/*' }
       });
-
       const file = response.data?.[0];
       setFile(file);
-
-      // alert(`File ID is: ${file.fileID}`)
-    } catch {
-      // console.error('Failed to fetch object file:', error);
-      // throw error;
-    }
-  }
-
-  // Handler for right-click
-  const handleRightClick = (event, item) => {
-
-    event.preventDefault();
-    setMenuAnchor(event.currentTarget);
-    setMenuItem(item);
-    if ((item.objectID === 0 || item.objectTypeId === 0) && item.isSingleFile === true) {
-      fetchObjectFile(item);
-
+    } catch (error) {
+      console.error('Failed to fetch object file:', error);
     }
   };
 
-  // Handler to close menu
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-    setMenuItem(null);
-  };
-
-
-  const [selectedItemId, setSelectedItemId] = useState(null);
-
-  let clickTimeout = null;
-
-
-
-  const markAssignementComplete = async () => {
-
-    await axios.post(`${constants.mfiles_api}/api/objectinstance/ApproveAssignment`, approvalPayload, {
-      headers: {
-        'Accept': '*/*',
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-
-        setApprovalPayload(null)
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
-  }
-
-  const handleCloseDialog = () => setDialogOpen(false);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-  const transformFormValues = async () => {
-
-    try {
-      setUpdatingObject(true);
-
-      const requestData = {
-        objectid: selectedObject.id,
-        objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-        classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
-        props: Object.entries(formValues).map(([id, { value, datatype }]) => {
-          let transformedValue = value;
-
-          // Handle transformation based on datatype
-          switch (datatype) {
-            case 'MFDatatypeMultiSelectLookup':
-              transformedValue = value.join(", ");
-              break;
-            case 'MFDatatypeBoolean':
-              transformedValue = value ? "true" : "false";
-              break;
-            case 'MFDatatypeNumber':
-            case 'MFDatatypeLookup':
-              transformedValue = value.toString();
-              break;
-          }
-
-          return {
-            id: parseInt(id, 10), // Ensure ID is a number
-            value: transformedValue,
-            datatype,
-          };
-        }),
-        userID: parseInt(props.mfilesId, 10),
-
-        vaultGuid: props.selectedVault?.guid || "", // Ensure valid vaultGuid
-      };
-
-      await axios.put(
-        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
-        requestData,
-        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
-      );
-
-      setAlertPopOpen(true);
-      setAlertPopSeverity("success");
-      setAlertPopMessage("Updated successfully! Chages will be effected next time item is loaded.");
-      setFormValues({});
-
-      // console.log(selectedObject)
-      setPreviewObjectProps([])
-      setSelectedObject({})
-      setUpdatingObject(false);
-
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject, false);
-        } else {
-          previewSublistObject(selectedObject, false);
-        }
-      }, 5000);
-
-    } catch {
-      setUpdatingObject(false)
-      // console.error('Error updating object props:', error);
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("something went wrong, please try again later!");
-    }
-  };
-
-
-  const transitionState = async () => {
-    try {
-      setUpdatingObject(true);
-      const data = {
-        vaultGuid: props.selectedVault.guid,
-        objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-        objectId: selectedObject.id,
-        nextStateId: selectedState.id,
-        userID: props.mfilesId
-      };
-      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
-        headers: { accept: '*/*', 'Content-Type': 'application/json' },
-      });
-      // setSelectedState({});
-      // if (!formValues) {
-      //   await reloadObjectMetadata();  // Await reloadObjectMetadata to ensure it's completed
-      // }
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject, false);
-        } else {
-          previewSublistObject(selectedObject, false);
-        }
-      }, 5000);
-      setAlertPopOpen(true);
-      setAlertPopSeverity("success");
-      setAlertPopMessage("Updated successfully!");
-      setUpdatingObject(false)
-    } catch {
-      // console.error('Error transitioning state:', error);
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("something went wrong, please try again later!");
-      setUpdatingObject(false)
-    }
-  };
-
-  const addNewWorkflowAndState = async () => {
-    const hasNewWorkflow = Boolean(newWFState?.stateName);
-
-    if (!hasNewWorkflow) {
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("Select a workflow state to save.");
-
-    }
-    else {
-      try {
-        setUpdatingObject(true);
-        const data = {
-          vaultGuid: props.selectedVault.guid,
-          objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-          objectId: selectedObject.id,
-          workflowId: newWF.workflowId,
-          stateId: newWFState.stateId,
-          userID: props.mfilesId
-        };
-
-        await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectWorkflowstate`, data, {
-          headers: { accept: '*/*', 'Content-Type': 'application/json' },
-        });
-
-        setTimeout(() => {
-          if (selectedObject.id !== 0) {
-            previewObject(selectedObject, false);
-          } else {
-            previewSublistObject(selectedObject, false);
-          }
-        }, 5000);
-        setAlertPopOpen(true);
-        setAlertPopSeverity("success");
-        setAlertPopMessage("Updated successfully!");
-        setNewWF(null)
-        setNewWFState(null)
-      } catch {
-        setUpdatingObject(false);
-        // console.error('Error transitioning state:', error);
-        setAlertPopOpen(true);
-        setAlertPopSeverity("error");
-        setAlertPopMessage("something went wrong, please try again later!");
-      }
-    }
-  };
-
-  const updateObjectMetadata = async () => {
-    const hasFormValues = Object.keys(formValues || {}).length > 0;
-    const hasSelectedState = Boolean(selectedState?.title);
-    const hasNewWorkflow = Boolean(newWF?.workflowName);
-
-
-    // Process form values if any
-    if (hasFormValues) {
-      await transformFormValues();
-    }
-
-    // Process state transition if a state is selected
-    if (hasSelectedState) {
-      await transitionState();
-    }
-
-    if (hasNewWorkflow) {
-      await addNewWorkflowAndState();
-    }
-
-    if (approvalPayload) {
-      markAssignementComplete()
-    }
-
-    // Reload metadata
-    await reloadObjectMetadata();
-
-    // Close the dialog after all operations are done
-    setDialogOpen(false);
-
-    // Set updating object to false after the dialog is closed
-    setUpdatingObject(false);
-
-
-  };
-
-  const reloadObjectMetadata = async () => {
-    // await getSelectedObjWorkflow(selectedObject.objectTypeId, selectedObject.id);
-
-    if (selectedObject.objectTypeId === 0) {
-      await previewObject(selectedObject, false);  // Await previewObject to ensure it's completed
-    } else {
-      await previewSublistObject(selectedObject, false);  // Await previewSublistObject to ensure it's completed
-    }
-
-  };
-
-
-
-
-
-
-  // Helper function to reset common state
-  const resetPreviewState = () => {
-    setWorkflows([]);
-    setCheckedItems({});
-    setNewWF(null);
-    setNewWFState(null);
-    setLoadingWFS(true);
-    setComments([]);
-    setSelectedState({});
-    setFormValues({});
-  };
-
-  // Helper function to set loading states
-  const setLoadingStates = (loading) => {
-    setLoadingObject(loading);
-    setLoadingClick(loading);
-  };
-
-  // Helper function to fetch object properties
   const fetchObjectProperties = async (item) => {
     const classId = item.classId !== undefined ? item.classId : item.classID;
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${classId}/${props.mfilesId}`;
-    console.log(url)
+
     try {
       const response = await axios.get(url);
-
       setPreviewObjectProps(response.data);
-      console.log('Fetched object properties:', response.data);
-      return { success: true };
-    } catch {
-      // console.error('Error fetching object properties:', error);
-      // return { success: false, error };
+      return response.data;
+    } catch (error) {
+      
+      setAlertPopOpen(true);
+      setAlertPopSeverity("info");
+      setAlertPopMessage("Object metadata could not be retrieved, Object was deleted.");
+      console.error('Error fetching object properties:', error);
+      throw error;
     }
   };
 
-  // Helper function to handle file download for documents
   const handleDocumentDownload = async (item) => {
     setLoadingFile(true);
 
-    const objectTypeId = item.objectTypeId ?? item.objectID;
-
-    if (objectTypeId !== 0) {
-      setBase64('');
-      setExtension('');
-      return { success: true };
-    }
-
     try {
-      // Fetch object files
+      // Get file metadata
       const filesUrl = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
-      const filesResponse = await axios.get(filesUrl, { headers: { Accept: '*/*' } });
+      const filesResult = await axios.get(filesUrl, { 
+        headers: { Accept: '*/*' }, 
+        timeout: 0 
+      });
+    
+      const fileData = filesResult.data;
+      const fileId = fileData?.[0]?.fileID;
+      if (!fileId) throw new Error('No file ID found in response');
 
-      const fileId = filesResponse.data[0].fileID;
       setSelectedFileId(fileId);
 
-      // Download the file
-      const downloadUrl = `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${fileId}`;
-      // console.log(downloadUrl)
-      const downloadResponse = await axios.get(downloadUrl, { headers: { Accept: '*/*' } });
+      // Download blob
+      const classId = item.classId ?? item.classID;
+      const downloadUrlBlob = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&fileID=${fileId}&ClassId=${classId}`;
+      
+      const blobResult = await axios.get(downloadUrlBlob, { 
+        headers: { Accept: '*/*' }, 
+        responseType: 'blob', 
+        timeout: 0 
+      });
 
-      setBase64(downloadResponse.data.base64);
-      setExtension(downloadResponse.data.extension.replace('.', ''));
-      // console.log(downloadResponse.data.base64)
-      // console.log(downloadResponse.data.extension.replace('.', ''))
+      const blobData = blobResult.data;
+      if (!(blobData instanceof Blob)) throw new Error('Invalid file format received');
 
-      return { success: true };
-    } catch {
-      // console.error('Error handling document download:', error);
-      // return { success: false, error };
+      setBlob(blobData);
+
+      // Set file extension
+      const extension = fileData[0]?.extension?.replace('.', '') || '';
+      setExtension(extension);
+
+      return { blob: blobData, extension, fileId, success: true };
+    } catch (error) {
+      console.error('Document download error:', error);
+      setBase64('');
+      setBlob(null);
+      setExtension('');
+      throw new Error(`Download failed: ${error.message}`);
     } finally {
       setLoadingFile(false);
     }
   };
 
-  // Helper function to show error alert
-  const showErrorAlert = (message = "Not found! object may be deleted or not available at the time") => {
-    setAlertPopOpen(true);
-    setAlertPopSeverity("error");
-    setAlertPopMessage(message);
-  };
-
-  // Main preview function that handles both cases
-  const previewObjectInternal = async (item, isSublist) => {
-    // Reset state
-    resetPreviewState();
-    setLoadingStates(true);
-    setSelectedObject(item);
-
-
-    setBase64('');
-    setExtension('');
-
-
-    // Get workflow info
-    const objectTypeId = item.objectTypeId || item.objectID;
-    const classId = item.classId || item.classID;
-    getSelectedObjWorkflow(objectTypeId, item.id, classId);
+  const getObjectComments = async (item) => {
+    setLoadingComments(true);
+    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${(item.objectID ?? item.objectTypeId)}`;
 
     try {
-      // Fetch object properties
-      const propsResult = await fetchObjectProperties(item);
-
-      if (!propsResult.success) {
-        throw propsResult.error;
-      }
-
-      // Handle document download for sublist objects
-      if (isSublist) {
-        const downloadResult = await handleDocumentDownload(item);
-        if (!downloadResult.success) {
-          throw downloadResult.error;
-        }
-      }
-
-    } catch {
-      // console.error('Error in preview operation:', error);
-      // if (isSublist) {
-      //   showErrorAlert();
-      // }
+      const response = await axios.get(url, {
+        headers: { 'accept': '*/*' }
+      });
+      setComments(response.data);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
     } finally {
-      setLoadingStates(false);
-    }
-
-    // Fetch comments
-    getObjectComments(item);
-  };
-
-  // Public functions
-  const previewObject = async (item, getLinkedItems) => {
-    await previewObjectInternal(item, false);
-  };
-
-  const previewSublistObject = async (item, getLinkedItems) => {
-    await previewObjectInternal(item, true);
-  };
-
-  const discardChange = () => {
-    setDialogOpen(false)
-    setSelectedState({})
-    setFormValues({})
-    setNewWF(null)
-    setNewWFState(null)
-    setApprovalPayload(null)
-
-    setSelectedState({})
-
-
-  }
-
-  const downloadFile = async (fileId, item) => {
-    // Reset base64 and extension before starting download
-    setBase64('');
-    setExtension('');
-    setLoadingClick(true);
-    setLoadingFile(true);
-
-    try {
-      const downloadResponse = await axios.get(
-        `${constants.mfiles_api}/api/objectinstance/DownloadFile/${props.selectedVault.guid}/${item.id}/${(item.classId ?? item.classID)}/${fileId}`,
-        { headers: { Accept: '*/*' } }
-      );
-
-      setBase64(downloadResponse.data.base64);
-      setExtension(downloadResponse.data.extension.replace('.', ''));
-      // let ext = downloadResponse.data.extension.replace('.', '');
-      // console.log(ext);
-    } catch {
-      // console.error('Error downloading file:', downloadError);
-    } finally {
-      setLoadingFile(false);
-      setLoadingClick(false);
+      setLoadingComments(false);
     }
   };
-
 
   const fetchVaultWorkflows = async (objectTypeId, classId) => {
-
     try {
-      const response = await axios.get(`${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsObjectClassTypeWorkflows/${props.selectedVault.guid}/${props.mfilesId}/${objectTypeId}/${classId}`, {
-        headers: {
-          'accept': '*/*'
-        }
-      });
-      setLoadingWFS(false)
-      setWorkflows(response.data)
-
-
-    } catch {
-      setLoadingWFS(false)
-      // console.error('Error fetching workflows:', error);
-
-
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsObjectClassTypeWorkflows/${props.selectedVault.guid}/${props.mfilesId}/${objectTypeId}/${classId}`,
+        { headers: { 'accept': '*/*' } }
+      );
+      setWorkflows(response.data);
+    } catch (error) {
+      console.error('Error fetching workflows:', error);
+    } finally {
+      setLoadingWFS(false);
     }
   };
 
@@ -679,70 +297,347 @@ const DocumentList = (props) => {
         }
       );
 
-      setLoadingWFS(false);
       setSelectedObjWf(response.data);
-
       setCurrentState({
         title: response.data.currentStateTitle,
         id: response.data.currentStateid
       });
-    } catch {
+    } catch (error) {
       fetchVaultWorkflows(objectTypeId, classId);
       setSelectedObjWf(null);
+      console.error('Workflow fetch error:', error);
+    } finally {
       setLoadingWFS(false);
-      // Optionally log the error:
-      // console.error('Workflow fetch error:', error);
     }
   };
 
+  // Helper functions
+  const resetPreviewState = () => {
+    setWorkflows([]);
+    setCheckedItems({});
+    setNewWF(null);
+    setNewWFState(null);
+    setLoadingWFS(true);
+    setComments([]);
+    setSelectedState({});
+    setFormValues({});
+  };
 
-  const getObjectComments = async (item) => {
-    setLoadingComments(true)
-    // Define the API URL
+  const setLoadingStates = (loading) => {
+    setLoadingObject(loading);
+    setLoadingClick(loading);
+  };
 
-    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${(item.objectID ?? item.objectTypeId)}`;
+  // Main preview functions
+  const previewObjectInternal = async (item, isDocument) => {
+    resetPreviewState();
+    setLoadingStates(true);
+    setSelectedObject(item);
+    setBase64('');
+    setBlob(null);
+    setExtension('');
 
-    // Fetch the comments using Axios
-    await axios.get(url, {
-      headers: {
-        'accept': '*/*'
+    // Get workflow info
+    const objectTypeId = item.objectTypeId !== undefined ? item.objectTypeId : item.objectID;
+    const classId = item.classId !== undefined ? item.classId : item.classID;
+    getSelectedObjWorkflow(objectTypeId, item.id, classId);
+
+    try {
+      const promises = [];
+      
+      // Always fetch object properties
+      promises.push(fetchObjectProperties(item));
+      
+      // Add document download if needed
+      if (isDocument) {
+        promises.push(handleDocumentDownload(item));
       }
-    })
-      .then(response => {
+      
+      // Add comments fetch
+      promises.push(getObjectComments(item));
 
-        setComments(response.data);  // Set the comments from the response data
-        setLoadingComments(false);
-      })
-      .catch(err => {
-        setLoadingComments(false);
+      const results = await Promise.allSettled(promises);
+      
+      // Handle any rejected promises
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Promise ${index} rejected:`, result.reason);
+        }
       });
 
-  }
+    } catch (error) {
+      console.error('Unexpected error in preview operation:', error);
+    } finally {
+      setLoadingStates(false);
+    }
+  };
 
-  const getObjectComments2 = async () => {
-    setLoadingComments(true);
-    let objectID = selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId;
+  const previewObject = async (item) => {
+    await previewObjectInternal(item, false);
+  };
 
-    // Define the API URL
-    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${selectedObject.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${objectID}`;
+  const previewDocumentObject = async (item) => {
+    await previewObjectInternal(item, true);
+  };
 
-    // Fetch the comments using Axios
-    await axios.get(url, {
-      headers: {
-        'accept': '*/*'
-      }
-    })
-      .then(response => {
+  // Update functions
+  const transformFormValues = async () => {
+    try {
+      setUpdatingObject(true);
 
-        setComments(response.data);  // Set the comments from the response data
-        setLoadingComments(false);
-      })
-      .catch(err => {
-        setLoadingComments(false);
+      const requestData = {
+        objectid: selectedObject.id,
+        objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+        classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
+        props: Object.entries(formValues).map(([id, { value, datatype }]) => {
+          let transformedValue = value;
+
+          switch (datatype) {
+            case 'MFDatatypeMultiSelectLookup':
+              transformedValue = value.join(", ");
+              break;
+            case 'MFDatatypeBoolean':
+              transformedValue = value ? "true" : "false";
+              break;
+            case 'MFDatatypeNumber':
+            case 'MFDatatypeLookup':
+              transformedValue = value.toString();
+              break;
+          }
+
+          return {
+            id: parseInt(id, 10),
+            value: transformedValue,
+            datatype,
+          };
+        }),
+        userID: parseInt(props.mfilesId, 10),
+        vaultGuid: props.selectedVault?.guid || "",
+      };
+
+      await axios.put(
+        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+        requestData,
+        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+      );
+
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully! Changes will be reflected next time item is loaded.");
+      setFormValues({});
+      setPreviewObjectProps([]);
+      setSelectedObject({});
+
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject);
+        } else {
+          previewDocumentObject(selectedObject);
+        }
+      }, 5000);
+
+    } catch (error) {
+      console.error('Error updating object props:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Something went wrong, please try again later!");
+    } finally {
+      setUpdatingObject(false);
+    }
+  };
+
+  const transitionState = async () => {
+    try {
+      setUpdatingObject(true);
+      const data = {
+        vaultGuid: props.selectedVault.guid,
+        objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+        objectId: selectedObject.id,
+        nextStateId: selectedState.id,
+        userID: props.mfilesId
+      };
+      
+      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
+        headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
 
-  }
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject);
+        } else {
+          previewDocumentObject(selectedObject);
+        }
+      }, 5000);
 
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully!");
+    } catch (error) {
+      console.error('Error transitioning state:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Something went wrong, please try again later!");
+    } finally {
+      setUpdatingObject(false);
+    }
+  };
+
+  const addNewWorkflowAndState = async () => {
+    const hasNewWorkflow = Boolean(newWFState?.stateName);
+
+    if (!hasNewWorkflow) {
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Select a workflow state to save.");
+      return;
+    }
+
+    try {
+      setUpdatingObject(true);
+      const data = {
+        vaultGuid: props.selectedVault.guid,
+        objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+        objectId: selectedObject.id,
+        workflowId: newWF.workflowId,
+        stateId: newWFState.stateId,
+        userID: props.mfilesId
+      };
+
+      await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectWorkflowstate`, data, {
+        headers: { accept: '*/*', 'Content-Type': 'application/json' },
+      });
+
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject);
+        } else {
+          previewDocumentObject(selectedObject);
+        }
+      }, 5000);
+
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully!");
+      setNewWF(null);
+      setNewWFState(null);
+    } catch (error) {
+      console.error('Error transitioning state:', error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Something went wrong, please try again later!");
+    } finally {
+      setUpdatingObject(false);
+    }
+  };
+
+  const markAssignmentComplete = async () => {
+    try {
+      await axios.post(`${constants.mfiles_api}/api/objectinstance/ApproveAssignment`, approvalPayload, {
+        headers: {
+          'Accept': '*/*',
+          'Content-Type': 'application/json'
+        }
+      });
+      setApprovalPayload(null);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const updateObjectMetadata = async () => {
+    const hasFormValues = Object.keys(formValues || {}).length > 0;
+    const hasSelectedState = Boolean(selectedState?.title);
+    const hasNewWorkflow = Boolean(newWF?.workflowName);
+
+    if (hasFormValues) {
+      await transformFormValues();
+    }
+
+    if (hasSelectedState) {
+      await transitionState();
+    }
+
+    if (hasNewWorkflow) {
+      await addNewWorkflowAndState();
+    }
+
+    if (approvalPayload) {
+      markAssignmentComplete();
+    }
+
+    await reloadObjectMetadata();
+    setDialogOpen(false);
+    setUpdatingObject(false);
+  };
+
+  const reloadObjectMetadata = async () => {
+    if (selectedObject.objectTypeId === 0) {
+      await previewObject(selectedObject);
+    } else {
+      await previewDocumentObject(selectedObject);
+    }
+  };
+
+  // Event handlers
+  const handleRightClick = (event, item) => {
+    event.preventDefault();
+    setMenuAnchor(event.currentTarget);
+    setMenuItem(item);
+    if ((item.objectID === 0 || item.objectTypeId === 0) && item.isSingleFile === true) {
+      fetchObjectFile(item);
+    }
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setMenuItem(null);
+  };
+
+  const handleCloseDialog = () => setDialogOpen(false);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleAlertClose = () => {
+    setAlertPopOpen(false);
+  };
+
+  const handleSearch = (e) => {
+    resetPreview();
+    setValue(0);
+    e.preventDefault();
+    setLoading(true);
+    
+    props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
+      setLoading(false);
+      setSearched(true);
+      props.setData(data);
+    });
+  };
+
+  const discardChange = () => {
+    setDialogOpen(false);
+    setSelectedState({});
+    setFormValues({});
+    setNewWF(null);
+    setNewWFState(null);
+    setApprovalPayload(null);
+  };
+
+  const toggleSidebar = () => {
+    props.setSidebarOpen(!props.sidebarOpen);
+  };
+
+  const resetPreview = () => {
+    setSelectedItemId(null);
+    setBase64('');
+    setBlob(null);
+    setExtension('');
+    setSelectedObject({});
+    setPreviewObjectProps([]);
+    setComments([]);
+  };
 
   const reloadPage = () => {
     const authTokens = sessionStorage.getItem('authTokens');
@@ -758,72 +653,10 @@ const DocumentList = (props) => {
       sessionStorage.setItem('selectedVault', selectedVault);
     }
 
-
     window.location.reload();
   };
 
-
-  const handleSearch = (e) => {
-    resetPreview()
-    setValue(0)
-    e.preventDefault();
-    setLoading(true)
-    // Trigger a search for documents based on 'searchTerm'
-    props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
-      setLoading(false)
-      setSearched(true)
-      props.setData(data);
-      console.log(data)
-
-    });
-
-  };
-
-  const [alertOpen, setAlertPopOpen] = useState(false);
-  const [severity, setAlertPopSeverity] = useState("success");
-  const [message, setAlertPopMessage] = useState("This is a success message!");
-
-
-
-  const handleAlertClose = () => {
-    setAlertPopOpen(false);
-  };
-
-  // const openApp = async (item) => {
-  //   const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
-  //   //   console.log(url)
-  //   try {
-  //     const response = await axios.get(url);
-  //     const data = response.data;
-  //     // const extension = data[0]?.extension?.toLowerCase();
-  //     const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-
-  //     if (extension === 'pdf' || extension === 'ppt' || extension === 'csv' || extension === 'xlsx' || extension === 'xls' || extension === 'docx' || extension === 'doc' || extension === 'txt') {
-  //       const updatedItem = {
-  //         ...item,
-  //         guid: props.selectedVault.guid,
-  //         extension: extension,
-  //         type: item.objectTypeId ?? item.objectID
-  //       };
-
-
-  //       // Display extension in alert
-
-  //       // Set the object to be edited and open the modal
-  //       setObjectToEditOnOfficeApp(updatedItem);
-  //       setOpenOfficeApp(true);
-  //     } else {
-  //       alert(`This file type ${extension} is not supported for editing.`);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching the extension:', error);
-
-  //   }
-
-  // }
-
   function openApp(item) {
-    // console.log(item)
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
 
@@ -831,6 +664,7 @@ const DocumentList = (props) => {
         const response = await axios.get(url);
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
+        
         if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
@@ -840,83 +674,20 @@ const DocumentList = (props) => {
           });
           setOpenOfficeApp(true);
         }
-      } catch { }
+      } catch (error) {
+        console.error('Error fetching extension:', error);
+      }
     };
     fetchExtension();
   }
 
-
   const handleRowClick = (subItem) => {
-    if (subItem.objectID === 0) {
-      previewSublistObject(subItem, false);
+    if (subItem.objectID === 0 || subItem.objectTypeId === 0) {
+      previewDocumentObject(subItem);
     } else {
-      previewObject(subItem, false);
+      previewObject(subItem);
     }
   };
-
-
-  const restoreObject = async (item) => {
-
-
-    let data = JSON.stringify(
-      {
-        "vaultGuid": `${props.selectedVault.guid}`,
-        "objectId": item.id,
-        "classId": item.classID,
-        "userID": props.mfilesId
-      }
-
-    );
-    // console.log(data)
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${constants.mfiles_api}/api/ObjectDeletion/UnDeleteObject`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: data
-    };
-
-    await axios.request(config)
-      .then((response) => {
-        props.resetViews()
-        setAlertPopOpen(true);
-        setAlertPopSeverity("success");
-        setAlertPopMessage("Object was restored successsfully")
-
-      })
-      .catch((error) => {
-        setOpenAlert(true);
-        setAlertSeverity("error");
-        setAlertMsg("Failed to restore, please try again later");
-
-
-        // console.log(error);
-      });
-
-
-  }
-
-  const toggleSidebar = () => {
-    if (props.sidebarOpen) {
-      props.setSidebarOpen(false)
-    } else {
-      props.setSidebarOpen(true)
-    }
-
-
-  }
-
-  const resetPreview = () => {
-    setSelectedItemId(null);
-    setBase64('')
-    setExtension('')
-    setSelectedObject({});
-    setPreviewObjectProps([]);
-    setComments([])
-
-  }
 
   function toolTipTitle(item) {
     return (
@@ -942,14 +713,12 @@ const DocumentList = (props) => {
     clickTimeout = setTimeout(() => {
       setSelectedItemId(`${item.id}-${item.title}`);
       if ((item.objectTypeId === 0 || item.objectID === 0) && (item.isSingleFile === true)) {
-        previewSublistObject(item, true);
+        previewDocumentObject(item);
       } else {
-        previewObject(item, true);
+        previewObject(item);
       }
-    }, 250); // Delay to allow doubleClick to cancel it
+    }, 250);
   }
-
-
 
   function handleDoubleClick(item) {
     if (clickTimeout) {
@@ -962,95 +731,32 @@ const DocumentList = (props) => {
     }
   }
 
+  const getObjectComments2 = async () => {
+    setLoadingComments(true);
+    let objectID = selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId;
 
+    const url = `${constants.mfiles_api}/api/Comments?ObjectId=${selectedObject.id}&VaultGuid=${props.selectedVault.guid}&ObjectTypeId=${objectID}`;
 
+    try {
+      const response = await axios.get(url, {
+        headers: { 'accept': '*/*' }
+      });
+      setComments(response.data);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  // Layout handlers
   const handleMouseDown = useCallback((e) => {
-    // Only start dragging if the left mouse button is pressed (button 0)
     if (e.button === 0 && !isMobile) {
       setIsDragging(true);
     }
   }, [isMobile]);
 
-
-  const rightClickActions = [
-    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
-      {
-        label: (
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <FileExtIcon
-              fontSize={'24px'}
-              guid={props.selectedVault.guid}
-              objectId={menuItem.id}
-              classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
-            />
-            <span className='mx-2'>Open</span>
-            <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>
-              Open in default application
-            </span>
-          </span>
-        ),
-        onClick: (itm) => {
-          openApp(itm);
-          handleMenuClose();
-        }
-      }
-    ] : []),
-    // ...(menuItem && menuItem.userPermission && menuItem.userPermission.deletePermission ? [
-    //   {
-    //     label: (
-    //         <span style={{fontSize: '12.5px'}}>
-    //         <i className="fa-solid fa-trash-can" style={{ marginRight: '6px', color: '#2757aa' }}></i>
-    //         Delete
-    //       </span>
-    //     ),
-    //     onClick: (itm) => {
-    //       deleteObject(itm);
-    //       handleMenuClose();
-    //     }
-    //   }
-    // ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
-      file?.extension &&
-      [
-        'docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv',
-        'jpg', 'jpeg', 'png', 'gif'
-      ].includes(file.extension.toLowerCase())
-      ? [
-        {
-          label: (
-            <span className='mx-3'>
-              Convert to PDF overwrite Original Copy
-            </span>
-          ),
-          onClick: (itm) => {
-            convertToPDF(itm, true);
-            handleMenuClose();
-          }
-        }
-      ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
-      file?.extension &&
-      [
-        'docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv',
-        'jpg', 'jpeg', 'png', 'gif'
-      ].includes(file.extension.toLowerCase())
-      ? [
-        {
-          label: (
-            <span className='mx-3'>
-              Convert to PDF Keep Original Copy
-            </span>
-          ),
-          onClick: (itm) => {
-            convertToPDF(itm, false);
-            handleMenuClose();
-          }
-        }
-      ] : [])
-  ];
-
-
-
+  // Effects
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -1075,12 +781,9 @@ const DocumentList = (props) => {
         if (!containerWidth) return;
 
         let newCol1Width = (e.clientX / containerWidth) * 100;
-
-        // Clamp width to avoid layout breaking
         newCol1Width = Math.min(90, Math.max(10, newCol1Width));
         const newCol2Width = 100 - newCol1Width;
 
-        // Apply widths
         if (col1Ref.current) col1Ref.current.style.width = `${newCol1Width}%`;
         if (col2Ref.current) col2Ref.current.style.width = `${newCol2Width}%`;
 
@@ -1103,8 +806,50 @@ const DocumentList = (props) => {
     };
   }, [isDragging, isMobile]);
 
-
-
+  // Right click actions
+  const rightClickActions = [
+    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+      {
+        label: (
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <FileExtIcon
+              fontSize={'24px'}
+              guid={props.selectedVault.guid}
+              objectId={menuItem.id}
+              classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+            />
+            <span className='mx-2'>Open</span>
+            <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
+              Open in default application
+            </span>
+          </span>
+        ),
+        onClick: (itm) => {
+          openApp(itm);
+          handleMenuClose();
+        }
+      }
+    ] : []),
+    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+      file?.extension &&
+      ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
+      ? [
+        {
+          label: <span className='mx-3'>Convert to PDF overwrite Original Copy</span>,
+          onClick: (itm) => {
+            convertToPDF(itm, true);
+            handleMenuClose();
+          }
+        },
+        {
+          label: <span className='mx-3'>Convert to PDF Keep Original Copy</span>,
+          onClick: (itm) => {
+            convertToPDF(itm, false);
+            handleMenuClose();
+          }
+        }
+      ] : [])
+  ];
 
   return (
     <>
@@ -1112,7 +857,7 @@ const DocumentList = (props) => {
         open={dialogOpen}
         onClose={handleCloseDialog}
         onConfirm={updateObjectMetadata}
-        uptatingObject={uptatingObject}
+        uptatingObject={updatingObject}
         message={selectedObject.title}
         discardChange={discardChange}
       />
@@ -1133,14 +878,14 @@ const DocumentList = (props) => {
         mfilesId={props.mfilesId}
       />
 
-      { /* Split column section */}
+      {/* Split column section */}
       <Box sx={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         backgroundColor: '#dedddd',
         height: '100vh',
-
       }} ref={containerRef}>
+        
         {/* Object List */}
         <Box
           ref={col1Ref}
@@ -1159,7 +904,7 @@ const DocumentList = (props) => {
             justifyContent: 'space-between',
             px: 1.5,
             py: 1,
-            fontSize: '12.5px',
+            fontSize: '13px',
             backgroundColor: '#fff',
             color: '#1C4690',
             overflow: 'hidden'
@@ -1188,7 +933,8 @@ const DocumentList = (props) => {
               <img
                 src={logo}
                 alt="Logo"
-                width="150"
+                width="auto"
+                height="30"
                 style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
               />
             </Box>
@@ -1212,7 +958,7 @@ const DocumentList = (props) => {
                     width: 36,
                     height: 36,
                     backgroundColor: '#2757aa',
-                    fontSize: '12.5px',
+                    fontSize: '13px',
                   }}
                 />
               </Tooltip>
@@ -1227,8 +973,7 @@ const DocumentList = (props) => {
             p: 1.5
           }}>
             <Box sx={{ display: 'flex', width: '100%' }}>
-
-              {/* Search Input - Now on the LEFT */}
+              {/* Search Input */}
               <Box sx={{ flex: 1 }}>
                 <form onSubmit={handleSearch} style={{ position: 'relative', width: '100%' }}>
                   <input
@@ -1239,7 +984,7 @@ const DocumentList = (props) => {
                     onChange={(e) => props.setSearchTerm(e.target.value)}
                     className="form-control form-control-md rounded-pill"
                     style={{
-                      fontSize: '12.5px',
+                      fontSize: '13px',
                       borderRadius: '6px',
                       width: '100%',
                       paddingRight: '40px'
@@ -1262,12 +1007,13 @@ const DocumentList = (props) => {
                 </form>
               </Box>
 
-              {/* Right Actions - Now on the RIGHT */}
+              {/* Right Actions */}
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-         
-                <AddButtonWithMenu vaultObjectsList={props.vaultObjectsList} fetchItemData={props.fetchItemData} />
+                <AddButtonWithMenu 
+                  vaultObjectsList={props.vaultObjectsList} 
+                  fetchItemData={props.fetchItemData} 
+                />
               </Box>
-
             </Box>
           </Box>
 
@@ -1283,7 +1029,7 @@ const DocumentList = (props) => {
               '& .MuiTab-root': {
                 minHeight: '36px',
                 height: '36px',
-                p: '4px 12.5px',
+                p: '4px 13px',
                 backgroundColor: '#ecf4fc',
                 minWidth: 'auto',
                 textTransform: 'none'
@@ -1329,7 +1075,7 @@ const DocumentList = (props) => {
                 <>
                   <Box sx={{
                     p: 1,
-                    fontSize: '12.5px',
+                    fontSize: '13px',
                     backgroundColor: '#ecf4fc',
                     display: 'flex',
                     alignItems: 'center',
@@ -1347,7 +1093,7 @@ const DocumentList = (props) => {
                     <>
                       <Box sx={{
                         p: 1,
-                        fontSize: '12.5px',
+                        fontSize: '13px',
                         backgroundColor: '#ecf4fc',
                         display: 'flex',
                         alignItems: 'center',
@@ -1362,63 +1108,42 @@ const DocumentList = (props) => {
                           data={props.data}
                           selectedVault={props.selectedVault}
                           mfilesId={props.mfilesId}
-
-                          // Selection Management (optional - component manages internally if not provided)
-                          selectedItemId={selectedItemId}      // 🔶 Optional
-                          setSelectedItemId={setSelectedItemId} // 🔶 Optional
-
-                          // Event Handlers (optional - component has default behavior)
-                          onItemClick={handleClick}            // 🔶 Optional
-                          onItemDoubleClick={handleDoubleClick} // 🔶 Optional  
-                          onItemRightClick={handleRightClick}  // 🔶 Optional
-                          onRowClick={handleRowClick}          // 🔶 Optional
-                          downloadFile={downloadFile}          // 🔶 Optional
-                          getTooltipTitle={toolTipTitle}       // 🔶 Optional
-
-                          // Customization (optional - has sensible defaults)
-                          headerTitle="Search Results"         // 🔶 Optional
-                          nameColumnLabel="Name"               // 🔶 Optional
-                          dateColumnLabel="Date Modified"      // 🔶 Optional
+                          selectedItemId={selectedItemId}
+                          setSelectedItemId={setSelectedItemId}
+                          onItemClick={handleClick}
+                          onItemDoubleClick={handleDoubleClick}
+                          onItemRightClick={handleRightClick}
+                          onRowClick={handleRowClick}
+                          getTooltipTitle={toolTipTitle}
+                          headerTitle="Search Results"
+                          nameColumnLabel="Name"
+                          dateColumnLabel="Date Modified"
                         />
                       ) : (
-                        <>
-                          <Box sx={{
-                            p: 2,
-                            fontSize: '12.5px',
-                            backgroundColor: '#ecf4fc',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            color: '#333'
-                          }}>
-                            <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#1C4690' }} />
-                            Search Results
-                          </Box>
-                          <Box sx={{
-                            width: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            p: 3,
-                            backgroundColor: '#fff'
-                          }}>
-                            <i className="fa-solid fa-search" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
-                            <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
-                              No Results Found
-                            </Typography>
-                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
-                              Please try a different search parameter
-                            </Typography>
-                          </Box>
-                        </>
+                        <Box sx={{
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: 3,
+                          backgroundColor: '#fff'
+                        }}>
+                          <i className="fa-solid fa-search" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                            No Results Found
+                          </Typography>
+                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                            Please try a different search parameter
+                          </Typography>
+                        </Box>
                       )}
                     </>
                   ) : (
                     <ViewsList
                       selectedFileId={selectedFileId}
                       viewableobjects={props.viewableobjects}
-                      previewSublistObject={previewSublistObject}
+                      previewDocumentObject={previewDocumentObject}
                       selectedObject={selectedObject}
                       loadingobjects={loadingobjects}
                       selectedVault={props.selectedVault}
@@ -1433,7 +1158,6 @@ const DocumentList = (props) => {
                       resetPreview={resetPreview}
                       setSelectedItemId={setSelectedItemId}
                       selectedItemId={selectedItemId}
-                      downloadFile={downloadFile}
                       reloadPage={reloadPage}
                       selectedViewObjects={selectedViewObjects}
                       setSelectedViewObjects={setSelectedViewObjects}
@@ -1443,15 +1167,13 @@ const DocumentList = (props) => {
                       handleRightClick={handleRightClick}
                       handleClick={handleClick}
                       handleRowClick={handleRowClick}
-
-
                     />
                   )}
                 </>
               )}
             </CustomTabPanel>
 
-            {/* Other Tab Panels with similar optimization pattern */}
+            {/* Other Tab Panels */}
             {[1, 2, 3].map((tabIndex) => {
               const dataKey = tabIndex === 1 ? 'recentData' : tabIndex === 2 ? 'assignedData' : 'deletedData';
               const title = tabIndex === 1 ? 'Recent' : tabIndex === 2 ? 'Assigned' : 'Deleted By Me';
@@ -1469,7 +1191,7 @@ const DocumentList = (props) => {
                     <>
                       <Box sx={{
                         p: 1,
-                        fontSize: '12.5px',
+                        fontSize: '13px',
                         backgroundColor: '#ecf4fc',
                         display: 'flex',
                         alignItems: 'center',
@@ -1477,19 +1199,17 @@ const DocumentList = (props) => {
                         color: '#333'
                       }}>
                         <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
-                        {title} ({props[dataKey].length})
+                        {title} ({props[dataKey]?.length || 0})
                       </Box>
                       <Loader />
                     </>
-
                   ) : (
                     <>
-                      {props[dataKey].length > 0 ? (
+                      {props[dataKey]?.length > 0 ? (
                         <>
-                          {/* Header */}
                           <Box sx={{
                             p: 1,
-                            fontSize: '12.5px',
+                            fontSize: '13px',
                             backgroundColor: '#ecf4fc',
                             display: 'flex',
                             alignItems: 'center',
@@ -1503,28 +1223,23 @@ const DocumentList = (props) => {
                             data={props[dataKey]}
                             selectedVault={props.selectedVault}
                             mfilesId={props.mfilesId}
-                            // Selection Management (optional - component manages internally if not provided)
-                            selectedItemId={selectedItemId}      // 🔶 Optional
-                            setSelectedItemId={setSelectedItemId} // 🔶 Optional
-                            // Event Handlers (optional - component has default behavior)
-                            onItemClick={handleClick}            // 🔶 Optional
-                            onItemDoubleClick={handleDoubleClick} // 🔶 Optional  
-                            onItemRightClick={handleRightClick}  // 🔶 Optional
-                            onRowClick={handleRowClick}          // 🔶 Optional
-                            downloadFile={downloadFile}          // 🔶 Optional
-                            getTooltipTitle={toolTipTitle}       // 🔶 Optional
-
-                            // Customization (optional - has sensible defaults)
-                            headerTitle="Search Results"         // 🔶 Optional
-                            nameColumnLabel="Name"               // 🔶 Optional
-                            dateColumnLabel="Date Modified"      // 🔶 Optional
+                            selectedItemId={selectedItemId}
+                            setSelectedItemId={setSelectedItemId}
+                            onItemClick={handleClick}
+                            onItemDoubleClick={handleDoubleClick}
+                            onItemRightClick={handleRightClick}
+                            onRowClick={handleRowClick}
+                            getTooltipTitle={toolTipTitle}
+                            headerTitle="Search Results"
+                            nameColumnLabel="Name"
+                            dateColumnLabel="Date Modified"
                           />
                         </>
                       ) : (
                         <>
                           <Box sx={{
                             p: 1,
-                            fontSize: '12.5px',
+                            fontSize: '13px',
                             backgroundColor: '#ecf4fc',
                             display: 'flex',
                             alignItems: 'center',
@@ -1542,13 +1257,12 @@ const DocumentList = (props) => {
                             justifyContent: 'center',
                             p: 3,
                             backgroundColor: '#fff'
-                          }}> 
+                          }}>
                             <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
-                          
                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                               No Results Found
                             </Typography>
-                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
+                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
                               {emptySubtitle}
                             </Typography>
                           </Box>
@@ -1604,7 +1318,7 @@ const DocumentList = (props) => {
             selectedState={selectedState}
             setSelectedState={setSelectedState}
             currentState={currentState}
-            selectedObkjWf={selectedObkjWf}
+            selectedObkjWf={selectedObjWf}
             transformFormValues={transformFormValues}
             formValues={formValues}
             setFormValues={setFormValues}
@@ -1616,6 +1330,7 @@ const DocumentList = (props) => {
             selectedObject={selectedObject}
             extension={extension}
             base64={base64}
+            blob={blob}
             loadingobjects={loadingobjects}
             loadingfile={loadingfile}
             loadingobject={loadingobject}
@@ -1649,4 +1364,3 @@ const DocumentList = (props) => {
 };
 
 export default DocumentList;
-

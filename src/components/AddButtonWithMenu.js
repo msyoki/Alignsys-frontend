@@ -43,7 +43,7 @@ const AddButtonWithMenu = (props) => {
             sx: {
               padding: 0,
               marginTop: 0,
-              borderRadius: '4px',
+          
               width: '220px',
             },
             className: 'no-menu-padding',

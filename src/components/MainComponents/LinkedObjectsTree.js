@@ -31,7 +31,7 @@ function useSessionState(key, defaultValue) {
 
 // Optimized constants with minimal spacing
 const TREE_ITEM_STYLES = {
-  ml: 1, // Reduced from 12.5px to 8px
+  ml: 1, // Reduced from 13px to 8px
   backgroundColor: '#fff',
   "&:hover": { backgroundColor: "#fff !important" },
   "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
@@ -101,7 +101,6 @@ const TreeSubItem = memo(({
   onRightClick,
   onItemClick,
   isDocument,
-  downloadFile,
   parentKey // Add this new prop to ensure uniqueness
 }) => {
   const toolTipTitle = useMemo(() => (
@@ -193,7 +192,7 @@ const TreeSubItem = memo(({
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    fontSize: '12.5px'
+                    fontSize: '13px'
                   }}
                 >
                   {subItem.title}
@@ -209,7 +208,7 @@ const TreeSubItem = memo(({
 
               {/* Date flexed to the end */}
               <Box sx={{
-                fontSize: '12.5px',
+                fontSize: '13px',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 marginLeft: 'auto'  // This pushes the date to the far right
@@ -221,7 +220,6 @@ const TreeSubItem = memo(({
           {isDocument && !isSingleFile && (
             <MultifileFiles
               item={subItem}
-              downloadFile={downloadFile}
               selectedItemId={selectedItemId}
               setSelectedItemId={setSelectedItemId}
               selectedVault={selectedVault}
@@ -242,7 +240,6 @@ const LinkedObjectsTree = ({
   handleRowClick,
   setSelectedItemId,
   selectedItemId,
-  downloadFile
 }) => {
   const [linkedObjects, setLinkedObjects] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -417,7 +414,7 @@ const LinkedObjectsTree = ({
               classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
             />
             <Box>Open</Box>
-            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12.5px' }}>
+            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '13px' }}>
               Open in default application
             </Box>
           </Box>
@@ -471,7 +468,7 @@ const LinkedObjectsTree = ({
           itemId="loading"
           label={
             <Box >
-              <span className="loading-indicator text-muted">
+              <span className="loading-indicator text-muted" style={{ fontSize: '11.5px', color: 'black' }}>
                 Searching Relationships<span>.</span><span>.</span><span>.</span>
               </span>
             </Box>
@@ -494,10 +491,10 @@ const LinkedObjectsTree = ({
                     ...BOX_STYLES
                   }}>
                     <i className="fa-regular fa-folder-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                    <Box sx={{ fontSize: '12.5px' }}>
+                    <Box sx={{ fontSize: '13px' }}>
                       {obj.propertyName?.replace(/\(s\)/g, '')}
                     </Box>
-                    <Box sx={{ fontSize: '12.5px', color: '#666' }}>
+                    <Box sx={{ fontSize: '13px', color: '#666' }}>
                       ({obj.items?.length})
                     </Box>
                   </Box>
@@ -513,7 +510,6 @@ const LinkedObjectsTree = ({
                     onRightClick={handleRightClick}
                     onItemClick={handleItemClick}
                     isDocument={false}
-                    downloadFile={downloadFile}
                     parentKey={`obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                   />
                 ))}
@@ -534,9 +530,9 @@ const LinkedObjectsTree = ({
                   ...BOX_STYLES
                 }}>
                   <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                  <Box sx={{ fontSize: '12.5px' }}>Document</Box>
+                  <Box sx={{ fontSize: '13px' }}>Document</Box>
                   {documents.map((doc) => (
-                    <Box key={doc.propertyName} sx={{ fontSize: '12.5px', color: '#666' }}>
+                    <Box key={doc.propertyName} sx={{ fontSize: '13px', color: '#666' }}>
                       ({doc.items.length})
                     </Box>
                   ))}
@@ -554,7 +550,6 @@ const LinkedObjectsTree = ({
                     onRightClick={handleRightClick}
                     onItemClick={handleItemClick}
                     isDocument={true}
-                    downloadFile={downloadFile}
                     parentKey={`doc-${docIndex}`}
                   />
                 ))

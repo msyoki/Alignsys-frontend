@@ -60,8 +60,9 @@ import { toSentenceCase, toUpperCase } from '../components/Utils/Utils';
 
 // Constants and utilities
 import * as constants from '../components/Auth/configs';
-import logo from '../images/TechEdgeLogo.png';
+import logo from '../images/ZFBLU.png';
 import VaultFormDialog from '../components/Modals/AddVaultModal';
+import AttachExistingVault from '../components/AttachExistingVault';
 
 // ============= CONSTANTS =============
 const STANDARD_FONT_FAMILY = "'Segoe UI', 'Roboto', 'Arial', sans-serif";
@@ -223,6 +224,7 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                                 width: "auto",
                                 maxHeight: "30px",
                                 objectFit: "contain",
+
                             }}
                         />
                     </div>
@@ -363,6 +365,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                     <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group
                 </small>
             </Button>
+
             <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
                 <TableHead>
                     <TableRow className='my-3'>
@@ -866,6 +869,7 @@ function AdminDashboard() {
                             }}>
                                 <span>Organization: <span style={{ color: '#2757aa' }}>{user.organization}</span></span>
                             </div>
+                         
 
                             {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
                                 <span style={{ fontSize: '14px' }} className='text-dark'>Login Accounts ({organizationusers.length})</span>
@@ -878,6 +882,8 @@ function AdminDashboard() {
                             {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
                                 <span style={{ fontSize: '14px' }} className='text-dark'>Repository/repositories ({user.vaultcount})</span>
                             </HeaderBox> */}
+                            {/* Superadmin Register Vault Button */}
+
 
                             <div style={{ fontSize: '13px', overflowY: 'auto' }}>
 
@@ -913,7 +919,6 @@ function AdminDashboard() {
                                     user={user}
                                 />
                             </div>
-
 
 
                             <Box sx={{ minHeight: 352, minWidth: 250 }}>
@@ -962,7 +967,11 @@ function AdminDashboard() {
                                     </TreeItem>
 
                                 </SimpleTreeView>
+                           
                             </Box>
+
+
+
 
                         </div>
 

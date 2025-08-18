@@ -71,7 +71,7 @@ const VaultSelectForm = ({ onVaultChange }) => {
         }}
       >
         <MenuItem value="" disabled>
-          <span  style={{ fontSize: '12px' }}>Switch selcted vault</span>
+          <span  style={{ fontSize: '12px' }}>Please Select a Repository</span>
         </MenuItem>
         {vaults.map((vault) => (
           <MenuItem key={vault.guid} value={vault.guid}>

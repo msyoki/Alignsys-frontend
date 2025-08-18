@@ -118,12 +118,7 @@ const MultifileFiles = React.memo((props) => {
         "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
     }), []);
 
-    // Memoized download handler to prevent recreation
-    const handleDownload = useCallback((fileID) => {
-        if (props.downloadFile) {
-            props.downloadFile(fileID, props.item);
-        }
-    }, [props.downloadFile, props.item]);
+
 
     // Handle expand/collapse
     const handleExpandedItemsChange = useCallback((event, itemIds) => {
@@ -141,7 +136,6 @@ const MultifileFiles = React.memo((props) => {
                     key={doc.fileID || index}
                     itemId={itemId}
                     onClick={() => {
-                        handleDownload(doc.fileID); 
                         props.setSelectedItemId(`${doc.fileID}-${doc.fileTitle}`)
                     }}
                     sx={treeItemStyles}
@@ -181,7 +175,7 @@ const MultifileFiles = React.memo((props) => {
                 />
             );
         });
-    }, [documents, props.selectedItemId, getIcon, handleDownload, treeItemStyles]);
+    }, [documents, props.selectedItemId, getIcon, treeItemStyles]);
 
     // Memoized loading component
     const loadingComponent = useMemo(() => (

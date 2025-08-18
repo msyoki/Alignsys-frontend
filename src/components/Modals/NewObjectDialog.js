@@ -1022,6 +1022,7 @@ const NewObjectDialog = (props) => {
                 setAlertMsg("Error submitting form. Please try again.");
             }
         }
+       
     }, [filteredProperties, props, uploadedFile, closeFormDialog]);
 
     const handleSearchTermChange = useCallback((event) => {

@@ -132,7 +132,7 @@ function LoginActivityTable(props) {
                 </Button>
             </div>
 
-            <TableContainer className="shadow-lg">
+            <TableContainer className="shadow-lg" sx={{ maxHeight: 450, minHeight: 450 }}>
                 <Table stickyHeader className="table table-sm table-responsive p-2">
                     <TableHead className="bg-white">
                         <TableRow>

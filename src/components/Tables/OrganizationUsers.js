@@ -22,7 +22,8 @@ function OrganizationUsersTable(props) {
 <TableContainer
   className='shadow-lg'
   sx={{
-    maxHeight: '60vh', // sets the scrollable limit
+    maxHeight: 450,
+    minHeight: 450,
     overflowY: 'auto'
   }}
 >

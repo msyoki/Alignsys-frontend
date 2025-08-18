@@ -778,7 +778,7 @@ function SuperAdminDashboard() {
 
     return (
         <>
-            <VaultFormDialog open={addNewVault} onClose={() => setAddNewVault(false)} />
+            {/* <VaultFormDialog open={addNewVault} onClose={() => setAddNewVault(false)} /> */}
 
             <div className="dashboard" style={{ fontFamily: STANDARD_FONT_FAMILY, fontSize: STANDARD_FONT_SIZE }}>
                 <Sidebar

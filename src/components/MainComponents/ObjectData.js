@@ -7,16 +7,17 @@ import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../CustomFormTags/UpdateObjectLookupMultiSelect';
 import LookupSelect from '../CustomFormTags/UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup ,CircularProgress} from '@mui/material';
 import Bot from '../Bot/Bot';
 
-import CommentsComponent from '../ObjectComments';
+import CommentsComponent from '../CommentsComponent';
 import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
 import BotLLM from '../Bot/BotLLM';
+import { ResizableTextarea } from '../CustomFormTags/ResizableTextArea';
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -190,6 +191,7 @@ const ObjectData = (props) => {
   }, [props.selectedObkjWf, props.selectedState, props.setSelectedState]);
 
   const handleInputChange = useCallback((id, newValues, datatype) => {
+    console.log(newValues)
     props.setFormValues(prevFormValues => {
       const newFormValues = { ...(prevFormValues || {}) };
       if (datatype === 'MFDatatypeMultiSelectLookup') {
@@ -204,44 +206,30 @@ const ObjectData = (props) => {
     });
   }, [props.setFormValues]);
 
-  const downloadBase64File = useCallback((base64, ext, fileName) => {
+ 
+  const handleDownload = (blob, ext, fileName) => {
+    if (!blob) return;
+
     try {
-      const byteCharacters = atob(base64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const mimeTypes = {
-        pdf: "application/pdf",
-        png: "image/png",
-        jpg: "image/jpeg",
-        jpeg: "image/jpeg",
-        txt: "text/plain",
-        doc: "application/msword",
-        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        xls: "application/vnd.ms-excel",
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        ppt: "application/vnd.ms-powerpoint",
-        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        mp4: "video/mp4",
-        mp3: "audio/mpeg",
-        csv: "text/csv"
-      };
-      const mimeType = mimeTypes[ext.toLowerCase()] || "application/octet-stream";
-      const blob = new Blob([byteArray], { type: mimeType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${fileName}.${ext}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch {
-      alert("Failed to download the file. Please try again.");
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.${ext}`;
+
+      // Append to document, trigger click, then remove
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Free up memory
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
     }
-  }, []);
+  };
 
   const filteredProps = useMemo(() =>
     props.previewObjectProps.filter(item =>
@@ -360,27 +348,34 @@ const ObjectData = (props) => {
   }, [props.formValues, renderValue, handleInputChange, getInputStyle, renderLinkOrText]);
 
   const renderTextarea = useCallback((item) => (
-    <textarea
-      ref={(el) => {
-        if (el) {
-          const autoResize = () => {
-            el.style.height = 'auto';
-            el.style.height = Math.max(48, el.scrollHeight) + 'px';
-          };
-          setTimeout(autoResize, 0);
-          el.addEventListener('input', autoResize);
-        }
-      }}
-      placeholder={renderValue(item.value)}
-      value={props.formValues?.[item.id]?.value || ''}
-      onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
-      className="form-control"
-      disabled={item.isAutomatic}
-      style={{
-        ...getInputStyle(item.isAutomatic),
-        ...textareaStyle,
-      }}
-    />
+    // <textarea
+    //   ref={(el) => {
+    //     if (el) {
+    //       const autoResize = () => {
+    //         el.style.height = 'auto';
+    //         el.style.height = Math.max(48, el.scrollHeight) + 'px';
+    //       };
+    //       setTimeout(autoResize, 0);
+    //       el.addEventListener('input', autoResize);
+    //     }
+    //   }}
+    //   placeholder={renderValue(item.value)}
+    //   value={props.formValues?.[item.id]?.value || ''}
+    //   onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype)}
+    //   className="form-control"
+    //   disabled={item.isAutomatic}
+    //   style={{
+    //     ...getInputStyle(item.isAutomatic),
+    //     ...textareaStyle,
+    //   }}
+    // />
+    <ResizableTextarea 
+      item={item}
+      props={props}
+      handleInputChange={handleInputChange}
+      renderValue={ renderValue}
+      getInputStyle ={getInputStyle}
+      />
   ), [props.formValues, renderValue, handleInputChange, getInputStyle, textareaStyle]);
 
   const renderDateTimeInput = useCallback((item, type = 'date') => (
@@ -682,7 +677,7 @@ const ObjectData = (props) => {
                 <i className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingobject ? (
                   <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
-                    Loading metadata<span>.</span><span>.</span><span>.</span>
+                    <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Loading metadata<span>.</span><span>.</span><span>.</span>
                   </Typography>
                  
                 ) : (
@@ -803,11 +798,11 @@ const ObjectData = (props) => {
                         </Box>
                       </Tooltip>
                     )}
-                    {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && (
+                    {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 &&  props.blob && (
                       <Tooltip title="Download document">
                         <i
                           className="fas fa-download"
-                          onClick={() => downloadBase64File(props.base64, props.extension, props.selectedObject.title)}
+                          onClick={() => handleDownload(props.blob, props.extension, props.selectedObject.title)}
                           style={{
                             fontSize: '20px',
                             cursor: 'pointer',
@@ -1139,7 +1134,7 @@ const ObjectData = (props) => {
             )}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1} style={{ backgroundColor: '#fff', padding: '0%', width: '100%' }}>
-            {props.base64 && !props.loadingfile ? (
+            {props.blob && !props.loadingfile? (
               <DynamicFileViewer
                 base64Content={props.base64}
                 fileExtension={props.extension}
@@ -1151,6 +1146,7 @@ const ObjectData = (props) => {
                 selectedObject={props.selectedObject}
                 windowWidth={props.windowWidth}
                 mfilesId={props.mfilesId}
+                blob={props.blob}
               />
             ) : (
               <Box
@@ -1167,9 +1163,9 @@ const ObjectData = (props) => {
                 <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingfile ? (
                   <>
-                    <Typography variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
+                    <Typography component="div" variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                        Buffering file<span>.</span><span>.</span><span>.</span>
+                         <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Buffering file<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
@@ -1190,8 +1186,8 @@ const ObjectData = (props) => {
             )}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2} style={{ backgroundColor: '#fff', padding: '0%', width: '100%' }}>
-            {props.base64 && props.extension === 'pdf' ? (
-              <Bot base64={props.base64} objectTitle={props.selectedObject.title} messages={messages} setMessages={setMessages} />
+            {props.blob && props.extension === "pdf" ? (
+              <Bot blob={props.blob} objectTitle={props.selectedObject.title} messages={messages} setMessages={setMessages} file_ext={props.extension} />
             ) : (
               <Box
                 sx={{
@@ -1207,9 +1203,9 @@ const ObjectData = (props) => {
                 <i className="fa-brands fa-android my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingfile ? (
                   <>
-                    <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
+                    <Typography component="div" variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                        Starting chat<span>.</span><span>.</span><span>.</span>
+                          <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Starting chat<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
@@ -1258,7 +1254,7 @@ const ObjectData = (props) => {
                   <div style={{ fontSize: '16px', marginBottom: '8px' }}>
                     {props.loadingcomments ? (
                       <div className="loading-indicator text-dark">
-                        Loading comments <span>.</span><span>.</span><span>.</span>
+                         <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Loading comments <span>.</span><span>.</span><span>.</span>
                       </div>
                     ) : (
                       <>

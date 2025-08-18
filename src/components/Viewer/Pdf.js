@@ -4,6 +4,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { Tooltip, Box } from '@mui/material';
 import LoadingDialog from '../Loaders/LoaderDialog';
 import SignButton from '../SignDocument';
+import { Typography, CircularProgress } from "@mui/material";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -136,45 +137,71 @@ const PDFViewerPreview = (props) => {
   }, [pageDimensions]);
 
   // Download handler
-  const handleDownload = useCallback((base64, ext, fileName) => {
+  // const handleDownload = useCallback((blob, ext, fileName) => {
+  //   try {
+  //     const byteCharacters = atob(base64);
+  //     const byteNumbers = new Array(byteCharacters.length);
+  //     for (let i = 0; i < byteCharacters.length; i++) {
+  //       byteNumbers[i] = byteCharacters.charCodeAt(i);
+  //     }
+  //     const byteArray = new Uint8Array(byteNumbers);
+  //     const mimeTypes = {
+  //       pdf: "application/pdf",
+  //       png: "image/png",
+  //       jpg: "image/jpeg",
+  //       jpeg: "image/jpeg",
+  //       txt: "text/plain",
+  //       doc: "application/msword",
+  //       docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  //       xls: "application/vnd.ms-excel",
+  //       xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //       ppt: "application/vnd.ms-powerpoint",
+  //       pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  //       mp4: "video/mp4",
+  //       mp3: "audio/mpeg",
+  //       csv: "text/csv"
+  //     };
+  //     const mimeType = mimeTypes[ext.toLowerCase()] || "application/octet-stream";
+  //     const blob = new Blob([byteArray], { type: mimeType });
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.setAttribute("download", `${fileName}.${ext}`);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   } catch (error) {
+  //     console.error("Error downloading the file:", error);
+  //     alert("Failed to download the file. Please try again.");
+  //   }
+  // }, []);
+  const handleDownload = (blob, ext, fileName) => {
+    if (!blob) return;
+
     try {
-      const byteCharacters = atob(base64);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const mimeTypes = {
-        pdf: "application/pdf",
-        png: "image/png",
-        jpg: "image/jpeg",
-        jpeg: "image/jpeg",
-        txt: "text/plain",
-        doc: "application/msword",
-        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        xls: "application/vnd.ms-excel",
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        ppt: "application/vnd.ms-powerpoint",
-        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        mp4: "video/mp4",
-        mp3: "audio/mpeg",
-        csv: "text/csv"
-      };
-      const mimeType = mimeTypes[ext.toLowerCase()] || "application/octet-stream";
-      const blob = new Blob([byteArray], { type: mimeType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${fileName}.${ext}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.${ext}`;
+
+      // Append to document, trigger click, then remove
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Free up memory
+      URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading the file:", error);
-      alert("Failed to download the file. Please try again.");
+      console.error("Error downloading file:", error);
     }
-  }, []);
+  };
+
+
+
 
   // Keyboard navigation
   useEffect(() => {
@@ -238,6 +265,8 @@ const PDFViewerPreview = (props) => {
       prevWidthRef.current = props.windowWidth;
     }
   }, [props.windowWidth, props.document]);
+
+
 
   // Memoized title
   const trimTitle = useCallback((title) => {
@@ -307,7 +336,7 @@ const PDFViewerPreview = (props) => {
           </div>
           {/* Download PDF */}
           <Tooltip title="Download PDF">
-            <i onClick={() => handleDownload(props.base64Content, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+            <i onClick={() => handleDownload(props.blob, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
           </Tooltip>
           {/* Sign PDF */}
           <Tooltip title="Digitally Sign Copy">
@@ -328,7 +357,48 @@ const PDFViewerPreview = (props) => {
       <div className="pdf-viewer-container">
         {isAsideOpen && (
           <aside className={`pdf-thumbnail-panel ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
-            <Document className="pdf-container" file={props.document}>
+            <Document className="pdf-container" file={props.fileUrl} loading={<Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                color: "text.primary",
+                fontSize: "14px",
+                animation: "fadeIn 0.3s ease-in-out",
+                "@keyframes fadeIn": {
+                  from: { opacity: 0 },
+                  to: { opacity: 1 },
+                },
+              }}
+            >
+              <CircularProgress size={20} thickness={4} />
+              <Typography
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "2px",
+                  fontWeight: 500,
+                }}
+              >
+                Loading PDF
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    animation: "dots 1.5s steps(4, end) infinite",
+                    "@keyframes dots": {
+                      "0%": { content: '"."' },
+                      "25%": { content: '".."' },
+                      "50%": { content: '"..."' },
+                      "75%": { content: '""' },
+                    },
+                  }}
+                >
+                  ...
+                </Box>
+              </Typography>
+            </Box>}
+              error={<div>Error loading PDF!</div>} >
               {[...Array(numPages).keys()].map((pageIndex) => (
                 <div
                   key={`thumbnail_${pageIndex + 1}`}
@@ -353,11 +423,49 @@ const PDFViewerPreview = (props) => {
         <main className="pdf-main-viewer scrollbar-custom" ref={mainContainerRef}>
           <Document
             className="pdf-container"
-            file={props.document}
+            file={props.fileUrl}
             onLoadSuccess={onDocumentLoadSuccess}
-            loading={<div className="loading-indicator text-dark">
-              Loading PDF<span>.</span><span>.</span><span>.</span>
-            </div>}
+            loading={<Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                color: "text.primary",
+                fontSize: "14px",
+                animation: "fadeIn 0.3s ease-in-out",
+                "@keyframes fadeIn": {
+                  from: { opacity: 0 },
+                  to: { opacity: 1 },
+                },
+              }}
+            >
+              <CircularProgress size={20} thickness={4} />
+              <Typography
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "2px",
+                  fontWeight: 500,
+                }}
+              >
+                Loading PDF
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    animation: "dots 1.5s steps(4, end) infinite",
+                    "@keyframes dots": {
+                      "0%": { content: '"."' },
+                      "25%": { content: '".."' },
+                      "50%": { content: '"..."' },
+                      "75%": { content: '""' },
+                    },
+                  }}
+                >
+                  ...
+                </Box>
+              </Typography>
+            </Box>}
             error={<div>Error loading PDF!</div>}
           >
             {[...Array(numPages).keys()].map((pageIndex) => (

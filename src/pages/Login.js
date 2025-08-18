@@ -170,7 +170,7 @@ const Login = () => {
               }}
             >
 
-              {miniLoader ? 'Logging in ...' : 'LOGIN'}
+              {miniLoader ? 'Authenticating ...' : 'LOGIN'}
             </Button>
 
             <p className="mt-3" style={{ fontSize: '13px' }}>

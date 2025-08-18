@@ -12,7 +12,7 @@ const FileExtIcon = (props) => {
   const [is400, setIs400] = useState(false);
 
   useEffect(() => {
-
+  
     let isMounted = true;
     const controller = new AbortController();
 
@@ -25,6 +25,7 @@ const FileExtIcon = (props) => {
 
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
+  
       try {
         const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
@@ -65,7 +66,6 @@ const FileExtIcon = (props) => {
 
   if (is400) {
     // Show book icon if 400 error
-    console.log(`${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`)
     return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
     
   }

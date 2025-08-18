@@ -1,16 +1,34 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
-import logo from '../images/ZFBLU.png';
+import {
+  Container,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import logo from '../images/ZFWHITE.png';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
 import axios from 'axios';
+import AttachExistingVault from '../components/AttachExistingVault';
 
 const VaultSelectForm = () => {
   const { authTokens, user } = useContext(Authcontext);
   const [selectedVaultGuid, setSelectedVaultGuid] = useState('');
-
   const [vaults, setVaults] = useState([]);
+
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,8 +47,11 @@ const VaultSelectForm = () => {
       }
     };
 
+
+
     fetchUserVaults();
-  }, [authTokens.access]);
+    // fetchOrganizations();
+  }, [authTokens.access, user.is_superuser]);
 
   const handleVaultChange = (event) => {
     const value = event.target.value;
@@ -44,6 +65,9 @@ const VaultSelectForm = () => {
   };
 
 
+  const handleAdminDashboard = () => {
+    navigate('/admin');
+  };
 
   return (
     <div style={{ backgroundColor: '#fff' }}>
@@ -59,7 +83,7 @@ const VaultSelectForm = () => {
       >
         <Box
           component="form"
-          className="shadow-lg bg-white text-dark"
+          className="shadow-lg text-dark"
           sx={{
             width: '100%',
             display: 'flex',
@@ -73,26 +97,40 @@ const VaultSelectForm = () => {
           }}
         >
           <Box
-            component="img"
-            src={logo}
-            alt="Logo"
+            component="form"
+            className="shadow-lg "
             sx={{
-              my: 2,
-              maxWidth: '100%',
-              width: { xs: '180px', sm: '250px', md: '300px' }, // Responsive sizes
+              backgroundColor: '#2757aa',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid white',
+              borderRadius: 2,
+              p: 2,
+              fontSize: '13px',
             }}
-          />
-
-          <p className="text-dark text-center" style={{ fontSize: '13px' }}>
-            Welcome back{' '}
-            <span style={{ color: '#1C4690' }}>
-              {user.first_name} {user.last_name}
-            </span>
-            , please select a vault below
-          </p>
+          >
+            <Box
+              component="img"
+              src={logo}
+              alt="Logo"
+              sx={{
+                my: 2,
+                maxWidth: '100%',
+                width: { xs: '180px', sm: '250px', md: '300px' },
+              }}
+            />
+            <p className="text-white text-center" style={{ fontSize: '13px' }}>
+              Welcome back{' '}
+              <span style={{ color: '#fff' }}>
+                {user.first_name} {user.last_name}
+              </span>
+            </p>
+          </Box>
 
           <FormControl fullWidth className="my-3" sx={{ fontSize: '13px' }}>
-
             <Select
               value={selectedVaultGuid}
               onChange={handleVaultChange}
@@ -107,7 +145,7 @@ const VaultSelectForm = () => {
               inputProps={{ 'aria-label': 'Select Vault' }}
             >
               <MenuItem value="" disabled>
-                <span style={{ fontSize: '14px' }}>Please select a vault</span>
+                <span style={{ fontSize: '14px' }}>Choose a Repository to Access</span>
               </MenuItem>
               {vaults.map((vault) => (
                 <MenuItem
@@ -115,21 +153,40 @@ const VaultSelectForm = () => {
                   value={vault.guid}
                   sx={{ fontSize: '14px' }}
                 >
-                  <i className="fa-solid  fa-database me-2" style={{ color: '#1C4690' }}></i> {vault.name}
+                  <i className="fa-solid fa-database me-2" style={{ color: '#2757aa' }}></i> {vault.name}
                 </MenuItem>
               ))}
             </Select>
-
-
           </FormControl>
 
 
+         <AttachExistingVault authTokens={authTokens} user={user}/>
+
+          {/* Admin Dashboard Button */}
+          {user.is_admin && (
+            <Button
+              variant="outlined"
+              onClick={handleAdminDashboard}
+              sx={{
+                mt: 2,
+                color: '#2757aa',
+                borderColor: '#2757aa',
+                fontSize: '12px',
+                '&:hover': {
+                  backgroundColor: '#2757aa',
+                  color: 'white',
+                },
+              }}
+            >
+              <i className="fa-solid fa-cog me-2"></i>
+              Admin Dashboard
+            </Button>
+          )}
         </Box>
       </Container>
+
+
     </div>
-
-
-
   );
 };
 

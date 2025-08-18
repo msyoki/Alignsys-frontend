@@ -167,21 +167,21 @@ const PDFViewerPreview = (props) => {
             <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
                 <div className="d-flex align-items-center flex-wrap gap-2">
                     {/* Page Navigation */}
-                    <span className="d-flex align-items-center text-dark" style={{ fontSize: '13px' }}>
+                    <span className="d-flex align-items-center text-dark" style={{ fontSize: '12.5px' }}>
                         Page
                         <input
                             type="number"
                             value={pageNumber}
                             onChange={handlePageInputChange}
                             className="mx-2 form-control form-control-sm"
-                            style={{ width: '50px', padding: '2px 6px', fontSize: '13px' }}
+                            style={{ width: '50px', padding: '2px 6px', fontSize: '12.5px' }}
                         />
                         / {numPages}
                     </span>
                     {/* Zoom Controls */}
                     <div className="d-flex align-items-center gap-2 mx-3">
                         <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
-                        <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                        <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
                             {Math.round(zoom * 100)}%
                         </span>
                         <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />

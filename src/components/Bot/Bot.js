@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
-import { Box, Tooltip } from '@mui/material';
+import { Box, Tooltip, MenuItem, FormControl, Select } from '@mui/material';
 import axios from 'axios';
 import '../../styles/Bot.css';
 
 // Lazy load heavy dependencies
 const ReactMarkdown = lazy(() => import('react-markdown'));
-const SyntaxHighlighter = lazy(() => import('react-syntax-highlighter').then(module => ({ 
-    default: module.Prism 
+const SyntaxHighlighter = lazy(() => import('react-syntax-highlighter').then(module => ({
+    default: module.Prism
 })));
 const vscDarkPlus = lazy(() => import('react-syntax-highlighter/dist/esm/styles/prism').then(module => ({
     default: module.vscDarkPlus
@@ -72,12 +72,37 @@ const SuggestedActions = memo(({ onSubmit, summarized }) => {
     );
 });
 
-const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
+const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
+    const modelOptions = [
+        { value: "gpt-4.1", label: "GPT-4.1 (default)" },
+        { value: "gpt-5", label: "GPT-5" }
+    ];
+
+    const [base64Data, setBase64Data] = useState('');
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
-    const messagesEndRef = useRef(null);
     const [summarized, setSummarized] = useState(false);
+    const messagesEndRef = useRef(null);
     const abortControllerRef = useRef(null);
+    const [selectedModel, setSelectedModel] = useState(modelOptions[0].value); // Default model
+
+
+    // Convert blob → base64
+    useEffect(() => {
+        if (!blob) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const result = reader.result;
+            if (result) {
+                const base64String = result.split(',')[1]; // strip data: prefix
+                // alert('Blob converted to base64 successfully'); 
+                console.log('Base64 Data:', result);
+                setBase64Data(base64String);
+            }
+        };
+        reader.readAsDataURL(blob);
+    }, [blob]);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,6 +114,8 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
     }, [messages.length, scrollToBottom]);
 
     const makeAPICall = useCallback(async (topic) => {
+        if (!base64Data) return null;
+
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
@@ -96,11 +123,18 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
         abortControllerRef.current = new AbortController();
 
         try {
+            // console.log(selectedModel);
+            // console.log(file_ext)
+            // console.log(base64Data);
+            
+
             const response = await axios.post(
                 API_URL,
                 new URLSearchParams({
                     topic,
-                    base64_data: base64
+                    base64_data: base64Data,
+                    model: selectedModel,
+                    file_ext: file_ext
                 }),
                 {
                     headers: {
@@ -110,13 +144,14 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
                     signal: abortControllerRef.current.signal
                 }
             );
+            console.log('API Response:', response.data);
 
             return response.data.response;
         } catch (error) {
             if (error.name === 'AbortError') return null;
             throw error;
         }
-    }, [base64]);
+    }, [base64Data, selectedModel]);
 
     const handleSubmit = useCallback(async (e, value = inputValue) => {
         if (e) e.preventDefault();
@@ -151,7 +186,7 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
                 }]);
 
                 let index = 0;
-                const typingSpeed = 20; // ms per character
+                const typingSpeed = 20;
 
                 const interval = setInterval(() => {
                     currentText += fullText.charAt(index);
@@ -178,12 +213,28 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
                 }, typingSpeed);
             }
         } catch (error) {
-            console.error('Error:', error);
-            setMessages(prev => [...prev, {
-                type: 'copilot',
-                content: 'Sorry, I encountered an error. Please try again.',
-                timestamp: new Date()
-            }]);
+            // console.error('Error:', error);
+            let errorMessage = "Sorry, I encountered an error. Please try again.";
+
+            // If backend sends { detail: "..."} extract it
+            if (error.response && error.response.data) {
+                if (typeof error.response.data === "string") {
+                    errorMessage = error.response.data;
+                } else if (error.response.data.detail) {
+                    errorMessage = error.response.data.detail;
+                } else {
+                    errorMessage = JSON.stringify(error.response.data);
+                }
+            }
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    type: 'copilot',
+                    content: errorMessage,
+                    timestamp: new Date()
+                }
+            ]);
         } finally {
             setLoading(false);
         }
@@ -210,13 +261,13 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
         setSummarized(false);
     }, [setMessages]);
 
-    const renderedMessages = useMemo(() => 
+    const renderedMessages = useMemo(() =>
         messages.map((message, index) => (
             <Message key={`${message.timestamp.getTime()}-${index}`} message={message} />
         )), [messages]
     );
 
-    const isSubmitDisabled = useMemo(() => 
+    const isSubmitDisabled = useMemo(() =>
         loading || !inputValue.trim(), [loading, inputValue]
     );
 
@@ -231,30 +282,173 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
     return (
         <div className="copilot-chat">
             {/* Chat Header */}
-            <Box className="chat-header">
-                <span className='mx-2' style={{ fontWeight: 500, fontSize: '14px' }}>
-                    Hello, how can I help with this document?
-                </span>
-
-                {messages?.length > 0 && (
-                    <Tooltip title="Clear chat and start new ...">
-                        <div 
-                            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-                            onClick={handleClearChat}
-                        >
-                            <span className="fa-solid fa-eraser mx-2" style={{ fontSize: '20px', color: '#2757aa' }}></span>
-                        </div>
-                    </Tooltip>
-                )}
-            </Box>
-
             {/* Document Info Header */}
-            <Box className="chat-header p-2">
-                <span className="mx-2">
-                    <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '20px' }}></i>
-                    <span style={{ fontSize: '13px' }}>{objectTitle}.pdf</span>
-                </span>
-            </Box>
+
+            <>
+                {/* Main Chat Header */}
+                <Box
+                    className="chat-header"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 10px',
+                        borderBottom: '1px solid #e0e0e0',
+                        backgroundColor: '#ecf4fc',
+                        minHeight: 'auto'
+                    }}
+                >
+                    {/* Left Section: Bot Greeting */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                        <i
+                            className="fa-brands fa-android"
+                            style={{
+                                color: '#2757aa',
+                                fontSize: '20px',
+                                marginRight: '12px'
+                            }}
+                        />
+                        <span style={{
+                            fontWeight: 500,
+                            fontSize: '13px',
+                            color: '#333',
+                            lineHeight: 1.2
+                        }}>
+                            Hello, how can I help with this document?
+                        </span>
+                    </Box>
+
+                    {/* Right Section: Controls */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {/* Model Selection */}
+                        <FormControl size="small" sx={{ minWidth: 140 }}>
+                            <Select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                    color: '#1C4690',
+                                    fontSize: '12px',
+                                    borderRadius: '20px',
+                                    backgroundColor: 'white',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#e0e0e0',
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2757aa',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#2757aa',
+                                        borderWidth: '1px',
+                                    },
+                                }}
+                                MenuProps={{
+                                    PaperProps: {
+                                        style: {
+                                            maxHeight: 250,
+                                            borderRadius: '8px',
+                                            marginTop: '4px',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                        },
+                                    },
+                                }}
+                            >
+                                {modelOptions.map(option => (
+                                    <MenuItem
+                                        key={option.value}
+                                        value={option.value}
+                                        sx={{
+                                            fontSize: '13px',
+                                            color: '#333',
+                                            backgroundColor: option.value === selectedModel ? '#f0f4ff' : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: '#f0f4ff',
+                                            },
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                            {option.value === selectedModel && (
+                                                <i
+                                                    className="fas fa-check"
+                                                    style={{
+                                                        color: '#2757aa',
+                                                        fontSize: '10px',
+                                                        marginRight: '8px'
+                                                    }}
+                                                />
+                                            )}
+                                            {option.label}
+                                        </Box>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        {/* Clear Chat Button */}
+                        {messages?.length > 0 && (
+                            <Tooltip title="Clear chat and start new..." arrow>
+                                <Box
+                                    onClick={handleClearChat}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        padding: '8px',
+                                        borderRadius: '50%',
+                                        backgroundColor: 'transparent',
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: '#f0f4ff',
+                                            transform: 'scale(1.05)',
+                                        },
+                                    }}
+                                >
+                                    <i
+                                        className="fa-solid fa-eraser"
+                                        style={{
+                                            fontSize: '18px',
+                                            color: '#2757aa'
+                                        }}
+                                    />
+                                </Box>
+                            </Tooltip>
+                        )}
+                    </Box>
+                </Box>
+
+                {/* Document Info Header */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '8px 16px',
+                        backgroundColor: '#ecf4fc',
+                        borderBottom: '1px solid #e9ecef',
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <i
+                            className="fas fa-file-pdf"
+                            style={{
+                                color: '#dc3545',
+                                fontSize: '16px',
+                                marginRight: '8px'
+                            }}
+                        />
+                        <span style={{
+                            fontSize: '13px',
+                            color: 'black',
+                            fontWeight: 500
+                        }}>
+                            {objectTitle}.pdf
+                        </span>
+                    </Box>
+                </Box>
+            </>
+
+
 
             {/* Chat Messages */}
             <div className="chat-messages">
@@ -287,6 +481,8 @@ const Bot = memo(({ base64, objectTitle, messages, setMessages }) => {
                     </button>
                 </div>
             </form>
+
+
         </div>
     );
 });

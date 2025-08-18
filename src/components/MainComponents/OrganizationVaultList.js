@@ -25,10 +25,11 @@ import {
   AccountBox,
   Timeline
 } from "@mui/icons-material";
+import AttachExistingVault from "../AttachExistingVault";
 
 function OrganizationVaultList(props) {
   const [expanded, setExpanded] = useState([]);
-  const { authTokens } = useContext(Authcontext);
+  const { authTokens, user } = useContext(Authcontext);
 
   // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
@@ -202,7 +203,7 @@ function OrganizationVaultList(props) {
           gap: 1
         }}>
           <i className="fa-solid fa-database" style={{ fontSize: '18px' }}></i>
-          Create New Vault
+          Create New Repository
         </DialogTitle>
 
         <DialogContent dividers sx={{ pt: 3 }}>
@@ -251,7 +252,7 @@ function OrganizationVaultList(props) {
               }
             }}
           >
-            {loading ? 'Creating...' : 'Create Vault'}
+            {loading ? 'Creating...' : 'Create Repository'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -277,20 +278,28 @@ function OrganizationVaultList(props) {
           </Typography>
         </Box>
 
-        {/* <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenDialog}
-          sx={{
-            fontSize: '11px',
-            textTransform: 'none',
-            py: 1,
-            px: 2
-          }}
-        >
-          <i className="fa-solid fa-plus"></i> <span className="mx-1">Add New Repo</span>
-        </Button> */}
+        {process.env.REACT_APP_ONSITE === "false" && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenDialog}
+            disabled={props.vaults?.length >= process.env.REACT_APP_MAX_VAULTS}
+            sx={{
+              fontSize: '11px',
+              textTransform: 'none',
+              py: 1,
+              px: 2
+            }}
+          >
+            <i className="fa-solid fa-plus"></i>
+            <span className="mx-1">New Repo</span>
+          </Button>
+
+
+        )}
+
       </Box>
+   
 
       {/* Compact Vaults TreeView */}
       <Box sx={{
@@ -310,6 +319,8 @@ function OrganizationVaultList(props) {
           borderRadius: '2px',
         },
       }}>
+
+
         {props.vaults?.length === 0 ? (
           <Box sx={{
             display: 'flex',
@@ -434,7 +445,10 @@ function OrganizationVaultList(props) {
               );
             })}
           </TreeView>
-        )}
+        )}  <span className="text-center">
+          <AttachExistingVault authTokens={authTokens} user={user} />
+        </span>
+      
       </Box>
     </Box>
   );

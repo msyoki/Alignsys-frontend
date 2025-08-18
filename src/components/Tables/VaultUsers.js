@@ -530,7 +530,7 @@ function VaultUsersTable(props) {
       </Box>
 
       {/* Table */}
-      <TableContainer className="shadow-lg" sx={{ maxHeight: 400 }}>
+      <TableContainer className="shadow-lg" sx={{ maxHeight: 450, minHeight: 450 }}>
         <Table stickyHeader className="table table-sm table-responsive p-2" aria-label="scrollable table">
           <TableHead className="bg-white">
             <TableRow>
@@ -630,7 +630,8 @@ function VaultUsersTable(props) {
 
                 {/* Action */}
                 <TableCell align="center" sx={{ fontSize: '13px', py: 0.5, borderBottom: '1px solid #f5f5f5' }}>
-                  <i
+                 {user.email?
+                   <i
                     onClick={() => handleOpenConfirmDialog(user)}
                     className="fa-solid fa-trash text-danger"
                     style={{
@@ -642,7 +643,7 @@ function VaultUsersTable(props) {
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#fee'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                     title={`Remove ${user.username || user.email} from vault`}
-                  />
+                  />:<></>}
                 </TableCell>
               </TableRow>
             ))}

@@ -10,7 +10,7 @@ import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import NewObjectDialog from '../components/Modals/NewObjectDialog';
 import * as constants from '../components/Auth/configs';
-import logo from '../images/TechEdgeLogo.png';
+import logo from '../images/ZFBLU.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
@@ -305,7 +305,7 @@ const useApiCalls = (selectedVault, mfilesId) => {
       );
       cacheRef.current.set(cacheKey, response.data);
       setDeletedData(response.data);
-      console.log('Fetched deleted data:', response.data);
+      // console.log('Fetched deleted data:', response.data);
     } catch (error) {
       setDeletedData([]);
     }
@@ -339,7 +339,7 @@ const useApiCalls = (selectedVault, mfilesId) => {
       .request(config)
       .then((response) => {
         setVaultObjectsList(response.data);
-        console.log('Fetched vault objects:', response.data);
+        // console.log('Fetched vault objects:', response.data);
         setOpenObjectModal(true);
       })
       .catch(() => { });
@@ -363,7 +363,7 @@ const useApiCalls = (selectedVault, mfilesId) => {
       .then((response) => {
         cacheRef.current.set(cacheKey, response.data);
         setVaultObjectsList(response.data);
-        console.log('Fetched vault objects:', response.data);
+        // console.log('Fetched vault objects:', response.data);
       })
       .catch(() => { });
   }, [selectedVault?.guid, mfilesId]);
@@ -474,24 +474,24 @@ function Dashboard() {
     }
   }, []);
 
-  const findBestIconMatch = useCallback((name) => {
-    const nameWords = name.toLowerCase().split(' ');
-    for (let iconName in allIcons) {
-      for (let word of nameWords) {
-        if (iconName.toLowerCase().includes(word)) return allIcons[iconName];
-        if (
-          word.toLowerCase().includes('document') ||
-          word.toLowerCase().includes('invoice') ||
-          word.toLowerCase().includes('Petty Cash')
-        ) return faFile;
-        if (
-          word.toLowerCase().includes('staff') ||
-          word.toLowerCase().includes('employee')
-        ) return faUser;
-      }
-    }
-    return faFolder;
-  }, []);
+  // const findBestIconMatch = useCallback((name) => {
+  //   const nameWords = name.toLowerCase().split(' ');
+  //   for (let iconName in allIcons) {
+  //     for (let word of nameWords) {
+  //       if (iconName.toLowerCase().includes(word)) return allIcons[iconName];
+  //       if (
+  //         word.toLowerCase().includes('document') ||
+  //         word.toLowerCase().includes('invoice') ||
+  //         word.toLowerCase().includes('Petty Cash')
+  //       ) return faFile;
+  //       if (
+  //         word.toLowerCase().includes('staff') ||
+  //         word.toLowerCase().includes('employee')
+  //       ) return faUser;
+  //     }
+  //   }
+  //   return faFolder;
+  // }, []);
 
   // --- Preview Logic ---
   const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
@@ -580,7 +580,7 @@ function Dashboard() {
         );
         setTemplates(response.data);
 
-        console.log('Templates fetched:', response.data);
+        // console.log('Templates fetched:', response.data);
         setLoadingDialog(false);
         setIsFormOpen(true);
       } catch (error) {
@@ -728,9 +728,9 @@ function Dashboard() {
   useEffect(() => {
     if (selectedVault) {
       getVaultObjects2(setVaultObjectsList);
-      getRecent(setRecentData);
-      getAssigned(setAssignedData);
-      getDeleted(setDeletedData);
+      // getRecent(setRecentData);
+      // getAssigned(setAssignedData);
+      // getDeleted(setDeletedData);
     }
   }, [selectedVault, mfilesId, getVaultObjects2, getRecent, getAssigned, getDeleted, setVaultObjectsList, setRecentData, setAssignedData, setDeletedData]);
 
