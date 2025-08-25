@@ -10,7 +10,7 @@ import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import NewObjectDialog from '../components/Modals/NewObjectDialog';
 import * as constants from '../components/Auth/configs';
-import logo from '../images/ZFBLU.png';
+import logo from '../images/waica.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
@@ -88,7 +88,7 @@ const SidebarMenu = React.memo(({
           minHeight: "56px",
           maxHeight: "56px",
           overflow: "hidden",
-      
+
         }}
       >
         <img
@@ -173,7 +173,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
       transition: "max-height 0.4s ease, opacity 0.3s ease",
       padding: isVisible ? "10px 20px" : "0",
       backgroundColor: "#fff",
-   
+
       "& *": { direction: "ltr" },
       "&::-webkit-scrollbar": { width: "3px" },
       "&::-webkit-scrollbar-track": {
@@ -274,99 +274,87 @@ const useApiCalls = (selectedVault, mfilesId) => {
     }
   }, [mfilesId]);
 
-  const getRecent = useCallback(async (setRecentData) => {
-    const cacheKey = `recent_${selectedVault?.guid}`;
-    if (cacheRef.current.has(cacheKey)) {
-      setRecentData(cacheRef.current.get(cacheKey));
-      return;
-    }
 
-    try {
-      const { data } = await axios.get(
-        `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
-      );
-      cacheRef.current.set(cacheKey, data);
-      setRecentData(data);
-    } catch {
-      setRecentData([]);
-    }
-  }, [selectedVault?.guid, mfilesId]);
+const getRecent = useCallback(async (setRecentData) => {
+  try {
+    const { data } = await axios.get(
+      `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
+    );
 
-  const getDeleted = useCallback(async (setDeletedData) => {
-    const cacheKey = `deleted_${selectedVault?.guid}`;
-    if (cacheRef.current.has(cacheKey)) {
-      setDeletedData(cacheRef.current.get(cacheKey));
-      return;
-    }
+    // Sort by most recent date first (descending order)
+    const sortedData = data.sort((a, b) => {
+      const dateA = new Date(a.lastModifiedUtc);
+      const dateB = new Date(b.lastModifiedUtc);
+      return dateB - dateA;
+    });
+    
+    setRecentData(sortedData);
+  } catch (error) {
+    console.error("Failed to fetch recent data", error);
+    setRecentData([]);
+  }
+}, [selectedVault?.guid, mfilesId]);
 
-    try {
-      const response = await axios.get(
-        `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
-      );
-      cacheRef.current.set(cacheKey, response.data);
-      setDeletedData(response.data);
-      // console.log('Fetched deleted data:', response.data);
-    } catch (error) {
-      setDeletedData([]);
-    }
-  }, [selectedVault?.guid, mfilesId]);
 
-  const getAssigned = useCallback(async (setAssignedData) => {
-    const cacheKey = `assigned_${selectedVault?.guid}`;
-    if (cacheRef.current.has(cacheKey)) {
-      setAssignedData(cacheRef.current.get(cacheKey));
-      return;
-    }
+const getDeleted = useCallback(async (setDeletedData) => {
+  try {
+    const response = await axios.get(
+      `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
+    );
+    setDeletedData(response.data);
+  } catch (error) {
+    console.error("Failed to fetch deleted data", error);
+    setDeletedData([]);
+  }
+}, [selectedVault?.guid, mfilesId]);
 
-    try {
-      const response = await axios.get(
-        `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
-      );
-      cacheRef.current.set(cacheKey, response.data);
-      setAssignedData(response.data);
-    } catch (error) {
-      setAssignedData([]);
-    }
-  }, [selectedVault?.guid, mfilesId]);
 
-  const getVaultObjects = useCallback((setVaultObjectsList, setOpenObjectModal) => {
-    const config = {
-      method: 'get',
-      url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`,
-      headers: {},
-    };
-    axios
-      .request(config)
-      .then((response) => {
-        setVaultObjectsList(response.data);
-        // console.log('Fetched vault objects:', response.data);
-        setOpenObjectModal(true);
-      })
-      .catch(() => { });
-  }, [selectedVault?.guid, mfilesId]);
+const getAssigned = useCallback(async (setAssignedData) => {
+  try {
+    const response = await axios.get(
+      `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
+    );
 
-  const getVaultObjects2 = useCallback((setVaultObjectsList) => {
-    const cacheKey = `vaultObjects_${selectedVault?.guid}`;
-    if (cacheRef.current.has(cacheKey)) {
-      setVaultObjectsList(cacheRef.current.get(cacheKey));
+    // Sort by most recent date first
+    const sortedData = response.data.sort((a, b) => {
+      const dateA = new Date(a.lastModifiedUtc);
+      const dateB = new Date(b.lastModifiedUtc);
+      return dateB - dateA;
+    });
 
-      return;
-    }
+    setAssignedData(sortedData);
+  } catch (error) {
+    console.error('Error fetching assigned data:', error);
+    setAssignedData([]);
+  }
+}, [selectedVault?.guid, mfilesId]);
 
-    const config = {
-      method: 'get',
-      url: `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`,
-      headers: {},
-    };
-    axios
-      .request(config)
-      .then((response) => {
-        cacheRef.current.set(cacheKey, response.data);
-        setVaultObjectsList(response.data);
-        // console.log('Fetched vault objects:', response.data);
-      })
-      .catch(() => { });
-  }, [selectedVault?.guid, mfilesId]);
+
+const getVaultObjects = useCallback((setVaultObjectsList, setOpenObjectModal) => {
+  axios.get(
+    `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+  )
+  .then((response) => {
+    setVaultObjectsList(response.data);
+    setOpenObjectModal(true);
+  })
+  .catch((error) => {
+    console.error("Failed to fetch vault objects", error);
+  });
+}, [selectedVault?.guid, mfilesId]);
+
+
+const getVaultObjects2 = useCallback((setVaultObjectsList) => {
+  axios.get(
+    `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+  )
+  .then((response) => {
+    setVaultObjectsList(response.data);
+  })
+  .catch((error) => {
+    console.error("Failed to fetch vault objects (2)", error);
+  });
+}, [selectedVault?.guid, mfilesId]);
 
   return {
     searchObject,
@@ -697,10 +685,10 @@ function Dashboard() {
   }, []);
 
   const resetViews = useCallback(() => {
-    getRecent(setRecentData);
-    getAssigned(setAssignedData);
-    getDeleted(setDeletedData);
-  }, [getRecent, getAssigned, getDeleted, setRecentData, setAssignedData, setDeletedData]);
+    getRecent([]);
+    getAssigned([]);
+    getDeleted([]);
+  }, []);
 
   // --- useEffect Hooks (keeping original logic) ---
   useEffect(() => {
@@ -789,11 +777,13 @@ function Dashboard() {
         setSelectedTemplate={setSelectedTemplate}
         UseTemplate={UseTemplate}
         dontUseTemplates={dontUseTemplates}
+        getRecent={() => getRecent(setRecentData)}
+        getAssigned={() => getAssigned(setAssignedData)}
       />
 
       <div className="dashboard">
         {/* Sidebar */}
-        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`} style={{  borderRight: "3px solid #ddd"}}>
+        <nav className={`sidebar ${sidebarOpen ? "open" : "closed"} shadow-lg`} style={{ borderRight: "3px solid #ddd" }}>
           <SidebarMenu
             sidebarOpen={sidebarOpen}
             isSublistVisible={isSublistVisible}
@@ -809,7 +799,7 @@ function Dashboard() {
         </nav>
 
         {/* Content Section */}
-        <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
+        <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'} `}>
           <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
             <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
               <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>

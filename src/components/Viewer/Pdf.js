@@ -283,18 +283,18 @@ const PDFViewerPreview = (props) => {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
-            fontSize: '13px',
+            fontSize: '12.8px',
             backgroundColor: '#ecf4fc',
             height: '53px',
             color: '#1d3557',
           }}
         >
           <i style={{ fontSize: '25px', marginLeft: '15px', marginRight: '8px' }} className='fas fa-file-pdf text-danger '></i>
-          <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
+          <span style={{ fontSize: '12.8px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
         </Box> */}
         <Box className="chat-header2 p-2">
 
-          <span className='mx-2' >  <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }} ></i> <span style={{ fontSize: '13px' }}>{trimTitle(props.selectedObject.title)}.pdf</span> </span>
+          <span className='mx-2' >  <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }} ></i> <span style={{ fontSize: '12.8px' }}>{trimTitle(props.selectedObject.title)}.pdf</span> </span>
 
         </Box>
       </Tooltip>
@@ -306,27 +306,27 @@ const PDFViewerPreview = (props) => {
           <span className="d-flex align-items-center cursor-pointer mx-3" onClick={toggleAside}>
             <Tooltip title={isAsideOpen ? "Close thumbnail" : "Open thumbnail view"}>
               <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
-              <span className="text-muted mx-1" style={{ fontSize: '13px', cursor: 'pointer' }}>
+              <span className="text-muted mx-1" style={{ fontSize: '12.8px', cursor: 'pointer' }}>
                 <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Minimize" : "Maximize"}</span>
               </span>
             </Tooltip>
           </span>
           {/* Page Navigation */}
-          <span className="d-flex align-items-center text-dark" style={{ fontSize: '13px' }}>
+          <span className="d-flex align-items-center text-dark" style={{ fontSize: '12.8px' }}>
             Page
             <input
               type="number"
               value={pageNumber}
               onChange={handlePageInputChange}
               className="mx-2 form-control form-control-sm"
-              style={{ width: '50px', padding: '2px 6px', fontSize: '13px' }}
+              style={{ width: '50px', padding: '2px 6px', fontSize: '12.8px' }}
             />
             / {numPages}
           </span>
           {/* Zoom Controls */}
           <div className="d-flex align-items-center gap-2 mx-3">
             <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
-            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '13px', color: '#333' }}>
+            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
               {Math.round(zoom * 100)}%
             </span>
             <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />

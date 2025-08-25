@@ -94,7 +94,7 @@ const LookupSelect = ({
     control: (base) => ({
       ...base,
       borderColor: error ? 'red' : base.borderColor,
-      fontSize: '13px',
+      fontSize: '12.8px',
       color: '#555',
       backgroundColor: disabled ? '#f5f5f5' : 'white',
       minHeight: '40px',
@@ -102,22 +102,22 @@ const LookupSelect = ({
     singleValue: (base) => ({
       ...base,
       color: '#555',
-      fontSize: '13px',
+      fontSize: '12.8px',
     }),
     option: (base, state) => ({
       ...base,
       color: '#555',
-      fontSize: '13px',
+      fontSize: '12.8px',
       backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
     }),
     placeholder: (base) => ({
       ...base,
       color: '#555',
-      fontSize: '13px',
+      fontSize: '12.8px',
     }),
     input: (base) => ({
       ...base,
-      fontSize: '13px',
+      fontSize: '12.8px',
     }),
   };
 
@@ -156,7 +156,7 @@ const LookupSelect = ({
         </div>
       )}
       {helperText && (
-        <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '13px' }} className='mx-3'>
+        <span style={{ color: error ? '#CC3333' : 'inherit', fontSize: '12.8px' }} className='mx-3'>
           {helperText}
         </span>
       )}

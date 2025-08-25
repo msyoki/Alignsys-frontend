@@ -31,7 +31,7 @@ function useSessionState(key, defaultValue) {
 
 // Optimized constants with minimal spacing
 const TREE_ITEM_STYLES = {
-  ml: 1, // Reduced from 13px to 8px
+  ml: 1, // Reduced from 12.8px to 8px
   backgroundColor: '#fff',
   "&:hover": { backgroundColor: "#fff !important" },
   "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
@@ -46,7 +46,7 @@ const LOADING_STYLES = {
   p: 0.5, // Reduced padding
   color: '#555',
 
-  fontSize: "12px",
+  fontSize: "12.8px",
   "& .MuiTreeItem-label": { fontSize: "12px !important" },
   "& .MuiTypography-root": { fontSize: "12px !important" },
 };
@@ -192,7 +192,7 @@ const TreeSubItem = memo(({
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    fontSize: '13px'
+                    fontSize: '12.8px'
                   }}
                 >
                   {subItem.title}
@@ -208,7 +208,7 @@ const TreeSubItem = memo(({
 
               {/* Date flexed to the end */}
               <Box sx={{
-                fontSize: '13px',
+                fontSize: '12.8px',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 marginLeft: 'auto'  // This pushes the date to the far right
@@ -238,6 +238,7 @@ const LinkedObjectsTree = ({
   selectedVault,
   mfilesId,
   handleRowClick,
+  onItemRightClick,
   setSelectedItemId,
   selectedItemId,
 }) => {
@@ -414,7 +415,7 @@ const LinkedObjectsTree = ({
               classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
             />
             <Box>Open</Box>
-            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '13px' }}>
+            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12.8px' }}>
               Open in default application
             </Box>
           </Box>
@@ -456,19 +457,19 @@ const LinkedObjectsTree = ({
 
   return (
     <>
-      <OfficeApp
+      {/* <OfficeApp
         open={openOfficeApp}
         close={() => setOpenOfficeApp(false)}
         object={objectToEditOnOffice}
         mfilesId={mfilesId}
-      />
+      /> */}
       {loading ? (
         <TreeItem
           sx={LOADING_STYLES}
           itemId="loading"
           label={
             <Box >
-              <span className="loading-indicator text-muted" style={{ fontSize: '11.5px', color: 'black' }}>
+              <span className="loading-indicator text-muted" style={{ fontSize: '12px', color: 'black' }}>
                 Searching Relationships<span>.</span><span>.</span><span>.</span>
               </span>
             </Box>
@@ -491,10 +492,10 @@ const LinkedObjectsTree = ({
                     ...BOX_STYLES
                   }}>
                     <i className="fa-regular fa-folder-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                    <Box sx={{ fontSize: '13px' }}>
+                    <Box sx={{ fontSize: '12.8px' }}>
                       {obj.propertyName?.replace(/\(s\)/g, '')}
                     </Box>
-                    <Box sx={{ fontSize: '13px', color: '#666' }}>
+                    <Box sx={{ fontSize: '12.8px', color: '#666' }}>
                       ({obj.items?.length})
                     </Box>
                   </Box>
@@ -523,16 +524,17 @@ const LinkedObjectsTree = ({
               key="grid-document"
               itemId="grid-document"
               label={
-                <Box sx={{
+                <Box 
+                sx={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1, // Using gap instead of margins
                   ...BOX_STYLES
                 }}>
                   <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
-                  <Box sx={{ fontSize: '13px' }}>Document</Box>
+                  <Box sx={{ fontSize: '12.8px' }}>Document</Box>
                   {documents.map((doc) => (
-                    <Box key={doc.propertyName} sx={{ fontSize: '13px', color: '#666' }}>
+                    <Box key={doc.propertyName} sx={{ fontSize: '12.8px', color: '#666' }}>
                       ({doc.items.length})
                     </Box>
                   ))}
@@ -547,7 +549,7 @@ const LinkedObjectsTree = ({
                     selectedItemId={selectedItemId}
                     setSelectedItemId={setSelectedItemId}
                     selectedVault={selectedVault}
-                    onRightClick={handleRightClick}
+                    onRightClick={onItemRightClick}
                     onItemClick={handleItemClick}
                     isDocument={true}
                     parentKey={`doc-${docIndex}`}
@@ -557,7 +559,7 @@ const LinkedObjectsTree = ({
             </TreeItem>
           )}
 
-          {rightClickActions.length > 0 && (
+          {/* {rightClickActions.length > 0 && (
             <RightClickMenu
               anchorEl={menuAnchor}
               open={Boolean(menuAnchor)}
@@ -565,7 +567,7 @@ const LinkedObjectsTree = ({
               item={menuItem}
               actions={rightClickActions}
             />
-          )}
+          )} */}
         </>
       ) : (
         <></>

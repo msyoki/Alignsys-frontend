@@ -103,7 +103,7 @@ const CommentsComponent = (props) => {
                     />
                   </span>
                   <Box sx={{
-                    fontSize: '13px',
+                    fontSize: '12.8px',
                     color: '#212529',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -135,7 +135,7 @@ const CommentsComponent = (props) => {
                     }}
                   />
                   <Box sx={{
-                    fontSize: '13px',
+                    fontSize: '12.8px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'

@@ -988,6 +988,11 @@ const NewObjectDialog = (props) => {
                     setUploadedFile(null);
                     closeFormDialog();
                     props.closeModal();
+                    setTimeout(() => {
+                        props.getRecent?.();
+                        props.getAssigned?.();
+                    }, 7000); // 5000ms = 5 seconds
+
                 } else {
                     payload = {
                         objectTypeID: props.selectedObjectId,
@@ -1004,6 +1009,7 @@ const NewObjectDialog = (props) => {
                         { headers }
                     );
 
+
                     setMiniLoader(false);
                     setOpenAlert(true);
                     setAlertSeverity("success");
@@ -1013,6 +1019,11 @@ const NewObjectDialog = (props) => {
                     props.setTemplateModalOpen(false);
                     props.setVaultObjectsModal(false);
                     props.setTemplateIsTrue(false);
+
+                    setTimeout(() => {
+                        props.getRecent?.();
+                        props.getAssigned?.();
+                    }, 7000); // 5000ms = 5 seconds
                 }
             } catch (error) {
                 setMiniLoader(false);
@@ -1022,7 +1033,7 @@ const NewObjectDialog = (props) => {
                 setAlertMsg("Error submitting form. Please try again.");
             }
         }
-       
+
     }, [filteredProperties, props, uploadedFile, closeFormDialog]);
 
     const handleSearchTermChange = useCallback((event) => {
@@ -1184,7 +1195,7 @@ const NewObjectDialog = (props) => {
                             )}
                         </DialogContent>
 
-                  
+
                         <DialogActions
                             style={{
                                 backgroundColor: '#ecf4fc',

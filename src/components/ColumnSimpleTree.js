@@ -7,6 +7,7 @@ import FileExtText from './FileExtText';
 import FileExtIcon from './FileExtIcon';
 
 const ColumnSimpleTree = ({
+  
   data = [],
   selectedVault,
   mfilesId,
@@ -15,8 +16,13 @@ const ColumnSimpleTree = ({
   onItemRightClick,
   onRowClick,
   getTooltipTitle,
+  setBlob,
+  setSelectedFileId,
+  setExtension,
+  setLoadingFile,
   selectedItemId,
   setSelectedItemId,
+  a11yProps,
 
   // Column visibility
   showNameColumn = true,
@@ -56,7 +62,7 @@ const ColumnSimpleTree = ({
   const [dragColumn, setDragColumn] = useState(null);
   const [hoveredDivider, setHoveredDivider] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  
+
   // Refs
   const dragStartX = useRef(0);
   const dragStartWidth = useRef(0);
@@ -72,7 +78,7 @@ const ColumnSimpleTree = ({
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    
+
     const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
     const date = new Date(utcString);
     if (isNaN(date)) return '';
@@ -102,57 +108,57 @@ const ColumnSimpleTree = ({
 
   // Column configuration
   const columns = [
-    { 
-      key: 'name', 
-      show: showNameColumn, 
-      label: nameColumnLabel, 
-      flex: true, 
-      align: 'left', 
-      fontSize: nameColumnFontSize, 
-      render: 'name' 
-    },
-    { 
-      key: 'objectType', 
-      show: showObjectTypeName, 
-      label: objectTypeNameLabel, 
-      width: 'objectType', 
-      align: 'center', 
-      fontSize: objectTypeNameFontSize, 
-      minWidth: 80, 
-      maxWidth: 300, 
-      render: item => item.objectTypeName || 'Document' 
+    {
+      key: 'name',
+      show: showNameColumn,
+      label: nameColumnLabel,
+      flex: true,
+      align: 'left',
+      fontSize: nameColumnFontSize,
+      render: 'name'
     },
     {
-      key: 'size', 
-      show: showSizeColumn, 
-      label: sizeColumnLabel, 
-      width: 'size', 
-      align: 'right', 
-      fontSize: sizeColumnFontSize, 
-      minWidth: 60, 
-      maxWidth: 150, 
+      key: 'objectType',
+      show: showObjectTypeName,
+      label: objectTypeNameLabel,
+      width: 'objectType',
+      align: 'center',
+      fontSize: objectTypeNameFontSize,
+      minWidth: 80,
+      maxWidth: 300,
+      render: item => item.objectTypeName || 'Document'
+    },
+    {
+      key: 'size',
+      show: showSizeColumn,
+      label: sizeColumnLabel,
+      width: 'size',
+      align: 'right',
+      fontSize: sizeColumnFontSize,
+      minWidth: 60,
+      maxWidth: 150,
       render: item => formatFileSize(item.size)
     },
-    { 
-      key: 'owner', 
-      show: showOwnerColumn, 
-      label: ownerColumnLabel, 
-      width: 'owner', 
-      align: 'center', 
-      fontSize: ownerColumnFontSize, 
-      minWidth: 80, 
-      maxWidth: 200, 
-      render: item => item.owner || item.createdBy || 'Unknown' 
+    {
+      key: 'owner',
+      show: showOwnerColumn,
+      label: ownerColumnLabel,
+      width: 'owner',
+      align: 'center',
+      fontSize: ownerColumnFontSize,
+      minWidth: 80,
+      maxWidth: 200,
+      render: item => item.owner || item.createdBy || 'Unknown'
     },
     {
-      key: 'status', 
-      show: showStatusColumn, 
-      label: statusColumnLabel, 
-      width: 'status', 
-      align: 'center', 
-      fontSize: statusColumnFontSize, 
-      minWidth: 70, 
-      maxWidth: 150, 
+      key: 'status',
+      show: showStatusColumn,
+      label: statusColumnLabel,
+      width: 'status',
+      align: 'center',
+      fontSize: statusColumnFontSize,
+      minWidth: 70,
+      maxWidth: 150,
       render: renderStatusBadge
     },
     {
@@ -164,6 +170,7 @@ const ColumnSimpleTree = ({
       fontSize: dateColumnFontSize,
       minWidth: 80,
       maxWidth: 400,
+      fontColor: 'black',
       render: item => formatDate(item.lastModifiedUtc)
     }
   ];
@@ -241,38 +248,61 @@ const ColumnSimpleTree = ({
   const renderNameColumn = (item) => {
     const classId = item.classId ?? item.classID ?? null;
     const isDocument = item.objectTypeId === 0 || item.objectID === 0;
-    
+
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          width: '100%',
+        }}
+      >
         {isDocument && item.isSingleFile ? (
-          <FileExtIcon fontSize="15px" guid={selectedVault?.guid} objectId={item.id} classId={classId} />
+          <FileExtIcon
+            fontSize={15}
+            guid={selectedVault?.guid}
+            objectId={item.id}
+            classId={classId}
+          />
         ) : (
-          <i 
+          <Box
+            component="i"
             className={isDocument ? 'fas fa-book' : 'fa-solid fa-folder'}
-            style={{ 
-              fontSize: 15, 
-              color: isDocument ? '#7cb518' : '#2a68af' 
-            }} 
+            sx={{
+              fontSize: 15,
+              color: isDocument ? '#7cb518' : '#2a68af',
+            }}
           />
         )}
-        <Tooltip title={getTooltipTitle?.(item) || item.title || ''} placement="top" arrow>
-          <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+
+        <Tooltip title={getTooltipTitle?.(item) ?? item.title ?? ''} placement="right" arrow>
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              minWidth: 0, // prevents flexbox overflow issues
+            }}
+          >
             {item.title}
             {item.isSingleFile && (
-              <FileExtText 
-                guid={selectedVault?.guid} 
-                objectId={item.id} 
-                classId={item.classId || item.classID} 
+              <FileExtText
+                guid={selectedVault?.guid}
+                objectId={item.id}
+                classId={classId}
               />
             )}
           </Box>
         </Tooltip>
       </Box>
+
     );
   };
 
   const renderColumnContent = (col, item) => {
- 
+
     if (col.render === 'name') return renderNameColumn(item);
     if (typeof col.render === 'function') return col.render(item);
     return item[col.key] || '';
@@ -322,7 +352,7 @@ const ColumnSimpleTree = ({
   const renderDividerLine = (idx) => {
     const nextCol = visibleColumns[idx + 1];
     const isActive = isDragging && dragColumn === nextCol?.width;
-    
+
     return (
       <Box
         className="divider-line"
@@ -339,7 +369,7 @@ const ColumnSimpleTree = ({
   const renderResizeHandle = (idx) => {
     const nextCol = visibleColumns[idx + 1];
     const shouldShow = nextCol?.width && (hoveredDivider === idx || (isDragging && dragColumn === nextCol?.width));
-    
+
     if (!shouldShow) return null;
 
     return (
@@ -370,7 +400,7 @@ const ColumnSimpleTree = ({
     <Box sx={{
       display: 'flex',
       alignItems: 'stretch',
-      p: '2px 5px',
+      p: '4px 5px',
       backgroundColor: '#f8f9fa',
       borderBottom: '1px solid #dee2e6',
       fontSize: headerFontSize,
@@ -381,7 +411,7 @@ const ColumnSimpleTree = ({
     }}>
       {visibleColumns.map((col, idx) => {
         const isLast = idx === visibleColumns.length - 1;
-        
+
         return (
           <React.Fragment key={col.key}>
             <Box sx={getColumnStyle(col, isLast)}>
@@ -445,21 +475,21 @@ const ColumnSimpleTree = ({
     <SimpleTreeView key={i}>
       <TreeItem
         itemId={`item-${i}`}
-        onClick={() => { 
-          setSelectedItemId(`${item.id}-${item.title}`); 
-          onItemClick?.(item); 
+        onClick={() => {
+          setSelectedItemId(`${item.id}-${item.title}`);
+          onItemClick?.(item);
         }}
         onDoubleClick={() => onItemDoubleClick?.(item)}
-        onContextMenu={e => { 
-          e.preventDefault(); 
-          onItemRightClick?.(e, item); 
-        }}
+
         sx={{
           "& .MuiTreeItem-content": { backgroundColor: '#fff !important' },
           "& .MuiTreeItem-content:hover": { backgroundColor: '#f9f9f9 !important' }
         }}
         label={
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', minHeight: 24 }}>
+          <Box onContextMenu={e => {
+            e.preventDefault();
+            onItemRightClick?.(e, item);
+          }} sx={{ display: 'flex', alignItems: 'center', width: '100%', minHeight: 24 }}>
             {visibleColumns.map((col, idx) => renderRowCell(col, item, idx))}
           </Box>
         }
@@ -470,6 +500,11 @@ const ColumnSimpleTree = ({
             selectedItemId={selectedItemId}
             setSelectedItemId={setSelectedItemId}
             selectedVault={selectedVault}
+            setBlob={setBlob}
+            setSelectedFileId={setSelectedFileId}
+            setExtension={setExtension}
+            setLoadingFile={setLoadingFile}
+            a11yProps={a11yProps}
           />
         )}
         <LinkedObjectsTree
@@ -479,8 +514,10 @@ const ColumnSimpleTree = ({
           selectedVault={selectedVault}
           mfilesId={mfilesId}
           handleRowClick={onRowClick}
+          onItemRightClick={onItemRightClick}
           setSelectedItemId={setSelectedItemId}
           selectedItemId={selectedItemId}
+
         />
       </TreeItem>
     </SimpleTreeView>

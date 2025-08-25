@@ -43,12 +43,7 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
+
 
 const formatDateForInput = (dateString) => {
   if (!dateString) return '';
@@ -88,7 +83,7 @@ const ObjectData = (props) => {
 
   // Common styles - extracted to avoid repetition
   const commonInputStyle = useMemo(() => ({
-    fontSize: '13px',
+    fontSize: '12.8px',
     color: '#333',
     margin: 0,
   }), []);
@@ -107,11 +102,11 @@ const ObjectData = (props) => {
   }), []);
 
   const selectSxStyle = useMemo(() => ({
-    fontSize: '13px',
+    fontSize: '12.8px',
     height: '24px',
     m: 0,
     '& .MuiSelect-select': {
-      fontSize: '13px',
+      fontSize: '12.8px',
       color: '#333',
       padding: '3px 6px',
       minHeight: 'unset',
@@ -124,10 +119,10 @@ const ObjectData = (props) => {
     },
     '& .MuiOutlinedInput-input': {
       padding: '3px 6px',
-      fontSize: '13px',
+      fontSize: '12.8px',
     },
     '& .MuiMenuItem-root': {
-      fontSize: '13px',
+      fontSize: '12.8px',
     },
     '& .MuiOutlinedInput-notchedOutline': {
       borderColor: '#ccc',
@@ -311,7 +306,7 @@ const ObjectData = (props) => {
   const renderLinkOrText = useCallback((value, isReadOnly = false) => {
     if (isLink(value)) {
       return (
-        <Typography variant="body2" sx={{ fontSize: '13px' }}>
+        <Typography variant="body2" sx={{ fontSize: '12.8px' }}>
           <a
             href={value}
             target="_blank"
@@ -433,7 +428,7 @@ const ObjectData = (props) => {
                   </Tooltip>
                 }
                 label={
-                  <span style={{ fontSize: '13px', color: '#333' }}>
+                  <span style={{ fontSize: '12.8px', color: '#333' }}>
                     {renderValue(i.title?.value || i.title)}
                   </span>
                 }
@@ -448,7 +443,7 @@ const ObjectData = (props) => {
 
     if (isCompletedByProperty) {
       return (
-        <Typography fontSize="13px" sx={{ color: '#333', lineHeight: 1.3, m: 0 }}>
+        <Typography fontSize="12.8px" sx={{ color: '#333', lineHeight: 1.3, m: 0 }}>
           {Array.isArray(item.value) ? 
             item.value
               .map(i => renderValue(i.title?.value || i.title))
@@ -521,7 +516,7 @@ const ObjectData = (props) => {
             <Typography
               variant="body2"
               sx={{
-                fontSize: '13px',
+                fontSize: '12.8px',
                 fontWeight: 400,
                 color: '#333',
                 textAlign: 'right',
@@ -539,11 +534,11 @@ const ObjectData = (props) => {
 
           <Box
             sx={{
-              fontSize: '13px',
+              fontSize: '12.8px',
               color: '#333',
               width: '85%',
               '& input, & textarea, & .MuiSelect-root': {
-                fontSize: '13px !important',
+                fontSize: '12.8px !important',
                 width: '100%',
               },
               '& .form-control': {
@@ -570,7 +565,7 @@ const ObjectData = (props) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: '13px',
+                  fontSize: '12.8px',
                   color: '#333',
                   wordBreak: 'break-word',
                   lineHeight: 1.3,
@@ -583,7 +578,7 @@ const ObjectData = (props) => {
               <>
                 {/* Class property display */}
                 {isClassProperty && (
-                  <Typography variant="body2" sx={{ fontSize: '13px', color: '#333' }}>
+                  <Typography variant="body2" sx={{ fontSize: '12.8px', color: '#333' }}>
                     {renderValue(item.value)}
                   </Typography>
                 )}
@@ -639,7 +634,7 @@ const ObjectData = (props) => {
                   justifyContent: "center",
                 }}
                 label={label}
-                {...a11yProps(index)}
+                {...props.a11yProps(index)}
               />
             ))}
             <Tab
@@ -657,7 +652,7 @@ const ObjectData = (props) => {
                   Comments
                 </Box>
               }
-              {...a11yProps(3)}
+              {...props.a11yProps(3)}
             />
           </Tabs>
         </Box>
@@ -685,7 +680,7 @@ const ObjectData = (props) => {
                     Metadata Card
                   </Typography>
                 )}
-                <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                   Please select an object to view its metadata
                 </Typography>
               </Box>
@@ -755,7 +750,7 @@ const ObjectData = (props) => {
                             }}
                           />
                           <Box sx={{
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
@@ -786,7 +781,7 @@ const ObjectData = (props) => {
                               color: "#fff",
                               borderRadius: "50%",
                               padding: "2px 6px",
-                              fontSize: "13px",
+                              fontSize: "12.8px",
                               fontWeight: "bold",
                               lineHeight: "1",
                               minWidth: "16px",
@@ -829,8 +824,8 @@ const ObjectData = (props) => {
                   </Box>
                 </Box>
                 <Box className="p-1" display="flex" justifyContent="space-between" sx={{ backgroundColor: '#ecf4fc' }}>
-                  <Box sx={{ textAlign: 'start', fontSize: '13px', maxWidth: '30%' }} className="mx-2">
-                    <Box sx={{ fontSize: '13px', color: '#555' }}>
+                  <Box sx={{ textAlign: 'start', fontSize: '12.8px', maxWidth: '30%' }} className="mx-2">
+                    <Box sx={{ fontSize: '12.8px', color: '#555' }}>
                       {props.selectedObject.objectTypeName || getPropValue('Class') || ''}
                     </Box>
                     <Box
@@ -839,7 +834,7 @@ const ObjectData = (props) => {
                         display: 'flex',
                         flexWrap: 'nowrap',
                         gap: '8px',
-                        fontSize: '13px',
+                        fontSize: '12.8px',
                         color: '#555',
                         width: '100%',
                         whiteSpace: 'nowrap',
@@ -850,7 +845,7 @@ const ObjectData = (props) => {
                       ID: {props.selectedObject.displayID || ''} &nbsp;&nbsp; Version: {props.selectedObject.versionId || ''}
                     </Box>
                   </Box>
-                  <Box sx={{ textAlign: 'end', fontSize: '13px', maxWidth: '80%', color: '#555' }} className="mx-2">
+                  <Box sx={{ textAlign: 'end', fontSize: '12.8px', maxWidth: '80%', color: '#555' }} className="mx-2">
                     {["Created", "Last modified"].map((label) => (
                       <Box key={label}>
                         {label}: {getPropValue(label) || ''} {getPropValue(`${label} by`) || ''}
@@ -858,7 +853,7 @@ const ObjectData = (props) => {
                     ))}
                   </Box>
                 </Box>
-                <Box className='p-2' sx={{ backgroundColor: '#fff', fontSize: '13px' }}>
+                <Box className='p-2' sx={{ backgroundColor: '#fff', fontSize: '12.8px' }}>
                   <List
                     sx={{
                       p: 0,
@@ -884,7 +879,7 @@ const ObjectData = (props) => {
                         <Typography
                           variant="body2"
                           sx={{
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             fontWeight: 400,
                             color: '#333',
                             textAlign: 'right',
@@ -896,7 +891,7 @@ const ObjectData = (props) => {
                         <Typography
                           variant="body2"
                           sx={{
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             color: '#333',
                             wordBreak: 'break-word',
                           }}
@@ -925,9 +920,9 @@ const ObjectData = (props) => {
                   }}>
                   <Box
                     sx={{
-                      fontSize: '13px',
+                      fontSize: '12.8px',
                       '*': {
-                        fontSize: '13px !important',
+                        fontSize: '12.8px !important',
                       },
                     }}
                   >
@@ -939,14 +934,14 @@ const ObjectData = (props) => {
                               <>
                                 <p className="my-1">
                                   <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
-                                  <span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}
+                                  <span style={{ color: 'black', fontSize: '12.8px' }}>Workflow</span>:{" "}
                                   <span style={{ marginLeft: '0.5rem' }}>
                                     {props.selectedObkjWf.workflowTitle || ''}
                                   </span>
                                 </p>
                                 <p className="my-1">
                                   <i className="fas fa-square-full text-warning mx-1" />
-                                  <span style={{ color: 'black', fontSize: '13px' }}>State</span>:{" "}
+                                  <span style={{ color: 'black', fontSize: '12.8px' }}>State</span>:{" "}
                                   <span style={{ marginLeft: '2rem' }}>{props.currentState?.title || ''}</span>
                                   {Array.isArray(props.selectedObkjWf?.nextStates) && props.selectedObkjWf.nextStates.length > 0 && (
                                     <Select
@@ -962,11 +957,11 @@ const ObjectData = (props) => {
                                         return wf?.workflowName || '';
                                       }}
                                       sx={{
-                                        fontSize: '13px !important',
+                                        fontSize: '12.8px !important',
                                         height: '24px',
                                         marginLeft: '0.5rem',
                                         '.MuiSelect-select': {
-                                          fontSize: '13px !important',
+                                          fontSize: '12.8px !important',
                                         },
                                       }}
                                     >
@@ -977,7 +972,7 @@ const ObjectData = (props) => {
                                         <MenuItem
                                           key={state.id}
                                           value={state.title}
-                                          sx={{ fontSize: '13px !important' }}
+                                          sx={{ fontSize: '12.8px !important' }}
                                         >
                                           <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
                                           {state.title || ''}
@@ -991,7 +986,7 @@ const ObjectData = (props) => {
                               <>
                                 {props.workflows?.length > 0 && (
                                   <p className="my-1">
-                                    {props.newWF ? <> <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} /><span style={{ color: 'black', fontSize: '13px' }}>Workflow</span>:{" "}</> : <></>}
+                                    {props.newWF ? <> <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} /><span style={{ color: 'black', fontSize: '12.8px' }}>Workflow</span>:{" "}</> : <></>}
                                     <Select
                                       value={props.newWF?.workflowId || ''}
                                       onChange={handleWFChangeEmpty}
@@ -1005,11 +1000,11 @@ const ObjectData = (props) => {
                                         return wf?.workflowName || '';
                                       }}
                                       sx={{
-                                        fontSize: '13px !important',
+                                        fontSize: '12.8px !important',
                                         height: '24px',
                                         marginLeft: '0.5rem',
                                         '.MuiSelect-select': {
-                                          fontSize: '13px !important',
+                                          fontSize: '12.8px !important',
                                         },
                                       }}
                                       MenuProps={{
@@ -1027,7 +1022,7 @@ const ObjectData = (props) => {
                                         className='shadow-sm'
                                         style={{
                                           color: '#2757aa',
-                                          fontSize: '13px',
+                                          fontSize: '12.8px',
                                           position: 'sticky',
                                           top: 0,
                                           background: '#fff',
@@ -1041,7 +1036,7 @@ const ObjectData = (props) => {
                                         <MenuItem
                                           key={wf.workflowId}
                                           value={wf.workflowId}
-                                          sx={{ fontSize: '13px !important' }}
+                                          sx={{ fontSize: '12.8px !important' }}
                                         >
                                           {wf.workflowName || ''}
                                         </MenuItem>
@@ -1052,7 +1047,7 @@ const ObjectData = (props) => {
                                 {props.newWF && (
                                   <p className="my-1">
                                     <i className="fas fa-square-full text-warning mx-1" />
-                                    <span style={{ color: 'black', fontSize: '13px' }}>State</span>:{" "}
+                                    <span style={{ color: 'black', fontSize: '12.8px' }}>State</span>:{" "}
                                     <Select
                                       value={props.newWFState?.stateId || ''}
                                       onChange={handleStateChangeNew}
@@ -1066,11 +1061,11 @@ const ObjectData = (props) => {
                                       }}
                                       size="small"
                                       sx={{
-                                        fontSize: '13px !important',
+                                        fontSize: '12.8px !important',
                                         height: '24px',
                                         marginLeft: '2rem',
                                         '.MuiSelect-select': {
-                                          fontSize: '13px !important',
+                                          fontSize: '12.8px !important',
                                         },
                                       }}
                                     >
@@ -1081,7 +1076,7 @@ const ObjectData = (props) => {
                                         <MenuItem
                                           key={state.stateId}
                                           value={state.stateId}
-                                          sx={{ fontSize: '13px !important' }}
+                                          sx={{ fontSize: '12.8px !important' }}
                                         >
                                           <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
                                           {state.stateName || ''}
@@ -1113,7 +1108,7 @@ const ObjectData = (props) => {
                           onClick={props.updateObjectMetadata}
                           sx={{ textTransform: 'none' }}
                         >
-                          <i className="fas fa-save " style={{ fontSize: '13px', marginRight: '4px' }} />
+                          <i className="fas fa-save " style={{ fontSize: '12.8px', marginRight: '4px' }} />
                           <small>Save</small>
                         </Button>
                         <Button
@@ -1124,7 +1119,7 @@ const ObjectData = (props) => {
                           onClick={() => { props.discardChange(); props.setCheckedItems({}) }}
                           sx={{ textTransform: 'none' }}
                         >
-                          <i className="fas fa-window-close" style={{ fontSize: '13px', marginRight: '4px' }} />
+                          <i className="fas fa-window-close" style={{ fontSize: '12.8px', marginRight: '4px' }} />
                           <small>Discard</small>
                         </Button>
                       </Box>
@@ -1168,7 +1163,7 @@ const ObjectData = (props) => {
                          <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Buffering file<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
-                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                       Please wait as we load the file content
                     </Typography>
                   </>
@@ -1177,7 +1172,7 @@ const ObjectData = (props) => {
                     <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                       Nothing to Preview
                     </Typography>
-                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                       Please select a document to view its content
                     </Typography>
                   </>
@@ -1208,7 +1203,7 @@ const ObjectData = (props) => {
                           <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Starting chat<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
-                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                       Please wait as we load the resources
                     </Typography>
                   </>
@@ -1217,7 +1212,7 @@ const ObjectData = (props) => {
                     <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                       No document selected
                     </Typography>
-                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                       Please select a PDF to interact with the chatbot
                     </Typography>
                   </>
@@ -1261,7 +1256,7 @@ const ObjectData = (props) => {
                         <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                           No Comments Yet
                         </Typography>
-                        <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px' }}>
+                        <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                           Please select an object to view comments
                         </Typography>
                       </>

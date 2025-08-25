@@ -310,7 +310,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                         />
                         <span style={{
                             fontWeight: 500,
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             color: '#333',
                             lineHeight: 1.2
                         }}>
@@ -359,7 +359,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                                         key={option.value}
                                         value={option.value}
                                         sx={{
-                                            fontSize: '13px',
+                                            fontSize: '12.8px',
                                             color: '#333',
                                             backgroundColor: option.value === selectedModel ? '#f0f4ff' : 'transparent',
                                             '&:hover': {
@@ -438,7 +438,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                             }}
                         />
                         <span style={{
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             color: 'black',
                             fontWeight: 500
                         }}>

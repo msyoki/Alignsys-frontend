@@ -15,8 +15,9 @@ import axios from 'axios';
 
 function OfficeApp(props) {
   const fetchFileId = async () => {
-    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.object.guid}/${props.object.id}/${props.object.type}`;
-
+    const classID = props.object.classId ?? props.object.classID;
+    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.object.guid}/${props.object.id}/${classID}`;
+    // console.log('Fetching file ID from URL:', url); // Debug log
     try {
       const response = await axios.get(url, { headers: { Accept: '*/*' } });
      
@@ -41,7 +42,7 @@ function OfficeApp(props) {
 
       const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}`;
    
-     
+      // console.log('Attempting to open app URL:', appUrl); // Debug log
       // Create an iframe to run the app URL in the background
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none'; // Hide the iframe

@@ -7,7 +7,10 @@ import FileExtText from './FileExtText';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
+
 const MultifileFiles = React.memo((props) => {
+
+
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,7 +25,7 @@ const MultifileFiles = React.memo((props) => {
     const getIcon = useCallback((extension) => {
         const ext = (extension || '').toLowerCase();
         const baseStyle = { ...iconStyle };
-        
+
         switch (ext) {
             case 'pdf':
                 return <i className="fas fa-file-pdf" style={{ ...baseStyle, color: '#f21b3f' }}></i>;
@@ -62,6 +65,7 @@ const MultifileFiles = React.memo((props) => {
 
     // Optimized data fetching with proper cleanup
     useEffect(() => {
+        console.log(props.item)
         if (!apiUrl) {
             setLoading(false);
             setDocuments([]);
@@ -75,11 +79,11 @@ const MultifileFiles = React.memo((props) => {
             try {
                 setLoading(true);
                 setError(null);
-                
+
                 const response = await axios.get(apiUrl, {
                     signal: abortController.signal
                 });
-                
+
                 if (isMounted) {
                     setDocuments(response.data || []);
                     console.log(response.data)
@@ -125,52 +129,91 @@ const MultifileFiles = React.memo((props) => {
         setExpandedItems(itemIds);
     }, []);
 
+    const downloadFileBlob = async (fileId, extension) => {
+        props.setLoadingFile(true);
+        try {
+            const url = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles?ObjectId=${props.item.id}&VaultGuid=${props.selectedVault.guid}&fileID=${fileId}&ClassId=${props.item.classId ?? props.item.classID}`;
+
+            const response = await axios.get(url, {
+                headers: { Accept: "*/*" },
+                responseType: "blob",
+                timeout: 0, // disable timeout for large files
+            });
+
+            const blobData = response.data;
+            if (!(blobData instanceof Blob)) {
+                throw new Error("Invalid file format received");
+            }
+
+
+            props.setSelectedFileId(fileId)
+            props.setExtension(extension)
+            if (blobData.size === 0) {
+                alert("File is empty");
+
+            }
+            props.a11yProps(1)
+            // return blobData;
+            props.setBlob(blobData);
+            props.setLoadingFile(false);
+
+        } catch (error) {
+            props.setLoadingFile(false);
+            console.error("Download failed:", error);
+            throw error;
+        }
+    };
+
     // Memoized document items to prevent unnecessary re-renders
     const documentItems = useMemo(() => {
         return documents.map((doc, index) => {
             const isSelected = props.selectedItemId === `${doc.fileID}-${doc.fileTitle}`;
             const itemId = `${doc.fileID}-multifile-${index}`;
-            
+
             return (
                 <TreeItem
                     key={doc.fileID || index}
                     itemId={itemId}
                     onClick={() => {
                         props.setSelectedItemId(`${doc.fileID}-${doc.fileTitle}`)
+                        downloadFileBlob(doc.fileID, doc.extension)
                     }}
                     sx={treeItemStyles}
                     label={
-                        <Box 
-                            display="flex" 
-                            alignItems="center" 
-                            sx={{ 
-                                padding: '3px', 
-                                backgroundColor: isSelected ? '#fcf3c0' : 'fff',
-                                borderRadius: '2px'
+                        <Box
+                            display="flex"
+                            alignItems="center"
+                            sx={{
+                                p: 0.5, // shorthand for padding
+                                backgroundColor: isSelected ? '#fcf3c0' : '#fff',
+                                overflow: 'hidden'
                             }}
                         >
-                            {getIcon(doc.extension)}
-                            <Tooltip 
-                                title={`${doc.fileTitle}.${doc.extension}` || 'No title'} 
+                            <Tooltip
+                                title={doc?.fileTitle ? `${doc.fileTitle}.${doc.extension}` : 'No title'}
                                 placement="right"
                                 arrow
-                                enterDelay={500}
-                                leaveDelay={200}
                             >
-                                <span 
-                                    style={{ 
-                                        fontSize: '12.5px',
-                                        minWidth: '100%',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }} 
-                                    className='list-text mx-2'
-                                >
-                                    {doc.fileTitle}.{doc.extension}
-                                </span>
+                                <Box display="flex" alignItems="center" sx={{ overflow: 'hidden' }}>
+                                    <Box sx={{ mx: 0.5 }}>{getIcon(doc.extension)}</Box>
+                                    <Box
+                                        className="list-text"
+                                        sx={{
+                                            fontSize: '12px',
+                                            mx: 1,
+                                            minWidth: 0, // better than 100% for ellipsis inside flex
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {doc?.fileTitle}.{doc?.extension}
+                                    </Box>
+                                </Box>
                             </Tooltip>
                         </Box>
+
+
                     }
                 />
             );
@@ -179,20 +222,20 @@ const MultifileFiles = React.memo((props) => {
 
     // Memoized loading component
     const loadingComponent = useMemo(() => (
-        <Box 
-           display="flex" 
-            alignItems="center" 
-            sx={{ 
-                padding: '8px', 
-                marginLeft:'10px',
+        <Box
+            display="flex"
+            alignItems="center"
+            sx={{
+                padding: '8px',
+                marginLeft: '10px',
                 color: '#555',
                 fontSize: '12px'
             }}
         >
-          
+
             <span className="loading-indicator text-muted">
-            Searching Files<span>.</span><span>.</span><span>.</span>
-          </span>
+                Searching Files<span>.</span><span>.</span><span>.</span>
+            </span>
         </Box>
     ), []);
 
@@ -229,23 +272,23 @@ const MultifileFiles = React.memo((props) => {
         >
             <TreeItem
                 itemId="multifile-root"
-                   sx={{
-                        ...treeItemStyles,
-                        marginLeft: '15px'
-                    }}
+                sx={{
+                    ...treeItemStyles,
+                    marginLeft: '15px'
+                }}
                 label={
-                    <Box 
-                        display="flex" 
-                        alignItems="center" 
-                        sx={{ 
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        sx={{
                             padding: '3px',
-                        
+
                             color: '#333'
                         }}
                     >
                         {/* <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
                         */}
-                         <Box sx={{ fontSize: '12.5px' }}> Files ({documents.length})</Box>
+                        <Box sx={{ fontSize: '12.5px' }}> Files ({documents.length})</Box>
                     </Box>
                 }
             >

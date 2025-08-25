@@ -93,37 +93,37 @@ const customStyles = {
   control: (base) => ({
     ...base,
     borderColor: error ? 'red' : base.borderColor,
-    fontSize: '13px',
+    fontSize: '12.8px',
     color: 'black',
     backgroundColor: disabled ? '#f5f5f5' : 'white',
   }),
   singleValue: (base) => ({
     ...base,
     color: 'black',
-    fontSize: '13px',
+    fontSize: '12.8px',
   }),
   option: (base, state) => ({
     ...base,
     color: 'black',
-    fontSize: '13px',
+    fontSize: '12.8px',
     backgroundColor: state.isFocused ? '#f0f0f0' : 'white',
   }),
   placeholder: (base) => ({
     ...base,
     color: 'black',
-    fontSize: '13px',
+    fontSize: '12.8px',
   }),
   multiValue: (base) => ({
     ...base,
-    fontSize: '13px',
+    fontSize: '12.8px',
   }),
   multiValueLabel: (base) => ({
     ...base,
-    fontSize: '13px',
+    fontSize: '12.8px',
   }),
   input: (base) => ({
     ...base,
-    fontSize: '13px',
+    fontSize: '12.8px',
   }),
 };
 

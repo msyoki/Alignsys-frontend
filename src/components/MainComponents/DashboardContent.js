@@ -20,6 +20,8 @@ import ColumnSimpleTree from '../ColumnSimpleTree';
 // Constants and assets
 import * as constants from '../Auth/configs';
 import logo from '../../images/ZFBLU.png';
+import PdfConversionDialog from '../Modals/PdfConversionDialog';
+import PdfMergeDialog from '../Modals/PdfMergeDialog';
 
 // Custom Hooks
 function useSessionState(key, defaultValue) {
@@ -80,6 +82,16 @@ function a11yProps(index) {
   };
 }
 
+function a11yProps2(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+
+
+
 const DocumentList = (props) => {
   // Session state
   const [value, setValue] = useSessionState('ss_value', 0);
@@ -129,6 +141,16 @@ const DocumentList = (props) => {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuItem, setMenuItem] = useState(null);
 
+  const [pdfDialogOpen, setPdfDialogOpen] = useSessionState('ss_pdfDialogOpen', false);
+  const [pdfConversionItem, setPdfConversionItem] = useSessionState('ss_pdfConversionItem', null);
+  const [pdfOverwriteOriginal, setPdfOverwriteOriginal] = useSessionState('ss_pdfOverwriteOriginal', false);
+  const [isConvertingToPdf, setIsConvertingToPdf] = useSessionState('ss_isConvertingToPdf', false);
+
+
+  const [mergeDialogOpen, setMergeDialogOpen] = useSessionState('ss_mergeDialogOpen', false);
+  const [mergeItem, setMergeItem] = useSessionState('ss_mergeItem', null);
+  const [isMergingToPdf, setIsMergingToPdf] = useSessionState('ss_isMergeToPdf', false);
+
   // Refs
   const col1Ref = useRef(null);
   const col2Ref = useRef(null);
@@ -138,6 +160,33 @@ const DocumentList = (props) => {
   let clickTimeout = null;
 
   // API Functions
+  // const convertToPDF = async (item, overWriteOriginal) => {
+  //   const payload = {
+  //     vaultGuid: props.selectedVault.guid,
+  //     objectId: item.id,
+  //     classId: item.classID || item.classId,
+  //     fileID: file.fileID,
+  //     overWriteOriginal: overWriteOriginal,
+  //     separateFile: !overWriteOriginal,
+  //     userID: props.mfilesId
+  //   };
+
+  //   try {
+  //     await axios.post(
+  //       `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           'Accept': '*/*',
+  //           'Content-Type': 'application/json'
+  //         }
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.error('Error converting to PDF:', error);
+  //   }
+  // };
+
   const convertToPDF = async (item, overWriteOriginal) => {
     const payload = {
       vaultGuid: props.selectedVault.guid,
@@ -150,6 +199,8 @@ const DocumentList = (props) => {
     };
 
     try {
+      setIsConvertingToPdf(true);
+
       await axios.post(
         `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
         payload,
@@ -160,9 +211,66 @@ const DocumentList = (props) => {
           }
         }
       );
+      props.getRecent?.()
+
+      // Show success message
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Document successfully converted to PDF!");
+
     } catch (error) {
       console.error('Error converting to PDF:', error);
+
+      // Show error message
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Failed to convert document to PDF. Please try again.");
+
+    } finally {
+      setIsConvertingToPdf(false);
+      setPdfDialogOpen(false);
+      setPdfConversionItem(null);
     }
+  };
+
+
+
+  // 4. Add helper functions to handle the dialog
+  const handleMergeRequest = (item) => {
+    setMergeItem(item);
+    setMergeDialogOpen(true);
+  };
+
+  const handleMergeConfirm = () => {
+    if (mergeItem) {
+      alert("proceed with merge request, add logic function")
+    }
+    props.getRecent?.()
+  };
+
+  const handlMergeCancel = () => {
+    setMergeDialogOpen(false);
+    setMergeItem(null);
+    setIsMergingToPdf(false);
+  };
+
+  const handlePdfConversionRequest = (item, overwriteOriginal) => {
+    setPdfConversionItem(item);
+    setPdfOverwriteOriginal(overwriteOriginal);
+    setPdfDialogOpen(true);
+  };
+
+
+  const handlePdfConversionConfirm = () => {
+    if (pdfConversionItem) {
+      convertToPDF(pdfConversionItem, pdfOverwriteOriginal);
+    }
+  };
+
+  const handlePdfConversionCancel = () => {
+    setPdfDialogOpen(false);
+    setPdfConversionItem(null);
+    setIsConvertingToPdf(false);
   };
 
   const fetchObjectFile = async (item) => {
@@ -189,7 +297,7 @@ const DocumentList = (props) => {
       setPreviewObjectProps(response.data);
       return response.data;
     } catch (error) {
-      
+
       setAlertPopOpen(true);
       setAlertPopSeverity("info");
       setAlertPopMessage("Object metadata could not be retrieved, Object was deleted.");
@@ -204,11 +312,11 @@ const DocumentList = (props) => {
     try {
       // Get file metadata
       const filesUrl = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
-      const filesResult = await axios.get(filesUrl, { 
-        headers: { Accept: '*/*' }, 
-        timeout: 0 
+      const filesResult = await axios.get(filesUrl, {
+        headers: { Accept: '*/*' },
+        timeout: 0
       });
-    
+
       const fileData = filesResult.data;
       const fileId = fileData?.[0]?.fileID;
       if (!fileId) throw new Error('No file ID found in response');
@@ -218,12 +326,13 @@ const DocumentList = (props) => {
       // Download blob
       const classId = item.classId ?? item.classID;
       const downloadUrlBlob = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&fileID=${fileId}&ClassId=${classId}`;
-      
-      const blobResult = await axios.get(downloadUrlBlob, { 
-        headers: { Accept: '*/*' }, 
-        responseType: 'blob', 
-        timeout: 0 
+
+      const blobResult = await axios.get(downloadUrlBlob, {
+        headers: { Accept: '*/*' },
+        responseType: 'blob',
+        timeout: 0
       });
+
 
       const blobData = blobResult.data;
       if (!(blobData instanceof Blob)) throw new Error('Invalid file format received');
@@ -344,20 +453,20 @@ const DocumentList = (props) => {
 
     try {
       const promises = [];
-      
+
       // Always fetch object properties
       promises.push(fetchObjectProperties(item));
-      
+
       // Add document download if needed
       if (isDocument) {
         promises.push(handleDocumentDownload(item));
       }
-      
+
       // Add comments fetch
       promises.push(getObjectComments(item));
 
       const results = await Promise.allSettled(promises);
-      
+
       // Handle any rejected promises
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
@@ -456,7 +565,7 @@ const DocumentList = (props) => {
         nextStateId: selectedState.id,
         userID: props.mfilesId
       };
-      
+
       await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
@@ -538,37 +647,45 @@ const DocumentList = (props) => {
           'Content-Type': 'application/json'
         }
       });
+      resetPreview();
+      props.getAssigned?.();
+
       setApprovalPayload(null);
     } catch (error) {
       console.error('Error:', error);
     }
   };
+const updateObjectMetadata = async () => {
+  const hasFormValues = Object.keys(formValues || {}).length > 0;
+  const hasSelectedState = Boolean(selectedState?.title);
+  const hasNewWorkflow = Boolean(newWF?.workflowName);
 
-  const updateObjectMetadata = async () => {
-    const hasFormValues = Object.keys(formValues || {}).length > 0;
-    const hasSelectedState = Boolean(selectedState?.title);
-    const hasNewWorkflow = Boolean(newWF?.workflowName);
+  if (hasFormValues) {
+    await transformFormValues();
+  }
 
-    if (hasFormValues) {
-      await transformFormValues();
-    }
+  if (hasSelectedState) {
+    await transitionState();
+  }
 
-    if (hasSelectedState) {
-      await transitionState();
-    }
+  if (hasNewWorkflow) {
+    await addNewWorkflowAndState();
+  }
 
-    if (hasNewWorkflow) {
-      await addNewWorkflowAndState();
-    }
+  if (approvalPayload) {
+    await markAssignmentComplete();
+  }
 
-    if (approvalPayload) {
-      markAssignmentComplete();
-    }
-
+  // Only reload metadata if not approval-only update
+  if (!approvalPayload) {
+    
     await reloadObjectMetadata();
-    setDialogOpen(false);
-    setUpdatingObject(false);
-  };
+  }
+
+  setDialogOpen(false);
+  setUpdatingObject(false);
+};
+
 
   const reloadObjectMetadata = async () => {
     if (selectedObject.objectTypeId === 0) {
@@ -608,7 +725,7 @@ const DocumentList = (props) => {
     setValue(0);
     e.preventDefault();
     setLoading(true);
-    
+
     props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
       setLoading(false);
       setSearched(true);
@@ -664,7 +781,7 @@ const DocumentList = (props) => {
         const response = await axios.get(url);
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-        
+
         if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
@@ -705,6 +822,7 @@ const DocumentList = (props) => {
   }
 
   function handleClick(item) {
+
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       clickTimeout = null;
@@ -804,9 +922,52 @@ const DocumentList = (props) => {
       document.removeEventListener('mouseup', handleMouseUp);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isDragging, isMobile]);
+  }, [isDragging, isMobile, setPreviewWindowWidth]);
 
   // Right click actions
+  // const rightClickActions = [
+  //   ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
+  //     {
+  //       label: (
+  //         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+  //           <FileExtIcon
+  //             fontSize={'24px'}
+  //             guid={props.selectedVault.guid}
+  //             objectId={menuItem.id}
+  //             classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+  //           />
+  //           <span className='mx-2'>Open</span>
+  //           <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
+  //             Open in default application
+  //           </span>
+  //         </span>
+  //       ),
+  //       onClick: (itm) => {
+  //         openApp(itm);
+  //         handleMenuClose();
+  //       }
+  //     }
+  //   ] : []),
+  //   ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+  //     file?.extension &&
+  //     ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
+  //     ? [
+  //       {
+  //         label: <span className='mx-3'>Convert to PDF overwrite Original Copy</span>,
+  //         onClick: (itm) => {
+  //           convertToPDF(itm, true);
+  //           handleMenuClose();
+  //         }
+  //       },
+  //       {
+  //         label: <span className='mx-3'>Convert to PDF Keep Original Copy</span>,
+  //         onClick: (itm) => {
+  //           convertToPDF(itm, false);
+  //           handleMenuClose();
+  //         }
+  //       }
+  //     ] : [])
+  // ];
   const rightClickActions = [
     ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
       {
@@ -829,30 +990,67 @@ const DocumentList = (props) => {
           handleMenuClose();
         }
       }
-    ] : []),
-    ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
+    ] : [
+
+    ]),
+    ...(menuItem && (menuItem.isSingleFile === true) && menuItem.userPermission && menuItem.userPermission.editPermission &&
       file?.extension &&
-      ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
+      ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
       ? [
         {
-          label: <span className='mx-3'>Convert to PDF overwrite Original Copy</span>,
+          label: <><i class="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF overwrite Original Copy</span></>,
           onClick: (itm) => {
-            convertToPDF(itm, true);
+            handlePdfConversionRequest(itm, true); // Changed this line
             handleMenuClose();
           }
         },
         {
-          label: <span className='mx-3'>Convert to PDF Keep Original Copy</span>,
+          label: <><i class="fa-solid fa-arrows-spin text-p" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF Keep Original Copy</span> </>,
           onClick: (itm) => {
-            convertToPDF(itm, false);
+            handlePdfConversionRequest(itm, false); // Changed this line
             handleMenuClose();
           }
         }
-      ] : [])
+      ] : []),
+
+    //   ...(menuItem && (menuItem.objectID > 0 || menuItem.objectTypeId > 0) ? [
+    //   {
+
+    //     label: (
+    //       <><i class="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i><span className='mx-3'>Consolidate Linked Documents</span></>
+    //     ),
+    //     onClick: (itm) => {
+    //       console.log(itm)
+    //       handleMergeRequest(itm);
+    //       handleMenuClose();
+    //     }
+    //   }
+    // ] : [
+
+    // ]),
   ];
 
   return (
     <>
+      <PdfMergeDialog
+        open={mergeDialogOpen}
+        onClose={handlMergeCancel}
+        onConfirm={handleMergeConfirm}
+        item={mergeItem}
+        isConverting={isMergingToPdf}
+      />
+
+      <PdfConversionDialog
+        open={pdfDialogOpen}
+        onClose={handlePdfConversionCancel}
+        onConfirm={handlePdfConversionConfirm}
+        fileName={pdfConversionItem?.title || 'Unknown'}
+        file={pdfConversionItem}
+        vault={props.selectedVault}
+        overwriteOriginal={pdfOverwriteOriginal}
+        isConverting={isConvertingToPdf}
+      />
+
       <ConfirmUpdateDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
@@ -885,7 +1083,7 @@ const DocumentList = (props) => {
         backgroundColor: '#dedddd',
         height: '100vh',
       }} ref={containerRef}>
-        
+
         {/* Object List */}
         <Box
           ref={col1Ref}
@@ -904,7 +1102,7 @@ const DocumentList = (props) => {
             justifyContent: 'space-between',
             px: 1.5,
             py: 1,
-            fontSize: '13px',
+            fontSize: '12.8px',
             backgroundColor: '#fff',
             color: '#1C4690',
             overflow: 'hidden'
@@ -958,7 +1156,7 @@ const DocumentList = (props) => {
                     width: 36,
                     height: 36,
                     backgroundColor: '#2757aa',
-                    fontSize: '13px',
+                    fontSize: '12.8px',
                   }}
                 />
               </Tooltip>
@@ -984,7 +1182,7 @@ const DocumentList = (props) => {
                     onChange={(e) => props.setSearchTerm(e.target.value)}
                     className="form-control form-control-md rounded-pill"
                     style={{
-                      fontSize: '13px',
+                      fontSize: '12.8px',
                       borderRadius: '6px',
                       width: '100%',
                       paddingRight: '40px'
@@ -1009,9 +1207,9 @@ const DocumentList = (props) => {
 
               {/* Right Actions */}
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <AddButtonWithMenu 
-                  vaultObjectsList={props.vaultObjectsList} 
-                  fetchItemData={props.fetchItemData} 
+                <AddButtonWithMenu
+                  vaultObjectsList={props.vaultObjectsList}
+                  fetchItemData={props.fetchItemData}
                 />
               </Box>
             </Box>
@@ -1029,7 +1227,7 @@ const DocumentList = (props) => {
               '& .MuiTab-root': {
                 minHeight: '36px',
                 height: '36px',
-                p: '4px 13px',
+                p: '4px 12.8px',
                 backgroundColor: '#ecf4fc',
                 minWidth: 'auto',
                 textTransform: 'none'
@@ -1075,7 +1273,7 @@ const DocumentList = (props) => {
                 <>
                   <Box sx={{
                     p: 1,
-                    fontSize: '13px',
+                    fontSize: '12.8px',
                     backgroundColor: '#ecf4fc',
                     display: 'flex',
                     alignItems: 'center',
@@ -1093,7 +1291,7 @@ const DocumentList = (props) => {
                     <>
                       <Box sx={{
                         p: 1,
-                        fontSize: '13px',
+                        fontSize: '12.8px',
                         backgroundColor: '#ecf4fc',
                         display: 'flex',
                         alignItems: 'center',
@@ -1115,6 +1313,11 @@ const DocumentList = (props) => {
                           onItemRightClick={handleRightClick}
                           onRowClick={handleRowClick}
                           getTooltipTitle={toolTipTitle}
+                          setBlob={setBlob}
+                          setSelectedFileId={setSelectedFileId}
+                          setExtension={setExtension}
+                          setLoadingFile={setLoadingFile}
+                          a11yProps={a11yProps2}
                           headerTitle="Search Results"
                           nameColumnLabel="Name"
                           dateColumnLabel="Date Modified"
@@ -1133,7 +1336,7 @@ const DocumentList = (props) => {
                           <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                             No Results Found
                           </Typography>
-                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
                             Please try a different search parameter
                           </Typography>
                         </Box>
@@ -1167,6 +1370,13 @@ const DocumentList = (props) => {
                       handleRightClick={handleRightClick}
                       handleClick={handleClick}
                       handleRowClick={handleRowClick}
+                      setBlob={setBlob}
+                      setSelectedFileId={setSelectedFileId}
+                      setExtension={setExtension}
+                      setLoadingFile={setLoadingFile}
+                      toolTipTitle={toolTipTitle}
+                      a11yProps={a11yProps2}
+
                     />
                   )}
                 </>
@@ -1191,7 +1401,7 @@ const DocumentList = (props) => {
                     <>
                       <Box sx={{
                         p: 1,
-                        fontSize: '13px',
+                        fontSize: '12.8px',
                         backgroundColor: '#ecf4fc',
                         display: 'flex',
                         alignItems: 'center',
@@ -1209,7 +1419,7 @@ const DocumentList = (props) => {
                         <>
                           <Box sx={{
                             p: 1,
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             backgroundColor: '#ecf4fc',
                             display: 'flex',
                             alignItems: 'center',
@@ -1230,16 +1440,22 @@ const DocumentList = (props) => {
                             onItemRightClick={handleRightClick}
                             onRowClick={handleRowClick}
                             getTooltipTitle={toolTipTitle}
+                            setBlob={setBlob}
+                            setSelectedFileId={setSelectedFileId}
+                            setExtension={setExtension}
+                            setLoadingFile={setLoadingFile}
+                            a11yProps={a11yProps2}
                             headerTitle="Search Results"
                             nameColumnLabel="Name"
                             dateColumnLabel="Date Modified"
+
                           />
                         </>
                       ) : (
                         <>
                           <Box sx={{
                             p: 1,
-                            fontSize: '13px',
+                            fontSize: '12.8px',
                             backgroundColor: '#ecf4fc',
                             display: 'flex',
                             alignItems: 'center',
@@ -1262,7 +1478,7 @@ const DocumentList = (props) => {
                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                               No Results Found
                             </Typography>
-                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '13px', color: '#333' }}>
+                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
                               {emptySubtitle}
                             </Typography>
                           </Box>
@@ -1310,6 +1526,7 @@ const DocumentList = (props) => {
             mfilesId={props.mfilesId}
             user={props.user}
             getObjectComments={getObjectComments2}
+            getAssigned={props.getAssigned}
             comments={comments}
             loadingcomments={loadingcomments}
             discardChange={discardChange}
@@ -1345,6 +1562,7 @@ const DocumentList = (props) => {
             checkedItems={checkedItems}
             setCheckedItems={setCheckedItems}
             loadingWFS={loadingWFS}
+            a11yProps={a11yProps2}
           />
         </Box>
       </Box>

@@ -69,13 +69,13 @@ const FileExtIcon = (props) => {
     return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
     
   }
-
+<i class="fa-solid fa-code"></i>
   // Render icons based on extension
   switch (extension) {
     case 'pdf':
       return <i className="fas fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
     case 'csv':
-      return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#6a994e' }}></i>;
+      return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
     case 'txt':
       return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#6c757d' }}></i>;
     case 'msg':
@@ -84,7 +84,7 @@ const FileExtIcon = (props) => {
       return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
     case 'xlsx':
     case 'xls':
-      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#3e8914' }}></i>;
+      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
     case 'ppt':
       return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#ef6351' }}></i>;
     case 'docx':
@@ -94,6 +94,8 @@ const FileExtIcon = (props) => {
     case 'jpeg':
     case 'jpg':
       return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
+    case 'vssettings':
+      return <i className="fa-solid fa-code shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     default:
       // If extension exists but is not handled, show grey file icon
       // if (extension) {

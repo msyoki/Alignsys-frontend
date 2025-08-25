@@ -41,9 +41,9 @@ const MAX_TITLE_LENGTH = 30;
 
 // Style constants to avoid inline object creation
 const TREE_ITEM_STYLES = {
-    fontSize: "13px",
-    "& .MuiTreeItem-label": { fontSize: "13px !important" },
-    "& .MuiTypography-root": { fontSize: "13px !important" },
+    fontSize: "12.8px",
+    "& .MuiTreeItem-label": { fontSize: "12.8px !important" },
+    "& .MuiTypography-root": { fontSize: "12.8px !important" },
     backgroundColor: '#fff !important',
     "&:hover": { backgroundColor: '#fff !important' },
     borderRadius: "0px !important",
@@ -58,7 +58,7 @@ const TREE_ITEM_OBJECT_STYLES = {
 };
 
 const SECTION_HEADER_STYLES = {
-    fontSize: '13px',
+    fontSize: '12.8px',
     backgroundColor: '#ecf4fc',
     cursor: 'pointer',
     display: 'flex'
@@ -69,7 +69,7 @@ const BOX_PADDING_STYLES = {
 };
 
 const NAVIGATION_STYLES = {
-    fontSize: '13px',
+    fontSize: '12.8px',
     backgroundColor: '#ecf4fc',
     cursor: 'pointer',
     gap: '4px',
@@ -77,7 +77,7 @@ const NAVIGATION_STYLES = {
 
 const DATE_SPAN_STYLES = {
     marginLeft: 'auto',
-    fontSize: '13px',
+    fontSize: '12.8px',
     color: '#888',
     whiteSpace: 'nowrap'
 };
@@ -162,7 +162,7 @@ const NavigationBreadcrumb = memo(({
       display: 'flex',
       alignItems: 'center',
       cursor: 'pointer',
-      fontSize: '13px', // Reduced from 14px
+      fontSize: '12.8px', // Reduced from 14px
       color: '#1C4690',
       fontWeight: '500',
       gap: '4px' // Reduced from 6px
@@ -209,7 +209,7 @@ const NavigationBreadcrumb = memo(({
                                 whiteSpace: 'normal',
                                 wordBreak: 'break-word',
                                 // maxWidth: '150px',
-                                fontSize: '13px', // Reduced from 13px
+                                fontSize: '12.8px', // Reduced from 12.8px
                                 color: '#333',
                                 padding: '2px 4px', // Reduced from 4px 6px
                                 borderRadius: '3px', // Reduced from 4px
@@ -270,7 +270,7 @@ const PropertyFolderItem = memo(({ item, index, selectedItemId, onFetchViewData 
                         }}
                     >
                         <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }} />
-                        <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
+                        <span style={{ fontSize: '12.8px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
             />
@@ -303,7 +303,7 @@ const ViewFolderItem = memo(({ item, index, selectedItemId, onFetchMainViewObjec
                         }}
                     >
                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
-                        <span style={{ fontSize: '13px' }} className='list-text'>{item.title}</span>
+                        <span style={{ fontSize: '12.8px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
             />
@@ -335,7 +335,7 @@ const ViewListItem = memo(({ view, index, selectedItemId, onFetchMainViewObjects
                         }}
                     >
                         <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
-                        <span style={{ fontSize: '13px' }} className='list-text'>{view.viewName}</span>
+                        <span style={{ fontSize: '12.8px' }} className='list-text'>{view.viewName}</span>
                     </Box>
                 }
             />
@@ -512,8 +512,8 @@ const ViewsList = (props) => {
             setLoading(false);
             props.setSelectedViewObjects(response.data);
             // setSelectedViewName(item.viewName);
-         
-            
+
+
         } catch {
             props.setSelectedViewObjects([]);
             setLoading(false);
@@ -540,7 +540,7 @@ const ViewsList = (props) => {
             setLoading(false);
             props.setSelectedViewObjects(response.data);
             // setSelectedViewName(item.title);
-          
+
         } catch {
             props.setSelectedViewObjects([]);
             setLoading(false);
@@ -753,11 +753,17 @@ const ViewsList = (props) => {
                                         onItemDoubleClick={props.handleDoubleClick}
                                         onItemRightClick={props.handleRightClick}
                                         onRowClick={props.handleRowClick}
-
+                                        getTooltipTitle={props.toolTipTitle}
+                                        setBlob={props.setBlob}
+                                        setSelectedFileId={props.setSelectedFileId}
+                                        setExtension={props.setExtension}
+                                        setLoadingFile={props.setLoadingFile}
+                                        a11yProps={props.a11yProps}
                                         headerTitle="Search Results"
                                         nameColumnLabel="Name"
                                         dateColumnLabel="Date Modified"
                                     />
+
                                 ) : null;
                             })()}
 
@@ -816,7 +822,7 @@ const ViewsList = (props) => {
                                     <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
                                     Common Views
                                 </span>
-                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({filteredCommonViews.length})</small>
+                                <small style={{ color: '#2a68af', fontSize: '12.8px' }}>({filteredCommonViews.length})</small>
                             </h6>
                             {showCommonViewSublist && (
                                 <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
@@ -845,7 +851,7 @@ const ViewsList = (props) => {
                                     <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
                                     Other Views
                                 </span>
-                                <small style={{ color: '#2a68af', fontSize: '13px' }}>({filteredOtherViews.length})</small>
+                                <small style={{ color: '#2a68af', fontSize: '12.8px' }}>({filteredOtherViews.length})</small>
                             </h6>
                             {showOtherViewSublist && (
                                 <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
