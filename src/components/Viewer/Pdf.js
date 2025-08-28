@@ -4,7 +4,8 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { Tooltip, Box } from '@mui/material';
 import LoadingDialog from '../Loaders/LoaderDialog';
 import SignButton from '../SignDocument';
-import { Typography, CircularProgress } from "@mui/material";
+import { Typography, CircularProgress, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
+import SignOptions from '../SignButton';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -23,11 +24,36 @@ const PDFViewerPreview = (props) => {
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [viewMode, setViewMode] = useState("original");
+  const [documentKey, setDocumentKey] = useState(0); // Key to force re-render
+
   const prevWidthRef = useRef(props.windowWidth);
 
-  // Zoom controls
-  const zoomIn = useCallback(() => setZoom(prev => Math.min(prev + 0.1, 2)), []);
-  const zoomOut = useCallback(() => setZoom(prev => Math.max(prev - 0.1, 0.5)), []);
+  // Get current file URL based on view mode
+  const currentFileUrl = useMemo(() => {
+    return viewMode === "report" ? props.fileReportUrl : props.fileUrl;
+  }, [viewMode, props.fileReportUrl, props.fileUrl]);
+
+  // Handle view mode change with document re-rendering
+  const handleViewModeChange = useCallback((event) => {
+    const newViewMode = event.target.value;
+    setViewMode(newViewMode);
+
+    // Reset document state for clean re-render
+    setNumPages(null);
+    setPageNumber(1);
+    setPagesLoaded(0);
+    setPageDimensions([]);
+    setLoading(true);
+    setLoadingPercentage(0);
+
+    // Force Document components to re-render by changing key
+    setDocumentKey(prev => prev + 1);
+  }, []);
+
+  // Zoom controls with 60% reduction when thumbnails are open
+  const zoomIn = useCallback(() => setZoom(prev => Math.min(prev + 0.01, 2)), []);
+  const zoomOut = useCallback(() => setZoom(prev => Math.max(prev - 0.01, 0.5)), []);
   const resetZoom = useCallback(() => setZoom(0.9), []);
 
   // Pinch zoom
@@ -115,7 +141,7 @@ const PDFViewerPreview = (props) => {
     });
   }, []);
 
-  // Scale for page
+  // Scale for page with 60% reduction when thumbnails open
   const getScaleForPage = useCallback((pageNumber, zoom = 1) => {
     const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
     if (!pageDim) return 1 * zoom;
@@ -127,8 +153,11 @@ const PDFViewerPreview = (props) => {
     } else {
       baseScale = 0.89;
     }
-    return baseScale * zoom;
-  }, [pageDimensions, isRotated]);
+
+    // Reduce to 60% when thumbnails are open
+    const thumbnailReduction = isAsideOpen ? 0.6 : 1.0;
+    return baseScale * zoom * thumbnailReduction;
+  }, [pageDimensions, isRotated, isAsideOpen]);
 
   // Scale for thumbnail
   const getScaleForPageThumbnail = useCallback((pageNumber) => {
@@ -137,45 +166,6 @@ const PDFViewerPreview = (props) => {
   }, [pageDimensions]);
 
   // Download handler
-  // const handleDownload = useCallback((blob, ext, fileName) => {
-  //   try {
-  //     const byteCharacters = atob(base64);
-  //     const byteNumbers = new Array(byteCharacters.length);
-  //     for (let i = 0; i < byteCharacters.length; i++) {
-  //       byteNumbers[i] = byteCharacters.charCodeAt(i);
-  //     }
-  //     const byteArray = new Uint8Array(byteNumbers);
-  //     const mimeTypes = {
-  //       pdf: "application/pdf",
-  //       png: "image/png",
-  //       jpg: "image/jpeg",
-  //       jpeg: "image/jpeg",
-  //       txt: "text/plain",
-  //       doc: "application/msword",
-  //       docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  //       xls: "application/vnd.ms-excel",
-  //       xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //       ppt: "application/vnd.ms-powerpoint",
-  //       pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  //       mp4: "video/mp4",
-  //       mp3: "audio/mpeg",
-  //       csv: "text/csv"
-  //     };
-  //     const mimeType = mimeTypes[ext.toLowerCase()] || "application/octet-stream";
-  //     const blob = new Blob([byteArray], { type: mimeType });
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.setAttribute("download", `${fileName}.${ext}`);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-  //   } catch (error) {
-  //     console.error("Error downloading the file:", error);
-  //     alert("Failed to download the file. Please try again.");
-  //   }
-  // }, []);
   const handleDownload = (blob, ext, fileName) => {
     if (!blob) return;
 
@@ -199,9 +189,6 @@ const PDFViewerPreview = (props) => {
       console.error("Error downloading file:", error);
     }
   };
-
-
-
 
   // Keyboard navigation
   useEffect(() => {
@@ -240,13 +227,13 @@ const PDFViewerPreview = (props) => {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [numPages]);
 
-  // Responsive zoom for aside open/close
-  useEffect(() => {
-    setZoom(prevZoom => {
-      const newZoom = isAsideOpen ? prevZoom - 0.05 : prevZoom + 0.05;
-      return Math.max(0.5, Math.min(2, newZoom));
-    });
-  }, [isAsideOpen]);
+  // Responsive zoom for aside open/close (removed to prevent conflicts with 60% reduction)
+  // useEffect(() => {
+  //   setZoom(prevZoom => {
+  //     const newZoom = isAsideOpen ? prevZoom - 0.05 : prevZoom + 0.05;
+  //     return Math.max(0.5, Math.min(2, newZoom));
+  //   });
+  // }, [isAsideOpen]);
 
   // Responsive zoom for window width
   useEffect(() => {
@@ -266,8 +253,6 @@ const PDFViewerPreview = (props) => {
     }
   }, [props.windowWidth, props.document]);
 
-
-
   // Memoized title
   const trimTitle = useCallback((title) => {
     const maxLength = 65;
@@ -277,27 +262,40 @@ const PDFViewerPreview = (props) => {
   return (
     <>
       {/* File Info Bar */}
-      <Tooltip title={props.selectedObject?.title}>
-        {/* <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '12.8px',
-            backgroundColor: '#ecf4fc',
-            height: '53px',
-            color: '#1d3557',
-          }}
-        >
-          <i style={{ fontSize: '25px', marginLeft: '15px', marginRight: '8px' }} className='fas fa-file-pdf text-danger '></i>
-          <span style={{ fontSize: '12.8px' }}>{trimTitle(props.selectedObject.title)}.pdf</span>
-        </Box> */}
-        <Box className="chat-header2 p-2">
 
-          <span className='mx-2' >  <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }} ></i> <span style={{ fontSize: '12.8px' }}>{trimTitle(props.selectedObject.title)}.pdf</span> </span>
+      <Box className="chat-header2 p-2" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Left side: icon + filename */}
+        <Tooltip title={`${props.selectedObject?.title}.pdf`}>
+          <span className="mx-2" style={{ display: 'flex', alignItems: 'center' }}>
+            <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }}></i>
+            <span style={{ fontSize: '12.8px' }}>
+              {trimTitle(props.selectedObject.title)}.pdf
+            </span>
+          </span>
+        </Tooltip>
+        {/* Right side: Sign button */}
+        {/* <Tooltip title="Digitally Sign Copy"> */}
+          <span className="mx-1">
+            {/* <SignButton
+              objectid={props.selectedObject.id}
+              classid={props.selectedObject.classId || props.selectedObject.classID}
+              fileId={props.fileId}
+              vault={props.vault}
+              email={props.email}
+              mfilesId={props.mfilesId}
+            /> */}
+            <SignOptions
+              objectid={props.selectedObject.id}
+              classid={props.selectedObject.classId || props.selectedObject.classID}
+              fileId={props.fileId}
+              vault={props.vault}
+              email={props.email}
+              mfilesId={props.mfilesId}
+            />
+          </span>
+        {/* </Tooltip> */}
+      </Box>
 
-        </Box>
-      </Tooltip>
 
       {/* Top Controls Bar */}
       <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
@@ -307,10 +305,32 @@ const PDFViewerPreview = (props) => {
             <Tooltip title={isAsideOpen ? "Close thumbnail" : "Open thumbnail view"}>
               <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
               <span className="text-muted mx-1" style={{ fontSize: '12.8px', cursor: 'pointer' }}>
-                <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Minimize" : "Maximize"}</span>
+                <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Close Thumbnail" : "Open Thumbnail"}</span>
               </span>
             </Tooltip>
           </span>
+          {/* View Mode Selector */}
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel id="view-mode-label" sx={{ fontSize: "12px" }}>
+              Document
+            </InputLabel>
+            <Select
+              labelId="view-mode-label"
+              value={viewMode}
+              label="View Mode"
+              onChange={handleViewModeChange}
+              sx={{ fontSize: "12px" }}
+            >
+              <MenuItem value="original" sx={{ fontSize: "12px" }}>
+                {props.blobReport ? "Signed Copy" : "Original Copy"}
+              </MenuItem>
+              {props.blobReport && (
+                <MenuItem value="report" sx={{ fontSize: "12px" }}>
+                  Signing Report
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
           {/* Page Navigation */}
           <span className="d-flex align-items-center text-dark" style={{ fontSize: '12.8px' }}>
             Page
@@ -321,10 +341,10 @@ const PDFViewerPreview = (props) => {
               className="mx-2 form-control form-control-sm"
               style={{ width: '50px', padding: '2px 6px', fontSize: '12.8px' }}
             />
-            / {numPages}
+            / {numPages || 0}
           </span>
           {/* Zoom Controls */}
-          <div className="d-flex align-items-center gap-2 mx-3">
+          {/* <div className="d-flex align-items-center gap-2 mx-3">
             <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
             <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
               {Math.round(zoom * 100)}%
@@ -333,73 +353,108 @@ const PDFViewerPreview = (props) => {
             <Tooltip title="Reset Zoom">
               <i onClick={resetZoom} className="fa-solid fa-rotate-right me-1" style={{ fontSize: '18px', color: '#2757aa' }} />
             </Tooltip>
+          </div> */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i
+              onClick={zoomOut}
+              className="fa-solid fa-magnifying-glass-minus"
+              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+            />
+
+            <Slider
+              size="small"
+              value={zoom * 100} // controlled by zoom state (e.g., 1 = 100%)
+              onChange={(_, newValue) => setZoom(newValue / 100)} // convert back to scale
+              min={25}
+              max={200}
+              aria-label="Zoom"
+              sx={{ width: 120 }}
+            />
+
+            <i
+              onClick={zoomIn}
+              className="fa-solid fa-magnifying-glass-plus"
+              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+            />
+
+            <span
+              style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.8px', color: '#333' }}
+            >
+              {Math.round(zoom * 100)}%
+            </span>
+
+            <Tooltip title="Reset Zoom">
+              <i
+                onClick={resetZoom}
+                className="fa-solid fa-rotate-right me-1"
+                style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+              />
+            </Tooltip>
           </div>
+
           {/* Download PDF */}
           <Tooltip title="Download PDF">
             <i onClick={() => handleDownload(props.blob, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
           </Tooltip>
-          {/* Sign PDF */}
-          <Tooltip title="Digitally Sign Copy">
-            <span className='mx-1'>
-              <SignButton
-                objectid={props.selectedObject.id}
-                classid={props.selectedObject.classId || props.selectedObject.classID}
-                fileId={props.fileId}
-                vault={props.vault}
-                email={props.email}
-                mfilesId={props.mfilesId}
-              />
-            </span>
-          </Tooltip>
+
+
+
         </div>
       </div>
 
       <div className="pdf-viewer-container">
         {isAsideOpen && (
           <aside className={`pdf-thumbnail-panel ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
-            <Document className="pdf-container" file={props.fileUrl} loading={<Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                color: "text.primary",
-                fontSize: "14px",
-                animation: "fadeIn 0.3s ease-in-out",
-                "@keyframes fadeIn": {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-              }}
-            >
-              <CircularProgress size={20} thickness={4} />
-              <Typography
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2px",
-                  fontWeight: 500,
-                }}
-              >
-                Loading PDF
+            <Document
+              key={`thumbnail-${documentKey}`} // Force re-render with key
+              className="pdf-container"
+              file={currentFileUrl}
+              loading={
                 <Box
-                  component="span"
                   sx={{
-                    display: "inline-flex",
-                    animation: "dots 1.5s steps(4, end) infinite",
-                    "@keyframes dots": {
-                      "0%": { content: '"."' },
-                      "25%": { content: '".."' },
-                      "50%": { content: '"..."' },
-                      "75%": { content: '""' },
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    color: "text.primary",
+                    fontSize: "14px",
+                    animation: "fadeIn 0.3s ease-in-out",
+                    "@keyframes fadeIn": {
+                      from: { opacity: 0 },
+                      to: { opacity: 1 },
                     },
                   }}
                 >
-                  ...
+                  <CircularProgress size={20} thickness={4} />
+                  <Typography
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "2px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Loading PDF
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        animation: "dots 1.5s steps(4, end) infinite",
+                        "@keyframes dots": {
+                          "0%": { content: '"."' },
+                          "25%": { content: '".."' },
+                          "50%": { content: '"..."' },
+                          "75%": { content: '""' },
+                        },
+                      }}
+                    >
+                      ...
+                    </Box>
+                  </Typography>
                 </Box>
-              </Typography>
-            </Box>}
-              error={<div>Error loading PDF!</div>} >
-              {[...Array(numPages).keys()].map((pageIndex) => (
+              }
+              error={<div>Error loading PDF!</div>}
+            >
+              {numPages && [...Array(numPages).keys()].map((pageIndex) => (
                 <div
                   key={`thumbnail_${pageIndex + 1}`}
                   id={`thumbnail_${pageIndex + 1}`}
@@ -422,53 +477,56 @@ const PDFViewerPreview = (props) => {
 
         <main className="pdf-main-viewer scrollbar-custom" ref={mainContainerRef}>
           <Document
+            key={`main-${documentKey}`} // Force re-render with key
             className="pdf-container"
-            file={props.fileUrl}
+            file={currentFileUrl}
             onLoadSuccess={onDocumentLoadSuccess}
-            loading={<Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                color: "text.primary",
-                fontSize: "14px",
-                animation: "fadeIn 0.3s ease-in-out",
-                "@keyframes fadeIn": {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-              }}
-            >
-              <CircularProgress size={20} thickness={4} />
-              <Typography
+            loading={
+              <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "2px",
-                  fontWeight: 500,
+                  gap: 1.5,
+                  color: "text.primary",
+                  fontSize: "14px",
+                  animation: "fadeIn 0.3s ease-in-out",
+                  "@keyframes fadeIn": {
+                    from: { opacity: 0 },
+                    to: { opacity: 1 },
+                  },
                 }}
               >
-                Loading PDF
-                <Box
-                  component="span"
+                <CircularProgress size={20} thickness={4} />
+                <Typography
                   sx={{
-                    display: "inline-flex",
-                    animation: "dots 1.5s steps(4, end) infinite",
-                    "@keyframes dots": {
-                      "0%": { content: '"."' },
-                      "25%": { content: '".."' },
-                      "50%": { content: '"..."' },
-                      "75%": { content: '""' },
-                    },
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "2px",
+                    fontWeight: 500,
                   }}
                 >
-                  ...
-                </Box>
-              </Typography>
-            </Box>}
+                  Loading PDF
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      animation: "dots 1.5s steps(4, end) infinite",
+                      "@keyframes dots": {
+                        "0%": { content: '"."' },
+                        "25%": { content: '".."' },
+                        "50%": { content: '"..."' },
+                        "75%": { content: '""' },
+                      },
+                    }}
+                  >
+                    ...
+                  </Box>
+                </Typography>
+              </Box>
+            }
             error={<div>Error loading PDF!</div>}
           >
-            {[...Array(numPages).keys()].map((pageIndex) => (
+            {numPages && [...Array(numPages).keys()].map((pageIndex) => (
               <div
                 key={`page_${pageIndex + 1}`}
                 id={`page_${pageIndex + 1}`}

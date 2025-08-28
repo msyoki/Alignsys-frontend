@@ -602,6 +602,8 @@ const PropertiesList = React.memo(({
                             guid={selectedVault?.guid}
                             objectId={selectedTemplate.id}
                             classId={selectedTemplate.classID}
+                            version={selectedTemplate.versionId?? null}
+                            
                         />
                     </span>
                     {selectedTemplate?.title}
@@ -609,6 +611,8 @@ const PropertiesList = React.memo(({
                         guid={selectedVault?.guid}
                         objectId={selectedTemplate.id}
                         classId={selectedTemplate.classID}
+                        version={selectedTemplate.versionId?? null}
+                            
                     />
                 </Box>
             </Box>
@@ -745,6 +749,8 @@ const TemplateActions = React.memo(({
                                     guid={selectedVault?.guid}
                                     objectId={item.id}
                                     classId={item.classID}
+                                    version={item.versionId?? null}
+                            
                                 />
                             </span>
                         </ListItemIcon>
@@ -757,6 +763,7 @@ const TemplateActions = React.memo(({
                                         guid={selectedVault?.guid}
                                         objectId={item.id}
                                         classId={item.classID}
+                                        version={item.versionId?? null}
                                     />
                                 </>
                             }
@@ -991,7 +998,7 @@ const NewObjectDialog = (props) => {
                     setTimeout(() => {
                         props.getRecent?.();
                         props.getAssigned?.();
-                    }, 7000); // 5000ms = 5 seconds
+                    }, 10000); // 5000ms = 5 seconds
 
                 } else {
                     payload = {
@@ -1023,7 +1030,7 @@ const NewObjectDialog = (props) => {
                     setTimeout(() => {
                         props.getRecent?.();
                         props.getAssigned?.();
-                    }, 7000); // 5000ms = 5 seconds
+                    }, 10000); // 5000ms = 5 seconds
                 }
             } catch (error) {
                 setMiniLoader(false);

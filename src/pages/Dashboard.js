@@ -10,7 +10,7 @@ import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
 import NewObjectDialog from '../components/Modals/NewObjectDialog';
 import * as constants from '../components/Auth/configs';
-import logo from '../images/waica.png';
+import logo from '../images/ZFBLU.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
@@ -685,9 +685,9 @@ function Dashboard() {
   }, []);
 
   const resetViews = useCallback(() => {
-    getRecent([]);
-    getAssigned([]);
-    getDeleted([]);
+    getRecent();
+    getAssigned();
+    getDeleted();
   }, []);
 
   // --- useEffect Hooks (keeping original logic) ---

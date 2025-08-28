@@ -452,9 +452,11 @@ const CSVViewer = React.memo(({ csvString }) => {
   );
 }, (prevProps, nextProps) => prevProps.csvString === nextProps.csvString);
 
+
 // Main component
 const DynamicFileViewer = ({
   blob,
+  blobReport,
   fileExtension,
   objectid,
   fileId,
@@ -466,6 +468,7 @@ const DynamicFileViewer = ({
   mfilesId
 }) => {
   const [fileUrl, setFileUrl] = useState('');
+  const [fileReportUrl, setFileReportUrl] = useState('');
   const [textContent, setTextContent] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const currentBlobRef = useRef(null);
@@ -520,9 +523,16 @@ const DynamicFileViewer = ({
     try {
       switch (fileType) {
         case 'image':
-        case 'pdf':
+        case "pdf":
           const objectUrl = URL.createObjectURL(blob);
           setFileUrl(objectUrl);
+
+          if (blobReport) {
+            const objectUrl2 = URL.createObjectURL(blobReport);
+            setFileReportUrl(objectUrl2);
+          } else {
+            setFileReportUrl('');
+          }
           break;
 
         case 'text':
@@ -619,7 +629,9 @@ const DynamicFileViewer = ({
             selectedObject={selectedObject}
             mfilesId={mfilesId}
             fileUrl={fileUrl}
+            fileReportUrl={fileReportUrl}
             blob={blob}
+            blobReport={blobReport}
           />
         ) : null;
 
@@ -723,6 +735,7 @@ const DynamicFileViewer = ({
 export default React.memo(DynamicFileViewer, (prevProps, nextProps) => {
   return (
     prevProps.blob === nextProps.blob &&
+    prevProps.blobReport === nextProps.blobReport &&
     prevProps.fileExtension === nextProps.fileExtension &&
     prevProps.objectid === nextProps.objectid &&
     prevProps.fileId === nextProps.fileId &&

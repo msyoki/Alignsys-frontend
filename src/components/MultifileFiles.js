@@ -35,7 +35,7 @@ const MultifileFiles = React.memo((props) => {
                 return <i className="fas fa-file-alt" style={{ ...baseStyle, color: '#6c757d' }}></i>;
             case 'xlsx':
             case 'xls':
-                return <i className="fas fa-file-excel" style={{ ...baseStyle, color: '#3e8914' }}></i>;
+                return <i className="fas fa-file-excel" style={{ ...baseStyle, color: '#7cb518' }}></i>;
             case 'ppt':
             case 'pptx':
                 return <i className="fas fa-file-powerpoint" style={{ ...baseStyle, color: '#ef6351' }}></i>;

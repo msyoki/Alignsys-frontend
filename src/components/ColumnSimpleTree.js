@@ -5,6 +5,7 @@ import LinkedObjectsTree from './MainComponents/LinkedObjectsTree';
 import MultifileFiles from './MultifileFiles';
 import FileExtText from './FileExtText';
 import FileExtIcon from './FileExtIcon';
+import {formatDate} from './Utils/Utils'
 
 const ColumnSimpleTree = ({
   
@@ -76,22 +77,22 @@ const ColumnSimpleTree = ({
     return `${(size / Math.pow(1024, idx)).toFixed(1)} ${units[idx]}`;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return '';
 
-    const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-    const date = new Date(utcString);
-    if (isNaN(date)) return '';
+  //   const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+  //   const date = new Date(utcString);
+  //   if (isNaN(date)) return '';
 
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).replace(',', '');
-  };
+  //   return date.toLocaleString('en-US', {
+  //     year: 'numeric',
+  //     month: 'numeric',
+  //     day: 'numeric',
+  //     hour: 'numeric',
+  //     minute: '2-digit',
+  //     hour12: true
+  //   }).replace(',', '');
+  // };
 
   const renderStatusBadge = (item) => (
     <Box sx={{
@@ -248,7 +249,7 @@ const ColumnSimpleTree = ({
   const renderNameColumn = (item) => {
     const classId = item.classId ?? item.classID ?? null;
     const isDocument = item.objectTypeId === 0 || item.objectID === 0;
-
+  
     return (
       <Box
         sx={{
@@ -264,6 +265,7 @@ const ColumnSimpleTree = ({
             guid={selectedVault?.guid}
             objectId={item.id}
             classId={classId}
+            version={item.versionId}
           />
         ) : (
           <Box
@@ -292,6 +294,7 @@ const ColumnSimpleTree = ({
                 guid={selectedVault?.guid}
                 objectId={item.id}
                 classId={classId}
+                version={item.versionId}
               />
             )}
           </Box>

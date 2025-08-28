@@ -2,41 +2,33 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 
-// Simple in-memory cache for extensions
-const extCache = {};
-
 const FileExtIcon = (props) => {
-  const cacheKey = `${props.guid}_${props.objectId}_${props.classId}`;
-  const [extension, setExtension] = useState(extCache[cacheKey] || null);
-  const [loading, setLoading] = useState(!extCache[cacheKey]);
+  const [extension, setExtension] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [is400, setIs400] = useState(false);
 
   useEffect(() => {
-  
     let isMounted = true;
     const controller = new AbortController();
 
-    if (extCache[cacheKey]) {
-      setExtension(extCache[cacheKey]);
-      setLoading(false);
-      return;
-    }
-
-
     const fetchExtension = async () => {
+      setLoading(true);
+      setIs400(false);
+      
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
-  
+     
       try {
         const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
         const ext = data[0]?.extension?.replace(/^\./, '').toLowerCase();
         if (isMounted) {
-          extCache[cacheKey] = ext;
           setExtension(ext);
         }
       } catch (err) {
         if (axios.isAxiosError(err) && err.response && err.response.status === 400) {
-          setIs400(true);
+          if (isMounted) {
+            setIs400(true);
+          }
         } else if (!axios.isCancel(err)) {
           console.error('Error fetching the extension:', err);
         }
@@ -47,13 +39,11 @@ const FileExtIcon = (props) => {
 
     fetchExtension();
 
-
-
     return () => {
       isMounted = false;
       controller.abort();
     };
-  }, [props.isMultifile, props.guid, props.objectId, props.classId, cacheKey]);
+  }, [props.guid, props.objectId, props.classId, props.version ?? null ]); // Removed props.isMultifile as it's not used
 
   const iconStyle = {
     fontSize: props.fontSize || '20px',
@@ -67,9 +57,8 @@ const FileExtIcon = (props) => {
   if (is400) {
     // Show book icon if 400 error
     return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
-    
   }
-<i class="fa-solid fa-code"></i>
+
   // Render icons based on extension
   switch (extension) {
     case 'pdf':
@@ -97,14 +86,7 @@ const FileExtIcon = (props) => {
     case 'vssettings':
       return <i className="fa-solid fa-code shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     default:
-      // If extension exists but is not handled, show grey file icon
-      // if (extension) {
-      //   return <i className="fas fa-file" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
-      // }
-      // // If no extension (shouldn't happen), show book icon as fallback
-      // return <i className="fas fa-book" style={{ ...iconStyle, color: '#7cb518' }}></i>;
       return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
-      
   }
 };
 

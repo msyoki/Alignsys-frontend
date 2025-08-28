@@ -7,7 +7,7 @@ import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../CustomFormTags/UpdateObjectLookupMultiSelect';
 import LookupSelect from '../CustomFormTags/UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup ,CircularProgress} from '@mui/material';
+import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, CircularProgress } from '@mui/material';
 import Bot from '../Bot/Bot';
 
 import CommentsComponent from '../CommentsComponent';
@@ -179,11 +179,11 @@ const ObjectData = (props) => {
 
   const handleStateChange = useCallback((event) => {
     const selectedTitle = event.target.value;
-    const selectedState = props.selectedObkjWf.nextStates.find(state => state.title === selectedTitle);
+    const selectedState = props.selectedObjWf.nextStates.find(state => state.title === selectedTitle);
     if (props.selectedState) {
       props.setSelectedState(selectedState);
     }
-  }, [props.selectedObkjWf, props.selectedState, props.setSelectedState]);
+  }, [props.selectedObjWf, props.selectedState, props.setSelectedState]);
 
   const handleInputChange = useCallback((id, newValues, datatype) => {
     console.log(newValues)
@@ -201,7 +201,7 @@ const ObjectData = (props) => {
     });
   }, [props.setFormValues]);
 
- 
+
   const handleDownload = (blob, ext, fileName) => {
     if (!blob) return;
 
@@ -318,11 +318,11 @@ const ObjectData = (props) => {
         </Typography>
       );
     }
-    
+
     if (isReadOnly) {
       return <span>{renderValue(value)}</span>;
     }
-    
+
     return null;
   }, [isLink, renderValue]);
 
@@ -364,13 +364,13 @@ const ObjectData = (props) => {
     //     ...textareaStyle,
     //   }}
     // />
-    <ResizableTextarea 
+    <ResizableTextarea
       item={item}
       props={props}
       handleInputChange={handleInputChange}
-      renderValue={ renderValue}
-      getInputStyle ={getInputStyle}
-      />
+      renderValue={renderValue}
+      getInputStyle={getInputStyle}
+    />
   ), [props.formValues, renderValue, handleInputChange, getInputStyle, textareaStyle]);
 
   const renderDateTimeInput = useCallback((item, type = 'date') => (
@@ -444,11 +444,11 @@ const ObjectData = (props) => {
     if (isCompletedByProperty) {
       return (
         <Typography fontSize="12.8px" sx={{ color: '#333', lineHeight: 1.3, m: 0 }}>
-          {Array.isArray(item.value) ? 
+          {Array.isArray(item.value) ?
             item.value
               .map(i => renderValue(i.title?.value || i.title))
               .filter(Boolean)
-              .join('; ') 
+              .join('; ')
             : renderValue(item.value)
           }
         </Typography>
@@ -489,7 +489,7 @@ const ObjectData = (props) => {
     const isVisible = !item.isHidden && hasReadPermission;
     const isReadOnly = item.isAutomatic && !item.userPermission?.editPermission && hasReadPermission;
     const isClassProperty = item.propName === 'Class';
-    
+
     // Datatype checks
     const datatypeMap = {
       text: ['MFDatatypeText', 'MFDatatypeFloating', 'MFDatatypeInteger'].includes(item.datatype),
@@ -582,7 +582,7 @@ const ObjectData = (props) => {
                     {renderValue(item.value)}
                   </Typography>
                 )}
-          
+
                 {/* Render different input types based on datatype */}
                 {datatypeMap.text && isVisible && renderTextInput(item)}
                 {datatypeMap.multiLineText && isVisible && renderTextarea(item)}
@@ -672,9 +672,9 @@ const ObjectData = (props) => {
                 <i className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingobject ? (
                   <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
-                    <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Loading metadata<span>.</span><span>.</span><span>.</span>
+                    <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Loading metadata<span>.</span><span>.</span><span>.</span>
                   </Typography>
-                 
+
                 ) : (
                   <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                     Metadata Card
@@ -793,7 +793,7 @@ const ObjectData = (props) => {
                         </Box>
                       </Tooltip>
                     )}
-                    {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 &&  props.blob && (
+                    {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && props.blob && (
                       <Tooltip title="Download document">
                         <i
                           className="fas fa-download"
@@ -928,22 +928,22 @@ const ObjectData = (props) => {
                   >
                     {!props.loadingWFS ? (
                       <>
-                        {(props.workflows?.length > 0 || props.selectedObkjWf) && (
+                        {(props.workflows?.length > 0 || props.selectedObjWf) && (
                           <>
-                            {props.selectedObkjWf ? (
+                            {props.selectedObjWf ? (
                               <>
                                 <p className="my-1">
                                   <i className="fa-solid fa-arrows-spin mx-1" style={{ color: '#2757aa' }} />
                                   <span style={{ color: 'black', fontSize: '12.8px' }}>Workflow</span>:{" "}
                                   <span style={{ marginLeft: '0.5rem' }}>
-                                    {props.selectedObkjWf.workflowTitle || ''}
+                                    {props.selectedObjWf.workflowTitle || ''}
                                   </span>
                                 </p>
                                 <p className="my-1">
                                   <i className="fas fa-square-full text-warning mx-1" />
                                   <span style={{ color: 'black', fontSize: '12.8px' }}>State</span>:{" "}
                                   <span style={{ marginLeft: '2rem' }}>{props.currentState?.title || ''}</span>
-                                  {Array.isArray(props.selectedObkjWf?.nextStates) && props.selectedObkjWf.nextStates.length > 0 && (
+                                  {Array.isArray(props.selectedObjWf?.nextStates) && props.selectedObjWf.nextStates.length > 0 && (
                                     <Select
                                       value={props.selectedState?.title || ''}
                                       onChange={handleStateChange}
@@ -953,8 +953,9 @@ const ObjectData = (props) => {
                                         if (!selected) {
                                           return <span style={{ color: '#aaa' }}>transition</span>;
                                         }
-                                        const wf = props.selectedObkjWf.nextStates.find(w => w.workflowId === selected);
-                                        return wf?.workflowName || '';
+                                        // Fix: Find by title since that's what we're using as value
+                                        const wf = props.selectedObjWf.nextStates.find(w => w.title === selected);
+                                        return wf?.workflowName || wf?.title || '';
                                       }}
                                       sx={{
                                         fontSize: '12.8px !important',
@@ -968,7 +969,7 @@ const ObjectData = (props) => {
                                       <MenuItem disabled value="">
                                         <em>transition to ...</em>
                                       </MenuItem>
-                                      {props.selectedObkjWf.nextStates.map((state) => (
+                                      {props.selectedObjWf.nextStates.map((state) => (
                                         <MenuItem
                                           key={state.id}
                                           value={state.title}
@@ -1106,10 +1107,20 @@ const ObjectData = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={props.updateObjectMetadata}
+                          disabled={props.isUpdatingMetadata}
                           sx={{ textTransform: 'none' }}
                         >
-                          <i className="fas fa-save " style={{ fontSize: '12.8px', marginRight: '4px' }} />
-                          <small>Save</small>
+                          {props.isUpdatingMetadata ? (
+                            <>
+                              <CircularProgress size={12.8} color="inherit" style={{ marginRight: '4px' }} />
+                              <small>Saving...</small>
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-save " style={{ fontSize: '12.8px', marginRight: '4px' }} />
+                              <small>Save</small>
+                            </>
+                          )}
                         </Button>
                         <Button
                           className=' rounded-pill'
@@ -1117,6 +1128,7 @@ const ObjectData = (props) => {
                           variant="contained"
                           color="warning"
                           onClick={() => { props.discardChange(); props.setCheckedItems({}) }}
+                          disabled={props.isUpdatingMetadata}
                           sx={{ textTransform: 'none' }}
                         >
                           <i className="fas fa-window-close" style={{ fontSize: '12.8px', marginRight: '4px' }} />
@@ -1129,9 +1141,10 @@ const ObjectData = (props) => {
             )}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1} style={{ backgroundColor: '#fff', padding: '0%', width: '100%' }}>
-            {props.blob && !props.loadingfile? (
+            {props.blob && !props.loadingfile ? (
               <DynamicFileViewer
-                base64Content={props.base64}
+                blob={props.blob}
+                blobReport={props.blobReport}
                 fileExtension={props.extension}
                 objectid={props.selectedObject.id}
                 fileId={props.selectedFileId}
@@ -1141,7 +1154,7 @@ const ObjectData = (props) => {
                 selectedObject={props.selectedObject}
                 windowWidth={props.windowWidth}
                 mfilesId={props.mfilesId}
-                blob={props.blob}
+
               />
             ) : (
               <Box
@@ -1160,7 +1173,7 @@ const ObjectData = (props) => {
                   <>
                     <Typography component="div" variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                         <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Buffering file<span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Buffering file<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
@@ -1200,7 +1213,7 @@ const ObjectData = (props) => {
                   <>
                     <Typography component="div" variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                          <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Starting chat<span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Starting chat<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
@@ -1249,7 +1262,7 @@ const ObjectData = (props) => {
                   <div style={{ fontSize: '16px', marginBottom: '8px' }}>
                     {props.loadingcomments ? (
                       <div className="loading-indicator text-dark">
-                         <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Loading comments <span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Loading comments <span>.</span><span>.</span><span>.</span>
                       </div>
                     ) : (
                       <>

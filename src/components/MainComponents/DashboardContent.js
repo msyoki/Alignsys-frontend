@@ -134,6 +134,7 @@ const DocumentList = (props) => {
   const [message, setAlertPopMessage] = useState("This is a success message!");
   const [file, setFile] = useState(null);
   const [blob, setBlob] = useState(null);
+  const [blobReport, setBlobReport] = useState(null);
 
   // Layout and interaction state
   const [isDragging, setIsDragging] = useState(false);
@@ -150,6 +151,8 @@ const DocumentList = (props) => {
   const [mergeDialogOpen, setMergeDialogOpen] = useSessionState('ss_mergeDialogOpen', false);
   const [mergeItem, setMergeItem] = useSessionState('ss_mergeItem', null);
   const [isMergingToPdf, setIsMergingToPdf] = useSessionState('ss_isMergeToPdf', false);
+
+  const [isUpdatingMetadata, setIsUpdatingMetadata] = useState(false);
 
   // Refs
   const col1Ref = useRef(null);
@@ -241,11 +244,43 @@ const DocumentList = (props) => {
     setMergeDialogOpen(true);
   };
 
-  const handleMergeConfirm = () => {
+  const handleMergeConfirm = async () => {
+    setIsMergingToPdf(true);
+
+    console.log("Merge item:", mergeItem);
     if (mergeItem) {
-      alert("proceed with merge request, add logic function")
+      try {
+        const response = await axios.post(
+          `${constants.mfiles_api}/api/objectinstance/CombinePdfObjectFiles`,
+          {
+            vaultGuid: props.selectedVault.guid,
+            userID: props.mfilesId,
+            oldClassID: mergeItem.classID ?? mergeItem.classId,
+            oldObjectTypeID: mergeItem.objectID ?? mergeItem.objectTypeId,
+            objectId: mergeItem.id,
+          },
+          {
+            headers: {
+              Accept: "*/*",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("Response:", response.data);
+      } catch (error) {
+        console.error("Error combining PDF object files:", error);
+
+      } finally {
+        setIsMergingToPdf(false);
+        setMergeDialogOpen(false);
+        setMergeItem(null);
+      }
+
     }
     props.getRecent?.()
+
+
   };
 
   const handlMergeCancel = () => {
@@ -274,7 +309,7 @@ const DocumentList = (props) => {
   };
 
   const fetchObjectFile = async (item) => {
-    const classId = item.classId || item.classID;
+    const classId = item.classId ?? item.classID;
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${classId}`;
 
     try {
@@ -316,9 +351,39 @@ const DocumentList = (props) => {
         headers: { Accept: '*/*' },
         timeout: 0
       });
+      console.log(filesResult)
 
       const fileData = filesResult.data;
       const fileId = fileData?.[0]?.fileID;
+      const documentGuid = fileData?.[0]?.reportGuid ?? null;
+      console.log(documentGuid)
+      if (documentGuid) {
+        try {
+          const blobReportResult = await axios.post(
+            `${constants.dss_url}/api/Doc/RetrieveFile`,
+            { fullfilename: `${documentGuid}_Report.pdf` },
+            {
+              headers: {
+                Accept: '*/*',
+                'Content-Type': 'application/json',
+              },
+              responseType: 'blob',
+              timeout: 0,
+            }
+          );
+
+          const blobReportData = blobReportResult.data;
+          if (!(blobReportData instanceof Blob)) {
+            throw new Error('Invalid file format received');
+          }
+
+          setBlobReport(blobReportData);
+        } catch (error) {
+          console.error('Error fetching report file:', error);
+        }
+      }
+
+
       if (!fileId) throw new Error('No file ID found in response');
 
       setSelectedFileId(fileId);
@@ -326,7 +391,7 @@ const DocumentList = (props) => {
       // Download blob
       const classId = item.classId ?? item.classID;
       const downloadUrlBlob = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&fileID=${fileId}&ClassId=${classId}`;
-
+      console.log(downloadUrlBlob)
       const blobResult = await axios.get(downloadUrlBlob, {
         headers: { Accept: '*/*' },
         responseType: 'blob',
@@ -339,6 +404,10 @@ const DocumentList = (props) => {
 
       setBlob(blobData);
 
+
+
+
+
       // Set file extension
       const extension = fileData[0]?.extension?.replace('.', '') || '';
       setExtension(extension);
@@ -348,6 +417,7 @@ const DocumentList = (props) => {
       console.error('Document download error:', error);
       setBase64('');
       setBlob(null);
+      setBlobReport(null);
       setExtension('');
       throw new Error(`Download failed: ${error.message}`);
     } finally {
@@ -444,6 +514,7 @@ const DocumentList = (props) => {
     setSelectedObject(item);
     setBase64('');
     setBlob(null);
+    setBlobReport(null);
     setExtension('');
 
     // Get workflow info
@@ -543,7 +614,7 @@ const DocumentList = (props) => {
         } else {
           previewDocumentObject(selectedObject);
         }
-      }, 5000);
+      }, 10000);
 
     } catch (error) {
       console.error('Error updating object props:', error);
@@ -655,37 +726,74 @@ const DocumentList = (props) => {
       console.error('Error:', error);
     }
   };
-const updateObjectMetadata = async () => {
-  const hasFormValues = Object.keys(formValues || {}).length > 0;
-  const hasSelectedState = Boolean(selectedState?.title);
-  const hasNewWorkflow = Boolean(newWF?.workflowName);
+  // const updateObjectMetadata = async () => {
+  //   const hasFormValues = Object.keys(formValues || {}).length > 0;
+  //   const hasSelectedState = Boolean(selectedState?.title);
+  //   const hasNewWorkflow = Boolean(newWF?.workflowName);
 
-  if (hasFormValues) {
-    await transformFormValues();
-  }
+  //   if (hasFormValues) {
+  //     await transformFormValues();
+  //   }
 
-  if (hasSelectedState) {
-    await transitionState();
-  }
+  //   if (hasSelectedState) {
+  //     await transitionState();
+  //   }
 
-  if (hasNewWorkflow) {
-    await addNewWorkflowAndState();
-  }
+  //   if (hasNewWorkflow) {
+  //     await addNewWorkflowAndState();
+  //   }
 
-  if (approvalPayload) {
-    await markAssignmentComplete();
-  }
+  //   if (approvalPayload) {
+  //     await markAssignmentComplete();
+  //   }
 
-  // Only reload metadata if not approval-only update
-  if (!approvalPayload) {
-    
-    await reloadObjectMetadata();
-  }
+  //   // Only reload metadata if not approval-only update
+  //   if (!approvalPayload) {
 
-  setDialogOpen(false);
-  setUpdatingObject(false);
-};
+  //     await reloadObjectMetadata();
+  //   }
 
+  //   setDialogOpen(false);
+  //   setUpdatingObject(false);
+  // };
+  const updateObjectMetadata = async () => {
+    const hasFormValues = Object.keys(formValues || {}).length > 0;
+    const hasSelectedState = Boolean(selectedState?.title);
+    const hasNewWorkflow = Boolean(newWF?.workflowName);
+
+    try {
+      setIsUpdatingMetadata(true);
+
+      if (hasFormValues) {
+        await transformFormValues();
+      }
+
+      if (hasSelectedState) {
+        await transitionState();
+      }
+
+      if (hasNewWorkflow) {
+        await addNewWorkflowAndState();
+      }
+
+      if (approvalPayload) {
+        await markAssignmentComplete();
+      }
+
+      // Only reload metadata if not approval-only update
+      if (!approvalPayload) {
+        await reloadObjectMetadata();
+      }
+
+    } catch (error) {
+      console.error('Error in updateObjectMetadata:', error);
+      // Handle error as needed
+    } finally {
+      setDialogOpen(false);
+      setUpdatingObject(false);
+      setIsUpdatingMetadata(false);
+    }
+  };
 
   const reloadObjectMetadata = async () => {
     if (selectedObject.objectTypeId === 0) {
@@ -729,6 +837,7 @@ const updateObjectMetadata = async () => {
     props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
       setLoading(false);
       setSearched(true);
+
       props.setData(data);
     });
   };
@@ -750,6 +859,7 @@ const updateObjectMetadata = async () => {
     setSelectedItemId(null);
     setBase64('');
     setBlob(null);
+    setBlobReport(null);
     setExtension('');
     setSelectedObject({});
     setPreviewObjectProps([]);
@@ -815,6 +925,7 @@ const updateObjectMetadata = async () => {
             guid={props.selectedVault.guid}
             objectId={item.id}
             classId={item.classId || item.classID}
+            version={item.versionId ?? null}
           />
         ) : null}
       </span>
@@ -978,6 +1089,7 @@ const updateObjectMetadata = async () => {
               guid={props.selectedVault.guid}
               objectId={menuItem.id}
               classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+              version={menuItem.versionId ?? null}
             />
             <span className='mx-2'>Open</span>
             <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
@@ -998,14 +1110,14 @@ const updateObjectMetadata = async () => {
       ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
       ? [
         {
-          label: <><i class="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF overwrite Original Copy</span></>,
+          label: <><i class="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF ( Overwrite Original Copy )</span></>,
           onClick: (itm) => {
             handlePdfConversionRequest(itm, true); // Changed this line
             handleMenuClose();
           }
         },
         {
-          label: <><i class="fa-solid fa-arrows-spin text-p" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF Keep Original Copy</span> </>,
+          label: <><i class="fa-solid fa-arrows-spin text-p" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF ( Keep Original Copy )</span> </>,
           onClick: (itm) => {
             handlePdfConversionRequest(itm, false); // Changed this line
             handleMenuClose();
@@ -1013,21 +1125,21 @@ const updateObjectMetadata = async () => {
         }
       ] : []),
 
-    //   ...(menuItem && (menuItem.objectID > 0 || menuItem.objectTypeId > 0) ? [
-    //   {
+    ...(menuItem && (menuItem.objectID > 0 || menuItem.objectTypeId > 0) ? [
+      {
 
-    //     label: (
-    //       <><i class="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i><span className='mx-3'>Consolidate Linked Documents</span></>
-    //     ),
-    //     onClick: (itm) => {
-    //       console.log(itm)
-    //       handleMergeRequest(itm);
-    //       handleMenuClose();
-    //     }
-    //   }
-    // ] : [
+        label: (
+          <><i class="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i><span className='mx-3'>Consolidate Linked Documents</span></>
+        ),
+        onClick: (itm) => {
+          console.log(itm)
+          handleMergeRequest(itm);
+          handleMenuClose();
+        }
+      }
+    ] : [
 
-    // ]),
+    ]),
   ];
 
   return (
@@ -1535,7 +1647,7 @@ const updateObjectMetadata = async () => {
             selectedState={selectedState}
             setSelectedState={setSelectedState}
             currentState={currentState}
-            selectedObkjWf={selectedObjWf}
+            selectedObjWf={selectedObjWf}
             transformFormValues={transformFormValues}
             formValues={formValues}
             setFormValues={setFormValues}
@@ -1548,6 +1660,7 @@ const updateObjectMetadata = async () => {
             extension={extension}
             base64={base64}
             blob={blob}
+            blobReport={blobReport}
             loadingobjects={loadingobjects}
             loadingfile={loadingfile}
             loadingobject={loadingobject}
@@ -1563,6 +1676,7 @@ const updateObjectMetadata = async () => {
             setCheckedItems={setCheckedItems}
             loadingWFS={loadingWFS}
             a11yProps={a11yProps2}
+            isUpdatingMetadata={isUpdatingMetadata}
           />
         </Box>
       </Box>

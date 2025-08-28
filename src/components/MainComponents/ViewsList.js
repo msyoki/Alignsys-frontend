@@ -635,6 +635,7 @@ const ViewsList = (props) => {
                             guid={props.selectedVault.guid}
                             objectId={menuItem.id}
                             classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
+                            version={menuItem.versionId?? null}
                         />
                         <span className='mx-2'>Open</span>
                         <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>

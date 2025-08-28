@@ -60,7 +60,7 @@ import { toSentenceCase, toUpperCase } from '../components/Utils/Utils';
 
 // Constants and utilities
 import * as constants from '../components/Auth/configs';
-import logo from '../images/waica.png';
+import logo from '../images/ZFBLU.png';
 import VaultFormDialog from '../components/Modals/AddVaultModal';
 import AttachExistingVault from '../components/AttachExistingVault';
 
