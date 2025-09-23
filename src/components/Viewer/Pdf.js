@@ -4,7 +4,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { Tooltip, Box } from '@mui/material';
 import LoadingDialog from '../Loaders/LoaderDialog';
 import SignButton from '../SignDocument';
-import { Typography, CircularProgress, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
+import { Typography, CircularProgress, Button, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
 import SignOptions from '../SignButton';
 
 // Configure PDF.js worker
@@ -275,30 +275,15 @@ const PDFViewerPreview = (props) => {
         </Tooltip>
         {/* Right side: Sign button */}
         {/* <Tooltip title="Digitally Sign Copy"> */}
-          <span className="mx-1">
-            {/* <SignButton
-              objectid={props.selectedObject.id}
-              classid={props.selectedObject.classId || props.selectedObject.classID}
-              fileId={props.fileId}
-              vault={props.vault}
-              email={props.email}
-              mfilesId={props.mfilesId}
-            /> */}
-            <SignOptions
-              objectid={props.selectedObject.id}
-              classid={props.selectedObject.classId || props.selectedObject.classID}
-              fileId={props.fileId}
-              vault={props.vault}
-              email={props.email}
-              mfilesId={props.mfilesId}
-            />
-          </span>
+
+
         {/* </Tooltip> */}
       </Box>
 
 
       {/* Top Controls Bar */}
       <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
+        {/* Left side controls */}
         <div className="d-flex align-items-center flex-wrap gap-2">
           {/* Toggle Sidebar Button */}
           <span className="d-flex align-items-center cursor-pointer mx-3" onClick={toggleAside}>
@@ -309,28 +294,7 @@ const PDFViewerPreview = (props) => {
               </span>
             </Tooltip>
           </span>
-          {/* View Mode Selector */}
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel id="view-mode-label" sx={{ fontSize: "12px" }}>
-              Document
-            </InputLabel>
-            <Select
-              labelId="view-mode-label"
-              value={viewMode}
-              label="View Mode"
-              onChange={handleViewModeChange}
-              sx={{ fontSize: "12px" }}
-            >
-              <MenuItem value="original" sx={{ fontSize: "12px" }}>
-                {props.blobReport ? "Signed Copy" : "Original Copy"}
-              </MenuItem>
-              {props.blobReport && (
-                <MenuItem value="report" sx={{ fontSize: "12px" }}>
-                  Signing Report
-                </MenuItem>
-              )}
-            </Select>
-          </FormControl>
+
           {/* Page Navigation */}
           <span className="d-flex align-items-center text-dark" style={{ fontSize: '12.8px' }}>
             Page
@@ -343,17 +307,7 @@ const PDFViewerPreview = (props) => {
             />
             / {numPages || 0}
           </span>
-          {/* Zoom Controls */}
-          {/* <div className="d-flex align-items-center gap-2 mx-3">
-            <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
-            <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
-              {Math.round(zoom * 100)}%
-            </span>
-            <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
-            <Tooltip title="Reset Zoom">
-              <i onClick={resetZoom} className="fa-solid fa-rotate-right me-1" style={{ fontSize: '18px', color: '#2757aa' }} />
-            </Tooltip>
-          </div> */}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <i
               onClick={zoomOut}
@@ -398,6 +352,45 @@ const PDFViewerPreview = (props) => {
           </Tooltip>
 
 
+        </div>
+
+        {/* Right side - View Mode Selector (always at far right) */}
+        <div>
+
+          {/* <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel id="view-mode-label" sx={{ fontSize: "12px" }}>
+              Document
+            </InputLabel>
+            <Select
+              labelId="view-mode-label"
+              value={viewMode}
+              label="View Mode"
+              onChange={handleViewModeChange}
+              sx={{ fontSize: "12px" }}
+            >
+              <MenuItem value="original" sx={{ fontSize: "12px" }}>
+                {props.blobReport ? "Signed Copy" : "Original Copy"}
+              </MenuItem>
+              {props.blobReport && (
+                <MenuItem value="report" sx={{ fontSize: "12px" }}>
+                  Signing Report
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl> */}
+     
+
+          <SignOptions
+            objectid={props.selectedObject.id}
+            classid={props.selectedObject.classId || props.selectedObject.classID}
+            fileId={props.fileId}
+            vault={props.vault}
+            email={props.email}
+            mfilesId={props.mfilesId}
+            setViewMode={setViewMode}
+            blobReport={props.blobReport}
+            viewMode={viewMode}
+          />
 
         </div>
       </div>

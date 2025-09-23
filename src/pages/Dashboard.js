@@ -275,86 +275,86 @@ const useApiCalls = (selectedVault, mfilesId) => {
   }, [mfilesId]);
 
 
-const getRecent = useCallback(async (setRecentData) => {
-  try {
-    const { data } = await axios.get(
-      `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
-    );
+  const getRecent = useCallback(async (setRecentData) => {
+    try {
+      const { data } = await axios.get(
+        `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
+      );
 
-    // Sort by most recent date first (descending order)
-    const sortedData = data.sort((a, b) => {
-      const dateA = new Date(a.lastModifiedUtc);
-      const dateB = new Date(b.lastModifiedUtc);
-      return dateB - dateA;
-    });
-    
-    setRecentData(sortedData);
-  } catch (error) {
-    console.error("Failed to fetch recent data", error);
-    setRecentData([]);
-  }
-}, [selectedVault?.guid, mfilesId]);
+      // Sort by most recent date first (descending order)
+      const sortedData = data.sort((a, b) => {
+        const dateA = new Date(a.lastModifiedUtc);
+        const dateB = new Date(b.lastModifiedUtc);
+        return dateB - dateA;
+      });
 
-
-const getDeleted = useCallback(async (setDeletedData) => {
-  try {
-    const response = await axios.get(
-      `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
-    );
-    setDeletedData(response.data);
-  } catch (error) {
-    console.error("Failed to fetch deleted data", error);
-    setDeletedData([]);
-  }
-}, [selectedVault?.guid, mfilesId]);
+      setRecentData(sortedData);
+    } catch (error) {
+      console.error("Failed to fetch recent data", error);
+      setRecentData([]);
+    }
+  }, [selectedVault?.guid, mfilesId]);
 
 
-const getAssigned = useCallback(async (setAssignedData) => {
-  try {
-    const response = await axios.get(
-      `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
-    );
-
-    // Sort by most recent date first
-    const sortedData = response.data.sort((a, b) => {
-      const dateA = new Date(a.lastModifiedUtc);
-      const dateB = new Date(b.lastModifiedUtc);
-      return dateB - dateA;
-    });
-
-    setAssignedData(sortedData);
-  } catch (error) {
-    console.error('Error fetching assigned data:', error);
-    setAssignedData([]);
-  }
-}, [selectedVault?.guid, mfilesId]);
+  const getDeleted = useCallback(async (setDeletedData) => {
+    try {
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
+      );
+      setDeletedData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch deleted data", error);
+      setDeletedData([]);
+    }
+  }, [selectedVault?.guid, mfilesId]);
 
 
-const getVaultObjects = useCallback((setVaultObjectsList, setOpenObjectModal) => {
-  axios.get(
-    `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
-  )
-  .then((response) => {
-    setVaultObjectsList(response.data);
-    setOpenObjectModal(true);
-  })
-  .catch((error) => {
-    console.error("Failed to fetch vault objects", error);
-  });
-}, [selectedVault?.guid, mfilesId]);
+  const getAssigned = useCallback(async (setAssignedData) => {
+    try {
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
+      );
+
+      // Sort by most recent date first
+      const sortedData = response.data.sort((a, b) => {
+        const dateA = new Date(a.lastModifiedUtc);
+        const dateB = new Date(b.lastModifiedUtc);
+        return dateB - dateA;
+      });
+
+      setAssignedData(sortedData);
+    } catch (error) {
+      console.error('Error fetching assigned data:', error);
+      setAssignedData([]);
+    }
+  }, [selectedVault?.guid, mfilesId]);
 
 
-const getVaultObjects2 = useCallback((setVaultObjectsList) => {
-  axios.get(
-    `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
-  )
-  .then((response) => {
-    setVaultObjectsList(response.data);
-  })
-  .catch((error) => {
-    console.error("Failed to fetch vault objects (2)", error);
-  });
-}, [selectedVault?.guid, mfilesId]);
+  const getVaultObjects = useCallback((setVaultObjectsList, setOpenObjectModal) => {
+    axios.get(
+      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+    )
+      .then((response) => {
+        setVaultObjectsList(response.data);
+        setOpenObjectModal(true);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch vault objects", error);
+      });
+  }, [selectedVault?.guid, mfilesId]);
+
+
+  const getVaultObjects2 = useCallback((setVaultObjectsList) => {
+    axios.get(
+      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+    )
+      .then((response) => {
+        setVaultObjectsList(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch vault objects (2)", error);
+      });
+  }, [selectedVault?.guid, mfilesId]);
 
   return {
     searchObject,
@@ -436,18 +436,20 @@ function Dashboard() {
   }, [authTokens.access, setViewableObjects]);
 
   const getVaultId = useCallback(async (guid) => {
-    let data = JSON.stringify({ "user_id": user.id, "guid": guid });
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${constants.auth_api}/api/vaultid/`,
-      headers: { 'Content-Type': 'application/json' },
-      data: data
-    };
-    axios.request(config)
-      .then((response) => setMfilesId(response.data.mfilesID))
-      .catch(() => { });
+    try {
+      const response = await axios.post(
+        `${constants.auth_api}/api/vaultid/`,
+        { user_id: user.id, guid },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      setMfilesId(response.data.mfilesID);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Vault ID fetch failed:", error);
+      setMfilesId(7);
+    }
   }, [user.id, setMfilesId]);
+
 
   const getNetworkStatus = useCallback(() => {
     if (navigator.connection) {

@@ -22,6 +22,7 @@ import * as constants from '../Auth/configs';
 import logo from '../../images/ZFBLU.png';
 import PdfConversionDialog from '../Modals/PdfConversionDialog';
 import PdfMergeDialog from '../Modals/PdfMergeDialog';
+import ChartGenerator from '../Reports/ChartGenerator';
 
 // Custom Hooks
 function useSessionState(key, defaultValue) {
@@ -153,6 +154,8 @@ const DocumentList = (props) => {
   const [isMergingToPdf, setIsMergingToPdf] = useSessionState('ss_isMergeToPdf', false);
 
   const [isUpdatingMetadata, setIsUpdatingMetadata] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('Home');
+
 
   // Refs
   const col1Ref = useRef(null);
@@ -726,36 +729,7 @@ const DocumentList = (props) => {
       console.error('Error:', error);
     }
   };
-  // const updateObjectMetadata = async () => {
-  //   const hasFormValues = Object.keys(formValues || {}).length > 0;
-  //   const hasSelectedState = Boolean(selectedState?.title);
-  //   const hasNewWorkflow = Boolean(newWF?.workflowName);
 
-  //   if (hasFormValues) {
-  //     await transformFormValues();
-  //   }
-
-  //   if (hasSelectedState) {
-  //     await transitionState();
-  //   }
-
-  //   if (hasNewWorkflow) {
-  //     await addNewWorkflowAndState();
-  //   }
-
-  //   if (approvalPayload) {
-  //     await markAssignmentComplete();
-  //   }
-
-  //   // Only reload metadata if not approval-only update
-  //   if (!approvalPayload) {
-
-  //     await reloadObjectMetadata();
-  //   }
-
-  //   setDialogOpen(false);
-  //   setUpdatingObject(false);
-  // };
   const updateObjectMetadata = async () => {
     const hasFormValues = Object.keys(formValues || {}).length > 0;
     const hasSelectedState = Boolean(selectedState?.title);
@@ -884,6 +858,7 @@ const DocumentList = (props) => {
   };
 
   function openApp(item) {
+
     const fetchExtension = async () => {
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
 
@@ -1035,50 +1010,7 @@ const DocumentList = (props) => {
     };
   }, [isDragging, isMobile, setPreviewWindowWidth]);
 
-  // Right click actions
-  // const rightClickActions = [
-  //   ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
-  //     {
-  //       label: (
-  //         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-  //           <FileExtIcon
-  //             fontSize={'24px'}
-  //             guid={props.selectedVault.guid}
-  //             objectId={menuItem.id}
-  //             classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
-  //           />
-  //           <span className='mx-2'>Open</span>
-  //           <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
-  //             Open in default application
-  //           </span>
-  //         </span>
-  //       ),
-  //       onClick: (itm) => {
-  //         openApp(itm);
-  //         handleMenuClose();
-  //       }
-  //     }
-  //   ] : []),
-  //   ...(menuItem && menuItem.userPermission && menuItem.userPermission.editPermission &&
-  //     file?.extension &&
-  //     ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'csv', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
-  //     ? [
-  //       {
-  //         label: <span className='mx-3'>Convert to PDF overwrite Original Copy</span>,
-  //         onClick: (itm) => {
-  //           convertToPDF(itm, true);
-  //           handleMenuClose();
-  //         }
-  //       },
-  //       {
-  //         label: <span className='mx-3'>Convert to PDF Keep Original Copy</span>,
-  //         onClick: (itm) => {
-  //           convertToPDF(itm, false);
-  //           handleMenuClose();
-  //         }
-  //       }
-  //     ] : [])
-  // ];
+
   const rightClickActions = [
     ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
       {
@@ -1346,7 +1278,7 @@ const DocumentList = (props) => {
               }
             }}
           >
-            {['Home', 'Recent', 'Assigned', 'Deleted'].map((label, index) => (
+            {['Home', 'Recent', 'Assigned', 'Deleted', 'Reports'].map((label, index) => (
               <Tab
                 key={index}
                 label={
@@ -1356,7 +1288,7 @@ const DocumentList = (props) => {
                         className="fas fa-home mx-1"
                         style={{
                           fontSize: '16px',
-                          color: '#2757aa'
+                          color: selectedTab === 'Home' ? '#2757aa' : '#ccc' // greyed out if not selected
                         }}
                       />
                     )}
@@ -1364,6 +1296,7 @@ const DocumentList = (props) => {
                   </span>
                 }
                 onClick={() => {
+                  setSelectedTab(label); // update the selected tab
                   resetPreview();
                   if (label === 'Home') {
                     setSelectedViewObjects([]);
@@ -1375,6 +1308,7 @@ const DocumentList = (props) => {
                 }}
                 {...a11yProps(index)}
               />
+
             ))}
           </Tabs>
 
@@ -1601,6 +1535,10 @@ const DocumentList = (props) => {
                 </CustomTabPanel>
               );
             })}
+            <CustomTabPanel value={value} index={4} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
+              <ChartGenerator />
+            </CustomTabPanel>
+
           </Box>
         </Box>
 

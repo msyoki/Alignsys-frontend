@@ -168,13 +168,12 @@ export default function SignOptions(props) {
                         style={{ marginRight: 8 }}
                     />
                 )}
-                <small>
-                    <i
-                        className="fas fa-signature"
-                        style={{ fontSize: '11px', marginRight: '4px' }}
-                    ></i>
-                    Sign Options
-                </small>
+       <small>
+  <i className="fas fa-signature me-1" style={{ fontSize: '11px' }}></i>
+  e-Sign Options
+  <i className="fas fa-caret-down ms-1"></i>
+</small>
+
             </Button>
             <Menu
                 anchorEl={anchorEl}
@@ -182,11 +181,21 @@ export default function SignOptions(props) {
                 onClose={handleClose}
             >
                 <MenuItem style={{ fontSize: '12.8px' }} onClick={postData}>
-                    Sign Myself
+                    Sign for Myself
                 </MenuItem>
-                <MenuItem style={{ fontSize: '12.8px' }} onClick={() => { setOpenDialogAddSigners(true) }}>
-                    Mail Signers
+                <MenuItem style={{ fontSize: '12.8px' }} onClick={() => setOpenDialogAddSigners(true)}>
+                    Request Signatures from Others
                 </MenuItem>
+                <MenuItem style={{ fontSize: '12.8px' }} onClick={() => props.setViewMode(props.viewMode === "report" ? "original" : "report")}>
+                    {props.blobReport && (
+
+                        <>
+                            {props.viewMode === "report" ? "Preview Signed Copy" : "Preview Signing Report"}
+
+                        </>
+                    )}
+                </MenuItem>
+
 
             </Menu>
         </div>

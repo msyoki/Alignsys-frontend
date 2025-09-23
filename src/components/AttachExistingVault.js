@@ -53,6 +53,7 @@ function AttachExistingVault(props) {
         setIsSubmitting(true);
         setSubmitError('');
         setSubmitSuccess('');
+        alert(`${constants.auth_api}/api/attach-existing-vault/`)
 
         try {
             const response = await axios.post(

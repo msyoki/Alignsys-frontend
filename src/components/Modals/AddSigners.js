@@ -9,6 +9,7 @@ import {
     Typography,
     Chip,
     Box,
+    Stack
 } from "@mui/material";
 
 const AddSignersDialog = (props) => {
@@ -133,9 +134,9 @@ const AddSignersDialog = (props) => {
                                 }}
                             >
                                 <i className="fas fa-user-circle" style={{ color: "#2757aa", marginRight: "6px" }}></i>
-                                <span style={{ marginRight: "8px", color: "#000", fontSize:'12.8px' }}>{item.email}</span>
+                                <span style={{ marginRight: "8px", color: "#000", fontSize: '12.8px' }}>{item.email}</span>
 
-                             
+
                                 <i
                                     className="fas fa-times text-danger"
                                     style={{ cursor: "pointer" }}
@@ -162,49 +163,87 @@ const AddSignersDialog = (props) => {
             ({ onSubmit }) =>
             (
                 <form onSubmit={onSubmit} noValidate>
-                    <Typography
-                        variant="h6"
-                        sx={{ mb: 2, color: "#2757aa", fontWeight: 500 }}
-                    >
-                        Add new signer
-                    </Typography>
+                    <div className='p-3' style={{ backgroundColor: '#e9f2ff', borderRadius: '8px', marginBottom: '16px', fontSize: '13px' }}>
+                        <span style={{ color: '#2757aa' }}>Instructions</span>: Add signers in the order they should sign. Once the list is complete, proceed to send for signing.
+                    </div>
+                    <h5 className="mb-2" style={{ fontSize: 13, color: '#2757aa' }}>
+                        <i className="fas fa-user-plus me-2"></i>Add new signer
+                    </h5>
+
 
                     <TextField
                         inputRef={emailInputRef}
                         id="signer-email"
-                        label="Signer email *"
+                        label="Signer email"
                         type="email"
                         name="email"
                         placeholder="example@gmail.com"
                         required
                         fullWidth
                         size="small"
-                        sx={{ mb: 3 }}
+                        sx={{ mb: 3, mt: 1 }}
                     />
 
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        size="medium"
-                        disabled={loadingAddSigner}
-                        fullWidth
-                        sx={{
-                            backgroundColor: "#2757aa",
-                            "&:hover": { backgroundColor: "#1e4a8c" },
-                            borderRadius: "8px",
-                            py: 1,
-                            textTransform: "none",
-                        }}
+                    <Stack
+                        direction={{ xs: "column", sm: "row" }} // column on extra-small screens, row on small+
+                        spacing={2}
+                        justifyContent="flex-start"
+                        alignItems="stretch"
                     >
-                        {loadingAddSigner ? (
-                            <>
-                                <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
-                                Adding...
-                            </>
-                        ) : (
-                            "Add signer"
-                        )}
-                    </Button>
+                        <Button
+                            onClick={handleClose2}
+                            variant="outlined"
+                            size="small"
+                            className="rounded-pill"
+                            fullWidth
+                            sx={{
+                                borderColor: "#f0c040",      // modern gold border
+                                color: "#555",            // darker golden text
+                                backgroundColor: "#fff8e1",  // soft yellow background
+                                "&:hover": {
+                                    backgroundColor: "#f0c040",
+                                    borderColor: "#f0c040",
+                                },
+                                borderRadius: "8px",
+                                textTransform: "none",
+                            }}
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            size="small"
+                            className="rounded-pill"
+                            disabled={loadingAddSigner}
+                            fullWidth
+                            sx={{
+                                backgroundColor: "#2757aa",
+                                "&:hover": { backgroundColor: "#1e4a8c" },
+                                borderRadius: "8px",
+                                py: 1,
+                                textTransform: "none",
+                               
+                                
+                            }}
+                        >
+                            {loadingAddSigner ? (
+                                <>
+                                    <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
+                                    Adding...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-plus-circle mx-2"></i>
+                                    Add Signer
+                                </>
+                            )}
+                        </Button>
+
+
+                    </Stack>
+
                 </form>
             ),
         [loadingAddSigner]
@@ -225,26 +264,7 @@ const AddSignersDialog = (props) => {
                     <Grid item xs={12} md={5} sx={{ p: 3, bgcolor: "#fff" }}>
                         <AddSignerForm onSubmit={addMailList} />
 
-                        <Box sx={{ textAlign: "center", mt: 3 }}>
-                            <Button
-                                onClick={handleClose2}
-                                variant="outlined"
-                                size="medium"
-                                sx={{
-                                    borderColor: "#fdd85d",
-                                    color: "#856404",
-                                    backgroundColor: "#fff3cd",
-                                    "&:hover": {
-                                        backgroundColor: "#fdd85d",
-                                        borderColor: "#fdd85d",
-                                    },
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                        </Box>
+
                     </Grid>
 
                     {/* Right Column - Signers List */}
@@ -313,9 +333,9 @@ const AddSignersDialog = (props) => {
                                         Preview / mark where to sign
                                     </Button>
                                 </Box> */}
-                                 <Box sx={{ textAlign: "center" }}>
+                                <Box sx={{ textAlign: "center" }}>
                                     <Button
-                                        onClick={() => {props.postDataOthers();props.setOpenDialogAddSigners(false)}}
+                                        onClick={() => { props.postDataOthers(); props.setOpenDialogAddSigners(false) }}
                                         variant="contained"
                                         size="small"
                                         className="rounded-pill"

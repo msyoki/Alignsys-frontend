@@ -18,6 +18,8 @@ import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
 import BotLLM from '../Bot/BotLLM';
 import { ResizableTextarea } from '../CustomFormTags/ResizableTextArea';
+import AllyBotMessage from '../AllyText';
+import AnimatedAndroidIcon from '../Modals/AnimatedBot';
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -1208,7 +1210,8 @@ const ObjectData = (props) => {
                   mx: 'auto'
                 }}
               >
-                <i className="fa-brands fa-android my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+                {/* <i className="fa-brands fa-android my-2" style={{ fontSize: '120px', color: '#2757aa' }} /> */}
+                <AnimatedAndroidIcon/>
                 {props.loadingfile ? (
                   <>
                     <Typography component="div" variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
@@ -1223,11 +1226,13 @@ const ObjectData = (props) => {
                 ) : (
                   <>
                     <Typography variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
-                      No document selected
+                      No document
+
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                       Please select a PDF to interact with the chatbot
                     </Typography>
+                  
                   </>
                 )}
               </Box>

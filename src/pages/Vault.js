@@ -160,7 +160,6 @@ const VaultSelectForm = () => {
           </FormControl>
 
 
-         <AttachExistingVault authTokens={authTokens} user={user}/>
 
           {/* Admin Dashboard Button */}
           {user.is_admin && (
@@ -182,6 +181,8 @@ const VaultSelectForm = () => {
               Admin Dashboard
             </Button>
           )}
+          
+         {/* <AttachExistingVault authTokens={authTokens} user={user}/> */}
         </Box>
       </Container>
 

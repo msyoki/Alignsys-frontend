@@ -40,7 +40,11 @@ function OfficeApp(props) {
   
     if (fileId) {
 
-      const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}`;
+      const title= `${props.object.title}.${props.object.extension}`
+   
+      // Construct the app URL with the fetched fileId
+
+      const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}&Filename=${title}`;
    
       // console.log('Attempting to open app URL:', appUrl); // Debug log
       // Create an iframe to run the app URL in the background
