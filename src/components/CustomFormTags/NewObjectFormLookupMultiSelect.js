@@ -22,6 +22,35 @@ const LookupMultiSelect = ({
   const [loading, setLoading] = useState(false);
   const searchTimeout = useRef();
 
+  const fetchOptions = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`
+      );
+      const formattedOptions = response.data.map(option => ({
+        label: option.name,
+        value: option.id,
+      }));
+      setDefaultOptions(formattedOptions);
+      // Merge with selected values to ensure all are present
+      const combined = [
+        ...formattedOptions,
+        ...value
+          .filter(val => !formattedOptions.some(opt => opt.value === val))
+          .map(val => {
+            // Try to find label from previous options or fallback to value
+            const prev = options.find(opt => opt.value === val);
+            return prev || { value: val, label: String(val) };
+          }),
+      ];
+      setOptions(combined);
+    } catch {
+      // console.error('Error fetching lookup options:', error);
+    }
+    setLoading(false);
+  };
+
   // Map value prop to selectedOptions for react-select
   const selectedOptions = options.concat(defaultOptions)
     .filter((option, idx, arr) =>
@@ -32,34 +61,7 @@ const LookupMultiSelect = ({
 
   // Fetch initial/default options
   useEffect(() => {
-    const fetchOptions = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`
-        );
-        const formattedOptions = response.data.map(option => ({
-          label: option.name,
-          value: option.id,
-        }));
-        setDefaultOptions(formattedOptions);
-        // Merge with selected values to ensure all are present
-        const combined = [
-          ...formattedOptions,
-          ...value
-            .filter(val => !formattedOptions.some(opt => opt.value === val))
-            .map(val => {
-              // Try to find label from previous options or fallback to value
-              const prev = options.find(opt => opt.value === val);
-              return prev || { value: val, label: String(val) };
-            }),
-        ];
-        setOptions(combined);
-      } catch  {
-        // console.error('Error fetching lookup options:', error);
-      }
-      setLoading(false);
-    };
+
     fetchOptions();
     // eslint-disable-next-line
   }, [propId, selectedVault, userId]);
@@ -102,7 +104,7 @@ const LookupMultiSelect = ({
             }),
         ];
         setOptions(combined);
-      } catch  {
+      } catch {
         // console.error('Error fetching lookup options based on search term:', error);
       }
       setLoading(false);
@@ -161,8 +163,10 @@ const LookupMultiSelect = ({
       <Select
         isMulti
         value={selectedOptions}
-        onChange={handleChange}
         options={options}
+        onChange={handleChange}
+        openMenuOnClick={true}  // let the menu open normally
+        onMenuOpen={() => fetchOptions()} // fetch options only when menu opens
         placeholder={loading ? `Loading ${label}...` : `Select ${label}`}
         inputValue={inputValue}
         onInputChange={(val, { action }) => {
@@ -176,6 +180,7 @@ const LookupMultiSelect = ({
         menuPortalTarget={document.body}
         menuPosition="absolute"
       />
+
       {loading && (
         <div style={{
           position: 'absolute',

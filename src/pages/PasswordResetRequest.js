@@ -41,7 +41,7 @@ const PasswordResetRequest = () => {
         } catch (error) {
             setOpenAlert(true);
             setAlertSeverity('error');
-           
+
             // Extract meaningful error message
             const errorMsg = error.response?.data?.error || error.message || 'An error occurred';
 
@@ -56,8 +56,16 @@ const PasswordResetRequest = () => {
 
 
     const handleRedirect = () => {
-        navigate('/login');
+
+        if (linksent) {
+            navigate('/login');
+        }
+        else{
+            navigate(-1);
+        }
+
     };
+
 
     return (
 
@@ -131,21 +139,21 @@ const PasswordResetRequest = () => {
 
                             <Button
                                 // color="success"
-                                 type="submit"
+                                type="submit"
                                 className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
                                 style={{
                                     fontSize: '12.5px',
                                     color: '#fff',
-                                    backgroundColor:'#2CB34A',
+                                    backgroundColor: '#2CB34A',
                                     cursor: 'pointer',
                                     width: 'auto',
                                     padding: '10px',
                                     textTransform: 'none',
                                 }}
-                                disabled={loading? true : false}
+                                disabled={loading ? true : false}
                                 variant="contained"
                             >
-                               <span className='mx-3'> {loading ? <>Sending email ... <CircularProgress size={12} className="text-white mx-2" /> </>: 'Send Reset Link'}</span>
+                                <span className='mx-3'> {loading ? <>Sending email ... <CircularProgress size={12} className="text-white mx-2" /> </> : 'Send Reset Link'}</span>
                             </Button>
                         </form>
                     ) : (
@@ -172,7 +180,7 @@ const PasswordResetRequest = () => {
                                 className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
                                 style={{
                                     fontSize: '12.5px',
-                                    color:linksent ? '#30343f' : '#fff',
+                                    color: linksent ? '#30343f' : '#fff',
                                     backgroundColor: linksent ? '#ffda75' : '#2757aa',
                                     cursor: 'pointer',
                                     width: '40%',
@@ -200,12 +208,11 @@ const PasswordResetRequest = () => {
                         </ButtonComponent> */}
 
                         <Button
-                           
                             onClick={handleRedirect}
-                            className="mb-3 m-2 rounded-pill " // Retaining the same classes as in the original code
+                            className="mb-3 m-2 rounded-pill"
                             style={{
                                 fontSize: '12.5px',
-                                color:linksent ? '#fff' : '#30343f',
+                                color: linksent ? '#fff' : '#30343f',
                                 backgroundColor: linksent ? '#2757aa' : '#ffda75',
                                 cursor: 'pointer',
                                 width: '40%',
@@ -217,6 +224,7 @@ const PasswordResetRequest = () => {
                         >
                             {linksent ? 'Go to Login' : 'Cancel Reset'}
                         </Button>
+
 
 
                     </Box>

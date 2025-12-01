@@ -24,7 +24,7 @@ import axios from 'axios';
 import AttachExistingVault from '../components/AttachExistingVault';
 
 const VaultSelectForm = () => {
-  const { authTokens, user } = useContext(Authcontext);
+  const { authTokens, user ,logoutUser} = useContext(Authcontext);
   const [selectedVaultGuid, setSelectedVaultGuid] = useState('');
   const [vaults, setVaults] = useState([]);
 
@@ -60,6 +60,7 @@ const VaultSelectForm = () => {
     const selectedObj = vaults.find(vault => vault.guid === value);
     if (selectedObj) {
       sessionStorage.setItem('selectedVault', JSON.stringify(selectedObj));
+      console.log('Selected Vault:', selectedObj);
       navigate('/', { state: { openalert: true, alertMsg: "logged in successfully", alertSeverity: "success" } });
     }
   };
@@ -70,7 +71,7 @@ const VaultSelectForm = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#fff' }}>
+    <div style={{ backgroundColor: '#2757aa' }}>
       <Container
         maxWidth="sm"
         className="p-2"
@@ -83,7 +84,7 @@ const VaultSelectForm = () => {
       >
         <Box
           component="form"
-          className="shadow-lg text-dark"
+          className="shadow-lg text-dark bg-white"
           sx={{
             width: '100%',
             display: 'flex',
@@ -181,6 +182,23 @@ const VaultSelectForm = () => {
               Admin Dashboard
             </Button>
           )}
+           <Button
+              variant="outlined"
+              onClick={logoutUser}
+              sx={{
+                mt: 2,
+                color: '#2757aa',
+                borderColor: '#2757aa',
+                fontSize: '12px',
+                '&:hover': {
+                  backgroundColor: '#2757aa',
+                  color: 'white',
+                },
+              }}
+            >
+              <i className="fas fa-sign-out-alt mx-2" style={{ fontSize: "18px" }}></i>
+              Log Out 
+            </Button>
           
          {/* <AttachExistingVault authTokens={authTokens} user={user}/> */}
         </Box>

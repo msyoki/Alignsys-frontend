@@ -45,7 +45,7 @@ function FileViewer(props) {
         height: '66vh',
         overflowY: 'scroll',
         overflowX:'scroll-hidden',
-        backgroundColor:'#555'
+        backgroundColor:'#555b6e'
       
       }}
       className='shadow-lg'

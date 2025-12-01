@@ -6,7 +6,7 @@ import LoadingDialog from '../Loaders/LoaderDialog';
 import SignButton from '../SignDocument';
 import { Typography, CircularProgress, Button, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
 import SignOptions from '../SignButton';
-
+import '../../styles/PDFViewerTechedge.css';
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 

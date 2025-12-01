@@ -60,7 +60,8 @@ import { toSentenceCase, toUpperCase } from '../components/Utils/Utils';
 
 // Constants and utilities
 import * as constants from '../components/Auth/configs';
-import logo from '../images/ZFBLU.png';
+import logo from '../images/ZFWHITE.png';
+import logo2 from '../images/ZFBLU.png';
 import VaultFormDialog from '../components/Modals/AddVaultModal';
 import AttachExistingVault from '../components/AttachExistingVault';
 
@@ -208,7 +209,7 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
             {sidebarOpen && (
                 <>
                     <div
-                        className="d-flex flex-column justify-content-center align-items-center bg-white shadow-lg"
+                        className="d-flex flex-column justify-content-center align-items-center  shadow-lg"
                         style={{
                             height: "58px",
                             minHeight: "56px",
@@ -228,10 +229,15 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                             }}
                         />
                     </div>
+                    
                     {/* Menu Items */}
                     <ul className="menu-items">
+                         <li className="menu-item main-li shadow-lg text-center">
+                            
+                            {user.organization}
+                        </li>
                         <li onClick={onNavigateHome} className="menu-item main-li shadow-lg">
-                            <i className="fa-solid fa-home" style={{ fontSize: "18px" }}></i>
+                             <i class="fas fa-backward"  style={{ fontSize: "18px" }}></i>
                             <span style={{ fontSize: "14px" }}>Return Home</span>
                         </li>
 
@@ -823,29 +829,51 @@ function AdminDashboard() {
                     </Tooltip>
                     <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#fff' }}>
                         <div id="col1" ref={col1Ref} style={{ width: isMobile ? '100%' : '30%', backgroundColor: '#fff', minWidth: '25%', minHeight: '100vh' }}>
-                            <HeaderBox className="shadow-lg" sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: '56px', maxHeight: '56px' }}>
-                                <Box
-                                    onClick={navigationHandlers.toggleSidebar}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 35,
-                                        height: 35,
-                                        cursor: 'pointer',
-                                        borderRadius: 1,
-                                        transition: 'all 0.3s ease',
-                                        '&:hover': {
-                                            backgroundColor: '#f0f4fa',
-                                            transform: 'scale(1.05)',
-                                        },
-                                    }}
-                                >
-                                    <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
+                            <HeaderBox
+                                className="shadow-lg"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 2,
+                                    minHeight: '56px',
+                                    maxHeight: '56px',
+                                    px: 2,
+                                }}
+                            >
+                                {/* Left section: Sidebar toggle + Logo */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Box
+                                        onClick={navigationHandlers.toggleSidebar}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: 40,
+                                            height: 40,
+                                            cursor: 'pointer',
+                                            borderRadius: 1,
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                backgroundColor: '#fff',
+                                                transform: 'scale(1.05)',
+                                            },
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
+                                    </Box>
+
+                                    <img
+                                        src={logo2}
+                                        alt="Logo"
+                                        width="auto"
+                                        height="30"
+                                        style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
+                                    />
                                 </Box>
-                                <Box>
-                                    <span style={{ fontSize: '14px' }} className='text-dark'>ADMIN MANAGER</span>
-                                </Box>
+
+                              
+                                {/* User Avatar */}
                                 <Tooltip title={`${user.first_name} ${user.last_name}`}>
                                     <Avatar
                                         alt={userDisplayName}
@@ -860,16 +888,10 @@ function AdminDashboard() {
                                 </Tooltip>
                             </HeaderBox>
 
-                            <div style={{
-                                backgroundColor: '#eef2f7',
-                                fontSize: '12.8px',
-                                borderRadius: '4px',
-                                textAlign: 'center',
-                                padding: '10px',
-                            }}>
-                                <span>Organization: <span style={{ color: '#2757aa' }}>{user.organization}</span></span>
-                            </div>
+
+
                          
+
 
                             {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
                                 <span style={{ fontSize: '14px' }} className='text-dark'>Login Accounts ({organizationusers.length})</span>
@@ -919,6 +941,7 @@ function AdminDashboard() {
                                     user={user}
                                 />
                             </div>
+                            
 
 
                             <Box sx={{ minHeight: 352, minWidth: 250 }}>
@@ -967,8 +990,18 @@ function AdminDashboard() {
                                     </TreeItem>
 
                                 </SimpleTreeView>
-                           
+                                   <div style={{
+                                backgroundColor: '#eef2f7',
+                                fontSize: '12.8px',
+                                borderRadius: '4px',
+                                textAlign: 'center',
+                                padding: '10px',
+                            }}>
+                               ADMIN MANAGER
+                            </div>
+
                             </Box>
+                            
 
 
 

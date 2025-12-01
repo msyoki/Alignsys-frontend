@@ -44,7 +44,7 @@ const TREE_ITEM_STYLES = {
 const LOADING_STYLES = {
   backgroundColor: '#fff',
   p: 0.5, // Reduced padding
-  color: '#555',
+  color: '#555b6e',
 
   fontSize: "12.8px",
   "& .MuiTreeItem-label": { fontSize: "12px !important" },
@@ -140,10 +140,10 @@ const TreeSubItem = memo(({
       itemId={uniqueItemId}
       sx={{
         "& .MuiTreeItem-content": { 
-          backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important' 
+          backgroundColor: isSelected ? '#e5e5e5 !important' : '#fff !important' 
         },
         "& .MuiTreeItem-content:hover": { 
-          backgroundColor: isSelected ? '#f0e68c !important' : '#f9f9f9 !important' 
+          backgroundColor: isSelected ? '#e5e5e5 !important' : '#f9f9f9 !important' 
         }
       }}
       label={
@@ -157,7 +157,7 @@ const TreeSubItem = memo(({
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                backgroundColor: isSelected ? '#fcf3c0' : 'inherit',
+                backgroundColor: isSelected ? '#e5e5e5' : 'inherit',
                 width: '100%',
                 gap: 1 // Using gap instead of margins
               }}
@@ -166,7 +166,7 @@ const TreeSubItem = memo(({
               {isDocument ? (
                 isObjectType0 && isSingleFile ? (
                   <FileExtIcon
-                    fontSize={'15px'}
+                    fontSize={'14px'}
                     guid={selectedVault.guid}
                     objectId={subItem.id}
                     classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
@@ -174,13 +174,13 @@ const TreeSubItem = memo(({
                   />
                 ) : (
                   isObjectType0 && !isSingleFile ? (
-                    <i className='fas fa-book' style={{ color: '#7cb518', fontSize: '15px', flexShrink: 0 }} />
+                    <i className='fas fa-book' style={{ color: '#7cb518', fontSize: '14px', flexShrink: 0 }} />
                   ) : (
-                    <i className='fa-solid fa-folder' style={{ fontSize: '15px', color: '#2a68af', flexShrink: 0 }} />
+                    <i className='fa-solid fa-folder' style={{ fontSize: '14px', color: '#2a68af', flexShrink: 0 }} />
                   )
                 )
               ) : (
-                <i className="fas fa-folder" style={{ fontSize: "15px", color: "#2a68af", flexShrink: 0 }} />
+                <i className="fas fa-folder" style={{ fontSize: "14px", color: "#2a68af", flexShrink: 0 }} />
               )}
 
               {/* Title with optimized spacing */}
@@ -469,7 +469,7 @@ const LinkedObjectsTree = ({
           itemId="loading"
           label={
             <Box >
-              <span className="loading-indicator text-muted" style={{ fontSize: '12px', color: 'black' }}>
+              <span className="loading-indicator text-muted" style={{ fontSize: '12px', color: '#333' }}>
                 Searching Relationships<span>.</span><span>.</span><span>.</span>
               </span>
             </Box>
@@ -491,7 +491,7 @@ const LinkedObjectsTree = ({
                     gap: 1, // Using gap instead of margins
                     ...BOX_STYLES
                   }}>
-                    <i className="fa-regular fa-folder-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
+                    <i className="fa-regular fa-folder-open" style={{ fontSize: '14px', color: '#8d99ae' }} />
                     <Box sx={{ fontSize: '12.8px' }}>
                       {obj.propertyName?.replace(/\(s\)/g, '')}
                     </Box>
@@ -531,7 +531,7 @@ const LinkedObjectsTree = ({
                   gap: 1, // Using gap instead of margins
                   ...BOX_STYLES
                 }}>
-                  <i className="fa-solid fa-book-open" style={{ fontSize: '15px', color: '#8d99ae' }} />
+                  <i className="fa-solid fa-book-open" style={{ fontSize: '14px', color: '#8d99ae' }} />
                   <Box sx={{ fontSize: '12.8px' }}>Document</Box>
                   {documents.map((doc) => (
                     <Box key={doc.propertyName} sx={{ fontSize: '12.8px', color: '#666' }}>

@@ -66,25 +66,26 @@ const FileExtIcon = (props) => {
     case 'csv':
       return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
     case 'txt':
-      return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#6c757d' }}></i>;
+      return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
     case 'msg':
       return <i className="fa-solid fa-envelope shadow-sm" style={{ ...iconStyle, color: '#ffb703' }}></i>;
     case 'webp':
       return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
     case 'xlsx':
     case 'xls':
-      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#217045' }}></i>;
     case 'ppt':
-      return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#ef6351' }}></i>;
+    case 'pptx':
+      return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#d34628' }}></i>;
     case 'docx':
     case 'doc':
-      return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#0077b6' }}></i>;
+      return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#35558b' }}></i>;
     case 'png':
     case 'jpeg':
     case 'jpg':
       return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
     case 'vssettings':
-      return <i className="fa-solid fa-code shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
+      return <i className="fa-solid fa-file-code shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
     default:
       return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
   }

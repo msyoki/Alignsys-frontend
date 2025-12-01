@@ -47,7 +47,7 @@ function ReactViewer(props) {
         height: '75vh',
         overflowY: 'scroll',
         overflowX:'scroll-hidden',
-        backgroundColor:'#555',
+        backgroundColor:'#555b6e',
         border: 'none',
         borderRadius: 0
         

@@ -1,0 +1,532 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import { Tooltip, Box } from '@mui/material';
+import LoadingDialog from '../Loaders/LoaderDialog';
+import SignButton from '../SignDocument';
+import { Typography, CircularProgress, Button, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
+import SignOptions from '../SignButton';
+import '../../styles/PDFViewerTechedge.css';
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
+const PDFViewerPreview3 = (props) => {
+  const [numPages, setNumPages] = useState(null);
+  const [zoom, setZoom] = useState(0.7);
+  const [isAsideOpen, setIsAsideOpen] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
+  const containerRef = useRef(null);
+  const mainContainerRef = useRef(null);
+  const [pageDimensions, setPageDimensions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagesLoaded, setPagesLoaded] = useState(0);
+  const [isRotated, setIsRotated] = useState(false);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [viewMode, setViewMode] = useState("original");
+  const [documentKey, setDocumentKey] = useState(0); // Key to force re-render
+
+  const prevWidthRef = useRef(props.windowWidth);
+
+  // Get current file URL based on view mode
+
+  // Handle view mode change with document re-rendering
+  const handleViewModeChange = useCallback((event) => {
+    const newViewMode = event.target.value;
+    setViewMode(newViewMode);
+
+    // Reset document state for clean re-render
+    setNumPages(null);
+    setPageNumber(1);
+    setPagesLoaded(0);
+    setPageDimensions([]);
+    setLoading(true);
+    setLoadingPercentage(0);
+
+    // Force Document components to re-render by changing key
+    setDocumentKey(prev => prev + 1);
+  }, []);
+
+  // Zoom controls with 60% reduction when thumbnails are open
+  const zoomIn = useCallback(() => setZoom(prev => Math.min(prev + 0.01, 2)), []);
+  const zoomOut = useCallback(() => setZoom(prev => Math.max(prev - 0.01, 0.5)), []);
+  const resetZoom = useCallback(() => setZoom(0.9), []);
+
+  // Pinch zoom
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.01;
+        setZoom(prevZoom => Math.min(Math.max(prevZoom + delta, 0.5), 2));
+      }
+    };
+    const container = mainContainerRef.current;
+    if (container) container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container && container.removeEventListener('wheel', handleWheel);
+  }, []);
+
+  // Window resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (mainContainerRef.current) setContainerWidth(mainContainerRef.current.offsetWidth);
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', updateDimensions);
+    updateDimensions();
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  const toggleAside = useCallback(() => setIsAsideOpen(open => !open), []);
+
+  // Page load success
+  const onPageLoadSuccess = useCallback((page) => {
+    const { pageNumber, width, height, rotate } = page;
+    setPagesLoaded(prev => Math.min(prev + 1, numPages));
+    setLoadingPercentage(((pagesLoaded + 1) / numPages) * 100);
+    if (rotate % 360 !== 0) setIsRotated(true);
+    setPageDimensions(prev => {
+      const pageExists = prev.find(p => p.pageNumber === pageNumber);
+      if (pageExists) {
+        return prev.map(p =>
+          p.pageNumber === pageNumber ? { pageNumber, width, height } : p
+        );
+      }
+      return [...prev, { pageNumber, width, height }];
+    });
+    if (pagesLoaded + 1 === numPages) {
+      setLoading(false);
+      setPagesLoaded(0);
+      setLoadingPercentage(100);
+    }
+  }, [numPages, pagesLoaded]);
+
+  const onDocumentLoadSuccess = useCallback(({ numPages }) => setNumPages(numPages), []);
+
+  // Page input change
+  const handlePageInputChange = useCallback((e) => {
+    const value = parseInt(e.target.value, 10);
+    if (value >= 1 && value <= numPages) {
+      setPageNumber(value);
+      const pageElement = mainContainerRef.current?.querySelector(`#page_${value}`);
+      const thumbnailElement = containerRef.current?.querySelector(`#thumbnail_${value}`);
+      if (pageElement && thumbnailElement) {
+        pageElement.scrollIntoView({ behavior: 'smooth' });
+        thumbnailElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [numPages]);
+
+  // Thumbnail navigation
+  const thumbnailNavigation = useCallback((pageIndex) => {
+    const pageNumber = pageIndex + 1;
+    const pageElement = mainContainerRef.current?.querySelector(`#page_${pageNumber}`);
+    const thumbnailElement = containerRef.current?.querySelector(`#thumbnail_${pageNumber}`);
+    if (!pageElement || !thumbnailElement) return;
+    const scrollOptions = { behavior: 'smooth', block: 'center' };
+    const thumbRect = thumbnailElement.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const isThumbnailVisible = (
+      thumbRect.top >= containerRect.top &&
+      thumbRect.bottom <= containerRect.bottom
+    );
+    if (!isThumbnailVisible) thumbnailElement.scrollIntoView(scrollOptions);
+    requestAnimationFrame(() => {
+      pageElement.scrollIntoView(scrollOptions);
+      setPageNumber(pageNumber);
+    });
+  }, []);
+
+  // Scale for page with 60% reduction when thumbnails open
+  const getScaleForPage = useCallback((pageNumber, zoom = 1) => {
+    const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
+    if (!pageDim) return 1 * zoom;
+    const { width, height } = pageDim;
+    const isLandscape = width > height;
+    let baseScale;
+    if (isLandscape) {
+      baseScale = isRotated ? 0.758 : 0.558;
+    } else {
+      baseScale = 0.89;
+    }
+
+    // Reduce to 60% when thumbnails are open
+    const thumbnailReduction = isAsideOpen ? 0.6 : 1.0;
+    return baseScale * zoom * thumbnailReduction;
+  }, [pageDimensions, isRotated, isAsideOpen]);
+
+  // Scale for thumbnail
+  const getScaleForPageThumbnail = useCallback((pageNumber) => {
+    const pageDim = pageDimensions.find(dim => dim.pageNumber === pageNumber);
+    return pageDim && pageDim.width > pageDim.height ? 0.15 : 0.25;
+  }, [pageDimensions]);
+
+  // Download handler
+  const handleDownload = (blob, ext, fileName) => {
+    if (!blob) return;
+
+    try {
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.${ext}`;
+
+      // Append to document, trigger click, then remove
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Free up memory
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (mainContainerRef.current) {
+        if (event.key === 'ArrowDown') {
+          mainContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
+        } else if (event.key === 'ArrowUp') {
+          mainContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Scroll sync for page number
+  useEffect(() => {
+    const container = mainContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const pages = Array.from(container.querySelectorAll('.page-container'));
+      const containerTop = container.getBoundingClientRect().top;
+      let newCurrentPage = 1;
+      pages.forEach((page, index) => {
+        const pageRect = page.getBoundingClientRect();
+        const pageTop = pageRect.top - containerTop;
+        const pageBottom = pageRect.bottom - containerTop;
+        if (pageTop < container.clientHeight / 2 && pageBottom > container.clientHeight / 2) {
+          newCurrentPage = index + 1;
+        }
+      });
+      setPageNumber(prev => prev !== newCurrentPage ? newCurrentPage : prev);
+    };
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [numPages]);
+
+  // Responsive zoom for aside open/close (removed to prevent conflicts with 60% reduction)
+  // useEffect(() => {
+  //   setZoom(prevZoom => {
+  //     const newZoom = isAsideOpen ? prevZoom - 0.05 : prevZoom + 0.05;
+  //     return Math.max(0.5, Math.min(2, newZoom));
+  //   });
+  // }, [isAsideOpen]);
+
+  // Responsive zoom for window width
+  useEffect(() => {
+    let prev = parseFloat(prevWidthRef.current);
+    let current = parseFloat(props.windowWidth);
+    if (isNaN(prev) || isNaN(current)) return;
+    const diff = current - prev;
+    if (diff !== 0) {
+      const sensitivity = 0.01;
+      setZoom(prevZoom => {
+        let newZoom = current > prev
+          ? prevZoom + diff * sensitivity
+          : prevZoom - Math.abs(diff * sensitivity);
+        return Math.max(0.5, Math.min(2, newZoom));
+      });
+      prevWidthRef.current = props.windowWidth;
+    }
+  }, [props.windowWidth, props.document]);
+
+  // Memoized title
+  const trimTitle = useCallback((title) => {
+    const maxLength = 65;
+    return title;
+  }, []);
+
+  return (
+    <>
+      {/* File Info Bar */}
+
+      <Box className="chat-header2 p-2" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Left side: icon + filename */}
+        <Tooltip title={`${props.selectedObject?.title}.pdf`}>
+          <span className="mx-2" style={{ display: 'flex', alignItems: 'center' }}>
+            <i className="fas fa-file-pdf text-danger mx-1" style={{ fontSize: '25px' }}></i>
+            <span style={{ fontSize: '12.8px' }}>
+              {trimTitle(props.title)}.pdf
+            </span>
+          </span>
+        </Tooltip>
+        {/* Right side: Sign button */}
+        {/* <Tooltip title="Digitally Sign Copy"> */}
+
+
+        {/* </Tooltip> */}
+      </Box>
+
+
+      {/* Top Controls Bar */}
+      <div style={{ backgroundColor: '#fff' }} className="shadow-lg controls text-dark d-flex align-items-center justify-content-between py-2 px-2">
+        {/* Left side controls */}
+        <div className="d-flex align-items-center flex-wrap gap-2">
+          {/* Toggle Sidebar Button */}
+          <span className="d-flex align-items-center cursor-pointer mx-3" onClick={toggleAside}>
+            <Tooltip title={isAsideOpen ? "Close thumbnail" : "Open thumbnail view"}>
+              <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
+              <span className="text-muted mx-1" style={{ fontSize: '12.8px', cursor: 'pointer' }}>
+                <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Close Thumbnail" : "Open Thumbnail"}</span>
+              </span>
+            </Tooltip>
+          </span>
+
+          {/* Page Navigation */}
+          <span className="d-flex align-items-center text-dark" style={{ fontSize: '12.8px' }}>
+            Page
+            <input
+              type="number"
+              value={pageNumber}
+              onChange={handlePageInputChange}
+              className="mx-2 form-control form-control-sm"
+              style={{ width: '50px', padding: '2px 6px', fontSize: '12.8px' }}
+            />
+            / {numPages || 0}
+          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i
+              onClick={zoomOut}
+              className="fa-solid fa-magnifying-glass-minus"
+              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+            />
+
+            <Slider
+              size="small"
+              value={zoom * 100} // controlled by zoom state (e.g., 1 = 100%)
+              onChange={(_, newValue) => setZoom(newValue / 100)} // convert back to scale
+              min={25}
+              max={200}
+              aria-label="Zoom"
+              sx={{ width: 120 }}
+            />
+
+            <i
+              onClick={zoomIn}
+              className="fa-solid fa-magnifying-glass-plus"
+              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+            />
+
+            <span
+              style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.8px', color: '#333' }}
+            >
+              {Math.round(zoom * 100)}%
+            </span>
+
+            <Tooltip title="Reset Zoom">
+              <i
+                onClick={resetZoom}
+                className="fa-solid fa-rotate-right me-1"
+                style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+              />
+            </Tooltip>
+          </div>
+
+          {/* Download PDF */}
+          <Tooltip title="Download PDF">
+            <i onClick={() => handleDownload(props.blob, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+          </Tooltip>
+
+
+        </div>
+
+        {/* Right side - View Mode Selector (always at far right) */}
+        <div>
+
+          {/* <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel id="view-mode-label" sx={{ fontSize: "12px" }}>
+              Document
+            </InputLabel>
+            <Select
+              labelId="view-mode-label"
+              value={viewMode}
+              label="View Mode"
+              onChange={handleViewModeChange}
+              sx={{ fontSize: "12px" }}
+            >
+              <MenuItem value="original" sx={{ fontSize: "12px" }}>
+                {props.blobReport ? "Signed Copy" : "Original Copy"}
+              </MenuItem>
+              {props.blobReport && (
+                <MenuItem value="report" sx={{ fontSize: "12px" }}>
+                  Signing Report
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl> */}
+     
+
+
+        </div>
+      </div>
+
+      <div className="pdf-viewer-container">
+        {isAsideOpen && (
+          <aside className={`pdf-thumbnail-panel ${isMobile ? 'mobile' : ''} scrollbar-custom1`} ref={containerRef}>
+            <Document
+              key={`thumbnail-${documentKey}`} // Force re-render with key
+              className="pdf-container"
+              file={props.document}
+              loading={
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    color: "text.primary",
+                    fontSize: "14px",
+                    animation: "fadeIn 0.3s ease-in-out",
+                    "@keyframes fadeIn": {
+                      from: { opacity: 0 },
+                      to: { opacity: 1 },
+                    },
+                  }}
+                >
+                  <CircularProgress size={20} thickness={4} />
+                  <Typography
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "2px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Loading PDF
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        animation: "dots 1.5s steps(4, end) infinite",
+                        "@keyframes dots": {
+                          "0%": { content: '"."' },
+                          "25%": { content: '".."' },
+                          "50%": { content: '"..."' },
+                          "75%": { content: '""' },
+                        },
+                      }}
+                    >
+                      ...
+                    </Box>
+                  </Typography>
+                </Box>
+              }
+              error={<div>Error loading PDF!</div>}
+            >
+              {numPages && [...Array(numPages).keys()].map((pageIndex) => (
+                <div
+                  key={`thumbnail_${pageIndex + 1}`}
+                  id={`thumbnail_${pageIndex + 1}`}
+                  className={`thumbnail-item ${pageNumber === pageIndex + 1 ? 'active' : ''}`}
+                  onClick={() => thumbnailNavigation(pageIndex)}
+                >
+                  <Page
+                    pageNumber={pageIndex + 1}
+                    scale={getScaleForPageThumbnail(pageIndex + 1)}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="page-container"
+                  />
+                  <span className="thumbnail-page-number">{`${pageIndex + 1}`}</span>
+                </div>
+              ))}
+            </Document>
+          </aside>
+        )}
+
+        <main className="pdf-main-viewer scrollbar-custom" ref={mainContainerRef}>
+          <Document
+            key={`main-${documentKey}`} // Force re-render with key
+            className="pdf-container"
+            file={props.document}
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading={
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  color: "text.primary",
+                  fontSize: "14px",
+                  animation: "fadeIn 0.3s ease-in-out",
+                  "@keyframes fadeIn": {
+                    from: { opacity: 0 },
+                    to: { opacity: 1 },
+                  },
+                }}
+              >
+                <CircularProgress size={20} thickness={4} />
+                <Typography
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "2px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Loading PDF
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      animation: "dots 1.5s steps(4, end) infinite",
+                      "@keyframes dots": {
+                        "0%": { content: '"."' },
+                        "25%": { content: '".."' },
+                        "50%": { content: '"..."' },
+                        "75%": { content: '""' },
+                      },
+                    }}
+                  >
+                    ...
+                  </Box>
+                </Typography>
+              </Box>
+            }
+            error={<div>Error loading PDF!</div>}
+          >
+            {numPages && [...Array(numPages).keys()].map((pageIndex) => (
+              <div
+                key={`page_${pageIndex + 1}`}
+                id={`page_${pageIndex + 1}`}
+                className="pdf-page-wrapper"
+              >
+                <Page
+                  pageNumber={pageIndex + 1}
+                  scale={getScaleForPage(pageIndex + 1, zoom)}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  className="page-container shadow-sm"
+                  onLoadSuccess={onPageLoadSuccess}
+                />
+              </div>
+            ))}
+          </Document>
+        </main>
+      </div>
+    </>
+  );
+};
+
+export default PDFViewerPreview3;

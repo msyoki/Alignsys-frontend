@@ -13,10 +13,7 @@ const AddButtonWithMenu = (props) => {
     setAnchorEl(null);
   };
 
-  const handleSelectOption = (option) => {
-    handleClose();
-    props.getVaultObjects(option); // You can pass the selected option if needed
-  };
+
 
   return (
     <>
@@ -27,7 +24,7 @@ const AddButtonWithMenu = (props) => {
           style={{
             fontSize: '30px',
             cursor: 'pointer',
-            color: '#1C4690',
+            color: '#2757aa',
             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
           }}
         ></i>

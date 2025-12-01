@@ -22,25 +22,26 @@ const LookupSelect = ({
   const [loading, setLoading] = useState(false);
   const searchTimeout = useRef();
 
+  const fetchOptions = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`
+      );
+      const formattedOptions = response.data.map(option => ({
+        label: option.name,
+        value: option.id,
+      }));
+      setDefaultOptions(formattedOptions);
+      setOptions(formattedOptions);
+    } catch {
+      // console.error('Error fetching lookup options:', error);
+    }
+    setLoading(false);
+  };
+
   // Fetch initial/default options
   useEffect(() => {
-    const fetchOptions = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${userId}`
-        );
-        const formattedOptions = response.data.map(option => ({
-          label: option.name,
-          value: option.id,
-        }));
-        setDefaultOptions(formattedOptions);
-        setOptions(formattedOptions);
-      } catch  {
-        // console.error('Error fetching lookup options:', error);
-      }
-      setLoading(false);
-    };
     fetchOptions();
     // eslint-disable-next-line
   }, [propId, selectedVault, userId]);
@@ -69,7 +70,7 @@ const LookupSelect = ({
           ? [selectedOption, ...formattedOptions]
           : formattedOptions;
         setOptions(combined);
-      } catch  {
+      } catch {
         // console.error('Error fetching lookup options based on search term:', error);
       }
       setLoading(false);
@@ -128,6 +129,8 @@ const LookupSelect = ({
     <div style={{ position: 'relative' }}>
       <Select
         label={`Select ${label}`}
+        openMenuOnClick={true} // keep menu opening behavior
+        onMenuOpen={() => fetchOptions()} // fetch options only when menu opens
         value={selectedOption}
         onChange={handleChange}
         options={options}
@@ -142,6 +145,7 @@ const LookupSelect = ({
         menuPortalTarget={document.body}
         menuPosition="absolute"
       />
+
       {loading && (
         <div style={{
           position: 'absolute',

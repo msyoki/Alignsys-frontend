@@ -18,7 +18,7 @@ const MultifileFiles = React.memo((props) => {
 
     // Memoized icon style to prevent recreation
     const iconStyle = useMemo(() => ({
-        fontSize: props.fontSize || '15px',
+        fontSize: props.fontSize || '14px',
     }), [props.fontSize]);
 
     // Memoized icon generation function
@@ -185,7 +185,7 @@ const MultifileFiles = React.memo((props) => {
                             alignItems="center"
                             sx={{
                                 p: 0.5, // shorthand for padding
-                                backgroundColor: isSelected ? '#fcf3c0' : '#fff',
+                                backgroundColor: isSelected ? '#e5e5e5' : '#fff',
                                 overflow: 'hidden'
                             }}
                         >
@@ -228,7 +228,7 @@ const MultifileFiles = React.memo((props) => {
             sx={{
                 padding: '8px',
                 marginLeft: '10px',
-                color: '#555',
+                color: '#555b6e',
                 fontSize: '12px'
             }}
         >

@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import KeyIcon from '@mui/icons-material/Key';
 import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
 
 import Authcontext from '../components/Auth/Authprovider';
 import TimedAlert from '../components/TimedAlert';
@@ -63,27 +64,26 @@ const Login = () => {
       <div className="login-container d-flex flex-column flex-md-row" style={{ minHeight: '100vh' }}>
         {/* Left Side - Form */}
         <div className="left-side d-flex align-items-center justify-content-center w-100 w-md-50 bg-white p-4">
-          <form onSubmit={loginUser} className="text-center text-dark w-100" style={{ maxWidth: '360px' }}>
-            {/* Logo for small screens */}
-            <Box className="d-block d-md-none text-center mb-3">
-              <img src={image} alt="Logo" style={{ width: '300px' }} />
+          <form onSubmit={loginUser} className="text-center text-dark w-100" style={{ maxWidth: '320px' }}>
 
-            </Box>
-            <div className="d-flex justify-content-center align-items-center mb-3">
-              <h5 className="mb-0">
+            {/* Logo for small screens */}
+            {/* <Box className="d-block d-md-none text-center mb-3">
+              <img src={image} alt="Logo" style={{ width: '260px' }} />
+            </Box> */}
+
+            {/* Title */}
+            <div className="d-flex justify-content-center align-items-center my-4" style={{ color: '#2757aa' }}>
+              <h5 className="mb-0 text-dark">
                 LOGIN
               </h5>
               <span className="d-block d-md-none ms-2" style={{ fontSize: '14px' }}>
-                to <strong>EDMS</strong> Software Solution
+                to  EDMS
               </span>
             </div>
 
-            {/* <Box className="d-block d-md-none text-center mb-3">
 
-              <p className="mt-2" style={{ fontSize: '14px', color:'#2757aa' }}>
-                <strong>EDMS</strong> Software Solution
-              </p>
-            </Box> */}
+
+            {/* Email Field */}
             <FormControl variant="standard" fullWidth className="mb-3">
               <InputLabel htmlFor="email">
                 {constants.auth_type_email === "true" ? "Email" : "Username"}*
@@ -105,7 +105,7 @@ const Login = () => {
               />
             </FormControl>
 
-
+            {/* Password Field */}
             <FormControl variant="standard" fullWidth className="mb-2">
               <InputLabel htmlFor="password">Password*</InputLabel>
               <Input
@@ -116,11 +116,8 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="User password"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <KeyIcon />
-                  </InputAdornment>
-                }
+                style={{ fontSize: '13px' }}
+                startAdornment={<InputAdornment position="start"><KeyIcon /></InputAdornment>}
                 endAdornment={
                   <InputAdornment position="end">
                     <i
@@ -131,69 +128,57 @@ const Login = () => {
                     />
                   </InputAdornment>
                 }
-                style={{ fontSize: '14px' }}
               />
             </FormControl>
 
-            <div className="text-end mb-3">
-              <a
-                onClick={handlePasswordReset}
-                style={{
-                  textDecoration: 'none',
-                  color: '#1C4690',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                }}
-              >
+            {/* Forgot password */}
+            <div className="d-flex justify-content-end mb-3">
+              <Link to="/password-reset" style={{ fontSize: '13px', color: '#2757aa', textDecoration: 'none' }}>
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
-            <Button
-              type="submit"
-              variant="contained"
-              className="mb-3 rounded-pill"
-              disabled={miniLoader}
-              startIcon={miniLoader ? <CircularProgress size={14} color="inherit" /> : null}
+            {/* Login Button */}
+            <div className="text-center mt-3 row">
+              <div className="col-lg-3 col-md-3" />
+              <div className="col-lg-6 col-md-6">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  className="mb-3 rounded-pill"
+                  disabled={miniLoader}
+                  startIcon={miniLoader ? <CircularProgress size={14} color="inherit" /> : null}
 
-              style={{
-                fontSize: '13px',
-                textTransform: 'none',
-                px: 2,
-                py: 1,
-                minWidth: '40%',
-                backgroundColor: miniLoader ? '#ccc' : '#2757aa',
-                color: '#fff',
-                '&:hover': {
-                  backgroundColor: miniLoader ? '#ccc' : '#1e4794',
-                },
-              }}
-            >
+                  style={{
+                    fontSize: '13px',
+                    textTransform: 'none',
+                    px: 2,
+                    py: 1,
+                    width: '100%',
+                    backgroundColor: miniLoader ? '#ccc' : '#2757aa',
+                    color: '#fff',
+                    '&:hover': {
+                      backgroundColor: miniLoader ? '#ccc' : '#1e4794',
+                    },
+                  }}
+                >
 
-              {miniLoader ? 'Authenticating ...' : 'LOGIN'}
-            </Button>
+                  {miniLoader ? 'Logging in ...' : 'LOGIN'}
+                </Button>
+              </div>
+              <div className="col-lg-3 col-md-3" />
+            </div>
 
-            <p className="mt-3" style={{ fontSize: '13px' }}>
+            {/* Footer Links */}
+            <p className="mt-4" style={{ fontSize: '13px', color: '#555' }}>
               Go to{' '}
-
-              {process.env.REACT_APP_ONSITE === "true" ? null : (
+              {process.env.REACT_APP_ONSITE !== 'true' && (
                 <>
-                  <span className="mx-1">
-                    <Link to="/register" style={{ color: '#2757aa', textDecoration: 'none' }}>
-                      Register an Organization
-                    </Link>
-                  </span>
+                  <Link to="/register" style={{ color: '#2757aa', textDecoration: 'none' }}>Register an Organization</Link>
                   <span className="mx-1"> | </span>
                 </>
               )}
-
-
-              <a
-                href="https://dss.alignsys.tech"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#2757aa', textDecoration: 'none' }}
-              >
+              <a href="https://dss.alignsys.tech" target="_blank" rel="noopener noreferrer" style={{ color: '#2757aa', textDecoration: 'none' }}>
                 DSS – Digital Signing Service
               </a>
             </p>
@@ -201,19 +186,63 @@ const Login = () => {
           </form>
         </div>
 
+
+
         {/* Right Side - Banner */}
         <div
           className="d-none d-md-flex right-side w-100 w-md-50 flex-column justify-content-center align-items-center"
           style={{
-            backgroundColor: '#007bff',
-            padding: '20px',
+            backgroundColor: '#2757aa',
+            padding: '40px 20px',
+            textAlign: 'center',
           }}
         >
-          <img src={logo2} alt="Banner Logo" width="300px" />
-          <p className="text-white mt-4" style={{ fontSize: '15px' }}>
-            <strong>EDMS</strong> Software Solution
+          <img
+            src={logo2}
+            alt="Banner Logo"
+            style={{
+              width: '280px',
+              maxWidth: '80%',
+              filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.25))',
+            }}
+          />
+
+          <p
+            className="text-white mt-4"
+            style={{
+              fontSize: '18px',
+              fontWeight: 500,
+              opacity: 0.9,
+              letterSpacing: '0.5px',
+            }}
+          >
+            <strong style={{ fontSize: '20px' }}>EDMS</strong> Software Solution
+          </p>
+
+          <div
+            style={{
+              width: '60px',
+              height: '4px',
+              backgroundColor: 'white',
+              opacity: 0.5,
+              borderRadius: '2px',
+              marginTop: '10px',
+            }}
+          ></div>
+
+          <p
+            className="text-white mt-4"
+            style={{
+              fontSize: '14px',
+              maxWidth: '340px',
+              lineHeight: '1.6',
+              opacity: 0.85,
+            }}
+          >
+            Manage documents efficiently, securely, and with seamless workflow automation.
           </p>
         </div>
+
 
       </div>
 

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Avatar, Box, Tabs, Tab, Typography, Tooltip } from '@mui/material';
+import { Avatar, Box, Tabs, Tab, Typography, Tooltip, Button } from '@mui/material';
 import PropTypes from 'prop-types';
+import { useDropzone } from 'react-dropzone';
 
 // Components
 import Loader from '../Loaders/LoaderMini';
@@ -23,6 +24,10 @@ import logo from '../../images/ZFBLU.png';
 import PdfConversionDialog from '../Modals/PdfConversionDialog';
 import PdfMergeDialog from '../Modals/PdfMergeDialog';
 import ChartGenerator from '../Reports/ChartGenerator';
+import UserAvatarMenu from '../UserAvatar';
+import History from '../Modals/History';
+
+
 
 // Custom Hooks
 function useSessionState(key, defaultValue) {
@@ -77,6 +82,7 @@ CustomTabPanel.propTypes = {
 };
 
 function a11yProps(index) {
+
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
@@ -94,12 +100,64 @@ function a11yProps2(index) {
 
 
 const DocumentList = (props) => {
+
+
+  const onDrop = useCallback(async (acceptedFiles) => {
+    if (acceptedFiles.length > 0) {
+      const uploadedFile = Object.assign(acceptedFiles[0], {
+        preview: URL.createObjectURL(acceptedFiles[0]),
+      });
+
+      props.setDroppedFile(uploadedFile);
+
+      // Ensure fetchItemData is called
+      if (uploadedFile) {
+        await props.fetchItemData(0, "Document");
+      }
+
+      // Optional alert
+      // alert(`File uploaded: ${uploadedFile.name}`);
+    }
+  }, [props]); // include props if necessary
+
+
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false, // single file only
+    noClick: true,   // disables click to open file dialog
+    accept: {
+      'image/*': [],
+      'application/pdf': [],
+      'application/msword': [],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+      'application/vnd.ms-excel': [],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [],
+      'application/vnd.ms-powerpoint': [],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': [],
+    },
+
+
+  });
+
+
+
+  const removeFile = () => {
+    if (file && file.preview) URL.revokeObjectURL(file.preview);
+    props.setDroppedFile(null);
+  };
+
+
+  const [classUpdatePayload, setClassUpdatePayload] = useState('ss_classUpdatePayload', {});
+  const [changedClass, setChangedClass] = useState('ss_changedClass', false);
+
   // Session state
   const [value, setValue] = useSessionState('ss_value', 0);
   const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
   const [selectedFileId, setSelectedFileId] = useSessionState('ss_selectedFileId', null);
   const [selectedViewObjects, setSelectedViewObjects] = useSessionState('ss_selectedViewObjects', []);
   const [viewNavigation, setViewNavigation] = useSessionState('ss_viewNavigation', []);
+  const [viewNavigation2, setViewNavigation2] = useSessionState('ss_viewNavigation2', []);
   const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
   const [formValues, setFormValues] = useSessionState('ss_formValues', {});
   const [base64, setBase64] = useSessionState('ss_base64', '');
@@ -156,6 +214,52 @@ const DocumentList = (props) => {
   const [isUpdatingMetadata, setIsUpdatingMetadata] = useState(false);
   const [selectedTab, setSelectedTab] = useState('Home');
 
+  const [openHistory, setOpenHistory] = useState(false)
+  const [isFile, setIsFile] = useState(false)
+
+  const [objectHistory, setObjectHistory] = useState([])
+  const [loadingHisytory, setLoadingHistory] = useState(false)
+
+
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const reloadViews = () => {
+    setRefreshKey(prev => prev + 1); // trigger a reload
+  };
+
+  const handleTabAction = () => {
+    // Delay everything inside by 5 seconds
+    setTimeout(() => {
+      if (selectedTab) {
+        switch (selectedTab) {
+          case 'Recent':
+            props.getRecent?.();
+            break;
+          case 'Assigned':
+            props.getAssigned?.();
+            break;
+          case 'Deleted':
+            props.getDeleted?.();
+            break;
+          default:
+            reloadViews();
+            break;
+        }
+      }
+
+      if (props.searchTerm?.length > 0 && props.data?.length > 0) {
+        props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
+          setLoading(false);
+          setSearched(true);
+          props.setData(data);
+        });
+      }
+    }, 4000); // ⏱ 5 seconds
+  };
+
+
+
+
 
   // Refs
   const col1Ref = useRef(null);
@@ -165,34 +269,6 @@ const DocumentList = (props) => {
   // Click handling
   let clickTimeout = null;
 
-  // API Functions
-  // const convertToPDF = async (item, overWriteOriginal) => {
-  //   const payload = {
-  //     vaultGuid: props.selectedVault.guid,
-  //     objectId: item.id,
-  //     classId: item.classID || item.classId,
-  //     fileID: file.fileID,
-  //     overWriteOriginal: overWriteOriginal,
-  //     separateFile: !overWriteOriginal,
-  //     userID: props.mfilesId
-  //   };
-
-  //   try {
-  //     await axios.post(
-  //       `${constants.mfiles_api}/api/objectinstance/ConvertToPdf`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           'Accept': '*/*',
-  //           'Content-Type': 'application/json'
-  //         }
-  //       }
-  //     );
-  //   } catch (error) {
-  //     console.error('Error converting to PDF:', error);
-  //   }
-  // };
-
   const convertToPDF = async (item, overWriteOriginal) => {
     const payload = {
       vaultGuid: props.selectedVault.guid,
@@ -201,7 +277,7 @@ const DocumentList = (props) => {
       fileID: file.fileID,
       overWriteOriginal: overWriteOriginal,
       separateFile: !overWriteOriginal,
-      userID: props.mfilesId
+      userID: props.selectedVault?.vaultId
     };
 
     try {
@@ -217,7 +293,7 @@ const DocumentList = (props) => {
           }
         }
       );
-      props.getRecent?.()
+      handleTabAction()
 
       // Show success message
       setAlertPopOpen(true);
@@ -240,7 +316,6 @@ const DocumentList = (props) => {
   };
 
 
-
   // 4. Add helper functions to handle the dialog
   const handleMergeRequest = (item) => {
     setMergeItem(item);
@@ -250,18 +325,25 @@ const DocumentList = (props) => {
   const handleMergeConfirm = async () => {
     setIsMergingToPdf(true);
 
-    console.log("Merge item:", mergeItem);
+    // console.log("Merge item:", mergeItem);
     if (mergeItem) {
+      // Prepare payload
+      const payload = {
+        vaultGuid: props.selectedVault.guid,
+        userID: props.selectedVault?.vaultId,
+        oldClassID: mergeItem.classID ?? mergeItem.classId,
+        oldObjectTypeID: mergeItem.objectID ?? mergeItem.objectTypeId,
+        objectId: mergeItem.id,
+        title: mergeItem.title,
+      };
+
+      // Log payload before sending
+      // console.log("Payload to be sent:", payload);
+
       try {
         const response = await axios.post(
           `${constants.mfiles_api}/api/objectinstance/CombinePdfObjectFiles`,
-          {
-            vaultGuid: props.selectedVault.guid,
-            userID: props.mfilesId,
-            oldClassID: mergeItem.classID ?? mergeItem.classId,
-            oldObjectTypeID: mergeItem.objectID ?? mergeItem.objectTypeId,
-            objectId: mergeItem.id,
-          },
+          payload,
           {
             headers: {
               Accept: "*/*",
@@ -270,7 +352,10 @@ const DocumentList = (props) => {
           }
         );
 
-        console.log("Response:", response.data);
+        // console.log("Response:", response.data);
+
+        handleTabAction();
+
       } catch (error) {
         console.error("Error combining PDF object files:", error);
 
@@ -279,9 +364,9 @@ const DocumentList = (props) => {
         setMergeDialogOpen(false);
         setMergeItem(null);
       }
-
     }
-    props.getRecent?.()
+
+    handleTabAction()
 
 
   };
@@ -300,6 +385,7 @@ const DocumentList = (props) => {
 
 
   const handlePdfConversionConfirm = () => {
+    handleTabAction()
     if (pdfConversionItem) {
       convertToPDF(pdfConversionItem, pdfOverwriteOriginal);
     }
@@ -328,11 +414,12 @@ const DocumentList = (props) => {
 
   const fetchObjectProperties = async (item) => {
     const classId = item.classId !== undefined ? item.classId : item.classID;
-    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${classId}/${props.mfilesId}`;
+    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectViewProps/${props.selectedVault.guid}/${item.id}/${classId}/${props.selectedVault?.vaultId}`;
 
     try {
       const response = await axios.get(url);
       setPreviewObjectProps(response.data);
+      console.log(response.data)
       return response.data;
     } catch (error) {
 
@@ -354,12 +441,12 @@ const DocumentList = (props) => {
         headers: { Accept: '*/*' },
         timeout: 0
       });
-      console.log(filesResult)
+      // console.log(filesResult)
 
       const fileData = filesResult.data;
       const fileId = fileData?.[0]?.fileID;
       const documentGuid = fileData?.[0]?.reportGuid ?? null;
-      console.log(documentGuid)
+      // console.log(documentGuid)
       if (documentGuid) {
         try {
           const blobReportResult = await axios.post(
@@ -394,7 +481,7 @@ const DocumentList = (props) => {
       // Download blob
       const classId = item.classId ?? item.classID;
       const downloadUrlBlob = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles?ObjectId=${item.id}&VaultGuid=${props.selectedVault.guid}&fileID=${fileId}&ClassId=${classId}`;
-      console.log(downloadUrlBlob)
+      // console.log(downloadUrlBlob)
       const blobResult = await axios.get(downloadUrlBlob, {
         headers: { Accept: '*/*' },
         responseType: 'blob',
@@ -447,7 +534,7 @@ const DocumentList = (props) => {
   const fetchVaultWorkflows = async (objectTypeId, classId) => {
     try {
       const response = await axios.get(
-        `${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsObjectClassTypeWorkflows/${props.selectedVault.guid}/${props.mfilesId}/${objectTypeId}/${classId}`,
+        `${constants.mfiles_api}/api/WorkflowsInstance/GetVaultsObjectClassTypeWorkflows/${props.selectedVault.guid}/${props.selectedVault?.vaultId}/${objectTypeId}/${classId}`,
         { headers: { 'accept': '*/*' } }
       );
       setWorkflows(response.data);
@@ -464,7 +551,7 @@ const DocumentList = (props) => {
       objectTypeId: objectTypeId,
       objectId: objectsId,
       userEmail: props.user.email,
-      userID: props.mfilesId
+      userID: props.selectedVault?.vaultId
     };
 
     try {
@@ -478,7 +565,7 @@ const DocumentList = (props) => {
           }
         }
       );
-
+      console.log(response.data)
       setSelectedObjWf(response.data);
       setCurrentState({
         title: response.data.currentStateTitle,
@@ -512,6 +599,8 @@ const DocumentList = (props) => {
 
   // Main preview functions
   const previewObjectInternal = async (item, isDocument) => {
+    console.log(selectedObject)
+    console.log(props.user)
     resetPreviewState();
     setLoadingStates(true);
     setSelectedObject(item);
@@ -564,69 +653,121 @@ const DocumentList = (props) => {
   };
 
   // Update functions
+  // const transformFormValues = async () => {
+  //   try {
+  //     setUpdatingObject(true);
+
+  //     const requestData = {
+  //       objectid: selectedObject.id,
+  //       objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+  //       classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
+  //       props: Object.entries(formValues).map(([id, { value, datatype }]) => {
+  //         let transformedValue = value;
+
+  //         switch (datatype) {
+  //           case 'MFDatatypeMultiSelectLookup':
+  //             transformedValue = value.join(", ");
+  //             break;
+  //           case 'MFDatatypeBoolean':
+  //             transformedValue = value ? "true" : "false";
+  //             break;
+  //           case 'MFDatatypeNumber':
+  //           case 'MFDatatypeLookup':
+  //             transformedValue = value.toString();
+  //             break;
+  //           default:
+  //             // No transformation for unknown datatype
+  //             break;
+  //         }
+
+  //         return {
+  //           id: parseInt(id, 10),
+  //           value: transformedValue,
+  //           datatype,
+  //         };
+  //       }),
+  //       userID: parseInt(props.selectedVault?.vaultId, 10),
+  //       vaultGuid: props.selectedVault?.guid || "",
+  //     };
+
+  //     console.log('Request Data:', requestData);
+
+  //     // await axios.put(
+  //     //   `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+  //     //   requestData,
+  //     //   { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+  //     // );
+
+  //     setAlertPopOpen(true);
+  //     setAlertPopSeverity("success");
+  //     setAlertPopMessage("Updated successfully! Changes will be reflected next time item is loaded.");
+  //     setFormValues({});
+  //     setPreviewObjectProps([]);
+  //     setSelectedObject({});
+
+  //     handleTabAction()
+
+  //     setTimeout(() => {
+  //       if (selectedObject.id !== 0) {
+  //         previewObject(selectedObject);
+  //       } else {
+  //         previewDocumentObject(selectedObject);
+  //       }
+  //     }, 10000);
+
+  //   } catch (error) {
+  //     console.error('Error updating object props:', error);
+  //     setAlertPopOpen(true);
+  //     setAlertPopSeverity("error");
+  //     setAlertPopMessage("Something went wrong, please try again later!");
+  //   } finally {
+  //     setUpdatingObject(false);
+  //   }
+  // };
   const transformFormValues = async () => {
-    try {
-      setUpdatingObject(true);
+    const requestData = {
+      objectid: selectedObject.id,
+      objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
+      classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
+      props: Object.entries(formValues).map(([id, { value, datatype }]) => {
+        let transformedValue = value;
 
-      const requestData = {
-        objectid: selectedObject.id,
-        objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-        classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
-        props: Object.entries(formValues).map(([id, { value, datatype }]) => {
-          let transformedValue = value;
-
-          switch (datatype) {
-            case 'MFDatatypeMultiSelectLookup':
-              transformedValue = value.join(", ");
-              break;
-            case 'MFDatatypeBoolean':
-              transformedValue = value ? "true" : "false";
-              break;
-            case 'MFDatatypeNumber':
-            case 'MFDatatypeLookup':
-              transformedValue = value.toString();
-              break;
-          }
-
-          return {
-            id: parseInt(id, 10),
-            value: transformedValue,
-            datatype,
-          };
-        }),
-        userID: parseInt(props.mfilesId, 10),
-        vaultGuid: props.selectedVault?.guid || "",
-      };
-
-      await axios.put(
-        `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
-        requestData,
-        { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
-      );
-
-      setAlertPopOpen(true);
-      setAlertPopSeverity("success");
-      setAlertPopMessage("Updated successfully! Changes will be reflected next time item is loaded.");
-      setFormValues({});
-      setPreviewObjectProps([]);
-      setSelectedObject({});
-
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject);
-        } else {
-          previewDocumentObject(selectedObject);
+        switch (datatype) {
+          case 'MFDatatypeMultiSelectLookup':
+            transformedValue = value.join(", ");
+            break;
+          case 'MFDatatypeBoolean':
+            transformedValue = value ? "true" : "false";
+            break;
+          case 'MFDatatypeNumber':
+          case 'MFDatatypeLookup':
+            transformedValue = value.toString();
+            break;
+          default:
+            break;
         }
-      }, 10000);
 
-    } catch (error) {
-      console.error('Error updating object props:', error);
-      setAlertPopOpen(true);
-      setAlertPopSeverity("error");
-      setAlertPopMessage("Something went wrong, please try again later!");
-    } finally {
-      setUpdatingObject(false);
-    }
+        return {
+          id: parseInt(id, 10),
+          value: transformedValue,
+          datatype,
+        };
+      }),
+      userID: parseInt(props.selectedVault?.vaultId, 10),
+      vaultGuid: props.selectedVault?.guid || "",
+    };
+
+    await axios.put(
+      `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
+      requestData,
+      { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+    );
+
+    // Clear form values after successful update
+    setFormValues({});
+
+    // Return success indicator
+    return { success: true };
   };
 
   const transitionState = async () => {
@@ -637,12 +778,14 @@ const DocumentList = (props) => {
         objectTypeId: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
         objectId: selectedObject.id,
         nextStateId: selectedState.id,
-        userID: props.mfilesId
+        userID: props.selectedVault?.vaultId
       };
 
       await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectstate`, data, {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
+
+      handleTabAction()
 
       setTimeout(() => {
         if (selectedObject.id !== 0) {
@@ -683,12 +826,14 @@ const DocumentList = (props) => {
         objectId: selectedObject.id,
         workflowId: newWF.workflowId,
         stateId: newWFState.stateId,
-        userID: props.mfilesId
+        userID: props.selectedVault?.vaultId
       };
 
       await axios.post(`${constants.mfiles_api}/api/WorkflowsInstance/SetObjectWorkflowstate`, data, {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
+
+      handleTabAction()
 
       setTimeout(() => {
         if (selectedObject.id !== 0) {
@@ -730,38 +875,213 @@ const DocumentList = (props) => {
     }
   };
 
+  const updateClassValue = async () => {
+    // ---- VALIDATION BEFORE API CALL ----
+    const isPayloadValid =
+      classUpdatePayload &&
+      typeof classUpdatePayload === "object" &&
+      Object.keys(classUpdatePayload).length > 0 &&
+      classUpdatePayload.newClassID &&                       // must exist
+      classUpdatePayload.oldClassID !== classUpdatePayload.newClassID; // avoid unnecessary call
+
+    if (!isPayloadValid) {
+      console.warn("Class update skipped: empty or invalid payload.");
+      return;
+    }
+
+    try {
+      setUpdatingObject(true);
+
+      await axios.post(
+        `${constants.mfiles_api}/api/objectinstance/ModifyObjectClass`,
+        classUpdatePayload,
+        {
+          headers: { accept: "*/*", "Content-Type": "application/json" },
+        }
+      );
+      setChangedClass(false);
+
+      handleTabAction();
+      resetPreview();
+
+      setTimeout(() => {
+        if (selectedObject.id !== 0) {
+          previewObject(selectedObject);
+        } else {
+          previewDocumentObject(selectedObject);
+        }
+      }, 5000);
+
+
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("Updated successfully!");
+    } catch (error) {
+      console.error("Error updating class:", error);
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage("Something went wrong, please try again later!");
+    } finally {
+      setUpdatingObject(false);
+    }
+  };
+
+
+
+
+  // const updateObjectMetadata = async () => {
+  //   const hasFormValues = Object.keys(formValues || {}).length > 0;
+  //   const hasSelectedState = Boolean(selectedState?.title);
+  //   const hasNewWorkflow = Boolean(newWF?.workflowName);
+
+  //   try {
+  //     setIsUpdatingMetadata(true);
+
+  //     if (changedClass) {
+  //       await updateClassValue()
+  //     }
+
+  //     if (hasFormValues) {
+  //       await transformFormValues();
+  //     }
+
+  //     if (hasSelectedState) {
+  //       await transitionState();
+  //     }
+
+  //     if (hasNewWorkflow) {
+  //       await addNewWorkflowAndState();
+  //     }
+
+  //     if (approvalPayload) {
+  //       await markAssignmentComplete();
+  //     }
+
+  //     // Only reload metadata if not approval-only update
+  //     if (!approvalPayload) {
+  //       await reloadObjectMetadata();
+  //     }
+  //     handleTabAction()
+
+  //   } catch (error) {
+  //     console.error('Error in updateObjectMetadata:', error);
+  //     // Handle error as needed
+  //   } finally {
+  //     setDialogOpen(false);
+  //     setUpdatingObject(false);
+  //     setIsUpdatingMetadata(false);
+  //   }
+  // };
+
   const updateObjectMetadata = async () => {
     const hasFormValues = Object.keys(formValues || {}).length > 0;
     const hasSelectedState = Boolean(selectedState?.title);
     const hasNewWorkflow = Boolean(newWF?.workflowName);
+    const hasApprovalPayload = Boolean(approvalPayload);
+    const hasClassChange = Boolean(changedClass);
+
+    // Early return if nothing to update
+    if (!hasFormValues && !hasSelectedState && !hasNewWorkflow && !hasApprovalPayload && !hasClassChange) {
+      setDialogOpen(false);
+      return;
+    }
 
     try {
       setIsUpdatingMetadata(true);
+      setUpdatingObject(true);
+
+      // Collect all update promises
+      const updates = [];
+
+      // 1. Class update (should happen first as it may affect other operations)
+      if (hasClassChange) {
+        updates.push(
+          updateClassValue().catch(err => {
+            console.error('Class update failed:', err);
+            throw new Error('Class update failed');
+          })
+        );
+      }
+
+      // 2. Run these in parallel since they're independent
+      const parallelUpdates = [];
 
       if (hasFormValues) {
-        await transformFormValues();
+        parallelUpdates.push(
+          transformFormValues().catch(err => {
+            console.error('Form values update failed:', err);
+            return { error: 'form_values', message: err.message };
+          })
+        );
       }
 
       if (hasSelectedState) {
-        await transitionState();
+        parallelUpdates.push(
+          transitionState().catch(err => {
+            console.error('State transition failed:', err);
+            return { error: 'state_transition', message: err.message };
+          })
+        );
       }
 
       if (hasNewWorkflow) {
-        await addNewWorkflowAndState();
+        parallelUpdates.push(
+          addNewWorkflowAndState().catch(err => {
+            console.error('Workflow addition failed:', err);
+            return { error: 'workflow_addition', message: err.message };
+          })
+        );
       }
 
-      if (approvalPayload) {
-        await markAssignmentComplete();
+      if (hasApprovalPayload) {
+        parallelUpdates.push(
+          markAssignmentComplete().catch(err => {
+            console.error('Assignment completion failed:', err);
+            return { error: 'assignment_completion', message: err.message };
+          })
+        );
       }
 
-      // Only reload metadata if not approval-only update
-      if (!approvalPayload) {
+      // Wait for class update first, then parallel updates
+      if (updates.length > 0) {
+        await Promise.all(updates);
+      }
+
+      if (parallelUpdates.length > 0) {
+        const results = await Promise.all(parallelUpdates);
+
+        // Check if any parallel updates failed
+        const failures = results.filter(r => r?.error);
+        if (failures.length > 0) {
+          console.warn('Some updates failed:', failures);
+          setAlertPopOpen(true);
+          setAlertPopSeverity("warning");
+          setAlertPopMessage(`Some updates completed with errors. Check console for details.`);
+        }
+      }
+
+      // Single reload after all updates
+      if (!hasApprovalPayload) {
+        // Delay reload to allow backend to process
+        await new Promise(resolve => setTimeout(resolve, 2000));
         await reloadObjectMetadata();
+      }
+
+      // Single handleTabAction call
+      handleTabAction();
+
+      // Show success message if not already shown by individual functions
+      if (!hasFormValues && !hasSelectedState && !hasNewWorkflow) {
+        setAlertPopOpen(true);
+        setAlertPopSeverity("success");
+        setAlertPopMessage("Update completed successfully!");
       }
 
     } catch (error) {
       console.error('Error in updateObjectMetadata:', error);
-      // Handle error as needed
+      setAlertPopOpen(true);
+      setAlertPopSeverity("error");
+      setAlertPopMessage(error.message || "Update failed. Please try again.");
     } finally {
       setDialogOpen(false);
       setUpdatingObject(false);
@@ -813,6 +1133,7 @@ const DocumentList = (props) => {
       setSearched(true);
 
       props.setData(data);
+      // console.log(data)
     });
   };
 
@@ -872,16 +1193,77 @@ const DocumentList = (props) => {
             ...item,
             guid: props.selectedVault.guid,
             extension,
-            type: item.objectTypeId ?? item.objectID
+            type: item.objectTypeId ?? item.objectID,
           });
           setOpenOfficeApp(true);
+
         }
+
+
       } catch (error) {
         console.error('Error fetching extension:', error);
       }
     };
     fetchExtension();
   }
+
+  const undoCheckout = async (objectType, objectId) => {
+    const payload = {
+      objecttypeid: objectType,
+      objectid: objectId,
+      vaultGuid: props.selectedVault.guid,
+      userID: props.selectedVault?.vaultId,
+    };
+    console.log(payload)
+
+    const headers = {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const response = await axios.post(
+        `${constants.mfiles_api}/api/ObjectCheckout/UndoCheckout`,
+        payload,
+        { headers }
+      );
+
+      console.log('Response:', response.data);
+      handleTabAction()
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const Checkout = async (objectType, objectId) => {
+    const payload = {
+      objecttypeid: objectType,
+      objectid: objectId,
+      vaultGuid: props.selectedVault.guid,
+      userID: props.selectedVault?.vaultId,
+    };
+    // console.log(payload)
+
+    const headers = {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const response = await axios.post(
+        `${constants.mfiles_api}/api/ObjectCheckout/Checkout`,
+        payload,
+        { headers }
+      );
+
+      // console.log('Response:', response.data);
+      handleTabAction()
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+
 
   const handleRowClick = (subItem) => {
     if (subItem.objectID === 0 || subItem.objectTypeId === 0) {
@@ -960,6 +1342,161 @@ const DocumentList = (props) => {
     }
   }, [isMobile]);
 
+  const rightClickActions = [];
+
+  if (menuItem) {
+    const isSingleFile = menuItem.isSingleFile === true;
+    const isCheckedOut = menuItem.isCheckedOut === true;
+    const checkoutByMe = Number(menuItem.checkoutuserid) === Number(props.selectedVault?.vaultId);
+    const hasObject = menuItem.objectID > 0 || menuItem.objectTypeId > 0;
+    const canEdit = menuItem.userPermission?.editPermission;
+    const fileExt = file?.extension?.toLowerCase();
+
+    // Open action
+    if (isSingleFile && !hasObject && !isCheckedOut) {
+      rightClickActions.push({
+        label: (
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <FileExtIcon
+              fontSize="18px"
+              guid={props.selectedVault.guid}
+              objectId={menuItem.id}
+              classId={menuItem.classId ?? menuItem.classID}
+              version={menuItem.versionId ?? null}
+            />
+            <span className="mx-2">Open</span>
+            <span className="text-muted" style={{ marginLeft: 'auto', fontWeight: 500 }}>
+              Open in default application
+            </span>
+          </span>
+        ),
+        onClick: (itm) => {
+          openApp(itm);
+          handleMenuClose();
+        },
+      });
+    }
+
+    // Convert to PDF actions
+    const convertibleExtensions = ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif'];
+    if (isSingleFile && !isCheckedOut && canEdit && fileExt && convertibleExtensions.includes(fileExt)) {
+      rightClickActions.push(
+        {
+          label: (
+            <>
+              <i className="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i>
+              <span className="mx-3">Convert to PDF (Overwrite Original Copy)</span>
+            </>
+          ),
+          onClick: (itm) => {
+            handlePdfConversionRequest(itm, true);
+            handleMenuClose();
+          },
+        },
+        {
+          label: (
+            <>
+              <i className="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i>
+              <span className="mx-3">Convert to PDF (Keep Original Copy)</span>
+            </>
+          ),
+          onClick: (itm) => {
+            handlePdfConversionRequest(itm, false);
+            handleMenuClose();
+          },
+        }
+      );
+    }
+
+    // Consolidate Linked Documents
+    if (hasObject && !isCheckedOut) {
+      rightClickActions.push({
+        label: (
+          <>
+            <i className="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i>
+            <span className="mx-3">Consolidate Linked Documents</span>
+          </>
+        ),
+        onClick: (itm) => {
+          handleMergeRequest(itm);
+          handleMenuClose();
+        },
+      });
+    }
+
+    // Check In
+    if (isCheckedOut && (checkoutByMe || props.user.is_admin === "True")) {
+      rightClickActions.push({
+        label: (
+          <>
+            <i className="fa-solid fa-square-check" style={{ color: '#3fa34d' }}></i>
+            <span className="mx-3">Check In</span>
+          </>
+        ),
+        onClick: () => {
+          undoCheckout(menuItem.objectID, menuItem.id);
+          handleMenuClose();
+        },
+      });
+    }
+
+    // History
+    if (!isCheckedOut && !checkoutByMe) {
+      rightClickActions.push({
+        label: (
+          <>
+            <i className="fa-solid fa-clock" style={{ color: '#fca311' }}></i>
+            <span className="mx-3">History</span>
+          </>
+        ),
+        onClick: (itm) => {
+          if (itm.objectID === 0 || itm.objectTypeId === 0) {
+            setIsFile(true);
+          }
+
+          const fetchObjectVersions = async () => {
+            setLoadingHistory(true);
+            const url = `${constants.mfiles_api}/api/ObjectVersions/GetObjectVesions/${props.selectedVault.guid}/${itm.id}/${itm.classId ?? itm.classID}/${props.selectedVault?.vaultId}`;
+            try {
+              const response = await fetch(url, { method: 'GET', headers: { accept: '*/*' } });
+              if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+              const data = await response.json();
+              setObjectHistory(Array.isArray(data) ? data : [data]);
+              setSelectedObject(itm);
+            } catch (error) {
+              console.error('Failed to fetch object versions:', error);
+              setObjectHistory([]);
+            } finally {
+              setLoadingHistory(false);
+            }
+          };
+
+          fetchObjectVersions();
+          setOpenHistory(true);
+        },
+      });
+    }
+  }
+
+
+
+  //    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) && (menuItem.isCheckedOut === false)  && (Number(menuItem.checkoutuserid) !== Number(props.selectedVault?.vaultId)) ? [
+  //   {
+
+  //     label: (
+  //       <><i class="fa-solid fa-pen-to-square" style={{ color: '#2757aa' }}></i><span className='mx-3'>Check Out</span></>
+  //     ),
+  //     onClick: (itm) => {
+  //       console.log(itm)
+  //       Checkout(menuItem.objectID, menuItem.id);
+  //       handleMenuClose();
+  //     }
+  //   }
+
+  // ] : [
+
+  // ]),
+
   // Effects
   useEffect(() => {
     const handleResize = () => {
@@ -1010,72 +1547,48 @@ const DocumentList = (props) => {
     };
   }, [isDragging, isMobile, setPreviewWindowWidth]);
 
+  useEffect(() => {
+  }, [props.selectedVault?.vaultId]);
 
-  const rightClickActions = [
-    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) ? [
-      {
-        label: (
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <FileExtIcon
-              fontSize={'24px'}
-              guid={props.selectedVault.guid}
-              objectId={menuItem.id}
-              classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
-              version={menuItem.versionId ?? null}
-            />
-            <span className='mx-2'>Open</span>
-            <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
-              Open in default application
-            </span>
-          </span>
-        ),
-        onClick: (itm) => {
-          openApp(itm);
-          handleMenuClose();
-        }
-      }
-    ] : [
 
-    ]),
-    ...(menuItem && (menuItem.isSingleFile === true) && menuItem.userPermission && menuItem.userPermission.editPermission &&
-      file?.extension &&
-      ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif'].includes(file.extension.toLowerCase())
-      ? [
-        {
-          label: <><i class="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF ( Overwrite Original Copy )</span></>,
-          onClick: (itm) => {
-            handlePdfConversionRequest(itm, true); // Changed this line
-            handleMenuClose();
-          }
-        },
-        {
-          label: <><i class="fa-solid fa-arrows-spin text-p" style={{ color: '#2757aa' }}></i><span className='mx-3'>Convert to PDF ( Keep Original Copy )</span> </>,
-          onClick: (itm) => {
-            handlePdfConversionRequest(itm, false); // Changed this line
-            handleMenuClose();
-          }
-        }
-      ] : []),
 
-    ...(menuItem && (menuItem.objectID > 0 || menuItem.objectTypeId > 0) ? [
-      {
 
-        label: (
-          <><i class="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i><span className='mx-3'>Consolidate Linked Documents</span></>
-        ),
-        onClick: (itm) => {
-          console.log(itm)
-          handleMergeRequest(itm);
-          handleMenuClose();
-        }
-      }
-    ] : [
 
-    ]),
-  ];
 
   return (
     <>
+
+      <History
+        open={openHistory}
+        close={() => setOpenHistory(false)}
+        data={objectHistory}
+        setObjectHistory={setObjectHistory}
+        loadingHisytory={loadingHisytory}
+        setLoadingHistory={setLoadingHistory}
+        selectedVault={props.selectedVault}
+        mfilesId={props.selectedVault?.vaultId}
+        selectedItemId={selectedItemId}
+        setSelectedItemId={setSelectedItemId}
+        handleClick={handleClick}
+        handleDoubleClick={handleDoubleClick}
+        handleRightClick={handleRightClick}
+        handleRowClick={handleRowClick}
+        toolTipTitle={toolTipTitle}
+        setBlob={setBlob}
+        setSelectedFileId={setSelectedFileId}
+        setExtension={setExtension}
+        setLoadingFile={setLoadingFile}
+        a11yProps2={a11yProps2}
+        headerTitle="History"
+        nameColumnLabel="Name"
+        dateColumnLabel="Date Modified"
+        isFile={isFile}
+        selectedObject={selectedObject}
+        handleTabAction={handleTabAction}
+
+
+
+      />
       <PdfMergeDialog
         open={mergeDialogOpen}
         onClose={handlMergeCancel}
@@ -1117,7 +1630,8 @@ const DocumentList = (props) => {
         open={openOfficeApp}
         close={() => setOpenOfficeApp(false)}
         object={objectToEditOnOffice}
-        mfilesId={props.mfilesId}
+        mfilesId={props.selectedVault?.vaultId}
+        handleTabAction={() => handleTabAction()}
       />
 
       {/* Split column section */}
@@ -1148,8 +1662,9 @@ const DocumentList = (props) => {
             py: 1,
             fontSize: '12.8px',
             backgroundColor: '#fff',
-            color: '#1C4690',
-            overflow: 'hidden'
+            color: '#2757aa',
+            overflow: 'hidden',
+            maxHeight: '56px'
           }}>
             {/* Logo + Menu */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -1165,7 +1680,7 @@ const DocumentList = (props) => {
                   borderRadius: 1,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    backgroundColor: '#f0f4fa',
+                    backgroundColor: '#fff',
                     transform: 'scale(1.05)',
                   },
                 }}
@@ -1175,35 +1690,31 @@ const DocumentList = (props) => {
               <img
                 src={logo}
                 alt="Logo"
-                width="auto"
-                height="30"
-                style={{ cursor: 'pointer', transition: 'transform 0.2s ease-in-out' }}
+                className="shadow-sm"
+                style={{
+                  height: "40px",
+                  cursor: "pointer",
+                  padding: "5px",
+                  transition: "transform 0.2s ease-in-out",
+                }}
               />
+
             </Box>
 
             {/* Right Section */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title="Switch to a different vault" placement="top">
+              <Tooltip title="Switch to a different vault" placement="left" arrow>
                 <Box sx={{ cursor: 'pointer' }}>
                   <VaultSelectForm activeVault={props.selectedVault} />
                 </Box>
               </Tooltip>
-              <Tooltip title={`${props.user.first_name} ${props.user.last_name}`}>
-                <Avatar
-                  alt={`${props.user.first_name} ${props.user.last_name}`}
-                  {...props.stringAvatar(
-                    props.user.first_name && props.user.last_name
-                      ? `${props.user.first_name} ${props.user.last_name}`
-                      : props.user.first_name || props.user.last_name || props.user.username
-                  )}
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    backgroundColor: '#2757aa',
-                    fontSize: '12.8px',
-                  }}
-                />
-              </Tooltip>
+
+              <UserAvatarMenu
+                user={props.user}
+                stringAvatar={props.stringAvatar}
+                onLogout={props.logoutUser}
+              />
+
             </Box>
           </Box>
 
@@ -1224,7 +1735,7 @@ const DocumentList = (props) => {
                     placeholder="Search"
                     value={props.searchTerm}
                     onChange={(e) => props.setSearchTerm(e.target.value)}
-                    className="form-control form-control-md rounded-pill"
+                    className="form-control form-control-md "
                     style={{
                       fontSize: '12.8px',
                       borderRadius: '6px',
@@ -1258,6 +1769,7 @@ const DocumentList = (props) => {
               </Box>
             </Box>
           </Box>
+          {/* <Button onClick={()=>{reloadViews();alert(value)}}>Reload Current Results</Button> */}
 
           {/* Tabs */}
           <Tabs
@@ -1285,7 +1797,7 @@ const DocumentList = (props) => {
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {label === 'Home' && (
                       <i
-                        className="fas fa-home mx-1"
+                        className="fas fa-home"
                         style={{
                           fontSize: '16px',
                           color: selectedTab === 'Home' ? '#2757aa' : '#ccc' // greyed out if not selected
@@ -1305,6 +1817,7 @@ const DocumentList = (props) => {
                   }
                   if (label === 'Recent') props.getRecent?.();
                   if (label === 'Assigned') props.getAssigned?.();
+                  if (label === 'Deleted') props.getDeleted?.();
                 }}
                 {...a11yProps(index)}
               />
@@ -1313,7 +1826,25 @@ const DocumentList = (props) => {
           </Tabs>
 
           {/* Tab Content */}
-          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+          <Box
+            {...getRootProps()}
+            sx={{
+              flex: 1,
+              overflow: 'hidden',
+              border: '1px dashed #fff',       // thinner border
+              backgroundColor: '#fff',         // always white
+              cursor: 'pointer',
+              transition: 'border 0.2s ease',
+              '&:hover': {
+                borderColor: '#fff',           // border color on hover
+                backgroundColor: '#fff',
+              },
+              '&.drag-active': {
+                borderColor: '#fff',           // border color when dragging
+                backgroundColor: '#fff',
+              },
+            }}>
+
             <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
               {loading ? (
                 <>
@@ -1324,9 +1855,9 @@ const DocumentList = (props) => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#333'
+                    // color: '#333'
                   }}>
-                    <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                    <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                     Search Results
                   </Box>
                   <Loader />
@@ -1342,16 +1873,16 @@ const DocumentList = (props) => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
-                        color: '#333'
+                        // color: '#333'
                       }}>
-                        <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                        <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                         Search Results
                       </Box>
                       {props.data?.length > 0 ? (
                         <ColumnSimpleTree
                           data={props.data}
                           selectedVault={props.selectedVault}
-                          mfilesId={props.mfilesId}
+                          mfilesId={props.selectedVault?.vaultId}
                           selectedItemId={selectedItemId}
                           setSelectedItemId={setSelectedItemId}
                           onItemClick={handleClick}
@@ -1379,10 +1910,10 @@ const DocumentList = (props) => {
                           backgroundColor: '#fff'
                         }}>
                           <i className="fa-solid fa-search" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
-                          <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                          <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                             No Results Found
                           </Typography>
-                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
+                          <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                             Please try a different search parameter
                           </Typography>
                         </Box>
@@ -1391,7 +1922,7 @@ const DocumentList = (props) => {
                   ) : (
                     <ViewsList
                       selectedFileId={selectedFileId}
-                      viewableobjects={props.viewableobjects}
+                      // viewableobjects={props.viewableobjects}
                       previewDocumentObject={previewDocumentObject}
                       selectedObject={selectedObject}
                       loadingobjects={loadingobjects}
@@ -1403,7 +1934,7 @@ const DocumentList = (props) => {
                       setAlertPopSeverity={setAlertPopSeverity}
                       setAlertPopMessage={setAlertPopMessage}
                       user={props.user}
-                      mfilesId={props.mfilesId}
+                      mfilesId={props.selectedVault?.vaultId}
                       resetPreview={resetPreview}
                       setSelectedItemId={setSelectedItemId}
                       selectedItemId={selectedItemId}
@@ -1412,6 +1943,8 @@ const DocumentList = (props) => {
                       setSelectedViewObjects={setSelectedViewObjects}
                       viewNavigation={viewNavigation}
                       setViewNavigation={setViewNavigation}
+                      viewNavigation2={viewNavigation2}
+                      setViewNavigation2={setViewNavigation2}
                       handleDoubleClick={handleDoubleClick}
                       handleRightClick={handleRightClick}
                       handleClick={handleClick}
@@ -1422,6 +1955,7 @@ const DocumentList = (props) => {
                       setLoadingFile={setLoadingFile}
                       toolTipTitle={toolTipTitle}
                       a11yProps={a11yProps2}
+                      refreshKey={refreshKey}
 
                     />
                   )}
@@ -1443,7 +1977,7 @@ const DocumentList = (props) => {
                   index={tabIndex}
                   style={{ backgroundColor: '#fff', padding: 0, width: '100%', overflowY: 'auto' }}
                 >
-                  {loading ? (
+                  {loading || props.isLoadingAssigned || props.isLoadingRecent || props.isLoadingDeleted ? (
                     <>
                       <Box sx={{
                         p: 1,
@@ -1452,9 +1986,9 @@ const DocumentList = (props) => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
-                        color: '#333'
+                        // color: '#333'
                       }}>
-                        <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                        <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                         {title} ({props[dataKey]?.length || 0})
                       </Box>
                       <Loader />
@@ -1470,15 +2004,15 @@ const DocumentList = (props) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            color: '#333'
+                            // color: '#333'
                           }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                             {title} ({props[dataKey].length})
                           </Box>
                           <ColumnSimpleTree
                             data={props[dataKey]}
                             selectedVault={props.selectedVault}
-                            mfilesId={props.mfilesId}
+                            mfilesId={props.selectedVault?.vaultId}
                             selectedItemId={selectedItemId}
                             setSelectedItemId={setSelectedItemId}
                             onItemClick={handleClick}
@@ -1506,9 +2040,9 @@ const DocumentList = (props) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            color: '#333'
+                            // color: '#333'
                           }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#1C4690' }} />
+                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                             {emptyTitle}
                           </Box>
                           <Box sx={{
@@ -1521,10 +2055,10 @@ const DocumentList = (props) => {
                             backgroundColor: '#fff'
                           }}>
                             <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
-                            <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                            <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                               No Results Found
                             </Typography>
-                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px', color: '#333' }}>
+                            <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
                               {emptySubtitle}
                             </Typography>
                           </Box>
@@ -1536,7 +2070,7 @@ const DocumentList = (props) => {
               );
             })}
             <CustomTabPanel value={value} index={4} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
-              <ChartGenerator />
+              <ChartGenerator vaultGuid={props.selectedVault?.guid} />
             </CustomTabPanel>
 
           </Box>
@@ -1570,10 +2104,14 @@ const DocumentList = (props) => {
           }}
         >
           <ObjectData
+            changedClass={changedClass}
+            setChangedClass={setChangedClass}
+            classUpdatePayload={classUpdatePayload}
+            setClassUpdatePayload={setClassUpdatePayload}
             setPreviewObjectProps={setPreviewObjectProps}
             setSelectedObject={setSelectedObject}
             resetViews={props.resetViews}
-            mfilesId={props.mfilesId}
+            mfilesId={props.selectedVault?.vaultId}
             user={props.user}
             getObjectComments={getObjectComments2}
             getAssigned={props.getAssigned}

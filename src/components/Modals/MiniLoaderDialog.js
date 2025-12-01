@@ -44,11 +44,11 @@ export default function MiniLoader(props) {
             <Typography variant="body2" color="textPrimary">
               {props.loaderMsg ? (
         
-                <span style={{ color: '#555' }} className="loading-indicator ">
+                <span style={{ color: '#555b6e' }} className="loading-indicator ">
                   {props.loaderMsg} <span>.</span><span>.</span><span>.</span>
                 </span>
               ) : (
-                <span style={{ color: '#555' }} className="loading-indicator ">
+                <span style={{ color: '#555b6e' }} className="loading-indicator ">
                   Fetching, please wait <span>.</span><span>.</span><span>.</span>
                 </span>
               )}

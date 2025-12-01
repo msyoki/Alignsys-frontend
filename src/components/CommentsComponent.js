@@ -160,7 +160,7 @@ const CommentsComponent = (props) => {
                   <div key={index} className="message">
                     <i className="fas fa-user" style={{ color: '#2757aa', fontSize: '20px' }}></i>
                     <div className="message-content user-message">
-                      <div style={{ fontSize: '12px', color: '#555', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '12px', color: '#555b6e', marginBottom: '4px' }}>
                         <strong>{boldText}</strong> • {comment.modifiedDate}
                       </div>
                       <div style={{ fontSize: '14px', lineHeight: 1.4 }}>

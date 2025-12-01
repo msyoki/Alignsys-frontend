@@ -16,6 +16,8 @@ import TimedAlert from '../TimedAlert';
 import MultifileFiles from '../MultifileFiles';
 import ColumnSimpleTree from '../ColumnSimpleTree';
 import Typography from '@mui/material/Typography';
+import Loader from '../Loaders/LoaderMini'
+
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -113,6 +115,9 @@ const MAIN_CONTENT_STYLES = {
     overflowY: 'auto'
 };
 
+
+
+
 // Utility functions
 const trimTitle = (title) => title.length > MAX_TITLE_LENGTH ? title.substring(0, MAX_TITLE_LENGTH) + '...' : title;
 
@@ -133,118 +138,118 @@ const formatDate = (dateString) => {
 };
 
 // Memoized sub-components
-const NavigationBreadcrumb = memo(({
-    viewNavigation,
-    onBackToViews,
-    onNavClick,
-    onResetPreview
-}) => (
-    <h6 className="p-1 text-dark d-flex align-items-center flex-wrap" style={NAVIGATION_STYLES}>
-        {/* <div className="d-flex align-items-center" style={{ minWidth: '24px' }}>
-            <FontAwesomeIcon
-                icon={faTable}
-                style={{ color: '#1C4690', fontSize: '18px' }}
-                className="mx-2"
-            />
-        </div> */}
-        <div
-            className="d-flex align-items-center flex-wrap"
-            style={{
-                gap: '6px',
-                flex: 1,
-                minHeight: '24px' // Reduced from 32px to 24px
-            }}
-        >
-            {/* Back Button */}
-            {/* <span 
-    onClick={onBackToViews}
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      cursor: 'pointer',
-      fontSize: '12.8px', // Reduced from 14px
-      color: '#1C4690',
-      fontWeight: '500',
-      gap: '4px' // Reduced from 6px
-    }}
-  > 
-    <i 
-      className="fas fa-arrow-left" 
-      style={{ 
-        color: '#1C4690', 
-        fontSize: '14px' // Reduced from 16px
-      }}
-    />
-    Back
-  </span> */}
-            <FontAwesomeIcon
-                icon={faTable}
-                style={{ color: '#1C4690', fontSize: '18px' }}
-                className="mx-2"
-            />
+const NavigationBreadcrumb = memo(
+    ({ viewNavigation, onNavClick, onResetPreview }) => {
+        const [collapsed, setCollapsed] = useState(true);
+        const MAX_VISIBLE_ITEMS = 3;
 
-            {/* First Separator */}
-            {/* {viewNavigation.length > 0 && (
-    <i 
-      className="fas fa-chevron-right" 
-      style={{ 
-        color: '#2a68af', 
-        fontSize: '10px', // Reduced from 12px
-        opacity: 0.7 
-      }} 
-    />
-  )} */}
+        const toggleCollapsed = () => setCollapsed(!collapsed);
+        const visibleItems = collapsed
+            ? viewNavigation.slice(0, MAX_VISIBLE_ITEMS)
+            : viewNavigation;
 
-            {/* Navigation Items */}
-            {viewNavigation.map((item, index) => (
-                <React.Fragment key={index}>
-                    <Tooltip title={item.title} placement="top" arrow>
-                        <span
-                            onClick={() => {
-                                onNavClick(item);
-                                onResetPreview();
-                            }}
-                            style={{
-                                cursor: 'pointer',
-                                whiteSpace: 'normal',
-                                wordBreak: 'break-word',
-                                // maxWidth: '150px',
-                                fontSize: '12.8px', // Reduced from 12.8px
-                                color: '#333',
-                                padding: '2px 4px', // Reduced from 4px 6px
-                                borderRadius: '3px', // Reduced from 4px
-                                transition: 'background-color 0.2s ease',
-                                display: 'inline-block',
-                                lineHeight: '1.1' // Reduced from 1.2
-                            }}
-                        //   onMouseEnter={(e) => {
-                        //     e.target.style.backgroundColor = '#f0f0f0';
-                        //   }}
-                        //   onMouseLeave={(e) => {
-                        //     e.target.style.backgroundColor = 'transparent';
-                        //   }}
-                        >
-                            {trimTitle(item.title)}
+        const isCollapsible = viewNavigation.length > MAX_VISIBLE_ITEMS;
+
+        return (
+            <div
+                className="d-flex align-items-center flex-wrap "
+                style={{
+                    backgroundColor: "#ecf4fc",
+                    color: "#333",
+                    borderRadius: "4px",
+                    padding: "10px 6px",
+                    gap: "4px",
+                    lineHeight: 1,
+                    fontSize: "12px",
+                    minHeight: "20px",
+                }}
+            >
+                <i
+                    className="fas fa-table"
+                    style={{
+                        fontSize: "20px",
+                        color: "#2757aa",
+                        marginRight: "3px",
+                    }}
+                />
+
+                {visibleItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                        <Tooltip title={item.title} placement="top" arrow>
+                            <span
+                                onClick={() => {
+                                    onNavClick(item);
+                                    onResetPreview();
+                                }}
+                                style={{
+                                    cursor: "pointer",
+                                    whiteSpace: "nowrap",
+                                    color: "#333",
+                                    padding: "1px 4px",
+                                    borderRadius: "2px",
+                                    background: "rgba(39, 87, 170, 0.05)",
+                                    transition: "background 0.2s ease",
+                                }}
+                                onMouseEnter={(e) =>
+                                (e.currentTarget.style.background =
+                                    "rgba(39, 87, 170, 0.15)")
+                                }
+                                onMouseLeave={(e) =>
+                                (e.currentTarget.style.background =
+                                    "rgba(39, 87, 170, 0.05)")
+                                }
+                            >
+                                {item.title}
+                            </span>
+                        </Tooltip>
+
+                        {index < visibleItems.length - 1 && (
+                            <i
+                                className="fas fa-chevron-right"
+                                style={{
+                                    color: "#2757aa",
+                                    fontSize: "9px",
+                                    opacity: 0.8,
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+
+                {collapsed && isCollapsible && (
+                    <>
+                        <span style={{ fontSize: "11px", color: "#333", opacity: 0.8 }}>
+                            ...
                         </span>
-                    </Tooltip>
-
-                    {/* Separator after each item except the last */}
-                    {index < viewNavigation.length - 1 && (
                         <i
-                            className="fas fa-chevron-right"
+                            className="fas fa-chevron-down"
+                            onClick={toggleCollapsed}
                             style={{
-                                color: '#2a68af',
-                                fontSize: '10px', // Reduced from 12px
-                                opacity: 0.7
+                                cursor: "pointer",
+                                fontSize: "10px",
+                                color: "#2757aa",
+                                marginLeft: "2px",
                             }}
                         />
-                    )}
-                </React.Fragment>
-            ))}
-        </div>
-    </h6>
-));
+                    </>
+                )}
 
+                {!collapsed && isCollapsible && (
+                    <i
+                        className="fas fa-chevron-up"
+                        onClick={toggleCollapsed}
+                        style={{
+                            cursor: "pointer",
+                            fontSize: "10px",
+                            color: "#2757aa",
+                            marginLeft: "2px",
+                        }}
+                    />
+                )}
+            </div>
+        );
+    }
+);
 
 const PropertyFolderItem = memo(({ item, index, selectedItemId, onFetchViewData }) => {
     const handleClick = useCallback(() => {
@@ -302,7 +307,7 @@ const ViewFolderItem = memo(({ item, index, selectedItemId, onFetchMainViewObjec
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#1C4690', fontSize: '20px' }} />
+                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
                         <span style={{ fontSize: '12.8px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
@@ -334,7 +339,7 @@ const ViewListItem = memo(({ view, index, selectedItemId, onFetchMainViewObjects
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2a68af', fontSize: '20px' }} />
+                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
                         <span style={{ fontSize: '12.8px' }} className='list-text'>{view.viewName}</span>
                     </Box>
                 }
@@ -383,19 +388,19 @@ const ViewsList = (props) => {
     );
 
     // Memoized API calls
-    const fetchObjectFile = useCallback(async (item) => {
-        const classId = item.classId || item.classID
-        const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${classId}`;
-        try {
-            const response = await axios.get(url, {
-                headers: { Accept: '*/*' }
-            });
-            const file = response.data?.[0];
-            setFile(file);
-        } catch {
-            // Silent error handling as in original
-        }
-    }, [props.selectedVault]);
+    // const fetchObjectFile = useCallback(async (item) => {
+    //     const classId = item.classId || item.classID
+    //     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${classId}`;
+    //     try {
+    //         const response = await axios.get(url, {
+    //             headers: { Accept: '*/*' }
+    //         });
+    //         const file = response.data?.[0];
+    //         setFile(file);
+    //     } catch {
+    //         // Silent error handling as in original
+    //     }
+    // }, [props.selectedVault]);
 
     const convertToPDF = useCallback(async (item, overWriteOriginal) => {
         const payload = {
@@ -405,7 +410,7 @@ const ViewsList = (props) => {
             fileID: file.fileID,
             overWriteOriginal: overWriteOriginal,
             separateFile: overWriteOriginal ? false : true,
-            userID: props.mfilesId
+            userID: props.selectedVault?.vaultId
         };
 
         try {
@@ -423,7 +428,7 @@ const ViewsList = (props) => {
         } catch {
 
         }
-    }, [props.selectedVault, file?.fileID, props.mfilesId]);
+    }, [props.selectedVault, file?.fileID, props.selectedVault?.vaultId]);
 
     const openApp = useCallback((item) => {
         const fetchExtension = async () => {
@@ -449,12 +454,17 @@ const ViewsList = (props) => {
     // Fetch data effect
     useEffect(() => {
         const savedOption = sessionStorage.getItem('selectedVault');
+        console.log(savedOption)
+
         if (!savedOption) return;
         const fetchData = async () => {
-            const guid = JSON.parse(savedOption).guid;
+            const parsed = JSON.parse(savedOption);
+            const guid = parsed.guid;
+            const userId = parseInt(parsed.vaultId);
+            console.log(guid, userId)
             try {
                 const response = await axios.get(
-                    `${constants.mfiles_api}/api/Views/GetViews/${guid}/${props.mfilesId}`
+                    `${constants.mfiles_api}/api/Views/GetViews/${guid}/${userId}`
                 );
                 setOtherViews(response.data.otherViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
                 setCommonViews(response.data.commonViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
@@ -464,13 +474,89 @@ const ViewsList = (props) => {
             }
         };
         fetchData();
-    }, [props.viewNavigation, props.mfilesId, setOtherViews, setCommonViews]);
+    }, [props.viewNavigation, props.selectedVault?.vaultId, setOtherViews, setCommonViews]);
+
+    useEffect(() => {
+        const loadViews = async () => {
+            try {
+                // No navigation → fetch MAIN LIST views
+                if (props.viewNavigation.length === 0) {
+                    const savedOption = sessionStorage.getItem('selectedVault');
+                    if (!savedOption) return;
+
+                    let parsed;
+                    try {
+                        parsed = JSON.parse(savedOption);
+                    } catch {
+                        console.error("Invalid JSON for selectedVault");
+                        return;
+                    }
+
+                    const guid = parsed.guid;
+                    const userId = parseInt(parsed.vaultId);
+
+                    if (!guid || !userId) return;
+
+                    try {
+                        setLoading(true);
+                        const response = await axios.get(
+                            `${constants.mfiles_api}/api/Views/GetViews/${guid}/${userId}`
+                        );
+
+                        const { otherViews = [], commonViews = [] } = response.data;
+
+                        setOtherViews([...otherViews].sort((a, b) => a.viewName.localeCompare(b.viewName)));
+                        setCommonViews([...commonViews].sort((a, b) => a.viewName.localeCompare(b.viewName)));
+                        setLoading(false);
+                    } catch (err) {
+                        console.error("Failed to load main views:", err);
+                    }
+
+                    return;
+                }
+
+                // Inside a view → fetch based on type
+                const lastNavItem = props.viewNavigation.at(-1);
+                if (!lastNavItem) return;
+
+                try {
+                    switch (lastNavItem.type) {
+                        case "Common Views":
+                        case "Other Views":
+                            await fetchMainViewObjects(lastNavItem, lastNavItem.type);
+                            break;
+
+                        case "MFFolderContentItemTypeViewFolder":
+                            await fetchMainViewObjects2(lastNavItem);
+                            break;
+
+                        case "MFFolderContentItemTypePropertyFolder":
+                            await fetchViewData(lastNavItem);
+                            break;
+
+                        default:
+                            console.warn("Unknown view type:", lastNavItem.type);
+                            break;
+                    }
+                } catch (err) {
+                    console.error("Error loading nested view:", err);
+                }
+
+            } catch (outerErr) {
+                console.error("Unhandled error in view loader:", outerErr);
+            }
+        };
+
+        loadViews();
+    }, [props.refreshKey]);
+
 
     // Navigation and fetch logic
     const backToViews = useCallback(() => {
         props.resetPreview();
         props.setSelectedViewObjects([]);
         props.setViewNavigation([]);
+        props.setViewNavigation2([])
         // setSelectedViewCategory([]);
     }, [props]);
 
@@ -478,6 +564,7 @@ const ViewsList = (props) => {
         const itemIndex = props.viewNavigation.findIndex(navItem => navItem.id === item.id);
         if (itemIndex !== -1) {
             props.setViewNavigation(props.viewNavigation.slice(0, itemIndex + 1));
+            props.setViewNavigation2(props.viewNavigation2.slice(0, itemIndex + 1));
         }
         switch (item.type) {
             case 'Common Views':
@@ -497,34 +584,49 @@ const ViewsList = (props) => {
     const fetchMainViewObjects = useCallback(async (item, viewType) => {
         setLoading(true);
         props.setViewNavigation([])
+        props.setViewNavigation2([])
         props.setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
             if (!exists) {
                 return [...prevItems, { ...item, type: viewType, title: item.viewName }];
             }
+            props.setViewNavigation2(prevItems)
             return prevItems;
         });
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.mfilesId}`,
+                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`,
                 { headers: { accept: '*/*' } }
             );
-            setLoading(false);
             props.setSelectedViewObjects(response.data);
+            setLoading(false);
+
             // setSelectedViewName(item.viewName);
+            console.log(`${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`)
+            console.log('Fetched view data for property folder:', response.data);
 
 
         } catch {
+            console.log(`${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`)
             props.setSelectedViewObjects([]);
             setLoading(false);
             // props.setAlertPopOpen(true);
             // props.setAlertPopSeverity("info");
             // props.setAlertPopMessage("Sorry, we couldn't find any objects!");
         }
-    }, [props.selectedVault, props.mfilesId, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
+    }, [props.selectedVault, props.selectedVault?.vaultId, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, props.setViewNavigation]);
 
     const fetchMainViewObjects2 = useCallback(async (item) => {
         setLoading(true);
+        // console.log(item)
+
+        // if (item.type = "MFFolderContentItemTypeViewFolder") {
+        //     console.log(props.viewNavigation)
+        //     console.log("reset view value")
+        // }
+
+
+
         props.setViewNavigation(prevItems => {
             const exists = prevItems.some(navItem => navItem.id === item.id);
             if (!exists) {
@@ -532,95 +634,155 @@ const ViewsList = (props) => {
             }
             return prevItems;
         });
+
+        // Reset view navigation since you are navigating in a new view 
+        props.setViewNavigation2([])
+
         try {
             const response = await axios.get(
-                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}`,
+                `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`,
                 { headers: { accept: '*/*' } }
             );
-            setLoading(false);
             props.setSelectedViewObjects(response.data);
+            setLoading(false);
+
             // setSelectedViewName(item.title);
+            console.log(`${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`)
+            console.log('Fetched view data for view folder:', response.data);
 
         } catch {
+            console.log(`${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`)
             props.setSelectedViewObjects([]);
             setLoading(false);
             // props.setAlertPopOpen(true);
             // props.setAlertPopSeverity("info");
             // props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
         }
-    }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
+    }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, props.setViewNavigation]);
 
     const fetchViewData = useCallback(async (item) => {
         setLoading(true);
-        props.setViewNavigation(prevItems => {
-            const exists = prevItems.some(navItem => navItem.propId === item.propId);
-            const updatedItems = exists ? prevItems : [...prevItems, { ...item, type: item.type, title: item.title }];
-            processNavigation(updatedItems);
-            return updatedItems;
-        });
 
+        // ----------------------------------------
+        // Helper: Update a navigation list safely
+        // ----------------------------------------
+        const updateNavigationList = (setNav) => {
+            setNav(prev => {
+                const exists = prev.some(n => n.propId === item.propId);
+                const updated = exists ? prev : [...prev, { ...item }];
+
+                processNavigation(updated);
+                return updated;
+            });
+        };
+
+        // Update both lists using the helper
+        updateNavigationList(props.setViewNavigation);
+        updateNavigationList(props.setViewNavigation2);
+
+        // ----------------------------------------
+        // Helper: Handle navigation processing
+        // ----------------------------------------
         function processNavigation(updatedItems) {
-            const newItem = { propId: `${item.propId}`, propDatatype: `${item.propDatatype}` };
-            const itemList = updatedItems.filter(i => i.type === "MFFolderContentItemTypePropertyFolder");
-            const transformedList = itemList.map(i => ({
+            const newItem = {
+                propId: String(item.propId),
+                propDatatype: String(item.propDatatype),
+            };
+
+            // Only folder-content items
+            const propertyFolders = updatedItems.filter(
+                (i) => i.type === "MFFolderContentItemTypePropertyFolder"
+            );
+
+            const transformedList = propertyFolders.map((i) => ({
                 propId: i.propId,
-                propDatatype: i.propDatatype
+                propDatatype: i.propDatatype,
             }));
-            if (!transformedList.some(existingItem =>
-                existingItem.propId === newItem.propId &&
-                existingItem.propDatatype === newItem.propDatatype
-            )) {
-                transformedList.push(newItem);
-            }
-            apiRequest(transformedList);
+
+            // Add current item if not present
+            const exists = transformedList.some(
+                (t) => t.propId === newItem.propId && t.propDatatype === newItem.propDatatype
+            );
+
+            const finalList = exists ? transformedList : [...transformedList, newItem];
+
+            apiRequest(finalList);
         }
 
-        async function apiRequest(newPropList) {
+        // ----------------------------------------
+        // API Request
+        // ----------------------------------------
+        async function apiRequest(properties) {
             try {
+                const payload = {
+                    viewId: item.viewId,
+                    userID: props.selectedVault?.vaultId,
+                    properties,
+                    vaultGuid: props.selectedVault.guid,
+                };
+                console.log(`${constants.mfiles_api}/api/Views/GetViewPropObjects`);
+                console.log(payload);
+
                 const response = await axios.post(
                     `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
+                    payload,
                     {
-                        viewId: item.viewId,
-                        properties: newPropList,
-                        vaultGuid: `${props.selectedVault.guid}`
-                    },
-                    { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
+                        headers: {
+                            accept: "*/*",
+                            "Content-Type": "application/json",
+                        },
+                    }
                 );
-                setLoading(false);
+
                 props.setSelectedViewObjects(response.data);
-                // setSelectedViewName(item.title);
-            } catch {
+
+                console.log('Fetched view data for property folder:', response.data);
+            } catch (error) {
+                console.log(`${constants.mfiles_api}/api/Views/GetViewPropObjects`);
+                console.log({
+                    viewId: item.viewId,
+                    userID: props.selectedVault?.vaultId,
+                    properties,
+                    vaultGuid: props.selectedVault.guid,
+                });
                 props.setSelectedViewObjects([]);
+            } finally {
                 setLoading(false);
-                // props.setAlertPopOpen(true);
-                // props.setAlertPopSeverity("info");
-                // props.setAlertPopMessage("Sorry, we couldn't find any objects!");
             }
         }
-    }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, setLoading, props.setViewNavigation]);
-
-    const handleRowClick = useCallback((subItem) => {
-        if (subItem.objectID === 0 && subItem.isSingleFile === true) {
-            props.previewDocumentObject(subItem);
-        } else {
-            props.previewObject(subItem);
-        }
-    }, [props]);
-
-    // Right click menu handlers
-    const handleRightClick = useCallback((event, item) => {
-        event.preventDefault();
-        setMenuAnchor(event.currentTarget);
-        setMenuItem(item);
-        if (item.objectID === 0 || item.objectTypeId === 0) {
-            fetchObjectFile(item);
-        }
-    }, [fetchObjectFile]);
+    }, [
+        props.selectedVault,
+        props.setViewNavigation,
+        props.setViewNavigation2,
+        props.setSelectedViewObjects,
+    ]);
 
     const handleMenuClose = useCallback(() => {
         setMenuAnchor(null);
         setMenuItem(null);
     }, []);
+
+    // Convert viewNavigation to a string for URL
+    // const updateUrlFromNavigation = (viewNavigation) => {
+    //     if (!viewNavigation || viewNavigation.length === 0) {
+    //         window.history.replaceState(null, '', window.location.pathname);
+    //         return;
+    //     }
+
+    //     const segments = viewNavigation.map(item => {
+    //         // Use IDs and type to encode
+    //         return `${item.id}`;
+    //     });
+
+    //     const newHash = segments.join('/');
+    //     window.history.replaceState(null, '', `#${newHash}`);
+    // };
+
+    // useEffect(() => {
+    //     updateUrlFromNavigation(props.viewNavigation);
+    // }, [props.viewNavigation]);
+
+
 
     // Memoized right click actions
     const rightClickActions = useMemo(() => {
@@ -635,7 +797,7 @@ const ViewsList = (props) => {
                             guid={props.selectedVault.guid}
                             objectId={menuItem.id}
                             classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
-                            version={menuItem.versionId?? null}
+                            version={menuItem.versionId ?? null}
                         />
                         <span className='mx-2'>Open</span>
                         <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>
@@ -684,6 +846,9 @@ const ViewsList = (props) => {
         return actions;
     }, [menuItem, file, props.selectedVault, openApp, handleMenuClose, convertToPDF]);
 
+    useEffect(() => {
+    }, [props.selectedVault?.vaultId]);
+
     return (
         <>
             <TimedAlert
@@ -694,184 +859,223 @@ const ViewsList = (props) => {
                 setSeverity={setAlertSeverity}
                 setMessage={setAlertMsg}
             />
-            <LoadingDialog opendialogloading={loading} />
+            {/* <LoadingDialog opendialogloading={loading} /> */}
             <OfficeApp
                 open={openOfficeApp}
                 close={() => setOpenOfficeApp(false)}
                 object={objectToEditOnOffice}
-                mfilesId={props.mfilesId}
+                mfilesId={props.selectedVault?.vaultId}
             />
-
-            {props.selectedViewObjects.length > 0 || props.viewNavigation.length > 0 ? (
+            {loading ? (
                 <>
-                    <NavigationBreadcrumb
+
+                    {/* <NavigationBreadcrumb
                         viewNavigation={props.viewNavigation}
                         onBackToViews={backToViews}
                         onNavClick={handleViewNavClick}
                         onResetPreview={props.resetPreview}
-                    />
+                    /> */}
 
-
-                    <div >
-                        {props.selectedViewObjects.length > 0 ? <>
-                            <div className=' text-dark' style={MAIN_CONTENT_STYLES}>
-                                {props.selectedViewObjects.map((item, index) => (
-                                    <React.Fragment key={index}>
-
-                                        {item.type === "MFFolderContentItemTypePropertyFolder" && (
-                                            <PropertyFolderItem
-                                                item={item}
-                                                index={index}
-                                                selectedItemId={props.selectedItemId}
-                                                onFetchViewData={fetchViewData}
-                                            />
-                                        )}
-                                        {item.type === "MFFolderContentItemTypeViewFolder" && (
-                                            <ViewFolderItem
-                                                item={item}
-                                                index={index}
-                                                selectedItemId={props.selectedItemId}
-                                                onFetchMainViewObjects2={fetchMainViewObjects2}
-                                            />
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </div>
-
-                            {(() => {
-                                const versions = props.selectedViewObjects.filter(
-                                    item => item.type === "MFFolderContentItemTypeObjectVersion"
-                                );
-                                if (versions.length === 0) return null;
-                                return versions.length > 0 ? (
-                                    <ColumnSimpleTree
-                                        data={versions}
-                                        selectedVault={props.selectedVault}
-                                        mfilesId={props.mfilesId}
-                                        selectedItemId={props.selectedItemId}
-                                        setSelectedItemId={props.setSelectedItemId}
-                                        onItemClick={props.handleClick}
-                                        onItemDoubleClick={props.handleDoubleClick}
-                                        onItemRightClick={props.handleRightClick}
-                                        onRowClick={props.handleRowClick}
-                                        getTooltipTitle={props.toolTipTitle}
-                                        setBlob={props.setBlob}
-                                        setSelectedFileId={props.setSelectedFileId}
-                                        setExtension={props.setExtension}
-                                        setLoadingFile={props.setLoadingFile}
-                                        a11yProps={props.a11yProps}
-                                        headerTitle="Search Results"
-                                        nameColumnLabel="Name"
-                                        dateColumnLabel="Date Modified"
-                                    />
-
-                                ) : null;
-                            })()}
-
-                            {rightClickActions.length > 0 && (
-                                <RightClickMenu
-                                    anchorEl={menuAnchor}
-                                    open={Boolean(menuAnchor)}
-                                    onClose={handleMenuClose}
-                                    item={menuItem}
-                                    actions={rightClickActions}
-                                />
-                            )}
-                        </> : <>
-
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: 'inherit', // or whatever height you want the parent to have
-                                width: '100%'
-                            }}>
-                                <Box sx={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    p: 3,
-                                    backgroundColor: '#fff'
-                                }}>
-                                    <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
-                                    <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
-                                        No Results Found
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
-                                        No items found in this view
-                                    </Typography>
-
-
-                                </Box>
-                            </div>
-                        </>}
-                    </div>
-
+                    <Loader />
                 </>
-            ) : (
-                <span>
-                    {filteredCommonViews.length > 0 && (
-                        <div className='bg-white my-1'>
-                            <h6
-                                onClick={() => setshowCommonViewSublist(v => !v)}
-                                className="p-2 text-dark d-flex align-items-center justify-content-between"
-                                style={SECTION_HEADER_STYLES}
+            ) :
+                <>
+                    {props.selectedViewObjects.length > 0 || props.viewNavigation.length > 0 ? (
+                        <>
+                            {/* Breadcrumb section — fixed and not scrollable */}
+                            <div
+                                style={{
+                                    position: 'sticky',
+                                    top: 0,
+                                    zIndex: 100,
+                                    backgroundColor: '#ecf4fc',
+                                    overflow: 'hidden', // prevents internal scrolling
+                                    whiteSpace: 'nowrap',
+
+                                    // borderBottom: '1px solid #e0e0e0'
+                                }}
                             >
-                                <span className="d-flex align-items-center">
-                                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
-                                    Common Views
-                                </span>
-                                <small style={{ color: '#2a68af', fontSize: '12.8px' }}>({filteredCommonViews.length})</small>
-                            </h6>
-                            {showCommonViewSublist && (
-                                <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
-                                    {filteredCommonViews.map((view, index) => (
-                                        <ViewListItem
-                                            key={index}
-                                            view={view}
-                                            index={index}
-                                            selectedItemId={props.selectedItemId}
-                                            onFetchMainViewObjects={fetchMainViewObjects}
-                                            viewType="Common Views"
-                                        />
-                                    ))}
+                                <NavigationBreadcrumb
+                                    viewNavigation={props.viewNavigation}
+                                    onBackToViews={backToViews}
+                                    onNavClick={handleViewNavClick}
+                                    onResetPreview={props.resetPreview}
+                                />
+                            </div>
+
+                            {/* Scrollable main content */}
+                            <div>
+                                {props.selectedViewObjects.length > 0 ? (
+                                    <>
+                                        <div className="text-dark" style={MAIN_CONTENT_STYLES}>
+                                            {props.selectedViewObjects.map((item, index) => (
+                                                <React.Fragment key={index}>
+                                                    {item.type === "MFFolderContentItemTypePropertyFolder" && (
+                                                        <PropertyFolderItem
+                                                            item={item}
+                                                            index={index}
+                                                            selectedItemId={props.selectedItemId}
+                                                            onFetchViewData={fetchViewData}
+                                                        />
+                                                    )}
+                                                    {item.type === "MFFolderContentItemTypeViewFolder" && (
+                                                        <ViewFolderItem
+                                                            item={item}
+                                                            index={index}
+                                                            selectedItemId={props.selectedItemId}
+                                                            onFetchMainViewObjects2={fetchMainViewObjects2}
+                                                        />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+
+                                        {(() => {
+                                            const versions = props.selectedViewObjects.filter(
+                                                item => item.type === "MFFolderContentItemTypeObjectVersion"
+                                            );
+                                            if (versions.length === 0) return null;
+
+                                            return (
+                                                <ColumnSimpleTree
+                                                    data={versions}
+                                                    selectedVault={props.selectedVault}
+                                                    mfilesId={props.selectedVault?.vaultId}
+                                                    selectedItemId={props.selectedItemId}
+                                                    setSelectedItemId={props.setSelectedItemId}
+                                                    onItemClick={props.handleClick}
+                                                    onItemDoubleClick={props.handleDoubleClick}
+                                                    onItemRightClick={props.handleRightClick}
+                                                    onRowClick={props.handleRowClick}
+                                                    getTooltipTitle={props.toolTipTitle}
+                                                    setBlob={props.setBlob}
+                                                    setSelectedFileId={props.setSelectedFileId}
+                                                    setExtension={props.setExtension}
+                                                    setLoadingFile={props.setLoadingFile}
+                                                    a11yProps={props.a11yProps}
+                                                    headerTitle="Search Results"
+                                                    nameColumnLabel="Name"
+                                                    dateColumnLabel="Date Modified"
+                                                    renderHeight="60vh"
+                                                />
+                                            );
+                                        })()}
+
+                                        {rightClickActions.length > 0 && (
+                                            <RightClickMenu
+                                                anchorEl={menuAnchor}
+                                                open={Boolean(menuAnchor)}
+                                                onClose={handleMenuClose}
+                                                item={menuItem}
+                                                actions={rightClickActions}
+                                            />
+                                        )}
+                                    </>
+                                ) : (
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            height: 'inherit',
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                p: 3,
+                                                backgroundColor: '#fff',
+                                            }}
+                                        >
+                                            <i
+                                                className="fa-solid fa-ban"
+                                                style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }}
+                                            />
+                                            <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                                                No Results Found
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
+                                                No items found in this view
+                                            </Typography>
+                                        </Box>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+
+                    ) : (
+                        <span>
+                            {filteredCommonViews.length > 0 && (
+                                <div className='bg-white my-1'>
+                                    <h6
+                                        onClick={() => setshowCommonViewSublist(v => !v)}
+                                        className="p-2 text-dark d-flex align-items-center justify-content-between"
+                                        style={SECTION_HEADER_STYLES}
+                                    >
+                                        <span className="d-flex align-items-center">
+                                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                                            Common Views
+                                        </span>
+                                        <small style={{ color: '#2757aa', fontSize: '12.8px' }}>({filteredCommonViews.length})</small>
+                                    </h6>
+                                    {showCommonViewSublist && (
+                                        <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
+                                            {filteredCommonViews.map((view, index) => (
+                                                <ViewListItem
+                                                    key={index}
+                                                    view={view}
+                                                    index={index}
+                                                    selectedItemId={props.selectedItemId}
+                                                    onFetchMainViewObjects={fetchMainViewObjects}
+                                                    viewType="Common Views"
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                        </div>
-                    )}
-                    {filteredOtherViews.length > 0 && (
-                        <div className='bg-white my-1'>
-                            <h6
-                                onClick={() => setshowOtherViewSublist(v => !v)}
-                                className="p-2 text-dark d-flex align-items-center justify-content-between"
-                                style={SECTION_HEADER_STYLES}
-                            >
-                                <span className="d-flex align-items-center">
-                                    <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2a68af' }}></i>
-                                    Other Views
-                                </span>
-                                <small style={{ color: '#2a68af', fontSize: '12.8px' }}>({filteredOtherViews.length})</small>
-                            </h6>
-                            {showOtherViewSublist && (
-                                <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
-                                    {filteredOtherViews.map((view, index) => (
-                                        <ViewListItem
-                                            key={index}
-                                            view={view}
-                                            index={index}
-                                            selectedItemId={props.selectedItemId}
-                                            onFetchMainViewObjects={fetchMainViewObjects}
-                                            viewType="Other Views"
-                                        />
-                                    ))}
+                            {filteredOtherViews.length > 0 && (
+                                <div className='bg-white my-1'>
+                                    <h6
+                                        onClick={() => setshowOtherViewSublist(v => !v)}
+                                        className="p-2 text-dark d-flex align-items-center justify-content-between"
+                                        style={SECTION_HEADER_STYLES}
+                                    >
+                                        <span className="d-flex align-items-center">
+                                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                                            Other Views
+                                        </span>
+                                        <small style={{ color: '#2757aa', fontSize: '12.8px' }}>({filteredOtherViews.length})</small>
+                                    </h6>
+                                    {showOtherViewSublist && (
+                                        <div style={{
+                                            height: filteredCommonViews?.length < 1 ? '60vh' : '27vh',
+                                            overflowY: 'auto',
+                                        }} className='text-dark bg-white'>
+                                            {filteredOtherViews.map((view, index) => (
+                                                <ViewListItem
+                                                    key={index}
+                                                    view={view}
+                                                    index={index}
+                                                    selectedItemId={props.selectedItemId}
+                                                    onFetchMainViewObjects={fetchMainViewObjects}
+                                                    viewType="Other Views"
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                        </div>
+                        </span>
                     )}
-                </span>
-            )}
+                </>}
+
+
         </>
     );
 };

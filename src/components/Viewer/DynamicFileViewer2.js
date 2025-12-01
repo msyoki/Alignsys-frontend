@@ -20,7 +20,7 @@ const FileViewerContainer = styled.div`
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #555;
+  background-color: #555b6e
   border: 1px solid #dee2e6;
   border-radius: 12px;
   padding: 16px 24px;
@@ -68,7 +68,7 @@ const ImageViewerContainer = styled.div`
   height: 85vh;
   display: flex;
   flex-direction: column;
-  background: #555;
+  background: #555b6e
   border: 1px solid #dee2e6;
   overflow: hidden;
 `;
@@ -88,7 +88,7 @@ const ImageWrapper = styled.div`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #555;
+  background: #555b6e
   cursor: grab;
   padding: 1rem;
   display: flex;

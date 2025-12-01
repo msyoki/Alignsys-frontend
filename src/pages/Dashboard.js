@@ -8,9 +8,9 @@ import PropTypes from 'prop-types';
 import { Box, Tooltip, Avatar, List, ListItem, ListItemText } from '@mui/material';
 import axios from 'axios';
 import DashboardContent from '../components/MainComponents/DashboardContent';
-import NewObjectDialog from '../components/Modals/NewObjectDialog';
+import NewObjectDialog from '../components/Modals/NewObjectDialog/NewObjectDialog';
 import * as constants from '../components/Auth/configs';
-import logo from '../images/ZFBLU.png';
+import logo from '../images/ZFWHITE.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
@@ -18,6 +18,7 @@ import {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile,
   faFolder, faUserFriends, faPlus, faTag
 } from '@fortawesome/free-solid-svg-icons';
+import TaskMessenger from '../components/features/ai/TaskMessenger';
 
 const allIcons = {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends,
@@ -82,7 +83,7 @@ const SidebarMenu = React.memo(({
     <div className="sidebar-content">
       {/* Logo Section */}
       <div
-        className="d-flex flex-column justify-content-center align-items-center bg-white shadow-lg"
+        className="d-flex flex-column justify-content-center align-items-center shadow-lg"
         style={{
           height: "58px",
           minHeight: "56px",
@@ -97,7 +98,7 @@ const SidebarMenu = React.memo(({
           className="logo"
           style={{
             width: "auto",
-            maxHeight: "30px",
+            maxHeight: "33px",
             objectFit: "contain",
           }}
         />
@@ -112,7 +113,7 @@ const SidebarMenu = React.memo(({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "10px 15px",
+
             borderRadius: "8px",
           }}
         >
@@ -165,7 +166,6 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
     dense
     disablePadding
     sx={{
-      color: "#fff",
       maxHeight: isVisible ? "350px" : "0",
       overflowY: "auto",
       width: "100%",
@@ -174,82 +174,84 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
       padding: isVisible ? "10px 20px" : "0",
       backgroundColor: "#fff",
 
-      "& *": { direction: "ltr" },
       "&::-webkit-scrollbar": { width: "3px" },
-      "&::-webkit-scrollbar-track": {
-        background: "rgba(255, 255, 255, 0.15)",
-        borderRadius: "10px",
-        boxShadow: "inset 0 0 5px rgba(255, 255, 255, 0.2)",
-      },
       "&::-webkit-scrollbar-thumb": {
         background: "#2757aa",
         borderRadius: "10px",
-        minHeight: "10px",
-        transition: "background 0.3s",
-        border: "2px solid rgba(255, 255, 255, 0.2)",
-      },
-      "&::-webkit-scrollbar-thumb:hover": {
-        background: "#2757aa",
-        boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
-      },
-      "&::-webkit-scrollbar-button:single-button": {
-        display: "block",
-        height: "10px",
-        background: "rgba(255, 255, 255, 0.2)",
-        borderRadius: "4px",
-      },
-      "&::-webkit-scrollbar-button:single-button:hover": {
-        background: "rgba(255, 255, 255, 0.4)",
-      },
-      "&::-webkit-scrollbar-button:single-button:vertical:decrement": {
-        backgroundImage:
-          "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 14l5-5 5 5H7z\"/></svg>')",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-      },
-      "&::-webkit-scrollbar-button:single-button:vertical:increment": {
-        backgroundImage:
-          "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M7 10l5 5 5-5H7z\"/></svg>')",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
       },
     }}
   >
     {isVisible && items.map((item) => (
-      <ListItem
-        key={item.objectid}
-        onMouseEnter={() => setHoveredItem(item.objectid)}
-        onMouseLeave={() => setHoveredItem(null)}
-        onClick={() => fetchItemData(item.objectid, item.namesingular)}
-        sx={{
-          textAlign: "start",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff",
-          color: hoveredItem === item.objectid ? "black" : "black",
-          py: 0,
-          px: 1,
-          margin: "2px 0",
-          height: "20px",
-        }}
-      >
-        <ListItemText
-          className='text-dark'
-          primary={item.namesingular}
-          primaryTypographyProps={{ fontSize: "12px" }}
-          sx={{ margin: 0, padding: 0, fontWeight: "bolder" }}
-        />
-      </ListItem>
+      <Tooltip title={item.namesingular} placement="right" arrow>
+        <ListItem
+          key={item.objectid}
+          onMouseEnter={() => setHoveredItem(item.objectid)}
+          onMouseLeave={() => setHoveredItem(null)}
+          onClick={() => fetchItemData(item.objectid, item.namesingular)}
+          sx={{
+            cursor: "pointer",
+            backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff",
+            color: "#333",
+            py: 0,
+            px: 0,
+            margin: "2px 0",
+            height: "22px",
+
+            display: "flex",
+            alignItems: "center",
+            gap: 0.3,
+            width: "100%",
+
+            borderRadius: "4px",
+            transition: "all 0.15s ease",
+
+            "&:hover": {
+              backgroundColor: "#e9f2fc",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              transform: "translateY(-1px)",
+            },
+
+            "&:active": {
+              transform: "scale(0.98)",
+              boxShadow: "0 0 0 rgba(0,0,0,0)",
+            },
+          }}
+
+        >
+          {/* ICON */}
+          <i
+            className={
+              item.objectid === 0
+                ? "fas fa-file-circle-plus"
+                : "fas fa-folder-plus"
+            }
+            style={{ color: "#2757aa", fontSize: "12px" }}
+          />
+
+          {/* TEXT */}
+          <ListItemText
+            primary={item.namesingular}
+            primaryTypographyProps={{ fontSize: "12px" }}
+            sx={{
+              margin: 0,
+              padding: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          />
+        </ListItem>
+      </Tooltip>
+
     ))}
   </List>
+
 ));
 
 SubList.displayName = 'SubList';
 
 // API Functions Hook - optimized with caching
-const useApiCalls = (selectedVault, mfilesId) => {
+const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted) => {
   const cacheRef = useRef(new Map());
 
   // Clear cache when vault changes
@@ -276,6 +278,7 @@ const useApiCalls = (selectedVault, mfilesId) => {
 
 
   const getRecent = useCallback(async (setRecentData) => {
+    setIsLoadingRecent(true);
     try {
       const { data } = await axios.get(
         `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
@@ -289,27 +292,34 @@ const useApiCalls = (selectedVault, mfilesId) => {
       });
 
       setRecentData(sortedData);
+      setIsLoadingRecent(false);
+      // console.log(sortedData)
     } catch (error) {
       console.error("Failed to fetch recent data", error);
       setRecentData([]);
+      setIsLoadingRecent(false);
     }
   }, [selectedVault?.guid, mfilesId]);
 
 
   const getDeleted = useCallback(async (setDeletedData) => {
+    setIsLoadingDeleted(true);
     try {
       const response = await axios.get(
         `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
       );
       setDeletedData(response.data);
+      setIsLoadingDeleted(false);
     } catch (error) {
       console.error("Failed to fetch deleted data", error);
       setDeletedData([]);
+      setIsLoadingDeleted(false);
     }
   }, [selectedVault?.guid, mfilesId]);
 
 
   const getAssigned = useCallback(async (setAssignedData) => {
+    setIsLoadingAssigned(true);
     try {
       const response = await axios.get(
         `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
@@ -323,9 +333,12 @@ const useApiCalls = (selectedVault, mfilesId) => {
       });
 
       setAssignedData(sortedData);
+      setIsLoadingAssigned(false);
+      console.log(sortedData)
     } catch (error) {
       console.error('Error fetching assigned data:', error);
       setAssignedData([]);
+      setIsLoadingAssigned(false);
     }
   }, [selectedVault?.guid, mfilesId]);
 
@@ -391,6 +404,9 @@ function Dashboard() {
   const [selectedObjectId, setSelectedObjectId] = useSessionState('ss_selectedObjectId', null);
   const [selectedObjectName, setSelectedObjectName] = useSessionState('ss_selectedObjectName', '');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRecent, setIsLoadingRecent] = useState(false);
+  const [isLoadingAssigned, setIsLoadingAssigned] = useState(false);
+  const [isLoadingDeleted, setIsLoadingDeleted] = useState(false);
   const [selectedClassId, setSelectedClassId] = useSessionState('ss_selectedClassId', null);
   const [groupedItems, setGroupedItems] = useSessionState('ss_groupedItems', []);
   const [ungroupedItems, setUngroupedItems] = useSessionState('ss_ungroupedItems', []);
@@ -407,9 +423,17 @@ function Dashboard() {
   const [alertOpen, setOpenAlert] = useSessionState('ss_alertOpen', false);
   const [alertSeverity, setAlertSeverity] = useSessionState('ss_alertSeverity', '');
   const [alertMsg, setAlertMsg] = useSessionState('ss_alertMsg', '');
-  const [mfilesId, setMfilesId] = useSessionState('ss_mfilesId', null);
+  // const [mfilesId, setMfilesId] = useSessionState('ss_mfilesId', null);
   const [loadingDialog, setLoadingDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useSessionState('ss_hoveredItem', null);
+
+  // --- Preview Logic ---
+  const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
+  const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
+  const [base64, setBase64] = useSessionState('ss_base64', '');
+  const [extension, setExtension] = useSessionState('ss_extension', '');
+  const [droppedFile, setDroppedFile] = useSessionState('ss_droppedFile', null);
+
 
   // API calls hook
   const {
@@ -419,7 +443,7 @@ function Dashboard() {
     getAssigned,
     getVaultObjects,
     getVaultObjects2
-  } = useApiCalls(selectedVault, mfilesId);
+  } = useApiCalls(selectedVault, selectedVault?.vaultId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted);
 
   // --- Helper Functions (memoized for performance) ---
   const getViewableObjects = useCallback(() => {
@@ -435,20 +459,23 @@ function Dashboard() {
       .catch(() => { });
   }, [authTokens.access, setViewableObjects]);
 
-  const getVaultId = useCallback(async (guid) => {
-    try {
-      const response = await axios.post(
-        `${constants.auth_api}/api/vaultid/`,
-        { user_id: user.id, guid },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      setMfilesId(response.data.mfilesID);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Vault ID fetch failed:", error);
-      setMfilesId(7);
-    }
-  }, [user.id, setMfilesId]);
+  // const getVaultId = useCallback(async (guid) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${constants.auth_api}/api/vaultid/`,
+  //       { user_id: user.id, guid },
+  //       { headers: { 'Content-Type': 'application/json' } }
+  //     );
+  //     setMfilesId(response.data.mfilesID);
+
+  //   } catch (error) {
+
+  //     setMfilesId(17)
+
+  //     console.error("Vault ID fetch failed:", error);
+
+  //   }
+  // }, [user.id, setMfilesId]);
 
 
   const getNetworkStatus = useCallback(() => {
@@ -464,53 +491,28 @@ function Dashboard() {
     }
   }, []);
 
-  // const findBestIconMatch = useCallback((name) => {
-  //   const nameWords = name.toLowerCase().split(' ');
-  //   for (let iconName in allIcons) {
-  //     for (let word of nameWords) {
-  //       if (iconName.toLowerCase().includes(word)) return allIcons[iconName];
-  //       if (
-  //         word.toLowerCase().includes('document') ||
-  //         word.toLowerCase().includes('invoice') ||
-  //         word.toLowerCase().includes('Petty Cash')
-  //       ) return faFile;
-  //       if (
-  //         word.toLowerCase().includes('staff') ||
-  //         word.toLowerCase().includes('employee')
-  //       ) return faUser;
-  //     }
-  //   }
-  //   return faFolder;
-  // }, []);
-
-  // --- Preview Logic ---
-  const [selectedObject, setSelectedObject] = useSessionState('ss_selectedObject', {});
-  const [previewObjectProps, setPreviewObjectProps] = useSessionState('ss_previewObjectProps', []);
-  const [base64, setBase64] = useSessionState('ss_base64', '');
-  const [extension, setExtension] = useSessionState('ss_extension', '');
-
   // Preview functions (memoized)
   const previewObject = useCallback(async (item, isMain = true) => {
     setSelectedObject(item);
     try {
-      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${mfilesId}`;
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${selectedVault.vaultId}`;
       const { data } = await axios.get(url);
       setPreviewObjectProps(data);
     } catch (error) {
       setPreviewObjectProps([]);
     }
-  }, [selectedVault?.guid, mfilesId, setSelectedObject, setPreviewObjectProps]);
+  }, [selectedVault?.guid, selectedVault?.vaultId, setSelectedObject, setPreviewObjectProps]);
 
   const previewSublistObject = useCallback(async (item, isMain = true) => {
     setSelectedObject(item);
     try {
-      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${mfilesId}`;
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectProps/${selectedVault.guid}/${item.id}/${item.classId ?? item.classID}/${selectedVault.vaultId}`;
       const { data } = await axios.get(url);
       setPreviewObjectProps(data);
     } catch (error) {
       setPreviewObjectProps([]);
     }
-  }, [selectedVault?.guid, mfilesId, setSelectedObject, setPreviewObjectProps]);
+  }, [selectedVault?.guid, selectedVault?.vaultId, setSelectedObject, setPreviewObjectProps]);
 
   // --- Event Handlers (memoized) ---
   const adminPage = useCallback(() => navigate('/admin'), [navigate]);
@@ -527,7 +529,7 @@ function Dashboard() {
     setIsLoading(true);
     setSelectedObjectName(objectName);
     try {
-      const url = `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}/${mfilesId}`;
+      const url = `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${selectedVault.guid}/${objectId}/${selectedVault.vaultId}`;
       const { data } = await axios.get(url);
       const { grouped, unGrouped } = data;
       setSelectedObjectId(objectId);
@@ -553,49 +555,36 @@ function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedVault?.guid, mfilesId, setSelectedObjectName, setSelectedObjectId, setGroupedItems, setUngroupedItems, setIsDataOpen]);
+  }, [selectedVault?.guid, selectedVault?.vaultId, setSelectedObjectName, setSelectedObjectId, setGroupedItems, setUngroupedItems, setIsDataOpen]);
 
   const handleClassSelection = useCallback(async (classId, className, objectId) => {
+    // Combine initial state updates into one
     setLoadingDialog(true);
     setSelectedClassName(className);
     setSelectedClassId(classId);
     setSelectedObjectId(objectId);
     setTemplates([]);
+    setFormProperties([]);
+    setFormValues({});
+    setIsFormOpen(false);
 
-    const fetchTemplates = async () => {
-      try {
-        const response = await axios.get(
-          `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
-          { headers: { accept: '*/*' } }
-        );
-        setTemplates(response.data);
-
-        // console.log('Templates fetched:', response.data);
-        setLoadingDialog(false);
-        setIsFormOpen(true);
-      } catch (error) {
-        console.error('Error fetching templates:', error);
-        await proceedNoneTemplate();
-      }
-    };
-
+    // Helper: proceed with class properties if no template
     const proceedNoneTemplate = async () => {
-      setLoadingDialog(true);
       try {
         const response = await axios.get(
-          `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${mfilesId}`
+          `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${selectedVault.vaultId}`
         );
-        setFormProperties(() => response.data);
-        setFormValues(() =>
+
+        setFormProperties(response.data);
+        setFormValues(
           response.data.reduce((acc, prop) => {
             acc[prop.propId] = '';
             return acc;
           }, {})
         );
+
         setIsFormOpen(true);
-        setLoadingDialog(false);
       } catch (error) {
-        setLoadingDialog(false);
         console.error('Error fetching class properties:', error);
       } finally {
         setLoadingDialog(false);
@@ -603,10 +592,36 @@ function Dashboard() {
       }
     };
 
+    // Helper: fetch templates
+    const fetchTemplates = async () => {
+      try {
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
+          { headers: { accept: '*/*' } }
+        );
+
+        if (response.data?.length > 0) {
+          setTemplates(response.data);
+          setIsFormOpen(true);
+        } else {
+          // If no templates, fallback
+          await proceedNoneTemplate();
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        await proceedNoneTemplate();
+      } finally {
+        setLoadingDialog(false);
+      }
+    };
+
+    // Start by fetching templates
+
     await proceedNoneTemplate();
     await fetchTemplates();
 
-  }, [selectedVault?.guid, mfilesId, setSelectedClassName, setSelectedClassId, setSelectedObjectId, setTemplates, setLoadingDialog, setIsFormOpen, setFormProperties, setFormValues, closeDataDialog]);
+  }, [selectedVault?.guid, selectedVault?.vaultId, closeDataDialog]);
+
 
   const UseTemplate = useCallback(async (item) => {
     setLoadingDialog(true);
@@ -616,7 +631,7 @@ function Dashboard() {
 
     try {
       const response = await axios.get(
-        `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${item.classID}/${item.id}/${mfilesId}`
+        `${constants.mfiles_api}/api/Templates/GetClassTemplateProps/${selectedVault.guid}/${item.classID}/${item.id}/${selectedVault.vaultId}`
       );
       setFormProperties(response.data);
       setFormValues(response.data.reduce((acc, prop) => {
@@ -631,7 +646,7 @@ function Dashboard() {
       setLoadingDialog(false);
       closeDataDialog();
     }
-  }, [selectedVault?.guid, mfilesId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setFormValues, setIsFormOpen, closeDataDialog]);
+  }, [selectedVault?.guid, selectedVault?.vaultId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setFormValues, setIsFormOpen, closeDataDialog]);
 
   const dontUseTemplates = useCallback(async () => {
     setLoadingDialog(true);
@@ -641,7 +656,7 @@ function Dashboard() {
     setTemplateModalOpen(false);
     try {
       const response = await axios.get(
-        `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}/${mfilesId}`
+        `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${selectedObjectId}/${selectedClassId}/${selectedVault.vaultId}`
       );
       setFormProperties(response.data);
       setFormValues(response.data.reduce((acc, prop) => {
@@ -657,7 +672,7 @@ function Dashboard() {
       setLoadingDialog(false);
       closeDataDialog();
     }
-  }, [selectedVault?.guid, selectedObjectId, selectedClassId, mfilesId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setTemplateModalOpen, setFormValues, setIsFormOpen, closeDataDialog]);
+  }, [selectedVault?.guid, selectedObjectId, selectedClassId, selectedVault?.vaultId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setTemplateModalOpen, setFormValues, setIsFormOpen, closeDataDialog]);
 
   // --- Derived/Computed Values (memoized) ---
   const data2 = useMemo(() => [], []);
@@ -665,19 +680,6 @@ function Dashboard() {
     allrequisitions.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)),
     [allrequisitions]
   );
-
-  const stringToColor = useCallback((string) => {
-    let hash = 0, i;
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let color = '#';
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-    return color;
-  }, []);
 
   const stringAvatar = useCallback((name) => {
     const nameParts = name.split(' ');
@@ -694,14 +696,22 @@ function Dashboard() {
 
   // --- useEffect Hooks (keeping original logic) ---
   useEffect(() => {
-    getViewableObjects();
+
     getNetworkStatus();
 
-    const vault = sessionStorage.getItem('selectedVault');
-    if (vault) {
-      setSelectedVault(JSON.parse(vault));
-      getVaultId(JSON.parse(vault).guid);
-    }
+    const vaultString = sessionStorage.getItem('selectedVault');
+
+    if (!vaultString) return;
+
+    const vaultObj = JSON.parse(vaultString);
+    setSelectedVault(vaultObj);
+
+
+
+
+
+
+
 
     if (location.state?.openalert) {
       setOpenAlert(true);
@@ -709,11 +719,8 @@ function Dashboard() {
       setAlertSeverity(location.state.alertSeverity);
       navigate(location.pathname, { replace: true });
     }
-  }, [getViewableObjects, getNetworkStatus, getVaultId, setSelectedVault, location.state, setOpenAlert, setAlertMsg, setAlertSeverity, navigate]);
+  }, [sessionStorage.getItem('selectedVault'), getViewableObjects, getNetworkStatus, setSelectedVault, location.state, setOpenAlert, setAlertMsg, setAlertSeverity, navigate]);
 
-  useEffect(() => {
-    if (selectedVault) getVaultId(selectedVault.guid);
-  }, [selectedVault, getVaultId]);
 
   useEffect(() => {
     if (selectedVault) {
@@ -722,7 +729,7 @@ function Dashboard() {
       // getAssigned(setAssignedData);
       // getDeleted(setDeletedData);
     }
-  }, [selectedVault, mfilesId, getVaultObjects2, getRecent, getAssigned, getDeleted, setVaultObjectsList, setRecentData, setAssignedData, setDeletedData]);
+  }, [selectedVault, selectedVault?.vaultId, getVaultObjects2, getRecent, getAssigned, getDeleted, setVaultObjectsList, setRecentData, setAssignedData, setDeletedData]);
 
   // --- Render ---
   return (
@@ -735,8 +742,11 @@ function Dashboard() {
         setSeverity={setAlertSeverity}
         setMessage={setAlertMsg}
       />
+      {/* <TaskMessenger/> */}
 
       <NewObjectDialog
+        uploadedFile={droppedFile}
+        setUploadedFile={setDroppedFile}
         loadingDialog={loadingDialog}
         setLoadingDialog={setLoadingDialog}
         vaultObjectModalsOpen={openObjectModal}
@@ -774,13 +784,14 @@ function Dashboard() {
         templates={templates}
         setTemplates={setTemplates}
         user={user}
-        mfilesId={mfilesId}
+        mfilesId={selectedVault?.vaultId}
         selectedTemplate={selectedTemplate}
         setSelectedTemplate={setSelectedTemplate}
         UseTemplate={UseTemplate}
         dontUseTemplates={dontUseTemplates}
         getRecent={() => getRecent(setRecentData)}
         getAssigned={() => getAssigned(setAssignedData)}
+
       />
 
       <div className="dashboard">
@@ -808,6 +819,8 @@ function Dashboard() {
             </div>
           </Tooltip>
           <DashboardContent
+            droppedFile={droppedFile}
+            setDroppedFile={setDroppedFile}
             searchTerm={searchTerm}
             data={data}
             data2={data2}
@@ -821,16 +834,17 @@ function Dashboard() {
             allrequisitions={allrequisitions}
             logoutUser={logoutUser}
             selectedVault={selectedVault}
-            viewableobjects={viewableobjects}
+            // viewableobjects={viewableobjects}
             toggleSidebar={toggleSidebar}
             sidebarOpen={sidebarOpen}
             recentData={recentData}
             setRecentData={setRecentData}
-            getRecent={() => getRecent(setRecentData)}
-            mfilesId={mfilesId}
+            mfilesId={selectedVault?.vaultId}
             assignedData={assignedData}
             setAssignedData={setAssignedData}
+            getRecent={() => getRecent(setRecentData)}
             getAssigned={() => getAssigned(setAssignedData)}
+            getDeleted={() => getDeleted(setDeletedData)}
             deletedData={deletedData}
             resetViews={resetViews}
             stringAvatar={stringAvatar}
@@ -848,6 +862,9 @@ function Dashboard() {
             setBase64={setBase64}
             extension={extension}
             setExtension={setExtension}
+            isLoadingRecent={isLoadingRecent}
+            isLoadingAssigned={isLoadingAssigned}
+            isLoadingDeleted={isLoadingDeleted}
           />
         </main>
       </div>

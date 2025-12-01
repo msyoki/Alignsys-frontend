@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Tooltip } from '@mui/material';
+import { Badge, Box, Tooltip } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import LinkedObjectsTree from './MainComponents/LinkedObjectsTree';
 import MultifileFiles from './MultifileFiles';
 import FileExtText from './FileExtText';
 import FileExtIcon from './FileExtIcon';
-import {formatDate} from './Utils/Utils'
+import { formatDate } from './Utils/Utils'
+import CheckOutStatusBadgeIcon from './CheckoutStatusBadge';
+
 
 const ColumnSimpleTree = ({
-  
+
   data = [],
   selectedVault,
   mfilesId,
@@ -23,6 +25,7 @@ const ColumnSimpleTree = ({
   setLoadingFile,
   selectedItemId,
   setSelectedItemId,
+  renderHeight,
   a11yProps,
 
   // Column visibility
@@ -48,7 +51,7 @@ const ColumnSimpleTree = ({
   sizeColumnFontSize = 12,
   ownerColumnFontSize = 12,
   statusColumnFontSize = 11,
-  headerFontSize = 12
+  headerFontSize = 11.5
 }) => {
 
   // State
@@ -69,32 +72,16 @@ const ColumnSimpleTree = ({
   const dragStartWidth = useRef(0);
 
   // Helper functions
-  const formatFileSize = (bytes) => {
+  const formatFileSize = useCallback((bytes) => {
     if (!bytes) return '';
     const size = parseInt(bytes, 10);
     const units = ['B', 'KB', 'MB', 'GB'];
     const idx = Math.floor(Math.log(size) / Math.log(1024));
     return `${(size / Math.pow(1024, idx)).toFixed(1)} ${units[idx]}`;
-  };
+  }, []);
 
-  // const formatDate = (dateString) => {
-  //   if (!dateString) return '';
 
-  //   const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  //   const date = new Date(utcString);
-  //   if (isNaN(date)) return '';
-
-  //   return date.toLocaleString('en-US', {
-  //     year: 'numeric',
-  //     month: 'numeric',
-  //     day: 'numeric',
-  //     hour: 'numeric',
-  //     minute: '2-digit',
-  //     hour12: true
-  //   }).replace(',', '');
-  // };
-
-  const renderStatusBadge = (item) => (
+  const renderStatusBadge = useCallback((item) => (
     <Box sx={{
       display: 'inline-block',
       p: '2px 6px',
@@ -105,10 +92,10 @@ const ColumnSimpleTree = ({
     }}>
       {item.checkedOut ? 'Locked' : 'Available'}
     </Box>
-  );
+  ), [statusColumnFontSize]);
 
   // Column configuration
-  const columns = [
+  const columns = React.useMemo(() => [
     {
       key: 'name',
       show: showNameColumn,
@@ -116,7 +103,8 @@ const ColumnSimpleTree = ({
       flex: true,
       align: 'left',
       fontSize: nameColumnFontSize,
-      render: 'name'
+      render: 'name',
+      resizable: true,
     },
     {
       key: 'objectType',
@@ -127,7 +115,9 @@ const ColumnSimpleTree = ({
       fontSize: objectTypeNameFontSize,
       minWidth: 80,
       maxWidth: 300,
+      resizable: true,
       render: item => item.objectTypeName || 'Document'
+
     },
     {
       key: 'size',
@@ -138,6 +128,7 @@ const ColumnSimpleTree = ({
       fontSize: sizeColumnFontSize,
       minWidth: 60,
       maxWidth: 150,
+      resizable: true,
       render: item => formatFileSize(item.size)
     },
     {
@@ -149,6 +140,7 @@ const ColumnSimpleTree = ({
       fontSize: ownerColumnFontSize,
       minWidth: 80,
       maxWidth: 200,
+      resizable: true,
       render: item => item.owner || item.createdBy || 'Unknown'
     },
     {
@@ -160,6 +152,7 @@ const ColumnSimpleTree = ({
       fontSize: statusColumnFontSize,
       minWidth: 70,
       maxWidth: 150,
+      resizable: true,
       render: renderStatusBadge
     },
     {
@@ -171,10 +164,32 @@ const ColumnSimpleTree = ({
       fontSize: dateColumnFontSize,
       minWidth: 80,
       maxWidth: 400,
-      fontColor: 'black',
+      fontColor: '#333',
+      resizable: true,
       render: item => formatDate(item.lastModifiedUtc)
     }
-  ];
+  ], [
+    showNameColumn,
+    showObjectTypeName,
+    showSizeColumn,
+    showOwnerColumn,
+    showStatusColumn,
+    showDateColumn,
+    nameColumnLabel,
+    objectTypeNameLabel,
+    sizeColumnLabel,
+    ownerColumnLabel,
+    statusColumnLabel,
+    dateColumnLabel,
+    nameColumnFontSize,
+    objectTypeNameFontSize,
+    sizeColumnFontSize,
+    ownerColumnFontSize,
+    statusColumnFontSize,
+    dateColumnFontSize,
+    renderStatusBadge,
+    formatFileSize
+  ]);
 
   const visibleColumns = columns.filter(c => c.show);
 
@@ -249,7 +264,7 @@ const ColumnSimpleTree = ({
   const renderNameColumn = (item) => {
     const classId = item.classId ?? item.classID ?? null;
     const isDocument = item.objectTypeId === 0 || item.objectID === 0;
-  
+
     return (
       <Box
         sx={{
@@ -257,16 +272,76 @@ const ColumnSimpleTree = ({
           alignItems: 'center',
           gap: 1,
           width: '100%',
+          marginLeft: '6px'
         }}
       >
         {isDocument && item.isSingleFile ? (
-          <FileExtIcon
-            fontSize={15}
-            guid={selectedVault?.guid}
-            objectId={item.id}
-            classId={classId}
-            version={item.versionId}
-          />
+          <>
+            {item.isCheckedOut ? (
+              // <Badge
+              //   overlap="circular"
+              //   badgeContent={
+              //     <i
+              //       className="fas fa-check-circle"
+              //       style={{
+              //         color: '#3fa34d', //#f21b3f red 
+              //         fontSize: '8px',                 // slightly sharper rendering
+              //         textShadow: '0 0 1px #fff, 0 0 1px #fff, 0 0 2px #fff', // 
+              //         filter: 'drop-shadow(0 0 0.5px #fff)',                  // subtle extra edge
+              //       }}
+              //     ></i>
+              //   }
+              //   anchorOrigin={{
+              //     vertical: 'bottom',
+              //     horizontal: 'left',
+              //   }}
+              //   sx={{
+              //     '.MuiBadge-badge': {
+              //       background: 'transparent',
+              //       padding: 0,
+              //       marginBottom: '-3px',  // fine-tuned for icon shape alignment
+              //       marginLeft: '-5px',
+              //       minWidth: 0,
+              //       height: 'auto',
+              //       boxShadow: 'none',
+              //     },
+              //   }}
+              // >
+              //   <FileExtIcon
+              //     fontSize={17}
+              //     guid={selectedVault?.guid}
+              //     objectId={item.id}
+              //     classId={classId}
+              //     version={item.versionId}
+              //   />
+              // </Badge>
+              <CheckOutStatusBadgeIcon
+                color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
+                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
+                offsetX="-6px"
+                offsetY="-3px"
+              >
+                <FileExtIcon
+                  fontSize={17}
+                  guid={selectedVault?.guid}
+                  objectId={item.id}
+                  classId={classId}
+                  version={item.versionId}
+                />
+
+              </CheckOutStatusBadgeIcon>
+
+
+            ) : (
+              <FileExtIcon
+                fontSize={17}
+                guid={selectedVault?.guid}
+                objectId={item.id}
+                classId={classId}
+                version={item.versionId}
+              />)}
+          </>
+
         ) : (
           <Box
             component="i"
@@ -327,7 +402,7 @@ const ColumnSimpleTree = ({
 
   const getDividerStyle = (idx) => {
     const nextCol = visibleColumns[idx + 1];
-    const isResizable = nextCol?.width;
+    const isResizable = nextCol?.resizable;
     const isActive = isDragging && dragColumn === nextCol?.width;
     const isHovered = hoveredDivider === idx && isResizable;
 
@@ -400,18 +475,24 @@ const ColumnSimpleTree = ({
   };
 
   const renderHeader = () => (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'stretch',
-      p: '4px 5px',
-      backgroundColor: '#f8f9fa',
-      borderBottom: '1px solid #dee2e6',
-      fontSize: headerFontSize,
-      color: '#495057',
-      position: 'relative',
-      userSelect: isDragging ? 'none' : 'auto',
-      minHeight: 15
-    }}>
+
+    <Box
+      className="shadow-sm"
+      sx={{
+        display: 'flex',
+        alignItems: 'stretch',
+        p: '4px 6px',
+        backgroundColor: '#fff',
+        fontSize: headerFontSize,
+        color: '#555b6e',
+        position: 'relative',
+        userSelect: isDragging ? 'none' : 'auto',
+        minHeight: '15px',
+        borderRadius: '4px',
+        marginY: '4px',
+      }}
+    >
+
       {visibleColumns.map((col, idx) => {
         const isLast = idx === visibleColumns.length - 1;
 
@@ -435,6 +516,7 @@ const ColumnSimpleTree = ({
                 {renderResizeHandle(idx)}
               </Box>
             )}
+
           </React.Fragment>
         );
       })}
@@ -451,7 +533,7 @@ const ColumnSimpleTree = ({
           className='p-1'
           sx={{
             ...(col.flex ? { flex: 1 } : { width: columnWidths[col.width] || 160, flexShrink: 0 }),
-            backgroundColor: isSelected ? '#fcf3c0 !important' : '#fff !important',
+            backgroundColor: isSelected ? '#e5e5e5 !important' : '#fff !important',
             transition: isDragging ? 'none' : 'width 200ms ease-in-out',
             fontSize: col.fontSize || 13,
             overflow: 'hidden',
@@ -486,13 +568,13 @@ const ColumnSimpleTree = ({
 
         sx={{
           "& .MuiTreeItem-content": { backgroundColor: '#fff !important' },
-          "& .MuiTreeItem-content:hover": { backgroundColor: '#f9f9f9 !important' }
+          "& .MuiTreeItem-content:hover": { backgroundColor: '#fff !important' }
         }}
         label={
           <Box onContextMenu={e => {
             e.preventDefault();
             onItemRightClick?.(e, item);
-          }} sx={{ display: 'flex', alignItems: 'center', width: '100%', minHeight: 24 }}>
+          }} sx={{ display: 'flex', alignItems: 'center', width: '100%', minHeight: 20 }}>
             {visibleColumns.map((col, idx) => renderRowCell(col, item, idx))}
           </Box>
         }
@@ -530,7 +612,16 @@ const ColumnSimpleTree = ({
     <Box>
       {renderHeader()}
 
-      <Box sx={{ height: '60vh', overflowY: 'auto', overflowX: 'hidden', color: '#333', marginLeft: '10px' }}>
+      <Box
+        sx={{
+          height: renderHeight ? renderHeight : '55vh',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          color: '#333',
+          marginLeft: '10px',
+        }}
+      >
+
         {data.map(renderTreeItem)}
       </Box>
 

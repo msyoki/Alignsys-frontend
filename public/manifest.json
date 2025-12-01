@@ -1,19 +1,19 @@
 {
-  "short_name": "ALIGNSYS",
-  "name": "ALIGNSYS Eletronic Document Management Software Solution",
+  "short_name": "EDMS",
+  "name": "ALIGNSYS EDMS | Electronic Document Management System",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "logoB.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "logoB.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "ZF.png",
+      "src": "logoB.png",
       "type": "image/png",
       "sizes": "512x512"
     }

@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import DynamicChart from "./DynamicChart"; // The chart component from previous step
 
-const ChartGenerator = () => {
+const ChartGenerator = (props) => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState(null);
@@ -22,11 +22,18 @@ const ChartGenerator = () => {
     setLoading(true);
     setError("");
     setChartData(null);
+    console.log(  {
+          query,
+          vaultGuid: props.vaultGuid
+        })
 
     try {
       const response = await axios.post(
         "https://llm.alignsys.tech/chart/invoke",
-        { query },
+        {
+          query,
+          vaultGuid: props.vaultGuid
+        },
         {
           headers: { "Content-Type": "application/json", accept: "application/json" }
         }
@@ -49,7 +56,7 @@ const ChartGenerator = () => {
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto", p: 2 }}>
       <Typography variant="h6" sx={{ mb: 1, fontSize: 18 }}>
-        Chart Generator
+        Report Generator
       </Typography>
       <div
         className="p-3"
@@ -72,7 +79,7 @@ const ChartGenerator = () => {
       <form onSubmit={handleSubmit}>
         <TextField
           fullWidth
-          label="Describe Report/Chart"
+          label="Describe Report"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           margin="normal"
@@ -96,7 +103,7 @@ const ChartGenerator = () => {
           disabled={loading}
           sx={{ mt: 1, bgcolor: "#2757aa", "&:hover": { bgcolor: "#456badff" }, textTransform: "none" }}
         >
-          {loading ? <CircularProgress size={24} /> : "Generate Chart"}
+          {loading ? <CircularProgress size={24} /> : "Generate Report"}
         </Button>
       </form>
 
