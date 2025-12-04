@@ -349,6 +349,66 @@ const ViewListItem = memo(({ view, index, selectedItemId, onFetchMainViewObjects
 });
 
 const ViewsList = (props) => {
+    const { setViewNavigation } = props;
+
+    // Add these utility functions at the top of your file
+    const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
+
+    const sortByViewName = (items) =>
+        Array.isArray(items) ? [...items].sort((a, b) => (a?.viewName || '').localeCompare(b?.viewName || '')) : [];
+
+    const filterByPermission = (items) =>
+        Array.isArray(items) ? items.filter(view => view && view.userPermission?.readPermission) : [];
+
+    const filterTruthy = (items) => Array.isArray(items) ? items.filter(Boolean) : [];
+
+    // Then use them like this:
+    const processViews = pipe(
+        filterTruthy,
+        sortByViewName
+    );
+
+    const processCommonViews = pipe(
+        filterByPermission,
+        sortByViewName
+    );
+
+    // Navigation URL helpers
+    const navigationToHash = (nav = [], vault) => {
+        if (!Array.isArray(nav) && !Array.isArray([])) return '';
+        const segments = [];
+
+        // Include vault info first if provided
+        if (vault && (vault.guid || vault.vaultId)) {
+            const guid = vault.guid || '';
+            const vid = vault.vaultId ?? vault.vaultId ?? '';
+            const vaultPayload = `${String(guid)}|${String(vid)}`;
+            segments.push(`${encodeURIComponent('Vault')}:${encodeURIComponent(vaultPayload)}`);
+        }
+
+        (Array.isArray(nav) ? nav : []).forEach(item => {
+            const type = item.type || '';
+            let idPart = '';
+
+            if (type === 'MFFolderContentItemTypePropertyFolder') {
+                const propId = item.propId ?? item.id ?? '';
+                const propDatatype = item.propDatatype ?? '';
+                idPart = `${String(propId)}|${String(propDatatype)}`;
+            } else {
+                idPart = item.id ?? item.propId ?? '';
+            }
+
+            segments.push(`${encodeURIComponent(type)}:${encodeURIComponent(String(idPart))}`);
+        });
+
+        if (segments.length === 0) return '';
+        return `#${segments.join('/')}`;
+    };
+
+    // (updateUrlFromNavigation removed; use navigationToHash inline where needed)
+
+    // (updateNavigation removed - not used)
+
     // Session state
     const [otherviews, setOtherViews] = useSessionState('ss_otherviews', []);
     const [commonviews, setCommonViews] = useSessionState('ss_commonviews', []);
@@ -466,13 +526,14 @@ const ViewsList = (props) => {
                 const response = await axios.get(
                     `${constants.mfiles_api}/api/Views/GetViews/${guid}/${userId}`
                 );
-                setOtherViews(response.data.otherViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
-                setCommonViews(response.data.commonViews.sort((a, b) => a.viewName.localeCompare(b.viewName)));
+                setOtherViews(processViews(response.data.otherViews));
+                setCommonViews(processCommonViews(response.data.commonViews));
 
             } catch {
 
             }
         };
+
         fetchData();
     }, [props.viewNavigation, props.selectedVault?.vaultId, setOtherViews, setCommonViews]);
 
@@ -505,8 +566,8 @@ const ViewsList = (props) => {
 
                         const { otherViews = [], commonViews = [] } = response.data;
 
-                        setOtherViews([...otherViews].sort((a, b) => a.viewName.localeCompare(b.viewName)));
-                        setCommonViews([...commonViews].sort((a, b) => a.viewName.localeCompare(b.viewName)));
+                        setOtherViews(processViews(otherViews));
+                        setCommonViews(processCommonViews(commonViews));
                         setLoading(false);
                     } catch (err) {
                         console.error("Failed to load main views:", err);
@@ -549,6 +610,46 @@ const ViewsList = (props) => {
 
         loadViews();
     }, [props.refreshKey]);
+
+    // Update URL hash when navigation changes so users can bookmark
+    useEffect(() => {
+        try {
+            const newHash = navigationToHash(props.viewNavigation, props.selectedVault);
+            if (!newHash) {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                return;
+            }
+            window.history.replaceState(null, '', window.location.pathname + window.location.search + newHash);
+        } catch (e) {
+            // ignore in non-browser environments
+        }
+    }, [props.viewNavigation, props.selectedVault]);
+
+
+    useEffect(() => {
+        const savedOption = sessionStorage.getItem('selectedVault');
+        if (!savedOption) return;
+
+        const fetchData = async () => {
+            const parsed = JSON.parse(savedOption);
+            const guid = parsed.guid;
+            const userId = parseInt(parsed.vaultId);
+
+            try {
+                const response = await axios.get(
+                    `${constants.mfiles_api}/api/Views/GetViews/${guid}/${userId}`
+                );
+
+                // Apply piping here
+                setOtherViews(processViews(response.data.otherViews));
+                setCommonViews(processCommonViews(response.data.commonViews));
+
+            } catch {
+                // error handling
+            }
+        };
+        fetchData();
+    }, [props.viewNavigation, props.selectedVault?.vaultId, setOtherViews, setCommonViews]);
 
 
     // Navigation and fetch logic
@@ -757,6 +858,103 @@ const ViewsList = (props) => {
         props.setSelectedViewObjects,
     ]);
 
+    // On mount: if URL has a hash describing navigation, parse and navigate
+    useEffect(() => {
+        const run = async () => {
+            try {
+                const hash = window.location.hash.slice(1).trim();
+                if (!hash) return;
+
+                const segments = hash.split('/').filter(Boolean);
+                if (segments.length === 0) return;
+
+                // Parse into richer navigation items
+                const parsedNav = [];
+                let primaryViewId = null;
+                let vaultFromHash = null;
+
+                for (let i = 0; i < segments.length; i++) {
+                    const seg = segments[i];
+                    const [typeEnc, idEnc] = seg.split(':');
+                    const type = decodeURIComponent(typeEnc || '');
+                    const idRaw = decodeURIComponent(idEnc || '');
+                    const rawId = idRaw === '' ? '' : (isNaN(Number(idRaw)) ? idRaw : Number(idRaw));
+
+                    if (type === 'Vault') {
+                        // vault payload encoded as guid|vaultId
+                        const [guidEnc, vidEnc] = String(idRaw).split('|');
+                        const guid = guidEnc || '';
+                        const vid = vidEnc || '';
+                        vaultFromHash = { guid, vaultId: vid };
+                        // don't push vault into parsed navigation
+                        continue;
+                    }
+
+                    if (parsedNav.length === 0 && (type === 'Common Views' || type === 'Other Views')) {
+                        primaryViewId = rawId;
+                        parsedNav.push({ id: rawId, type, viewId: rawId, viewName: '', title: '' });
+                    } else if (type === 'MFFolderContentItemTypePropertyFolder') {
+                        // property folders encoded as propId|propDatatype
+                        const [pidStr, pdStr] = String(idRaw).split('|');
+                        const propId = pidStr === '' ? '' : (isNaN(Number(pidStr)) ? pidStr : Number(pidStr));
+                        const propDatatype = pdStr ?? '-1';
+                        parsedNav.push({ propId, propDatatype: String(propDatatype), type, viewId: primaryViewId });
+                    } else if (type === 'MFFolderContentItemTypeViewFolder') {
+                        parsedNav.push({ id: rawId, type, title: '' });
+                    } else {
+                        // generic fallback
+                        parsedNav.push({ id: rawId, type, title: '' });
+                    }
+                }
+
+                if (parsedNav.length === 0 && !vaultFromHash) return;
+
+                // If hash included vault info, save it to sessionStorage so other effects can use it
+                if (vaultFromHash) {
+                    try {
+                        sessionStorage.setItem('selectedVault', JSON.stringify(vaultFromHash));
+                    } catch (e) { }
+
+                    // If component doesn't yet have the selectedVault prop, reload to let app reinitialize from session storage
+                    if (!props.selectedVault || props.selectedVault.guid !== vaultFromHash.guid) {
+                        // preserve hash and reload once
+                        window.location.replace(window.location.pathname + window.location.search + window.location.hash);
+                        return;
+                    }
+                }
+
+                // set navigation state so UI (breadcrumb) updates
+                setViewNavigation(parsedNav);
+
+                // Now sequentially fetch each level so the final results are loaded
+                const first = parsedNav[0];
+                if (!first) return;
+
+                if (first.type === 'Common Views' || first.type === 'Other Views') {
+                    await fetchMainViewObjects(first, first.type);
+                } else if (first.type === 'MFFolderContentItemTypeViewFolder') {
+                    await fetchMainViewObjects2(first);
+                }
+
+                // Process remaining segments (property folders or nested view folders)
+                for (let i = 1; i < parsedNav.length; i++) {
+                    const navItem = parsedNav[i];
+                    if (navItem.type === 'MFFolderContentItemTypePropertyFolder') {
+                        // ensure viewId exists
+                        if (!navItem.viewId && primaryViewId) navItem.viewId = primaryViewId;
+                        await fetchViewData(navItem);
+                    } else if (navItem.type === 'MFFolderContentItemTypeViewFolder') {
+                        await fetchMainViewObjects2(navItem);
+                    }
+                }
+            } catch (e) {
+                // ignore parsing errors
+            }
+        };
+
+        run();
+    }, [fetchMainViewObjects, fetchMainViewObjects2, fetchViewData, setViewNavigation, props.selectedVault]);
+
     const handleMenuClose = useCallback(() => {
         setMenuAnchor(null);
         setMenuItem(null);
@@ -800,7 +998,7 @@ const ViewsList = (props) => {
                             version={menuItem.versionId ?? null}
                         />
                         <span className='mx-2'>Open</span>
-                        <span className='text-muted' style={{ marginLeft: '8px', marginRight: 0, marginLeft: 'auto', fontWeight: 500 }}>
+                        <span className='text-muted' style={{ marginLeft: 'auto', fontWeight: 500 }}>
                             Open in default application
                         </span>
                     </span>
