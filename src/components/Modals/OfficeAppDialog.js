@@ -38,8 +38,8 @@ function OfficeApp(props) {
     if (!fileId) return;
 
     const title = `${props.object.title}.${props.object.extension}`;
-    const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}&Filename=${title}`;
-
+    const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}&Filename=${title}&AuthUrl=${constants.auth_api}&BackedUrl=${constants.mfiles_api}`;
+  
     console.log("Launching plugin with URL:", appUrl);
 
     let pluginOpened = false;

@@ -7,91 +7,88 @@
   --highlight-color: #fff;
 }
 
+/* Main Layout */
 .dashboard {
   display: flex;
-  position: fixed; /* fixes it to the screen */
+  position: fixed;
   width: 100%;
-  height: 100vh; /* full screen height */
-  overflow: hidden; /* prevent any scroll */
+  height: 100vh;
+  overflow: hidden;
   background-color: #fff;
   color: var(--primary-color);
 }
 
 /* Sidebar */
 .sidebar {
-
-  width: 180px; /* Adjusts width to content size */
-  background: #2757aa;
+  width: 230px;
+  background: var(--primary-color);
   color: #edf4f7;
-  transition: width 0.3s ease;
   overflow: hidden;
- 
-  
+  transition: width 0.3s ease;
 }
 
-
-
+.sidebar.open {
+  min-width: 230px !important;
+}
 
 .sidebar.closed {
-  width: 0px;
+  width: 0px !important;
 }
-
-
-
 
 .sidebar ul {
   list-style: none;
   padding: 0;
   margin: 0px 0;
   width: 100%;
-  
 }
 
 .sidebar ul li {
   padding: 10px;
-  
-  text-align: start;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s; /* Smooth transitions for hover effects */
   display: flex;
-  align-items: center; /* Center align the content */
-  justify-content: flex-start; /* Align items to the start when sidebar is open */
+  align-items: center;
+  justify-content: flex-start;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* .sidebar ul li span {
-  margin-right: 15px;
-} */
-
-
 .sidebar ul li i {
-  margin-right: 10px; /* Add space between icon and text */
-  margin-left: 10px; /* Add space between icon and text */
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 .sidebar ul li.closed i {
-  margin-right: 0; /* Remove space between icon and text when sidebar is closed */
+  margin-right: 0;
 }
 
-/* .sidebar.closed .menu-items {
-  display: none;
-} */
-
-
-/* .sidebar ul li.main-li:hover {
- 
-  background-color: #e0fbfc ; 
-  color: #293241;
-} */
-
-.sidebar ul li.main-li{
+.sidebar ul li.main-li {
   width: 100%;
-  background-color: #2757aa;
+  background-color: var(--primary-color);
 }
 
-/* Bump Toggle */
+/* Sidebar Content Layout */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+}
+
+.menu-items {
+  flex-grow: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.bottom-buttons {
+  margin-top: auto;
+  margin-bottom: 5%;
+}
+
+/* Bump Toggle Button */
 .bump-toggle {
   position: fixed;
-  top: 45%;
+  top: 50%;
+  left: 230px; /* Matches open sidebar width */
   width: 13px;
   height: 70px;
   background: #ddd;
@@ -100,21 +97,18 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: left 0.0s ease-in-out;
+
+  /* Smooth movement with sidebar */
+  transition: left 0.3s ease, width 0.3s ease, opacity 0.3s ease;
+
   z-index: 1100;
-  
-  /* Clip-path for triangle effect on left and right */
+
   clip-path: polygon(0% 0%, 100% 8px, 100% calc(100% - 8px), 0% 100%);
-  border-color: var(--secondary-color);
-  
-  /* Maintain the shadow effect */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-
-
 .bump-toggle.moved {
-  left: 0; /* Keeps it on the edge of the sidebar even when it’s open */
+  left: 0; /* When sidebar is closed */
 }
 
 .bump-toggle.hidden {
@@ -125,68 +119,36 @@
 /* Content Section */
 .content {
   flex-grow: 1;
-  transition: margin-left 0.0s ease-in-out;
-  width: 100%; /* Make the content width flexible */
-  color: #555b6e; /* Remove single quotes */
-  height: 100vh; /* Let it fill the height of its parent container */
-  overflow-y: hidden; /* Prevent unnecessary scroll */
+  width: 100%;
+  height: 100vh;
+  overflow-y: hidden;
   overflow-x: hidden;
   background-color: #ecf4fc;
+  color: #555b6e;
+
+  /* Smooth slide with sidebar */
+  transition: margin-left 0.3s ease;
 }
-
-
-
-  @media screen and (max-width: 768px) {
-   .content {
-      overflow-y: auto;
-    }
-
-  }
-
-
 
 .content.full-width {
-  margin-left: 0;
+  margin-left: 0 !important;
 }
 
-body{
-  background-color: #2757aa;
-  max-height: max-content;
-  color: #293241;
+/* Mobile Handling */
+@media screen and (max-width: 768px) {
+  .content {
+    overflow-y: auto;
+  }
 }
 
-
-
-
-.sidebar-content {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Full height */
-  justify-content: space-between; /* Pushes the logout and admin buttons to the bottom */
-}
-
-.menu-items {
-  flex-grow: 2; /* Ensures the menu fills available space */
-  display: flex;
-  flex-direction: column;
-
-}
-
-.bottom-buttons {
-  margin-top: auto; /* Pushes the logout and admin buttons to the bottom */
-  margin-bottom: 5%;
-}
-
-
+/* Global Body Settings */
 body {
-  font-family: "YourFont", sans-serif; /* Replace 'YourFont' with your desired font */
+  background-color: var(--primary-color);
+  max-height: max-content;
   overflow: hidden;
+  font-family: "YourFont", sans-serif;
 }
 
 * {
-  font-family: inherit; /* Ensures all elements use the same font */
+  font-family: inherit;
 }
-
-
-
-

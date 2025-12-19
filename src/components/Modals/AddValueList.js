@@ -32,6 +32,7 @@ const AddValuelistItem = ({
             console.log('Auto-fetching because objectTypeVL is true:', item);
             if (typeof fetchItemData === 'function') {
                 fetchItemData(item.typeID, item.title);
+                console.log(item)
             } else {
                 console.warn('fetchItemData is not a function');
             }

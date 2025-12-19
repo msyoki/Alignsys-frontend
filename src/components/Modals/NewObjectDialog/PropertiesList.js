@@ -25,7 +25,7 @@ const PropertiesList = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     width: '100%',
-                    marginY: '2px'
+     
                 }}
             >
                 <Typography
@@ -66,7 +66,7 @@ const PropertiesList = ({
                 display: 'flex',
                 justifyContent: 'space-between',
                 width: '100%',
-                marginY: '2px'
+              
             }}
         >
             <Typography

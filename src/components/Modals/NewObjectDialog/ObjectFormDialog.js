@@ -8,7 +8,8 @@ import {
     CircularProgress,
     Grid,
     Box,
-    Typography
+    Typography,
+    Tooltip
 } from '@mui/material';
 import logo from '../../../images/ZFWHITE.png';
 import FileUploadComponent from '../../FileUpload';
@@ -40,7 +41,17 @@ const ObjectFormDialog = ({
     onDontUseTemplates
 }) => {
     return (
-        <Dialog open={open} maxWidth='xl'>
+        <Dialog
+            open={open}
+            maxWidth='xl'
+            fullWidth
+            PaperProps={{
+                sx: {
+                    height: uploadedFile ? '90vh' : 'auto',
+                    maxHeight: '90vh'
+                }
+            }}
+        >
             <DialogTitle
                 className='p-2 d-flex justify-content-between align-items-center'
                 style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
@@ -62,10 +73,29 @@ const ObjectFormDialog = ({
                 </span>
             </DialogTitle>
 
-            <DialogContent className="form-group my-3" sx={{ overflow: 'auto' }}>
+            <DialogContent
+                className="form-group my-3"
+                sx={{
+                    overflow: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '24px',
+                    height: uploadedFile ? 'calc(100% - 120px)' : 'auto'
+                }}
+            >
                 {(selectedObjectId === 0 && !templateIsTrue) ? (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={7} order={{ xs: 1, md: 2 }} sx={{ padding: '20px', width: '250px', maxHeight: '310px', overflowY: 'auto' }}>
+                    <Grid container spacing={3} sx={{ height: '100%' }}>
+                        <Grid
+                            item
+                            xs={12}
+                            md={uploadedFile ? 5 : 7}
+                            order={{ xs: 1, md: 1 }}
+                            sx={{
+                                padding: '20px',
+                                maxHeight: uploadedFile ? '100%' : '310px',
+                                overflowY: 'auto'
+                            }}
+                        >
                             <PropertiesList
                                 properties={filteredProperties}
                                 formValues={formValues}
@@ -81,16 +111,31 @@ const ObjectFormDialog = ({
                                 setAddingValueListItem={setAddingValueListItem}
                             />
                         </Grid>
-                        <Grid item xs={12} md={5} order={{ xs: 2, md: 2 }} sx={{ width: '700px' }}>
-                            <FileUploadComponent
-                                handleFileChange={onFileChange}
-                                uploadedFile={uploadedFile}
-                            />
+                        <Grid
+                            item
+                            xs={12}
+                            md={uploadedFile ? 7 : 5}
+                            order={{ xs: 2, md: 2 }}
+                            sx={{
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Box sx={{
+                                height: uploadedFile ? '100%' : '310px',
+                                minHeight: uploadedFile ? '500px' : '310px'
+                            }}>
+                                <FileUploadComponent
+                                    handleFileChange={onFileChange}
+                                    uploadedFile={uploadedFile}
+                                />
+                            </Box>
                         </Grid>
                     </Grid>
                 ) : (
                     <Grid container spacing={3}>
-                        <Grid item xs={12} md={12} sx={{ width: '650px' }}>
+                        <Grid item xs={12} md={12} sx={{ width: '100%' }}>
                             <PropertiesList
                                 properties={filteredProperties}
                                 formValues={formValues}
@@ -128,58 +173,58 @@ const ObjectFormDialog = ({
                     alignItems: 'flex-start',
                     minHeight: '40px'
                 }}>
-
-                    {!miniLoader ?
-                        <>
-                            {templateIsTrue ? (
-                                <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
-                                    <a
-                                        href="#"
-                                        style={{ color: '#2757aa', textDecoration: 'none', fontSize: '14.5px' }}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            onDontUseTemplates();
-                                        }}
-                                    >
-                                        <i className="fa-solid fa-upload mx-1"></i>
-                                        Switch to File Upload Or Switch Template
-                                    </a>
-                                </Typography>
-                            ) : (
-                                <>
-                                    {templates && templates.length > 0 && (
-                                        <>
-                                            <Typography
-                                                variant="caption"
-                                                sx={{
-                                                    color: '#2757aa',
-                                                    fontWeight: 600,
-                                                    fontSize: '12px',
-                                                    mb: 0.5,
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.5px'
-                                                }}
-                                            >
-                                                <i className="fa-solid fa-copy mx-1" style={{ fontSize: '11px' }}></i>
-                                                Quick Templates
-                                            </Typography>
-                                            <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
-                                                <TemplateActions
-                                                    templateIsTrue={templateIsTrue}
-                                                    templates={templates}
-                                                    selectedVault={selectedVault}
-                                                    onUseTemplate={onUseTemplate}
-                                                    onDontUseTemplates={onDontUseTemplates}
-                                                />
-                                            </Box>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </>
-
-
-                        : <></>}
+                    <>
+                        {!miniLoader && (
+                            <>
+                                {templateIsTrue ? (
+                                    <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
+                                        <a
+                                            href="#"
+                                            style={{ color: '#2757aa', textDecoration: 'none', fontSize: '14.5px' }}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onDontUseTemplates();
+                                            }}
+                                        >
+                                            <i className="fa-solid fa-upload mx-1"></i>
+                                            Switch to File Upload Or Switch Template
+                                        </a>
+                                    </Typography>
+                                ) : (
+                                    <>
+                                        {templates && templates.length > 0 && (
+                                            <>
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        color: '#2757aa',
+                                                        fontWeight: 600,
+                                                        fontSize: '12px',
+                                                        mb: 0.5,
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.5px'
+                                                    }}
+                                                >
+                                                    <i className="fa-solid fa-copy mx-1" style={{ fontSize: '11px' }}></i>
+                                                    Quick Templates
+                                                </Typography>
+                                                <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
+                                                    <TemplateActions
+                                                        templateIsTrue={templateIsTrue}
+                                                        templates={templates}
+                                                        selectedVault={selectedVault}
+                                                        onUseTemplate={onUseTemplate}
+                                                        onDontUseTemplates={onDontUseTemplates}
+                                                    />
+                                                </Box>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </>
+                        )}
+                 
+                    </>
                 </Box>
 
                 {/* Right Side - Action Buttons */}

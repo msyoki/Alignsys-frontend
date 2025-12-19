@@ -79,7 +79,7 @@ export default function UserAvatarMenu(props) {
   {/* User Info Section */}
   <Box sx={{ px: 1.5, py: 0.8, bgcolor: "grey.100", borderRadius: "0 0 6px 6px" }}>
     <Typography variant="subtitle2" fontWeight="600" sx={{ color: "#2757aa", fontSize: "12px" }}>
-      <span className="mr-2">Hi!</span> {fullName}
+      <span className="mr-2" style={{fontWeight:'lighter'}}>Hi!</span> {fullName}
     </Typography>
 
     <Box sx={{ backgroundColor: '#2757aa', color: '#fff', borderRadius: 1.5, p: 0.8, mt: 0.6 }}>

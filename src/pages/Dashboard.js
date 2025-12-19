@@ -113,17 +113,40 @@ const SidebarMenu = React.memo(({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-
             borderRadius: "8px",
+            padding: '6px 10px',
+            minHeight: '40px'
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <i className="fas fa-plus-circle" style={{ fontSize: "18px" }}></i>
-            <span style={{ fontSize: "14px" }}>Create</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <i className="fas fa-plus-circle" style={{ fontSize: "16px", flexShrink: 0 }}></i>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden' }}>
+              <span style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontSize: '13px',
+                fontWeight: '500',
+                lineHeight: '1.2'
+              }}>
+                Create
+              </span>
+              <span style={{
+                fontSize: '9px',
+                color: 'rgba(255, 255, 255, 0.65)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                lineHeight: '1.2',
+                marginTop: '5px'
+              }}>
+                New Objects / documents
+              </span>
+            </div>
           </div>
           <i
             className={`fas ${isSublistVisible ? "fa-angle-up" : "fa-angle-down"}`}
-            style={{ transition: "transform 0.3s ease-in-out" }}
+            style={{ transition: "transform 0.3s ease-in-out", fontSize: "18px", flexShrink: 0 }}
           ></i>
         </li>
 
@@ -143,13 +166,42 @@ const SidebarMenu = React.memo(({
       <div>
         <ul className="bottom-buttons">
           {user.is_admin === "True" && (
-            <li onClick={adminPage} className="menu-item main-li shadow-lg">
-              <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
-              <span style={{ fontSize: "14px" }}>Admin</span>
+            // <li onClick={adminPage} className="menu-item main-li shadow-lg">
+            //   <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
+            //   <span style={{ fontSize: "14px" }}>Admin</span>
+            // </li>
+            <li
+              onClick={adminPage}
+              className="menu-item main-li shadow-lg"
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, padding: '6px 10px', minHeight: '40px' }}
+            >
+              <i className="fas fa-user-shield" style={{ fontSize: '16px', flexShrink: 0 }}></i>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', gap: "4px" }}>
+                <span style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  lineHeight: '1.2'
+                }}>
+                  Administration
+                </span>
+                <span style={{
+                  fontSize: '9px',
+                  color: 'rgba(255, 255, 255, 0.65)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '1.2'
+                }}>
+                  Manage settings
+                </span>
+              </div>
             </li>
           )}
           <li onClick={logoutUser} className="menu-item main-li shadow-lg">
-            <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
+            <i className="fas fa-sign-out-alt" style={{ fontSize: "16px" }}></i>
             <span style={{ fontSize: "14px" }}>Logout</span>
           </li>
         </ul>
@@ -396,6 +448,7 @@ function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useSessionState('ss_sidebarOpen', false);
   const [menuOpen, setMenuOpen] = useSessionState('ss_menuOpen', false);
   const [isFormOpen, setIsFormOpen] = useSessionState('ss_isFormOpen', false);
+  const [isFormOpenVL, setIsFormOpenVL] = useSessionState('ss_isFormOpen', false);
   const [templateIsTrue, setTemplateIsTrue] = useSessionState('ss_templateIsTrue', false);
   const [templates, setTemplates] = useSessionState('ss_templates', []);
   const [selectedTemplate, setSelectedTemplate] = useState({});
@@ -412,8 +465,11 @@ function Dashboard() {
   const [ungroupedItems, setUngroupedItems] = useSessionState('ss_ungroupedItems', []);
   const [isDataOpen, setIsDataOpen] = useSessionState('ss_isDataOpen', false);
   const [formProperties, setFormProperties] = useSessionState('ss_formProperties', []);
-  const [templateModalOpen, setTemplateModalOpen] = useSessionState('ss_templateModalOpen', false);
+  const [formVLProperties, setVLFormProperties] = useSessionState('ss_VLformProperties', []);
   const [formValues, setFormValues] = useSessionState('ss_formValues', {});
+  const [VLformValues, setVLFormValues] = useSessionState('ss_VLformValues', {});
+  const [templateModalOpen, setTemplateModalOpen] = useSessionState('ss_templateModalOpen', false);
+
   const [value, setValue] = useSessionState('ss_value', 0);
   const [isSublistVisible, setIsSublistVisible] = useSessionState('ss_isSublistVisible', false);
   const [docClasses, setDocClasses] = useSessionState('ss_docClasses', []);
@@ -623,6 +679,45 @@ function Dashboard() {
   }, [selectedVault?.guid, selectedVault?.vaultId, closeDataDialog]);
 
 
+  const handleClassSelectionVL = useCallback(async (classId, className, objectId) => {
+    // Combine initial state updates into one
+    setLoadingDialog(true);
+    setVLFormProperties([]);
+    setVLFormValues({});
+
+    // Helper: proceed with class properties if no template
+    const proceedNoneTemplate = async () => {
+      try {
+        const response = await axios.get(
+          `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${selectedVault.vaultId}`
+        );
+        console.log('VL Class Props Response:', response.data);
+
+        setVLFormProperties(response.data);
+        setVLFormValues(
+          response.data.reduce((acc, prop) => {
+            acc[prop.propId] = '';
+            return acc;
+          }, {})
+        );
+      } catch (error) {
+        console.error('Error fetching class properties:', error);
+      } finally {
+        setLoadingDialog(false);
+        closeDataDialog();
+      }
+    };
+
+
+    // Start by fetching templates
+
+    await proceedNoneTemplate();
+
+
+  }, [selectedVault?.guid, selectedVault?.vaultId]);
+
+
+
   const UseTemplate = useCallback(async (item) => {
     setLoadingDialog(true);
     setFormProperties([]);
@@ -673,6 +768,42 @@ function Dashboard() {
       closeDataDialog();
     }
   }, [selectedVault?.guid, selectedObjectId, selectedClassId, selectedVault?.vaultId, setLoadingDialog, setFormProperties, setTemplateIsTrue, setSelectedTemplate, setTemplateModalOpen, setFormValues, setIsFormOpen, closeDataDialog]);
+
+
+  const VLObjectProps = useCallback(async (classId, className, objectId) => {
+    setLoadingDialog(true);
+    setVLFormProperties([]);
+
+    try {
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${selectedVault.guid}/${objectId}/${classId}/${selectedVault.vaultId}`
+      );
+
+      setVLFormProperties(response.data);
+
+      // Initialize empty values for each property
+      setVLFormValues(
+        response.data.reduce((acc, prop) => {
+          acc[prop.propId] = "";
+          return acc;
+        }, {})
+      );
+
+    } catch (error) {
+      console.error("Error fetching class properties:", error);
+    } finally {
+      setLoadingDialog(false);
+    }
+  }, [
+    selectedVault?.guid,
+    selectedObjectId,
+    selectedClassId,
+    selectedVault?.vaultId,
+    setLoadingDialog,
+    setVLFormProperties,
+    setVLFormValues
+  ]);
+
 
   // --- Derived/Computed Values (memoized) ---
   const data2 = useMemo(() => [], []);
@@ -775,10 +906,13 @@ function Dashboard() {
         templateModalOpen={templateModalOpen}
         setFormValues={setFormValues}
         formValues={formValues}
+        VLformValues={VLformValues}
         closeDataDialog={closeDataDialog}
         selectedClassName={selectedClassName}
         setIsFormOpen={setIsFormOpen}
         isFormOpen={isFormOpen}
+        setIsFormOpenVL={setIsFormOpenVL}
+        isFormOpenVL={isFormOpenVL}
         setTemplateIsTrue={setTemplateIsTrue}
         templateIsTrue={templateIsTrue}
         templates={templates}
@@ -789,6 +923,9 @@ function Dashboard() {
         setSelectedTemplate={setSelectedTemplate}
         UseTemplate={UseTemplate}
         dontUseTemplates={dontUseTemplates}
+        VLObjectProps={VLObjectProps}
+        handleClassSelectionVL={handleClassSelectionVL}
+        formVLProperties={formVLProperties}
         getRecent={() => getRecent(setRecentData)}
         getAssigned={() => getAssigned(setAssignedData)}
 
@@ -813,6 +950,12 @@ function Dashboard() {
 
         {/* Content Section */}
         <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'} `}>
+          {/* <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
+            <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
+              <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-3`} ></i>
+            </div>
+            
+          </Tooltip> */}
           <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
             <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
               <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>

@@ -1430,7 +1430,7 @@ const DocumentList = (props) => {
         label: (
           <>
             <i className="fa-solid fa-square-check" style={{ color: '#3fa34d' }}></i>
-            <span className="mx-3">Check In</span>
+            <span className="mx-3">Check In </span>
           </>
         ),
         onClick: () => {
@@ -1703,7 +1703,7 @@ const DocumentList = (props) => {
 
             {/* Right Section */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title="Switch to a different vault" placement="left" arrow>
+              <Tooltip title="Switch to a different repository" placement="left" arrow>
                 <Box sx={{ cursor: 'pointer' }}>
                   <VaultSelectForm activeVault={props.selectedVault} />
                 </Box>

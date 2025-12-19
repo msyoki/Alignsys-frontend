@@ -50,7 +50,7 @@ function FileViewer(props) {
       }}
       className='shadow-lg'
     >
-    <Document  file={fileUrl} onLoadSuccess={onDocumentLoadSuccess}>
+    <Document  file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
       {/* Render all pages dynamically */}
       {Array.from(new Array(props.numPages), (el, index) => (
         <Page
