@@ -9,7 +9,8 @@ import {
     Grid,
     Box,
     Typography,
-    Tooltip
+    Tooltip,
+    IconButton
 } from '@mui/material';
 import logo from '../../../images/ZFWHITE.png';
 import FileUploadComponent from '../../FileUpload';
@@ -21,6 +22,7 @@ const ObjectFormDialog = ({
     onClose,
     selectedObjectId,
     selectedClassName,
+    selectedClassId,
     filteredProperties,
     formValues,
     formErrors,
@@ -38,13 +40,56 @@ const ObjectFormDialog = ({
     fetchItemData,
     setAddingValueListItem,
     onUseTemplate,
-    onDontUseTemplates
+    onDontUseTemplates,
+    groupedItems,
+    ungroupedItems,
+    onClassChange,
+    setOpenAlert,
+    setAlertSeverity,
+    setAlertMsg
 }) => {
+
+    const getFileIcon = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        const iconStyle = { fontSize: '25px' };
+        switch (extension) {
+            case 'pdf':
+                return <i className="fa-regular fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
+            case 'csv':
+                return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+            case 'txt':
+                return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
+            case 'msg':
+                return <i className="fa-solid fa-envelope shadow-sm" style={{ ...iconStyle, color: '#ffb703' }}></i>;
+            case 'webp':
+                return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
+            case 'xlsx':
+            case 'xls':
+                return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#217045' }}></i>;
+            case 'ppt':
+            case 'pptx':
+                return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#d34628' }}></i>;
+            case 'docx':
+            case 'doc':
+                return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#35558b' }}></i>;
+            case 'png':
+            case 'jpeg':
+            case 'jpg':
+                return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
+            case 'vssettings':
+                return <i className="fa-solid fa-file-code shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
+            default:
+                return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+        }
+    };
+    const handleReplaceFile = () => {
+        document.getElementById('file-upload-input').click();
+    };
     return (
         <Dialog
             open={open}
             maxWidth='xl'
-            fullWidth
+            fullWidth={selectedObjectId === 0 && !templateIsTrue}
             PaperProps={{
                 sx: {
                     height: uploadedFile ? '90vh' : 'auto',
@@ -80,20 +125,22 @@ const ObjectFormDialog = ({
                     display: 'flex',
                     flexDirection: 'column',
                     padding: '24px',
-                    height: uploadedFile ? 'calc(100% - 120px)' : 'auto'
+                    height: uploadedFile ? 'calc(100% - 120px)' : 'auto',
+                    width: '100%',
+                    boxSizing: 'border-box'
                 }}
             >
                 {(selectedObjectId === 0 && !templateIsTrue) ? (
-                    <Grid container spacing={3} sx={{ height: '100%' }}>
+                    <Grid container spacing={3} sx={{ height: '100%', width: '100%' }}>
                         <Grid
                             item
                             xs={12}
-                            md={uploadedFile ? 5 : 7}
+                            md={uploadedFile ? 5 : 6}
                             order={{ xs: 1, md: 1 }}
                             sx={{
-                                padding: '20px',
-                                maxHeight: uploadedFile ? '100%' : '310px',
-                                overflowY: 'auto'
+
+                                maxHeight: uploadedFile ? '350px' : '310px',
+
                             }}
                         >
                             <PropertiesList
@@ -101,6 +148,7 @@ const ObjectFormDialog = ({
                                 formValues={formValues}
                                 formErrors={formErrors}
                                 selectedClassName={selectedClassName}
+                                selectedClassId={selectedClassId}
                                 selectedTemplate={selectedTemplate}
                                 selectedVault={selectedVault}
                                 templateIsTrue={templateIsTrue}
@@ -109,12 +157,19 @@ const ObjectFormDialog = ({
                                 handleClassSelection={handleClassSelection}
                                 fetchItemData={fetchItemData}
                                 setAddingValueListItem={setAddingValueListItem}
+                                groupedItems={groupedItems}
+                                ungroupedItems={ungroupedItems}
+                                selectedObjectId={selectedObjectId}
+                                onClassChange={onClassChange}
+                                setOpenAlert={setOpenAlert}
+                                setAlertSeverity={setAlertSeverity}
+                                setAlertMsg={setAlertMsg}
                             />
                         </Grid>
                         <Grid
                             item
                             xs={12}
-                            md={uploadedFile ? 7 : 5}
+                            md={uploadedFile ? 7 : 6}
                             order={{ xs: 2, md: 2 }}
                             sx={{
                                 height: '100%',
@@ -123,24 +178,30 @@ const ObjectFormDialog = ({
                             }}
                         >
                             <Box sx={{
-                                height: uploadedFile ? '100%' : '310px',
-                                minHeight: uploadedFile ? '500px' : '310px'
+                                height: uploadedFile ? '350px' : '310px',
+                                minHeight: uploadedFile ? '350px' : '310px',
+                                width: '100%',
                             }}>
+
+
                                 <FileUploadComponent
                                     handleFileChange={onFileChange}
                                     uploadedFile={uploadedFile}
+                                    getFileIcon={getFileIcon}
                                 />
                             </Box>
+
                         </Grid>
                     </Grid>
                 ) : (
-                    <Grid container spacing={3}>
+                    <Grid container sx={{ width: '100%' }}>
                         <Grid item xs={12} md={12} sx={{ width: '100%' }}>
                             <PropertiesList
                                 properties={filteredProperties}
                                 formValues={formValues}
                                 formErrors={formErrors}
                                 selectedClassName={selectedClassName}
+                                selectedClassId={selectedClassId}
                                 selectedTemplate={selectedTemplate}
                                 selectedVault={selectedVault}
                                 templateIsTrue={templateIsTrue}
@@ -149,6 +210,13 @@ const ObjectFormDialog = ({
                                 handleClassSelection={handleClassSelection}
                                 fetchItemData={fetchItemData}
                                 setAddingValueListItem={setAddingValueListItem}
+                                groupedItems={groupedItems}
+                                ungroupedItems={ungroupedItems}
+                                selectedObjectId={selectedObjectId}
+                                onClassChange={onClassChange}
+                                setOpenAlert={setOpenAlert}
+                                setAlertSeverity={setAlertSeverity}
+                                setAlertMsg={setAlertMsg}
                             />
                         </Grid>
                     </Grid>
@@ -223,7 +291,7 @@ const ObjectFormDialog = ({
                                 )}
                             </>
                         )}
-                 
+
                     </>
                 </Box>
 

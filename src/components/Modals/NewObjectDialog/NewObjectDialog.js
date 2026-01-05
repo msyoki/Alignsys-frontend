@@ -22,7 +22,7 @@ const NewObjectDialog = (props) => {
     const [alertMsg, setAlertMsg] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchQuery, setSearchQuery] = useState("");
-    const[,setAddingValueListItem]= useState('')
+    const [, setAddingValueListItem] = useState('')
 
     // Value list object dialog state - SEPARATE from main form
     const [valueListDialogOpen, setValueListDialogOpen] = useState(false);
@@ -271,6 +271,7 @@ const NewObjectDialog = (props) => {
                 if (props.selectedObjectId === 0 && props.uploadedFile) {
                     const formData = new FormData();
                     formData.append('formFiles', props.uploadedFile);
+                    
 
                     const uploadResponse = await axios.post(
                         `${constants.mfiles_api}/api/objectinstance/FilesUploadAsync`,
@@ -280,6 +281,7 @@ const NewObjectDialog = (props) => {
 
                     payload.uploadId = uploadResponse.data.uploadID;
                 }
+                console.log(payload)
 
                 await axios.post(`${constants.mfiles_api}/api/objectinstance/ObjectCreation`, payload, { headers });
                 props.setUploadedFile(null);
@@ -379,6 +381,40 @@ const NewObjectDialog = (props) => {
         setSearchQuery('');
     }, [props]);
 
+    const handleClassChange = useCallback(async (classId, className, objectId) => {
+        try {
+            // Fetch new class properties without closing the form
+            const response = await axios.get(
+                `${constants.mfiles_api}/api/MfilesObjects/ClassProps/${props.selectedVault.guid}/${objectId}/${classId}/${props.mfilesId}`
+            );
+
+            // Update form properties with new class properties
+            props.setFormProperties(response.data);
+
+            // Reset form values for the new class
+            const newFormValues = response.data.reduce((acc, prop) => {
+                acc[prop.propId] = '';
+                return acc;
+            }, {});
+            props.setFormValues(newFormValues);
+
+            // Clear any form errors
+            setFormErrors({});
+
+            // Update selected class information
+            props.setSelectedClassId(classId);
+            props.setSelectedClassName(className);
+
+            // Keep the form dialog open - no need to close it
+
+        } catch (error) {
+            console.error('Error fetching new class properties:', error);
+            setOpenAlert(true);
+            setAlertSeverity("error");
+            setAlertMsg("Error loading class properties. Please try again.");
+        }
+    }, [props]);
+
     return (
         <>
             <TimedAlert
@@ -431,6 +467,7 @@ const NewObjectDialog = (props) => {
                 }}
                 selectedObjectId={props.selectedObjectId}
                 selectedClassName={props.selectedClassName}
+                selectedClassId={props.selectedClassId}  // ADD THIS
                 filteredProperties={filteredProperties}
                 formValues={props.formValues}
                 formErrors={formErrors}
@@ -449,6 +486,12 @@ const NewObjectDialog = (props) => {
                 setAddingValueListItem={() => { }}
                 onUseTemplate={props.UseTemplate}
                 onDontUseTemplates={props.dontUseTemplates}
+                groupedItems={props.groupedItems}  // ADD THIS
+                ungroupedItems={props.ungroupedItems}  // ADD THIS
+                onClassChange={handleClassChange}  // ADD THIS
+                setOpenAlert={setOpenAlert}
+                setAlertSeverity={setAlertSeverity}
+                setAlertMsg={setAlertMsg}
             />
 
             {/* Separate dialog for value list objects with SEPARATE state */}

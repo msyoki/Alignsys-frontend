@@ -14,9 +14,9 @@ const FileExtIcon = (props) => {
     const fetchExtension = async () => {
       setLoading(true);
       setIs400(false);
-      
+
       const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.guid}/${props.objectId}/${props.classId}`;
-     
+
       try {
         const response = await axios.get(url, { signal: controller.signal });
         const data = response.data;
@@ -43,7 +43,7 @@ const FileExtIcon = (props) => {
       isMounted = false;
       controller.abort();
     };
-  }, [props.guid, props.objectId, props.classId, props.version ?? null ]); // Removed props.isMultifile as it's not used
+  }, [props.guid, props.objectId, props.classId, props.version ?? null]); // Removed props.isMultifile as it's not used
 
   const iconStyle = {
     fontSize: props.fontSize || '20px',
@@ -62,7 +62,7 @@ const FileExtIcon = (props) => {
   // Render icons based on extension
   switch (extension) {
     case 'pdf':
-      return <i className="fas fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
+      return <i className="fa-regular fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
     case 'csv':
       return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
     case 'txt':

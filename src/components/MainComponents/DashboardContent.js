@@ -2153,6 +2153,8 @@ const DocumentList = (props) => {
             loadingWFS={loadingWFS}
             a11yProps={a11yProps2}
             isUpdatingMetadata={isUpdatingMetadata}
+            groupedItems={props.groupedItems}
+            ungroupedItems={props.ungroupedItems}
           />
         </Box>
       </Box>

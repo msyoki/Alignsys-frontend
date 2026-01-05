@@ -18,14 +18,17 @@ const AddValuelistItem = ({
     item,
     handleClassSelection,
     fetchItemData,
-    setAddingValueListItem
+    setAddingValueListItem,
+    setOpenAlert,
+    setAlertSeverity,
+    setAlertMsg
 }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleClickOpen = (e) => {
-   
+
         e.stopPropagation();
 
         if (item?.objectTypeVL) {
@@ -76,9 +79,12 @@ const AddValuelistItem = ({
             }
 
             // Refresh valuelist data if available
-            if (typeof fetchItemData === 'function') {
-                fetchItemData(valuelistID, item.title);
-            }
+            // if (typeof fetchItemData === 'function') {
+            //     fetchItemData(valuelistID, item.title);
+            // }
+            setOpenAlert(true);
+            setAlertSeverity("success");
+            setAlertMsg("Value list object created successfully");
 
             handleClose();
             setName('');
@@ -94,7 +100,7 @@ const AddValuelistItem = ({
         <>
             <i
                 className="fa-solid fa-square-plus"
-                onClick={(e)=>{handleClickOpen(e); setAddingValueListItem(true)}}
+                onClick={(e) => { handleClickOpen(e); setAddingValueListItem(true) }}
                 title="Add item"
                 style={{
                     marginLeft: '8px',

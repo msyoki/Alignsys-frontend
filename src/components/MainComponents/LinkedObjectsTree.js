@@ -420,7 +420,9 @@ const LinkedObjectsTree = ({
             </Box>
           </Box>
         ),
-        onClick: (itm) => {
+        onClick: (itm, event) => {
+          event?.preventDefault();
+          event?.stopPropagation();
           openApp(itm);
           handleMenuClose();
         }
@@ -433,14 +435,18 @@ const LinkedObjectsTree = ({
       actions.push(
         {
           label: <Box sx={{ px: 1 }}>Convert to PDF overwrite Original Copy</Box>,
-          onClick: (itm) => {
+          onClick: (itm, event) => {
+            event?.preventDefault();
+            event?.stopPropagation();
             convertToPDF(itm, false);
             handleMenuClose();
           }
         },
         {
           label: <Box sx={{ px: 1 }}>Convert to PDF Keep Original Copy</Box>,
-          onClick: (itm) => {
+          onClick: (itm, event) => {
+            event?.preventDefault();
+            event?.stopPropagation();
             convertToPDF(itm, true);
             handleMenuClose();
           }
@@ -559,7 +565,7 @@ const LinkedObjectsTree = ({
             </TreeItem>
           )}
 
-          {/* {rightClickActions.length > 0 && (
+          {rightClickActions.length > 0 && (
             <RightClickMenu
               anchorEl={menuAnchor}
               open={Boolean(menuAnchor)}
@@ -567,7 +573,7 @@ const LinkedObjectsTree = ({
               item={menuItem}
               actions={rightClickActions}
             />
-          )} */}
+          )}
         </>
       ) : (
         <></>

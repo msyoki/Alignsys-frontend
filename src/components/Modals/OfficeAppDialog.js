@@ -70,7 +70,7 @@ function OfficeApp(props) {
 
     // Close dialog right away
     props.close();
-     props.handleTabAction()
+    //  props.handleTabAction()
   };
 
   const handleDownloadPlugin = () => {

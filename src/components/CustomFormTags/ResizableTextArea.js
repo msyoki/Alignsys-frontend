@@ -13,50 +13,59 @@ const ResizableTextarea = ({
   const [userHeight, setUserHeight] = useState(null);
 
   // Dynamic textarea styles based on resize mode
+  // Calculate default height: 8 rows = ~160px (20px per row with 1.3 line-height + padding)
+  const DEFAULT_ROW_HEIGHT = 20;
+  const DEFAULT_ROWS = 8;
+  const DEFAULT_HEIGHT = DEFAULT_ROWS * DEFAULT_ROW_HEIGHT;
+
   const textareaStyle = useMemo(() => {
     const baseStyle = {
-      minHeight: '48px',
+      minHeight: `${DEFAULT_HEIGHT}px`,
       lineHeight: '1.3',
       transition: 'height 0.2s ease',
+      fontFamily: 'inherit',
+      fontSize: '12.8px',
     };
 
     switch (resizeMode) {
       case 'auto':
         return {
           ...baseStyle,
-          height: 'auto',
+          height: userHeight || `${DEFAULT_HEIGHT}px`,
           resize: 'none',
           overflow: 'hidden',
         };
       case 'manual':
         return {
           ...baseStyle,
-          height: userHeight || 'auto',
+          height: userHeight || `${DEFAULT_HEIGHT}px`,
           resize: 'vertical',
           overflow: 'auto',
-          minHeight: '48px',
-          maxHeight: '300px',
+          minHeight: `${DEFAULT_HEIGHT}px`,
+          maxHeight: '500px',
         };
       case 'fixed':
         return {
           ...baseStyle,
-          height: userHeight || '48px',
+          height: userHeight || `${DEFAULT_HEIGHT}px`,
           resize: 'none',
           overflow: 'auto',
         };
       default:
         return baseStyle;
     }
-  }, [resizeMode, userHeight]);
+  }, [resizeMode, userHeight])
 
-  // Auto-resize function
+  // Auto-resize function - expands to fit full content height
   const autoResize = useCallback((element) => {
     if (resizeMode === 'auto' && element) {
+      // Reset height to measure full scroll height
       element.style.height = 'auto';
-      const newHeight = Math.max(48, element.scrollHeight);
+      const scrollHeight = element.scrollHeight;
+      const newHeight = Math.max(DEFAULT_HEIGHT, scrollHeight);
       element.style.height = newHeight + 'px';
       
-      // Store the computed height for potential mode switching
+      // Store the computed height
       setUserHeight(newHeight + 'px');
     }
   }, [resizeMode]);
@@ -85,6 +94,7 @@ const ResizableTextarea = ({
     // Auto-resize setup
     if (resizeMode === 'auto') {
       const handleInput = () => autoResize(el);
+      // Initial resize on mount
       setTimeout(() => autoResize(el), 0);
       el.addEventListener('input', handleInput);
       
@@ -93,9 +103,19 @@ const ResizableTextarea = ({
     
     // Manual resize setup
     if (resizeMode === 'manual') {
-      return handleManualResize(el);
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          const newHeight = entry.target.style.height;
+          if (newHeight && newHeight !== userHeight) {
+            setUserHeight(newHeight);
+          }
+        }
+      });
+      
+      resizeObserver.observe(el);
+      return () => resizeObserver.disconnect();
     }
-  }, [resizeMode, autoResize, handleManualResize]);
+  }, [resizeMode, autoResize, userHeight]);
 
   // Toggle between resize modes
   const toggleResizeMode = useCallback(() => {

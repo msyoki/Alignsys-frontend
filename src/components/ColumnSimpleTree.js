@@ -561,6 +561,7 @@ const ColumnSimpleTree = ({
       <TreeItem
         itemId={`item-${i}`}
         onClick={() => {
+          console.log('Clicked item:', item);
           setSelectedItemId(`${item.id}-${item.title}`);
           onItemClick?.(item);
         }}

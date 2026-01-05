@@ -876,6 +876,7 @@ function Dashboard() {
       {/* <TaskMessenger/> */}
 
       <NewObjectDialog
+        setSelectedClassName={setSelectedClassName}
         uploadedFile={droppedFile}
         setUploadedFile={setDroppedFile}
         loadingDialog={loadingDialog}
@@ -1008,6 +1009,8 @@ function Dashboard() {
             isLoadingRecent={isLoadingRecent}
             isLoadingAssigned={isLoadingAssigned}
             isLoadingDeleted={isLoadingDeleted}
+            groupedItems={groupedItems}
+            ungroupedItems={ungroupedItems}
           />
         </main>
       </div>

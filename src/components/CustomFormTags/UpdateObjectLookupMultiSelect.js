@@ -103,12 +103,23 @@ const LookupMultiSelect = ({
 
   const customStyles = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    // Allow the control to grow vertically when multiple values are selected
     control: (base) => ({
       ...base,
+      minHeight: '36px',
       borderColor: error ? 'red' : base.borderColor,
       fontSize: '12.8px',
       color: 'black',
       backgroundColor: disabled ? '#f5f5f5' : 'white',
+      padding: '2px 6px',
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '4px',
+      alignItems: 'center',
+      padding: '0 2px',
     }),
     option: (base, state) => ({
       ...base,
@@ -129,20 +140,24 @@ const LookupMultiSelect = ({
     multiValue: (base) => ({
       ...base,
       fontSize: '12.8px',
+      margin: '2px 4px',
     }),
     multiValueLabel: (base) => ({
       ...base,
       fontSize: '12.8px',
+      padding: '2px 6px',
     }),
     input: (base) => ({
       ...base,
       fontSize: '12.8px',
+      margin: 0,
+      padding: 0,
     }),
   };
 
 
   return (
-    <div>
+    <div style={{ marginTop: '6px', marginBottom: '6px' }}>
       <Select
         isMulti
         value={selectedOptions}
@@ -153,7 +168,6 @@ const LookupMultiSelect = ({
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
-        className="my-2"
         disabled={disabled}
         menuPortalTarget={document.body}
         menuPosition="absolute"

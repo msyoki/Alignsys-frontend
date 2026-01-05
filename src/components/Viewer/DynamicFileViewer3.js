@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import styled from 'styled-components';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import PDFViewerPreview3 from './Pdf3';
-import FileExtIcon from '../FileExtIcon';
+import PDFViewerPreview4 from './Pdf4';
+// FileExtIcon intentionally unused in this viewer
 
 // ==== Styled Components ====
 const ImageViewerContainer = styled.div`
@@ -51,7 +51,7 @@ const StyledImage = styled.img`
 `;
 
 // ==== Image Viewer ====
-const ImageViewer = React.memo(({ src }) => {
+const ImageViewer = React.memo(({ src, disablePointer }) => {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
 
@@ -75,7 +75,7 @@ const ImageViewer = React.memo(({ src }) => {
   const zoomDisplay = Math.round(zoom * 100);
 
   return (
-    <ImageViewerContainer>
+    <ImageViewerContainer style={{ pointerEvents: disablePointer ? 'none' : 'auto' }}>
       <ImageControls>
         <div>
           <i onClick={handlers.zoomOut} className="fas fa-search-minus" style={{ fontSize: 20, cursor: 'pointer', marginRight: 8 }} />
@@ -96,7 +96,7 @@ const ImageViewer = React.memo(({ src }) => {
         </Tooltip>
       </ImageControls>
       <ImageWrapper>
-        <StyledImage src={src} zoom={zoom} rotation={rotation} alt="Loaded content" />
+        <StyledImage src={src} zoom={zoom} rotation={rotation} alt="Loaded content" style={{ pointerEvents: disablePointer ? 'none' : 'auto' }} />
       </ImageWrapper>
     </ImageViewerContainer>
   );
@@ -161,6 +161,7 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
   const [fileUrl, setFileUrl] = useState('');
   const [textContent, setTextContent] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isExternalDrag, setIsExternalDrag] = useState(false);
 
   const fileType = useMemo(() => {
     if (!extension) return 'none';
@@ -209,6 +210,58 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
     })();
   }, [base64, extension, fileType]);
 
+  // Detect when user is dragging files over the window and disable pointer events
+  useEffect(() => {
+    let dragCounter = 0;
+
+    const onDragEnter = (e) => {
+      try {
+        const types = e.dataTransfer && e.dataTransfer.types;
+        if (types && ((types.includes && types.includes('Files')) || (types.indexOf && types.indexOf('Files') !== -1))) {
+          dragCounter += 1;
+          setIsExternalDrag(true);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    const onDragOver = (e) => {
+      try {
+        const types = e.dataTransfer && e.dataTransfer.types;
+        if (types && ((types.includes && types.includes('Files')) || (types.indexOf && types.indexOf('Files') !== -1))) {
+          // keep showing external drag state
+          e.preventDefault();
+          setIsExternalDrag(true);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    const onDragLeave = (e) => {
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) setIsExternalDrag(false);
+    };
+
+    const onDrop = () => {
+      dragCounter = 0;
+      setIsExternalDrag(false);
+    };
+
+    window.addEventListener('dragenter', onDragEnter);
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', onDrop);
+
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter);
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, []);
+
   if (isProcessing) {
     return (
       <Box sx={{ width: '100%', height: 400, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -230,20 +283,24 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
 
   switch (fileType) {
     case 'image':
-      return <ImageViewer src={fileUrl} />;
+      return <ImageViewer src={fileUrl} disablePointer={isExternalDrag} />;
     case 'pdf':
-      return <PDFViewerPreview3 document={fileUrl} title={title} />;
+      return (
+        <div style={{ pointerEvents: isExternalDrag ? 'none' : 'auto' }}>
+          <PDFViewerPreview4 document={fileUrl} title={title} />
+        </div>
+      );
     case 'text':
-      return <TextViewer content={textContent} />;
+      return <div style={{ pointerEvents: isExternalDrag ? 'none' : 'auto' }}><TextViewer content={textContent} /></div>;
     case 'csv':
-      return <CSVViewer csvString={textContent} />;
+      return <div style={{ pointerEvents: isExternalDrag ? 'none' : 'auto' }}><CSVViewer csvString={textContent} /></div>;
     case 'office':
       return (
-        <div className="viewer-container">
+        <div className="viewer-container" style={{ pointerEvents: isExternalDrag ? 'none' : 'auto' }}>
           {fileUrl ? (
             <iframe
               src={`https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`}
-              style={{ width: '100%', height: 'calc(100vh - 140px)', border: 'none' }}
+              style={{ width: '100%', height: 'calc(100vh - 140px)', border: 'none', pointerEvents: isExternalDrag ? 'none' : 'auto' }}
               title="Office File"
             />
           ) : (

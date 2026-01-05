@@ -92,10 +92,13 @@ const customStyles = {
   menuPortal: (base) => ({ ...base, zIndex: 9999 }),
   control: (base) => ({
     ...base,
+    height: '36px',
+    minHeight: '36px',
     borderColor: error ? 'red' : base.borderColor,
     fontSize: '12.8px',
     color: 'black',
     backgroundColor: disabled ? '#f5f5f5' : 'white',
+    padding: '0 6px'
   }),
   singleValue: (base) => ({
     ...base,
@@ -113,23 +116,17 @@ const customStyles = {
     color: 'black',
     fontSize: '12.8px',
   }),
-  multiValue: (base) => ({
-    ...base,
-    fontSize: '12.8px',
-  }),
-  multiValueLabel: (base) => ({
-    ...base,
-    fontSize: '12.8px',
-  }),
   input: (base) => ({
     ...base,
     fontSize: '12.8px',
+    margin: 0,
+    padding: 0
   }),
 };
 
 
   return (
-    <div >
+    <div style={{ marginTop: '12px', marginBottom: '12px' }}>
       <Select
         value={selectedOption}
         onChange={handleChange}
@@ -139,7 +136,6 @@ const customStyles = {
         noOptionsMessage={() => `No ${label} found`}
         styles={customStyles}
         required={required}
-        className="my-2"
         disabled={disabled}
         menuPortalTarget={document.body}
         menuPosition="absolute"

@@ -7,7 +7,7 @@ import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../CustomFormTags/UpdateObjectLookupMultiSelect';
 import LookupSelect from '../CustomFormTags/UpdateObjectLookup';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, CircularProgress, Badge, IconButton, Collapse } from '@mui/material';
+import { Dialog,DialogContent,DialogTitle,DialogActions,Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, CircularProgress, Badge, IconButton, Collapse } from '@mui/material';
 import Bot from '../Bot/Bot';
 
 import CommentsComponent from '../CommentsComponent';
@@ -88,20 +88,27 @@ const ObjectData = (props) => {
   const [alertMsg, setAlertMsg] = useState('');
   const [messages, setMessages] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
+  const [classOptions, setClassOptions] = useState([]);
+  const [classLoading, setClassLoading] = useState(false);
 
   const [expanded, setExpanded] = useState(true);
 
   const toggleExpand = () => setExpanded((prev) => !prev);
+  const [classDialogOpen, setClassDialogOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({});
+
 
   // Common styles - extracted to avoid repetition
   const commonInputStyle = useMemo(() => ({
     fontSize: '12.8px',
     color: '#333',
-    marginTop: 2.5,
+    marginTop: 0.75,
+    marginBottom: 0.75,
   }), []);
 
   const getInputStyle = useCallback((isAutomatic) => ({
     ...commonInputStyle,
+    height: '36px',
     backgroundColor: isAutomatic ? '#f5f5f5' : '#fff',
   }), [commonInputStyle]);
 
@@ -115,19 +122,19 @@ const ObjectData = (props) => {
 
   const selectSxStyle = useMemo(() => ({
     fontSize: '12.8px',
-    height: '24px',
+    height: '36px',
     m: 0,
     '& .MuiSelect-select': {
       fontSize: '12.8px',
       color: '#333',
       padding: '3px 6px',
       minHeight: 'unset',
-      height: '18px',
+      height: '30px',
       display: 'flex',
       alignItems: 'center',
     },
     '& .MuiInputBase-root': {
-      height: '24px',
+      height: '36px',
     },
     '& .MuiOutlinedInput-input': {
       padding: '3px 6px',
@@ -459,13 +466,15 @@ const ObjectData = (props) => {
   }, [props.formValues, renderValue, handleInputChange, getInputStyle, renderLinkOrText]);
 
   const renderTextarea = useCallback((item) => (
-    <ResizableTextarea
-      item={item}
-      props={props}
-      handleInputChange={handleInputChange}
-      renderValue={renderValue}
-      getInputStyle={getInputStyle}
-    />
+    <div style={{ marginTop: '6px', marginBottom: '6px' }}>
+      <ResizableTextarea
+        item={item}
+        props={props}
+        handleInputChange={handleInputChange}
+        renderValue={renderValue}
+        getInputStyle={getInputStyle}
+      />
+    </div>
   ), [props.formValues, renderValue, handleInputChange, getInputStyle, textareaStyle]);
 
   const renderDateTimeInput = useCallback((item, type = 'date') => (
@@ -476,7 +485,7 @@ const ObjectData = (props) => {
       onChange={(e) => handleInputChange(item.id, e.target.value, item.datatype, item.value)}
       className="form-control"
       disabled={item.isAutomatic}
-      style={getInputStyle(item.isAutomatic)}
+      style={{ ...getInputStyle(item.isAutomatic), height: '36px' }}
     />
   ), [props.formValues, renderValue, handleInputChange, getInputStyle]);
 
@@ -493,6 +502,8 @@ const ObjectData = (props) => {
       disabled={item.isAutomatic}
       sx={{
         ...selectSxStyle,
+        marginTop: 0.5,
+        marginBottom: 0.5,
         backgroundColor: item.isAutomatic ? '#f5f5f5' : '#fff',
       }}
     >
@@ -577,6 +588,104 @@ const ObjectData = (props) => {
     />
   ), [props.formValues, props.vault, props.mfilesId, handleInputChange]);
 
+  // Fetch available classes for the object type
+  const fetchAvailableClasses = useCallback(async () => {
+    if (classOptions.length > 0) return; // Don't refetch
+
+    try {
+      setClassLoading(true);
+      const objectTypeId = props.selectedObject.objectTypeId || props.selectedObject.objectID || 0;
+      const response = await axios.get(
+        `${constants.mfiles_api}/api/MfilesObjects/GetObjectClasses/${props.vault.guid}/${objectTypeId}/${props.mfilesId}`
+      );
+
+      // Flatten grouped and ungrouped classes
+      const allClasses = [];
+      if (response.data?.grouped) {
+        response.data.grouped.forEach(group => {
+          if (group.members) {
+            allClasses.push(...group.members);
+          }
+        });
+      }
+      if (response.data?.unGrouped) {
+        allClasses.push(...response.data.unGrouped);
+      }
+
+      setClassOptions(allClasses);
+    } catch (error) {
+      console.error('Error fetching class options:', error);
+    } finally {
+      setClassLoading(false);
+    }
+  }, [classOptions.length, props.selectedObject, props.vault, props.mfilesId]);
+
+  // Class selector renderer
+  const renderClassSelector = useCallback((item) => {
+    return (
+      <Select
+        value={item.value?.[0]?.id || ''}
+        onChange={(e) => handleInputChange(100, e.target.value, item.datatype, item.value)}
+        onOpen={fetchAvailableClasses}
+        fullWidth
+        size="small"
+        disabled={classLoading}
+        sx={{
+          fontSize: '12.8px',
+          height: '36px',
+          backgroundColor: '#fff',
+          '& .MuiSelect-select': {
+            fontSize: '12.8px',
+            padding: '6px',
+            minHeight: 'unset',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#ccc',
+          },
+        }}
+      >
+        <MenuItem value="" disabled>
+          <span style={{ fontSize: '12.8px' }}>
+            {classLoading ? 'Loading classes...' : 'Select a class...'}
+          </span>
+        </MenuItem>
+
+        {/* Current class */}
+        {item.value?.[0] && (
+          <MenuItem value={item.value[0].id} style={{ fontSize: '12.8px', fontWeight: 'bold' }}>
+            ✓ {item.value[0].title} (Current)
+          </MenuItem>
+        )}
+
+        {/* Divider if we have both current and other classes */}
+        {item.value?.[0] && classOptions.length > 0 && (
+          <Box component="div" sx={{ borderTop: '1px solid #ddd', my: 0.5 }} />
+        )}
+
+        {/* Available classes */}
+        {classOptions.map((classItem) => (
+          <MenuItem
+            key={classItem.classId}
+            value={classItem.classId}
+            style={{ fontSize: '12.8px' }}
+          >
+            {classItem.className}
+          </MenuItem>
+        ))}
+
+        {/* No classes message */}
+        {classOptions.length === 0 && !classLoading && (
+          <MenuItem disabled style={{ fontSize: '12.8px' }}>
+            No other classes available
+          </MenuItem>
+        )}
+      </Select>
+    );
+  }, [classLoading, classOptions, handleInputChange, fetchAvailableClasses]);
+
   // Main render function for property items
   const renderPropertyItem = useCallback(
     (item, index) => {
@@ -603,7 +712,7 @@ const ObjectData = (props) => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: '40% 60%', // original ratio
+              gridTemplateColumns: '35% 50%', // original ratio
               gap: 1,
               width: '100%',
               alignItems: datatypeMap.multiLineText ? 'flex-start' : 'center',
@@ -630,16 +739,16 @@ const ObjectData = (props) => {
               sx={{
                 fontSize: '12.8px',
                 color: '#333',
-                width: '85%',
+                width: '100%',
                 '& input, & textarea, & .MuiSelect-root': {
                   fontSize: '12.8px !important',
                   width: '100%',
                   boxSizing: 'border-box',
                   lineHeight: 1.3,
-                  borderRadius: '4px', // original border-radius
+                  borderRadius: '4px',
                   border: '1px solid #ccc',
-                  padding: '3px 6px',
-                  height: '24px',
+                  padding: '6px',
+                  height: '36px',
                   '&:focus': {
                     borderColor: '#0078d4',
                     outline: 'none',
@@ -669,11 +778,7 @@ const ObjectData = (props) => {
                 </Typography>
               ) : (
                 <>
-                  {isClassProperty && (
-                    <Typography variant="body2" sx={{ fontSize: '12.8px', color: '#333' }}>
-                      {renderValue(item.value)}
-                    </Typography>
-                  )}
+                  {isClassProperty && renderClassSelector(item)}
 
                   {datatypeMap.text && renderTextInput(item)}
                   {datatypeMap.multiLineText && renderTextarea(item)}
@@ -698,8 +803,59 @@ const ObjectData = (props) => {
       renderBooleanSelect,
       renderMultiSelectLookup,
       renderSingleLookup,
+      renderClassSelector,
     ]
   );
+
+  const allClasses = useMemo(() => {
+    const classes = [];
+
+    // Add grouped classes
+    if (props.groupedItems) {
+      props.groupedItems.forEach(group => {
+        group.members.forEach(member => {
+          if (member.userPermission?.attachObjectsPermission) {
+            classes.push({
+              classId: member.classId,
+              className: member.className,
+              groupName: group.classGroupName,
+              groupId: group.classGroupId
+            });
+          }
+        });
+      });
+    }
+
+    // Add ungrouped classes
+    if (props.ungroupedItems) {
+      props.ungroupedItems.forEach(member => {
+        if (member.userPermission?.attachObjectsPermission) {
+          classes.push({
+            classId: member.classId,
+            className: member.className,
+            groupName: 'Ungrouped',
+            groupId: 'ungrouped'
+          });
+        }
+      });
+    }
+
+    return classes;
+  }, [props.groupedItems, props.ungroupedItems]);
+
+  const handleOpenDialog = () => {
+    const initialExpanded = {};
+    if (props.groupedItems) {
+      props.groupedItems.forEach(group => {
+        initialExpanded[group.classGroupId] = true;
+      });
+    }
+    if (props.ungroupedItems && props.ungroupedItems.length > 0) {
+      initialExpanded['ungrouped'] = true;
+    }
+    setExpandedGroups(initialExpanded);
+    setClassDialogOpen(true);
+  };
 
   return (
     <>
@@ -712,6 +868,174 @@ const ObjectData = (props) => {
         setSeverity={setAlertSeverity}
         setMessage={setAlertMsg}
       />
+      {/* Class Selection Dialog with Collapsible Groups */}
+      <Dialog
+        open={classDialogOpen}
+        onClose={() => setClassDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: '#2757aa',
+            color: '#fff',
+            fontSize: '14px',
+            py: 2
+          }}
+        >
+          <i className="fas fa-folder-plus mx-2"></i>
+          Select Class
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, px: 2 }}>
+          <List sx={{ p: 0 }}>
+            {/* Grouped Classes */}
+            {props.groupedItems && props.groupedItems.map((group) => {
+              const filteredMembers = group.members.filter(
+                member => member.userPermission?.attachObjectsPermission
+              );
+
+              if (filteredMembers.length === 0) return null;
+
+              return (
+                <Box key={group.classGroupId}>
+                  <ListItem
+                    button
+                    // onClick={() => toggleGroup(group.classGroupId)}
+                    sx={{
+                      backgroundColor: '#ecf4fc',
+                      mb: 0.5,
+                      py: 1,
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                      <Typography
+                        sx={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#2757aa'
+                        }}
+                      >
+                        {group.classGroupName}
+                      </Typography>
+                      {expandedGroups[group.classGroupId] ? (
+                        <ExpandLess sx={{ color: '#2757aa' }} />
+                      ) : (
+                        <ExpandMore sx={{ color: '#2757aa' }} />
+                      )}
+                    </Box>
+                  </ListItem>
+                  <Collapse in={expandedGroups[group.classGroupId]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {filteredMembers.map((member) => (
+                        <ListItem
+                          button
+                          key={member.classId}
+                          onClick={() => props.handleClassSelect(member.classId, member.className)}
+                          sx={{
+                            pl: 4,
+                            py: 1,
+                            '&:hover': {
+                              backgroundColor: '#f0f4f8'
+                            },
+                            backgroundColor: member.classId === props.selectedClassId ? '#e3f2fd' : 'transparent'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <i
+                              className={`fas ${props.selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
+                              style={{ color: '#2a68af', fontSize: '16px' }}
+                            />
+                            <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
+                              {member.className}
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Collapse>
+                </Box>
+              );
+            })}
+
+            {/* Ungrouped Classes */}
+            {props.ungroupedItems && props.ungroupedItems.length > 0 &&
+              props.ungroupedItems.filter(member => member.userPermission?.attachObjectsPermission).length > 0 && (
+                <Box>
+                  <ListItem
+                    button
+                    // onClick={() => toggleGroup('ungrouped')}
+                    sx={{
+                      backgroundColor: '#ecf4fc',
+                      mb: 0.5,
+                      py: 1,
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                      <Typography
+                        sx={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#2757aa'
+                        }}
+                      >
+                        Ungrouped
+                      </Typography>
+                      {expandedGroups['ungrouped'] ? (
+                        <ExpandLess sx={{ color: '#2757aa' }} />
+                      ) : (
+                        <ExpandMore sx={{ color: '#2757aa' }} />
+                      )}
+                    </Box>
+                  </ListItem>
+                  <Collapse in={expandedGroups['ungrouped']} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {props.ungroupedItems
+                        .filter(member => member.userPermission?.attachObjectsPermission)
+                        .map((member) => (
+                          <ListItem
+                            button
+                            key={member.classId}
+                            // onClick={() => handleClassSelect(member.classId, member.className)}
+                            sx={{
+                              pl: 4,
+                              py: 1,
+                              '&:hover': {
+                                backgroundColor: '#f0f4f8'
+                              },
+                              backgroundColor: member.classId === props.selectedClassId ? '#e3f2fd' : 'transparent'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <i
+                                className={`fas ${props.selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
+                                style={{ color: '#2a68af', fontSize: '16px' }}
+                              />
+                              <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
+                                {member.className}
+                              </Typography>
+                            </Box>
+                          </ListItem>
+                        ))}
+                    </List>
+                  </Collapse>
+                </Box>
+              )}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setClassDialogOpen(false)}
+            variant="contained"
+            color="warning"
+            sx={{ textTransform: 'none', borderRadius: '20px' }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
 
       <Box>
         <Box sx={{ display: 'flex', flexDirection: 'row' }} className='bg-white'>
@@ -1038,12 +1362,13 @@ const ObjectData = (props) => {
                       <Box
                         sx={{
                           display: 'grid',
-                          gridTemplateColumns: '40% 60%',
+                          gridTemplateColumns: '35% 50%', // original ratio
                           gap: 1,
                           width: '100%',
                           alignItems: 'center',
                         }}
                       >
+                        {/* Label */}
                         <Typography
                           variant="body2"
                           sx={{
@@ -1052,6 +1377,7 @@ const ObjectData = (props) => {
                             color: '#333',
                             textAlign: 'right',
                             pr: 1,
+                            mt: 0,
                           }}
                         >
                           Class:
@@ -1062,11 +1388,42 @@ const ObjectData = (props) => {
                             fontSize: '12.8px',
                             color: '#333',
                             wordBreak: 'break-word',
+                            marginY: 1
                           }}
                         >
                           {props.selectedObject.classTypeName || getPropValue('Class') || ''}
-                
+
                         </Typography>
+                        {/* <Box className="my-2" sx={{ flex: 1, fontSize: '13px', textAlign: 'start', color: '#555b6e', mr: 4 }}>
+                          {allClasses.length > 1 ? (
+                            <Box
+                              onClick={handleOpenDialog}
+                              sx={{
+                                cursor: 'pointer',
+                                padding: '8px 12px',
+                                border: '1px solid #c4c4c4',
+                                borderRadius: '4px',
+                                backgroundColor: 'white',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                '&:hover': {
+                                  borderColor: '#2757aa',
+                                  backgroundColor: '#f8f9fa'
+                                }
+                              }}
+                            >
+                              <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
+                                {props.selectedObject.classTypeName}
+                              </Typography>
+                              <i className="fas fa-chevron-down" style={{ fontSize: '12px', color: '#555b6e' }}></i>
+                            </Box>
+                          ) : (
+                            <Typography sx={{ fontSize: '13px', color: '#555b6e', padding: '8px 0' }}>
+                              {props.selectedObject.classTypeName}
+                            </Typography>
+                          )}
+                        </Box> */}
                       </Box>
                     </ListItem>
 

@@ -13,14 +13,23 @@ const FormField = ({
     mfilesId,
     handleClassSelection,
     fetchItemData,
-    setAddingValueListItem
+    setAddingValueListItem,
+    setOpenAlert,
+    setAlertSeverity,
+    setAlertMsg
 }) => {
     if (prop.isAutomatic || !prop.userPermission.editPermission) {
         return (
             <Typography
-                className='my-2'
+                className='my-1'
                 variant="body2"
-                sx={{ fontSize: '13px' }}
+                sx={{
+                    fontSize: '13px',
+                    color: '#666',
+                    paddingTop: '8px',
+                    paddingBottom: '8px',
+                    paddingLeft: '14px'
+                }}
             >
                 ( Automatic )
             </Typography>
@@ -105,6 +114,9 @@ const FormField = ({
                             handleClassSelection={handleClassSelection}
                             fetchItemData={fetchItemData}
                             setAddingValueListItem={setAddingValueListItem}
+                            setOpenAlert={setOpenAlert}
+                            setAlertSeverity={setAlertSeverity}
+                            setAlertMsg={setAlertMsg}
                         />
                     )}
                 </Box>
@@ -144,6 +156,9 @@ const FormField = ({
                             handleClassSelection={handleClassSelection}
                             fetchItemData={fetchItemData}
                             setAddingValueListItem={setAddingValueListItem}
+                            setOpenAlert={setOpenAlert}
+                            setAlertSeverity={setAlertSeverity}
+                            setAlertMsg={setAlertMsg}
                         />
                     )}
                 </Box>
@@ -163,7 +178,7 @@ const FormField = ({
                     className='bg-white'
                     sx={{
                         backgroundColor: 'white',
-                        marginY: '8px',
+                        marginY: '4px',
                         fontSize: '13px',
                         '& .MuiSelect-select': {
                             fontSize: '13px',
@@ -201,7 +216,7 @@ const FormField = ({
                 <input
                     style={{ color: '#555b6e', fontSize: '13px' }}
                     type="datetime-local"
-                    className="form-control bg-white"
+                    className="form-control bg-white my-1"
                     value={value || ''}
                     onChange={(e) => handleChange(e.target.value)}
                 />
