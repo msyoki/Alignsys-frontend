@@ -11,8 +11,10 @@ import {
     ListItemIcon,
     ListItemText
 } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
+import { FaPlus } from "react-icons/fa";
+import { FaFolderPlus } from "react-icons/fa6";
+
 import logo from '../../../images/ZFWHITE.png';
 
 const MainObjectDialog = ({
@@ -39,7 +41,7 @@ const MainObjectDialog = ({
             >
                 <img className="mx-3" src={logo} alt="Loading" width="130px" />
                 <span className="ml-auto mx-3">
-                    <FontAwesomeIcon icon={faPlus} className='mx-2' /> Create
+                    <FaPlus className='mx-2' /> Create
                 </span>
             </DialogTitle>
 
@@ -76,7 +78,7 @@ const MainObjectDialog = ({
                                 disablePadding
                             >
                                 <ListItemIcon sx={{ minWidth: "auto", marginRight: "4px" }}>
-                                    <i className="fas fa-folder-plus mx-2" style={{ color: "#2a68af", fontSize: "20px" }}></i>
+                                    <FaFolderPlus className="mx-2" style={{ color: "#2a68af", fontSize: "20px" }} />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.namesingular}

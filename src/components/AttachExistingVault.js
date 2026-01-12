@@ -13,6 +13,8 @@ import {
 import * as constants from './Auth/configs';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FaPlus } from "react-icons/fa";
+import { FaDatabase } from "react-icons/fa6";
 
 function AttachExistingVault(props) {
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -117,7 +119,7 @@ function AttachExistingVault(props) {
                         },
                     }}
                 >
-                    <i className="fa-solid fa-plus me-2"></i>
+                    <FaPlus className="me-2" />
                     Attach Existing Repo
                 </Button>
             )}
@@ -135,7 +137,8 @@ function AttachExistingVault(props) {
                     alignItems: 'center',
                     gap: 1
                 }}>
-                    <i className="fa-solid fa-database" style={{ fontSize: '18px' }}></i>
+                    <FaDatabase style={{ fontSize: '18px' }} />
+
                     Attach Existing Repository
                 </DialogTitle>
                 <DialogContent sx={{ pt: 2 }}>

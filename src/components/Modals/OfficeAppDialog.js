@@ -15,23 +15,28 @@ import axios from 'axios';
 
 function OfficeApp(props) {
   const fetchFileId = async () => {
-    const classID = props.object.classId ?? props.object.classID;
-    const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.object.guid}/${props.object.id}/${classID}`;
-    // console.log('Fetching file ID from URL:', url); // Debug log
-    try {
-      const response = await axios.get(url, { headers: { Accept: '*/*' } });
+    if (props.object?.fileID) {
+      return props.object.fileID;
+    } else {
+      const classID = props.object.classId ?? props.object.classID;
+      const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.object.guid}/${props.object.id}/${classID}`;
+      // console.log('Fetching file ID from URL:', url); // Debug log
+      try {
+        const response = await axios.get(url, { headers: { Accept: '*/*' } });
 
 
-      if (response.data.length > 0) {
-        return response.data[0].fileID; // Return the first fileID found
-      } else {
-        console.error('No files found.');
-        return null;
+        if (response.data.length > 0) {
+          return response.data[0].fileID; // Return the first fileID found
+        } else {
+          console.error('No files found.');
+          return null;
+        }
+      } catch (error) {
+        console.error('Error fetching file ID:', error);
+        return null; // Return null in case of error
       }
-    } catch (error) {
-      console.error('Error fetching file ID:', error);
-      return null; // Return null in case of error
     }
+
   };
   const handleProceed = async () => {
     const fileId = await fetchFileId();
@@ -39,7 +44,7 @@ function OfficeApp(props) {
 
     const title = `${props.object.title}.${props.object.extension}`;
     const appUrl = `Alignsysofficeapp://?Extension=${props.object.extension}&ClassId=${props.object.classId ?? props.object.classID}&fileID=${fileId}&ObjectId=${props.object.id}&VaultGuid=${props.object.guid}&UserID=${props.mfilesId}&Filename=${title}&AuthUrl=${constants.auth_api}&BackedUrl=${constants.mfiles_api}`;
-  
+
     console.log("Launching plugin with URL:", appUrl);
 
     let pluginOpened = false;
@@ -53,7 +58,7 @@ function OfficeApp(props) {
     iframe.style.display = "none";
     iframe.src = appUrl;
     document.body.appendChild(iframe);
-    
+
 
     // Wait a few seconds
     // setTimeout(() => {

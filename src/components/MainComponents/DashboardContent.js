@@ -3,6 +3,16 @@ import axios from 'axios';
 import { Avatar, Box, Tabs, Tab, Typography, Tooltip, Button } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
+import { BiHomeAlt2 } from "react-icons/bi";
+import { FaSearch } from "react-icons/fa";
+import { CiCircleList } from "react-icons/ci";
+import { FaArrowsSpin } from "react-icons/fa6";
+import { TbArrowMerge } from "react-icons/tb";
+import { FiCheckSquare } from "react-icons/fi";
+import { FaHistory } from "react-icons/fa";
+import { FaBars } from "react-icons/fa6";
+import { FaBan } from "react-icons/fa";
+
 
 // Components
 import Loader from '../Loaders/LoaderMini';
@@ -306,7 +316,12 @@ const DocumentList = (props) => {
       // Show error message
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
-      setAlertPopMessage("Failed to convert document to PDF. Please try again.");
+      const rawMessage = error?.response?.data;
+      const userMessage = typeof rawMessage === 'string'
+        ? rawMessage.split('\n')[0].trim()
+        : 'Failed to convert file to PDF';
+      setAlertPopMessage(userMessage);
+
 
     } finally {
       setIsConvertingToPdf(false);
@@ -1188,7 +1203,7 @@ const DocumentList = (props) => {
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
 
-        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt','jpeg','png','jpg'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
             guid: props.selectedVault.guid,
@@ -1384,8 +1399,8 @@ const DocumentList = (props) => {
         {
           label: (
             <>
-              <i className="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i>
-              <span className="mx-3">Convert to PDF (Overwrite Original Copy)</span>
+              <FaArrowsSpin style={{ color: '#2757aa' }} />
+              <span className="mx-3">Convert to PDF (Overwrite Original Copy) </span>
             </>
           ),
           onClick: (itm) => {
@@ -1396,7 +1411,7 @@ const DocumentList = (props) => {
         {
           label: (
             <>
-              <i className="fa-solid fa-arrows-spin" style={{ color: '#2757aa' }}></i>
+              <FaArrowsSpin style={{ color: '#2757aa' }} />
               <span className="mx-3">Convert to PDF (Keep Original Copy)</span>
             </>
           ),
@@ -1413,7 +1428,7 @@ const DocumentList = (props) => {
       rightClickActions.push({
         label: (
           <>
-            <i className="fa-solid fa-object-group" style={{ color: '#2757aa' }}></i>
+            <TbArrowMerge style={{ color: '#2757aa' }} />
             <span className="mx-3">Consolidate Linked Documents</span>
           </>
         ),
@@ -1429,7 +1444,7 @@ const DocumentList = (props) => {
       rightClickActions.push({
         label: (
           <>
-            <i className="fa-solid fa-square-check" style={{ color: '#3fa34d' }}></i>
+            <FiCheckSquare style={{ color: '#3fa34d' }} />
             <span className="mx-3">Check In </span>
           </>
         ),
@@ -1445,7 +1460,7 @@ const DocumentList = (props) => {
       rightClickActions.push({
         label: (
           <>
-            <i className="fa-solid fa-clock" style={{ color: '#fca311' }}></i>
+            <FaHistory style={{ color: '#fca311' }} />
             <span className="mx-3">History</span>
           </>
         ),
@@ -1479,23 +1494,6 @@ const DocumentList = (props) => {
   }
 
 
-
-  //    ...(menuItem && (menuItem.isSingleFile === true) && (menuItem.objectID === 0 || menuItem.objectTypeId === 0) && (menuItem.isCheckedOut === false)  && (Number(menuItem.checkoutuserid) !== Number(props.selectedVault?.vaultId)) ? [
-  //   {
-
-  //     label: (
-  //       <><i class="fa-solid fa-pen-to-square" style={{ color: '#2757aa' }}></i><span className='mx-3'>Check Out</span></>
-  //     ),
-  //     onClick: (itm) => {
-  //       console.log(itm)
-  //       Checkout(menuItem.objectID, menuItem.id);
-  //       handleMenuClose();
-  //     }
-  //   }
-
-  // ] : [
-
-  // ]),
 
   // Effects
   useEffect(() => {
@@ -1685,7 +1683,8 @@ const DocumentList = (props) => {
                   },
                 }}
               >
-                <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
+                <FaBars style={{ fontSize: '25px', color: '#2757aa' }} />
+
               </Box>
               <img
                 src={logo}
@@ -1755,7 +1754,8 @@ const DocumentList = (props) => {
                       cursor: 'pointer'
                     }}
                   >
-                    <i className="fas fa-search text-muted" style={{ fontSize: '15px' }} />
+                    <FaSearch style={{ fontSize: '15px', color: '#6c757d' }} />
+
                   </button>
                 </form>
               </Box>
@@ -1796,13 +1796,7 @@ const DocumentList = (props) => {
                 label={
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {label === 'Home' && (
-                      <i
-                        className="fas fa-home"
-                        style={{
-                          fontSize: '16px',
-                          color: selectedTab === 'Home' ? '#2757aa' : '#ccc' // greyed out if not selected
-                        }}
-                      />
+                      <BiHomeAlt2 style={{ fontSize: '16px', color: selectedTab === 'Home' ? '#2757aa' : '#ccc' }} />
                     )}
                     {label}
                   </span>
@@ -1831,16 +1825,16 @@ const DocumentList = (props) => {
             sx={{
               flex: 1,
               overflow: 'hidden',
-              border: '1px dashed #fff',       // thinner border
-              backgroundColor: '#fff',         // always white
+              border: '1px dashed #fff',
+              backgroundColor: '#fff',
               cursor: 'pointer',
               transition: 'border 0.2s ease',
               '&:hover': {
-                borderColor: '#fff',           // border color on hover
+                borderColor: '#fff',
                 backgroundColor: '#fff',
               },
               '&.drag-active': {
-                borderColor: '#fff',           // border color when dragging
+                borderColor: '#fff',
                 backgroundColor: '#fff',
               },
             }}>
@@ -1857,7 +1851,7 @@ const DocumentList = (props) => {
                     gap: 1,
                     // color: '#333'
                   }}>
-                    <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                    <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
                     Search Results
                   </Box>
                   <Loader />
@@ -1875,7 +1869,7 @@ const DocumentList = (props) => {
                         gap: 1,
                         // color: '#333'
                       }}>
-                        <i className="fas fa-list" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                        <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
                         Search Results
                       </Box>
                       {props.data?.length > 0 ? (
@@ -1898,6 +1892,7 @@ const DocumentList = (props) => {
                           headerTitle="Search Results"
                           nameColumnLabel="Name"
                           dateColumnLabel="Date Modified"
+                          handleTabAction={handleTabAction}
                         />
                       ) : (
                         <Box sx={{
@@ -1909,7 +1904,8 @@ const DocumentList = (props) => {
                           p: 3,
                           backgroundColor: '#fff'
                         }}>
-                          <i className="fa-solid fa-search" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          <FaSearch style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+
                           <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                             No Results Found
                           </Typography>
@@ -1988,7 +1984,8 @@ const DocumentList = (props) => {
                         gap: 1,
                         // color: '#333'
                       }}>
-                        <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                        <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+
                         {title} ({props[dataKey]?.length || 0})
                       </Box>
                       <Loader />
@@ -2006,7 +2003,7 @@ const DocumentList = (props) => {
                             gap: 1,
                             // color: '#333'
                           }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                            <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
                             {title} ({props[dataKey].length})
                           </Box>
                           <ColumnSimpleTree
@@ -2028,6 +2025,7 @@ const DocumentList = (props) => {
                             headerTitle="Search Results"
                             nameColumnLabel="Name"
                             dateColumnLabel="Date Modified"
+                            handleTabAction={handleTabAction}
 
                           />
                         </>
@@ -2042,7 +2040,7 @@ const DocumentList = (props) => {
                             gap: 1,
                             // color: '#333'
                           }}>
-                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                            <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
                             {emptyTitle}
                           </Box>
                           <Box sx={{
@@ -2054,7 +2052,7 @@ const DocumentList = (props) => {
                             p: 3,
                             backgroundColor: '#fff'
                           }}>
-                            <i className="fa-solid fa-ban" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                            <FaBan style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
                             <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                               No Results Found
                             </Typography>

@@ -17,6 +17,24 @@ import FileUploadComponent from '../../FileUpload';
 import PropertiesList from './PropertiesList';
 import TemplateActions from './TemplateActions';
 
+import { FaRegFilePdf } from "react-icons/fa6";
+import { BsFiletypeCsv } from "react-icons/bs";
+import { FaRegFileWord } from "react-icons/fa6";
+import { BsFiletypeTxt } from "react-icons/bs";
+import { FaEnvelope } from "react-icons/fa";
+import { FaInternetExplorer } from "react-icons/fa";
+import { BsFiletypePptx } from "react-icons/bs";
+import { VscVscode } from "react-icons/vsc";
+import { CiFileOn } from "react-icons/ci";
+import { FaFileCirclePlus } from "react-icons/fa6";
+import { FaFolderPlus } from "react-icons/fa6";
+import { BsUpload } from "react-icons/bs";
+import { HiTemplate } from "react-icons/hi";
+import { CiImageOn } from "react-icons/ci";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
+import { HiOutlineAnnotation } from "react-icons/hi";
+
+
 const ObjectFormDialog = ({
     open,
     onClose,
@@ -53,34 +71,36 @@ const ObjectFormDialog = ({
         const extension = fileName.split('.').pop().toLowerCase();
         const iconStyle = { fontSize: '25px' };
         switch (extension) {
-            case 'pdf':
-                return <i className="fa-regular fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
-            case 'csv':
-                return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
-            case 'txt':
-                return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
-            case 'msg':
-                return <i className="fa-solid fa-envelope shadow-sm" style={{ ...iconStyle, color: '#ffb703' }}></i>;
-            case 'webp':
-                return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
-            case 'xlsx':
-            case 'xls':
-                return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#217045' }}></i>;
-            case 'ppt':
-            case 'pptx':
-                return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#d34628' }}></i>;
-            case 'docx':
-            case 'doc':
-                return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#35558b' }}></i>;
-            case 'png':
-            case 'jpeg':
-            case 'jpg':
-                return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
-            case 'vssettings':
-                return <i className="fa-solid fa-file-code shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
-            default:
-                return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
-        }
+         case 'pdf':
+           return <FaRegFilePdf style={{ ...iconStyle, color: '#f21b3f' }} />;
+         case 'csv':
+           return <BsFiletypeCsv style={{ ...iconStyle, color: '#7cb518' }} />;
+         case 'txt':
+           return <BsFiletypeTxt style={{ ...iconStyle, color: '#555b6e' }} />;
+         case 'msg':
+           return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
+         case 'webp':
+           return <FaInternetExplorer style={{ ...iconStyle, color: '#2757aa' }} />;
+         case 'xlsx':
+         case 'xls':
+           return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
+         case 'ppt':
+         case 'pptx':
+           return <BsFiletypePptx style={{ ...iconStyle, color: '#d34628' }} />;
+         case 'docx':
+         case 'doc':
+           return <FaRegFileWord style={{ ...iconStyle, color: '#35558b' }} />;
+         case 'png':
+         case 'jpeg':
+         case 'jpg':
+           return <CiImageOn style={{ ...iconStyle, color: '#2a68af' }} />;
+         case 'xfdf':
+            return <HiOutlineAnnotation style={{ ...iconStyle, color: '#ffb703' }} />;
+         case 'vssettings':
+           return <VscVscode style={{ ...iconStyle, color: '#555b6e' }} />;
+         default:
+           return <CiFileOn style={{ ...iconStyle, color: '#e5e5e5' }} />;
+       }
     };
     const handleReplaceFile = () => {
         document.getElementById('file-upload-input').click();
@@ -104,15 +124,12 @@ const ObjectFormDialog = ({
                 <img className="mx-3" src={logo} alt="Loading" width="180px" />
                 <span className="ml-auto mx-3">
                     {selectedObjectId === 0 ? (
-                        <i
-                            style={{ color: "#fff", fontSize: "20px" }}
-                            className="fa-solid fa-file-circle-plus"
-                        />
+                    
+                        <FaFileCirclePlus style={{ color: "#fff", fontSize: "20px" }} />
+
                     ) : (
-                        <i
-                            style={{ color: "#fff", fontSize: "20px" }}
-                            className="fas fa-folder-plus"
-                        />
+                  
+                        <FaFolderPlus style={{ color: "#fff", fontSize: "20px" }} />
                     )}
                     <small className='mx-2'>Create {selectedClassName}</small>
                 </span>
@@ -254,8 +271,9 @@ const ObjectFormDialog = ({
                                                 onDontUseTemplates();
                                             }}
                                         >
-                                            <i className="fa-solid fa-upload mx-1"></i>
-                                            Switch to File Upload Or Switch Template
+                                            <BsUpload className="mx-2" />
+                              
+                                            Switch to File Upload / Change Template
                                         </a>
                                     </Typography>
                                 ) : (
@@ -273,7 +291,9 @@ const ObjectFormDialog = ({
                                                         letterSpacing: '0.5px'
                                                     }}
                                                 >
-                                                    <i className="fa-solid fa-copy mx-1" style={{ fontSize: '11px' }}></i>
+                                                    <HiTemplate className="mx-2" style={{ fontSize: '15px' }} />
+                                                 
+
                                                     Quick Templates
                                                 </Typography>
                                                 <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>

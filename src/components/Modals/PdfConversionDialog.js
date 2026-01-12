@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo,useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,6 +12,22 @@ import {
 } from '@mui/material';
 import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
+
+
+import { FaRegFilePdf } from "react-icons/fa6";
+import { BsFiletypeCsv } from "react-icons/bs";
+import { FaRegFileWord } from "react-icons/fa6";
+import { BsFiletypeTxt } from "react-icons/bs";
+import { FaEnvelope } from "react-icons/fa";
+import { FaInternetExplorer } from "react-icons/fa";
+import { BsFiletypePptx } from "react-icons/bs";
+import { VscVscode } from "react-icons/vsc";
+import { CiFileOn } from "react-icons/ci";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
+import { CiImageOn } from "react-icons/ci";
+import { HiOutlineAnnotation } from "react-icons/hi";
+
+import { BsFiles } from "react-icons/bs";
 
 const PdfConversionDialog = ({
   open,
@@ -27,25 +43,71 @@ const PdfConversionDialog = ({
   const handleConfirm = () => onConfirm();
   const handleCancel = () => !isConverting && onClose();
 
+
+  // Memoized icon style to prevent recreation
+  const iconStyle = useMemo(() => ({
+    fontSize: '18px',
+  }), []);
+
+
+
+  // Memoized icon generation function
+      const getIcon = useCallback((extension) => {
+          const ext = (extension || '').toLowerCase();
+  
+          switch (ext) {
+              case 'pdf':
+                  return <FaRegFilePdf style={{ ...iconStyle, color: '#f21b3f' }} />;
+              case 'csv':
+                  return <BsFiletypeCsv style={{ ...iconStyle, color: '#7cb518' }} />;
+              case 'txt':
+                  return <BsFiletypeTxt style={{ ...iconStyle, color: '#555b6e' }} />;
+              case 'msg':
+                  return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
+              case 'webp':
+                  return <FaInternetExplorer style={{ ...iconStyle, color: '#2757aa' }} />;
+              case 'xlsx':
+              case 'xls':
+                  return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
+              case 'ppt':
+              case 'pptx':
+                  return <BsFiletypePptx style={{ ...iconStyle, color: '#d34628' }} />;
+              case 'docx':
+              case 'doc':
+                  return <FaRegFileWord style={{ ...iconStyle, color: '#35558b' }} />;
+              case 'png':
+              case 'jpeg':
+              case 'jpg':
+                  return <CiImageOn style={{ ...iconStyle, color: '#2a68af' }} />;
+              case 'xfdf':
+                  return <HiOutlineAnnotation style={{ ...iconStyle, color: '#ffb703' }} />;
+              case 'vssettings':
+                  return <VscVscode style={{ ...iconStyle, color: '#555b6e' }} />;
+              default:
+                  return <CiFileOn style={{ ...iconStyle, color: '#e5e5e5' }} />;
+          }
+      }, [iconStyle]);
+
   // Helper function to get class ID
   const getClassId = () => file?.classId ?? file?.classID;
 
   // File display component
   const FileDisplay = () => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <FileExtIcon
+      {file?.extension ? getIcon(file.extension) : <FileExtIcon
         fontSize="20px"
         guid={vault?.guid}
-        objectId={file?.id}
+        objectId={file?.id || file?.fileID}
         classId={getClassId()}
-      />
+      />}
+
       <span>
-        {fileName}
-        <FileExtText
+        {fileName}{file?.extension ? `.${file.extension}` : <FileExtText
           guid={vault?.guid}
           objectId={file?.id}
           classId={getClassId()}
-        />
+        />}
+
       </span>
     </Box>
   );
@@ -77,7 +139,7 @@ const PdfConversionDialog = ({
         p: 2
       }}>
         <Typography variant="body2">
-          NB: A multi-file document will be created containing both the original copy 
+          NB: A multi-file document will be created containing both the original copy
           and the newly generated PDF version.
         </Typography>
       </Box>
@@ -217,7 +279,7 @@ const PdfConversionDialog = ({
       disableEscapeKeyDown={isConverting}
     >
       <DialogHeader />
-      
+
       <DialogContent sx={{ pt: 2 }}>
         {isConverting ? <ConvertingContent /> : <ConfirmationContent />}
       </DialogContent>

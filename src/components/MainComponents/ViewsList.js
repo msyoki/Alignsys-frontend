@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { faTable } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip, Box } from '@mui/material';
 import OfficeApp from '../Modals/OfficeAppDialog';
@@ -13,11 +13,17 @@ import LinkedObjectsTree from './LinkedObjectsTree';
 import * as constants from '../Auth/configs';
 import RightClickMenu from '../RightMenu';
 import TimedAlert from '../TimedAlert';
-import MultifileFiles from '../MultifileFiles';
+
 import ColumnSimpleTree from '../ColumnSimpleTree';
 import Typography from '@mui/material/Typography';
 import Loader from '../Loaders/LoaderMini'
-
+import { CiCircleList } from "react-icons/ci";
+import { FaChevronRight } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa6";
+import { FaChevronUp } from "react-icons/fa6";
+import { FaFolderPlus } from "react-icons/fa6";
+import { FaTable } from "react-icons/fa";
+import { FaBan } from "react-icons/fa";
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -43,9 +49,9 @@ const MAX_TITLE_LENGTH = 30;
 
 // Style constants to avoid inline object creation
 const TREE_ITEM_STYLES = {
-    fontSize: "12.8px",
-    "& .MuiTreeItem-label": { fontSize: "12.8px !important" },
-    "& .MuiTypography-root": { fontSize: "12.8px !important" },
+    fontSize: "12px",
+    "& .MuiTreeItem-label": { fontSize: "12px !important" },
+    "& .MuiTypography-root": { fontSize: "12px !important" },
     backgroundColor: '#fff !important',
     "&:hover": { backgroundColor: '#fff !important' },
     borderRadius: "0px !important",
@@ -60,7 +66,7 @@ const TREE_ITEM_OBJECT_STYLES = {
 };
 
 const SECTION_HEADER_STYLES = {
-    fontSize: '12.8px',
+    fontSize: '12px',
     backgroundColor: '#ecf4fc',
     cursor: 'pointer',
     display: 'flex'
@@ -71,7 +77,7 @@ const BOX_PADDING_STYLES = {
 };
 
 const NAVIGATION_STYLES = {
-    fontSize: '12.8px',
+    fontSize: '12px',
     backgroundColor: '#ecf4fc',
     cursor: 'pointer',
     gap: '4px',
@@ -79,7 +85,7 @@ const NAVIGATION_STYLES = {
 
 const DATE_SPAN_STYLES = {
     marginLeft: 'auto',
-    fontSize: '12.8px',
+    fontSize: '12px',
     color: '#888',
     whiteSpace: 'nowrap'
 };
@@ -164,14 +170,8 @@ const NavigationBreadcrumb = memo(
                     minHeight: "20px",
                 }}
             >
-                <i
-                    className="fas fa-table"
-                    style={{
-                        fontSize: "20px",
-                        color: "#2757aa",
-                        marginRight: "3px",
-                    }}
-                />
+            
+                <FaTable className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
 
                 {visibleItems.map((item, index) => (
                     <React.Fragment key={index}>
@@ -204,14 +204,8 @@ const NavigationBreadcrumb = memo(
                         </Tooltip>
 
                         {index < visibleItems.length - 1 && (
-                            <i
-                                className="fas fa-chevron-right"
-                                style={{
-                                    color: "#2757aa",
-                                    fontSize: "9px",
-                                    opacity: 0.8,
-                                }}
-                            />
+                       
+                            <FaChevronRight style={{ color: "#2757aa", fontSize: "9px", opacity: 0.8 }} />
                         )}
                     </React.Fragment>
                 ))}
@@ -221,30 +215,13 @@ const NavigationBreadcrumb = memo(
                         <span style={{ fontSize: "11px", color: "#333", opacity: 0.8 }}>
                             ...
                         </span>
-                        <i
-                            className="fas fa-chevron-down"
-                            onClick={toggleCollapsed}
-                            style={{
-                                cursor: "pointer",
-                                fontSize: "10px",
-                                color: "#2757aa",
-                                marginLeft: "2px",
-                            }}
-                        />
+                        <FaChevronDown onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: "#2757aa", marginLeft: "2px" }} />
                     </>
                 )}
 
                 {!collapsed && isCollapsible && (
-                    <i
-                        className="fas fa-chevron-up"
-                        onClick={toggleCollapsed}
-                        style={{
-                            cursor: "pointer",
-                            fontSize: "10px",
-                            color: "#2757aa",
-                            marginLeft: "2px",
-                        }}
-                    />
+                  
+                    <FaChevronUp onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: "#2757aa", marginLeft: "2px" }} />
                 )}
             </div>
         );
@@ -274,8 +251,9 @@ const PropertyFolderItem = memo(({ item, index, selectedItemId, onFetchViewData 
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <i className='fas fa-folder-plus mx-2' style={{ color: '#6a994e', fontSize: '20px' }} />
-                        <span style={{ fontSize: '12.8px' }} className='list-text'>{item.title}</span>
+                        <FaFolderPlus className='mx-2' style={{ color: '#6a994e', fontSize: '20px' }} />
+                        
+                        <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
             />
@@ -307,8 +285,10 @@ const ViewFolderItem = memo(({ item, index, selectedItemId, onFetchMainViewObjec
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
-                        <span style={{ fontSize: '12.8px' }} className='list-text'>{item.title}</span>
+                        
+
+                        <FaTable className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
+                        <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
             />
@@ -339,8 +319,8 @@ const ViewListItem = memo(({ view, index, selectedItemId, onFetchMainViewObjects
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <FontAwesomeIcon icon={faTable} className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
-                        <span style={{ fontSize: '12.8px' }} className='list-text'>{view.viewName}</span>
+                        <FaTable className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
+                        <span style={{ fontSize: '12px' }} className='list-text'>{view.viewName}</span>
                     </Box>
                 }
             />
@@ -992,10 +972,8 @@ const ViewsList = (props) => {
                                                 backgroundColor: '#fff',
                                             }}
                                         >
-                                            <i
-                                                className="fa-solid fa-ban"
-                                                style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }}
-                                            />
+                                        
+                                            <FaBan className="mx-2" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
                                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                                                 No Results Found
                                             </Typography>
@@ -1018,10 +996,11 @@ const ViewsList = (props) => {
                                         style={SECTION_HEADER_STYLES}
                                     >
                                         <span className="d-flex align-items-center">
-                                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                                           
                                             Common Views
                                         </span>
-                                        <small style={{ color: '#2757aa', fontSize: '12.8px' }}>({filteredCommonViews.length})</small>
+                                        <small style={{ color: '#2757aa', fontSize: '12px' }}>({filteredCommonViews.length})</small>
                                     </h6>
                                     {showCommonViewSublist && (
                                         <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
@@ -1047,14 +1026,14 @@ const ViewsList = (props) => {
                                         style={SECTION_HEADER_STYLES}
                                     >
                                         <span className="d-flex align-items-center">
-                                            <i className="fas fa-list mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }}></i>
+                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
                                             Other Views
                                         </span>
-                                        <small style={{ color: '#2757aa', fontSize: '12.8px' }}>({filteredOtherViews.length})</small>
+                                        <small style={{ color: '#2757aa', fontSize: '12px' }}>({filteredOtherViews.length})</small>
                                     </h6>
                                     {showOtherViewSublist && (
                                         <div style={{
-                                            height: filteredCommonViews?.length < 1 ? '60vh' : '27vh',
+                                            height: filteredCommonViews?.length < 1 ? '70vh' : '27vh',
                                             overflowY: 'auto',
                                         }} className='text-dark bg-white'>
                                             {filteredOtherViews.map((view, index) => (

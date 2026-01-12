@@ -14,6 +14,13 @@ import logo from '../images/ZFWHITE.png';
 import TimedAlert from '../components/TimedAlert';
 import MiniLoader from '../components/Modals/MiniLoaderDialog';
 
+import { FaPlusCircle } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
+import { MdOutlineAdminPanelSettings } from "react-icons/md";
+
+import { FaFolderPlus } from "react-icons/fa6";
+import { FaFileCirclePlus } from "react-icons/fa6";
+
 import {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile,
   faFolder, faUserFriends, faPlus, faTag
@@ -119,31 +126,36 @@ const SidebarMenu = React.memo(({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <i className="fas fa-plus-circle" style={{ fontSize: "16px", flexShrink: 0 }}></i>
+            <FaPlusCircle style={{ fontSize: "20px", flexShrink: 0, marginRight: '10px', marginLeft: '10px' }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden' }}>
-              <span style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                fontSize: '13px',
-                fontWeight: '500',
-                lineHeight: '1.2'
-              }}>
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  lineHeight: 1.2,
+                }}
+              >
                 Create
               </span>
-              <span style={{
-                fontSize: '9px',
-                color: 'rgba(255, 255, 255, 0.65)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                lineHeight: '1.2',
-                marginTop: '5px'
-              }}>
+              <span
+                style={{
+                  fontSize: '9px',
+                  color: 'rgba(255, 255, 255, 0.65)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.2,
+                  marginTop: '5px',
+                }}
+              >
                 New Objects / documents
               </span>
             </div>
           </div>
+
           <i
             className={`fas ${isSublistVisible ? "fa-angle-up" : "fa-angle-down"}`}
             style={{ transition: "transform 0.3s ease-in-out", fontSize: "18px", flexShrink: 0 }}
@@ -175,7 +187,8 @@ const SidebarMenu = React.memo(({
               className="menu-item main-li shadow-lg"
               style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, padding: '6px 10px', minHeight: '40px' }}
             >
-              <i className="fas fa-user-shield" style={{ fontSize: '16px', flexShrink: 0 }}></i>
+              <MdOutlineAdminPanelSettings style={{ fontSize: '20px', flexShrink: 0, marginRight: '10px', marginLeft: '10px' }} />
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, overflow: 'hidden', gap: "4px" }}>
                 <span style={{
                   overflow: 'hidden',
@@ -201,7 +214,7 @@ const SidebarMenu = React.memo(({
             </li>
           )}
           <li onClick={logoutUser} className="menu-item main-li shadow-lg">
-            <i className="fas fa-sign-out-alt" style={{ fontSize: "16px" }}></i>
+            <FaSignOutAlt style={{ fontSize: "20px", flexShrink: 0, marginRight: '10px', marginLeft: '10px' }} />
             <span style={{ fontSize: "14px" }}>Logout</span>
           </li>
         </ul>
@@ -271,21 +284,20 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
 
         >
           {/* ICON */}
-          <i
-            className={
-              item.objectid === 0
-                ? "fas fa-file-circle-plus"
-                : "fas fa-folder-plus"
-            }
-            style={{ color: "#2757aa", fontSize: "12px" }}
-          />
+   
+          {item.objectid === 0 ? (
+            <FaFileCirclePlus style={{ color: "#2757aa", fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+          ) : (
+            <FaFolderPlus style={{ color: "#2757aa", fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+          )}
+
 
           {/* TEXT */}
           <ListItemText
             primary={item.namesingular}
             primaryTypographyProps={{ fontSize: "12px" }}
             sx={{
-              margin: 0,
+              marginX: 0.5,
               padding: 0,
               whiteSpace: "nowrap",
               overflow: "hidden",

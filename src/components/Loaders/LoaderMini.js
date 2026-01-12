@@ -25,7 +25,7 @@ const LoadingMini = ({ msg }) => (
           {msg} <span>.</span><span>.</span><span>.</span>
         </span>
       ) : (
-        <span style={{ color: '#555' }} className="loading-indicator ">
+        <span style={{ color: '#555', fontSize:'12px' }} className="loading-indicator ">
           <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Fetching, please wait <span>.</span><span>.</span><span>.</span>
         </span>
       )}

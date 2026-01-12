@@ -10,6 +10,14 @@ import OfficeApp from "../Modals/OfficeAppDialog";
 import { Tooltip } from '@mui/material';
 import MultifileFiles from "../MultifileFiles";
 
+import { FaRegFolderOpen } from "react-icons/fa6";
+import { FaFolder } from "react-icons/fa";
+import { TbFoldersFilled } from "react-icons/tb";
+import { IoDocuments } from "react-icons/io5";
+import { BsFiles } from "react-icons/bs";
+import { LuFolderSymlink } from "react-icons/lu";
+import { SiFiles } from "react-icons/si";
+
 function useSessionState(key, defaultValue) {
   const getInitialValue = () => {
     try {
@@ -31,7 +39,7 @@ function useSessionState(key, defaultValue) {
 
 // Optimized constants with minimal spacing
 const TREE_ITEM_STYLES = {
-  ml: 1, // Reduced from 12.8px to 8px
+  ml: 1, // Reduced from 12px to 8px
   backgroundColor: '#fff',
   "&:hover": { backgroundColor: "#fff !important" },
   "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
@@ -46,7 +54,7 @@ const LOADING_STYLES = {
   p: 0.5, // Reduced padding
   color: '#555b6e',
 
-  fontSize: "12.8px",
+  fontSize: "12px",
   "& .MuiTreeItem-label": { fontSize: "12px !important" },
   "& .MuiTypography-root": { fontSize: "12px !important" },
 };
@@ -166,7 +174,7 @@ const TreeSubItem = memo(({
               {isDocument ? (
                 isObjectType0 && isSingleFile ? (
                   <FileExtIcon
-                    fontSize={'14px'}
+                    fontSize={'18px'}
                     guid={selectedVault.guid}
                     objectId={subItem.id}
                     classId={subItem.classId !== undefined ? subItem.classId : subItem.classID}
@@ -174,13 +182,13 @@ const TreeSubItem = memo(({
                   />
                 ) : (
                   isObjectType0 && !isSingleFile ? (
-                    <i className='fas fa-book' style={{ color: '#7cb518', fontSize: '14px', flexShrink: 0 }} />
+                    <FaRegFolderOpen style={{ color: '#7cb518', fontSize: '18px', flexShrink: 0 }} />
                   ) : (
-                    <i className='fa-solid fa-folder' style={{ fontSize: '14px', color: '#2a68af', flexShrink: 0 }} />
+                    <FaFolder style={{ fontSize: '18px', color: '#2a68af', flexShrink: 0 }} />
                   )
                 )
               ) : (
-                <i className="fas fa-folder" style={{ fontSize: "14px", color: "#2a68af", flexShrink: 0 }} />
+                <FaFolder style={{ fontSize: "18px", color: "#2a68af", flexShrink: 0 }} />
               )}
 
               {/* Title with optimized spacing */}
@@ -192,7 +200,7 @@ const TreeSubItem = memo(({
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    fontSize: '12.8px'
+                    fontSize: '12px'
                   }}
                 >
                   {subItem.title}
@@ -208,7 +216,7 @@ const TreeSubItem = memo(({
 
               {/* Date flexed to the end */}
               <Box sx={{
-                fontSize: '12.8px',
+                fontSize: '12px',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 marginLeft: 'auto'  // This pushes the date to the far right
@@ -273,6 +281,7 @@ const LinkedObjectsTree = ({
 
   // API calls and handlers
   const fetchObjectFile = useCallback(async (item) => {
+    alert("Fetching file for objectID ");
     const classId = item.classId || item.classID
     const url = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${selectedVault.guid}/${item.id}/${classId}`;
     try {
@@ -280,6 +289,7 @@ const LinkedObjectsTree = ({
         headers: { Accept: '*/*' }
       });
       const file = response.data?.[0];
+   
       setFile(file);
     } catch {
       // console.error('Failed to fetch object file:', error);
@@ -367,7 +377,7 @@ const LinkedObjectsTree = ({
         const response = await axios.get(url);
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
-        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt'].includes(extension)) {
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt','jpeg','png','jpg'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
             guid: selectedVault.guid,
@@ -383,9 +393,11 @@ const LinkedObjectsTree = ({
 
   const handleRightClick = useCallback((event, item) => {
     event.preventDefault();
+
     setMenuAnchor(event.currentTarget);
     setMenuItem(item);
     if (item.objectID === 0 || item.objectTypeId === 0) {
+      alert("Fetching file for objectID in right click");
       fetchObjectFile(item);
     }
   }, [fetchObjectFile]);
@@ -409,13 +421,13 @@ const LinkedObjectsTree = ({
         label: (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             <FileExtIcon
-              fontSize={'24px'}
+              fontSize={'18px'}
               guid={selectedVault.guid}
               objectId={menuItem.id}
               classId={menuItem.classId !== undefined ? menuItem.classId : menuItem.classID}
             />
             <Box>Open</Box>
-            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12.8px' }}>
+            <Box sx={{ ml: 'auto', color: '#666', fontWeight: 500, fontSize: '12px' }}>
               Open in default application
             </Box>
           </Box>
@@ -463,12 +475,12 @@ const LinkedObjectsTree = ({
 
   return (
     <>
-      {/* <OfficeApp
+      <OfficeApp
         open={openOfficeApp}
         close={() => setOpenOfficeApp(false)}
         object={objectToEditOnOffice}
         mfilesId={mfilesId}
-      /> */}
+      />
       {loading ? (
         <TreeItem
           sx={LOADING_STYLES}
@@ -497,11 +509,11 @@ const LinkedObjectsTree = ({
                     gap: 1, // Using gap instead of margins
                     ...BOX_STYLES
                   }}>
-                    <i className="fa-regular fa-folder-open" style={{ fontSize: '14px', color: '#8d99ae' }} />
-                    <Box sx={{ fontSize: '12.8px' }}>
+                    <LuFolderSymlink style={{ fontSize: '18px', color: '#8d99ae' }} />
+                    <Box sx={{ fontSize: '12px' }}>
                       {obj.propertyName?.replace(/\(s\)/g, '')}
                     </Box>
-                    <Box sx={{ fontSize: '12.8px', color: '#666' }}>
+                    <Box sx={{ fontSize: '12px', color: '#666' }}>
                       ({obj.items?.length})
                     </Box>
                   </Box>
@@ -537,10 +549,10 @@ const LinkedObjectsTree = ({
                   gap: 1, // Using gap instead of margins
                   ...BOX_STYLES
                 }}>
-                  <i className="fa-solid fa-book-open" style={{ fontSize: '14px', color: '#8d99ae' }} />
-                  <Box sx={{ fontSize: '12.8px' }}>Document</Box>
+                  <BsFiles style={{ fontSize: '18px', color: '#8d99ae' }} />
+                  <Box sx={{ fontSize: '12px' }}>Document</Box>
                   {documents.map((doc) => (
-                    <Box key={doc.propertyName} sx={{ fontSize: '12.8px', color: '#666' }}>
+                    <Box key={doc.propertyName} sx={{ fontSize: '12px', color: '#666' }}>
                       ({doc.items.length})
                     </Box>
                   ))}

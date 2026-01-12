@@ -44,6 +44,7 @@ const PropertiesList = ({
 }) => {
     const [classDialogOpen, setClassDialogOpen] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Create a flat list of all available classes
     const allClasses = useMemo(() => {
@@ -96,19 +97,19 @@ const PropertiesList = ({
         }));
     };
 
-    // Initialize all groups as expanded when dialog opens
+    // Initialize all groups as collapsed when dialog opens
     const handleOpenDialog = () => {
-        const initialExpanded = {};
-        if (groupedItems) {
-            groupedItems.forEach(group => {
-                initialExpanded[group.classGroupId] = true;
-            });
-        }
-        if (ungroupedItems && ungroupedItems.length > 0) {
-            initialExpanded['ungrouped'] = true;
-        }
-        setExpandedGroups(initialExpanded);
+        setExpandedGroups({});
+        setSearchTerm('');
         setClassDialogOpen(true);
+    };
+
+    // Filter classes based on search term
+    const filterMembers = (members) => {
+        if (!searchTerm) return members;
+        return members.filter(member => 
+            member.className.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     };
 
     return (
@@ -232,12 +233,61 @@ const PropertiesList = ({
                     <i className="fas fa-folder-plus mx-2"></i>
                     Select Class
                 </DialogTitle>
-                <DialogContent sx={{ pt: 2, px: 2 }}>
-                    <List sx={{ p: 0 }}>
+                <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '500px' }}>
+                    {/* Search Bar - Fixed */}
+                    <Box sx={{ px: 2, pt: 2, pb: 2, backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                border: '1px solid #c4c4c4',
+                                borderRadius: '4px',
+                                padding: '8px 12px',
+                                backgroundColor: 'white',
+                                '&:focus-within': {
+                                    borderColor: '#2757aa',
+                                }
+                            }}
+                        >
+                            <i className="fas fa-search" style={{ color: '#555b6e', fontSize: '14px', marginRight: '8px' }}></i>
+                            <input
+                                type="text"
+                                placeholder="Search classes..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    border: 'none',
+                                    outline: 'none',
+                                    width: '100%',
+                                    fontSize: '13px',
+                                    color: '#555b6e',
+                                    backgroundColor: 'transparent'
+                                }}
+                            />
+                            {searchTerm && (
+                                <i 
+                                    className="fas fa-times" 
+                                    onClick={() => setSearchTerm('')}
+                                    style={{ 
+                                        color: '#555b6e', 
+                                        fontSize: '14px', 
+                                        cursor: 'pointer',
+                                        marginLeft: '8px'
+                                    }}
+                                ></i>
+                            )}
+                        </Box>
+                    </Box>
+                    
+                    {/* Scrollable List Container */}
+                    <Box sx={{ flex: 1, overflowY: 'auto', px: 2 }}>
+                        <List sx={{ p: 0, py: 1 }}>
                         {/* Grouped Classes */}
                         {groupedItems && groupedItems.map((group) => {
-                            const filteredMembers = group.members.filter(
-                                member => member.userPermission?.attachObjectsPermission
+                            const filteredMembers = filterMembers(
+                                group.members.filter(
+                                    member => member.userPermission?.attachObjectsPermission
+                                )
                             );
 
                             if (filteredMembers.length === 0) return null;
@@ -305,8 +355,14 @@ const PropertiesList = ({
                         })}
 
                         {/* Ungrouped Classes */}
-                        {ungroupedItems && ungroupedItems.length > 0 &&
-                            ungroupedItems.filter(member => member.userPermission?.attachObjectsPermission).length > 0 && (
+                        {ungroupedItems && ungroupedItems.length > 0 && (() => {
+                            const filteredUngrouped = filterMembers(
+                                ungroupedItems.filter(member => member.userPermission?.attachObjectsPermission)
+                            );
+                            
+                            if (filteredUngrouped.length === 0) return null;
+                            
+                            return (
                                 <Box>
                                     <ListItem
                                         button
@@ -337,38 +393,38 @@ const PropertiesList = ({
                                     </ListItem>
                                     <Collapse in={expandedGroups['ungrouped']} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
-                                            {ungroupedItems
-                                                .filter(member => member.userPermission?.attachObjectsPermission)
-                                                .map((member) => (
-                                                    <ListItem
-                                                        button
-                                                        key={member.classId}
-                                                        onClick={() => handleClassSelect(member.classId, member.className)}
-                                                        sx={{
-                                                            pl: 4,
-                                                            py: 1,
-                                                            '&:hover': {
-                                                                backgroundColor: '#f0f4f8'
-                                                            },
-                                                            backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent'
-                                                        }}
-                                                    >
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <i
-                                                                className={`fas ${selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
-                                                                style={{ color: '#2a68af', fontSize: '16px' }}
-                                                            />
-                                                            <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
-                                                                {member.className}
-                                                            </Typography>
-                                                        </Box>
-                                                    </ListItem>
-                                                ))}
+                                            {filteredUngrouped.map((member) => (
+                                                <ListItem
+                                                    button
+                                                    key={member.classId}
+                                                    onClick={() => handleClassSelect(member.classId, member.className)}
+                                                    sx={{
+                                                        pl: 4,
+                                                        py: 1,
+                                                        '&:hover': {
+                                                            backgroundColor: '#f0f4f8'
+                                                        },
+                                                        backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent'
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <i
+                                                            className={`fas ${selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
+                                                            style={{ color: '#2a68af', fontSize: '16px' }}
+                                                        />
+                                                        <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
+                                                            {member.className}
+                                                        </Typography>
+                                                    </Box>
+                                                </ListItem>
+                                            ))}
                                         </List>
                                     </Collapse>
                                 </Box>
-                            )}
+                            );
+                        })()}
                     </List>
+                    </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button

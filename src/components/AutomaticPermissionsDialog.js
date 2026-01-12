@@ -13,9 +13,10 @@ import {
   TableRow,
   Paper
 } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faTimes, faXmark } from '@fortawesome/free-solid-svg-icons';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { FaTimes } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
+import { FaXmark } from "react-icons/fa6";
+import { MdLockOutline } from "react-icons/md";
 
 const AutomaticPermissionsDialog = ({ open, onClose, permissions }) => {
   if (!permissions) return null;
@@ -36,13 +37,9 @@ const AutomaticPermissionsDialog = ({ open, onClose, permissions }) => {
   };
 
   const renderIcon = (val) => (
-    <FontAwesomeIcon
-      icon={val ? faCheck : faTimes}
-      style={{
-        color: val ? '#2e7d32' : '#d32f2f',
-        fontSize: '15px',
-      }}
-    />
+    <>
+      {val ? <FaCheck style={{ color: '#2e7d32', fontSize: '15px' }} /> : <FaTimes style={{ color: '#d32f2f', fontSize: '15px' }} />}
+    </>
   );
 
   return (
@@ -66,10 +63,10 @@ const AutomaticPermissionsDialog = ({ open, onClose, permissions }) => {
         }}
       >
         <Typography variant="subtitle1" sx={{ fontWeight: 'normal' }}>
-           <LockOutlinedIcon sx={{ fontSize: 18, color: '#9e9e9e' }} className='mx-2' /> Automatic Permissions
+           <MdLockOutline style={{ fontSize: 18, color: '#9e9e9e' }} className='mx-2' /> Automatic Permissions
         </Typography>
         <IconButton size="small" onClick={onClose}>
-          <FontAwesomeIcon icon={faXmark} />
+          <FaXmark />
         </IconButton>
       </Box>
 

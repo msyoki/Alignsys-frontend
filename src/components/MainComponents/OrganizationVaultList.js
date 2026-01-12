@@ -27,6 +27,9 @@ import {
 } from "@mui/icons-material";
 import AttachExistingVault from "../AttachExistingVault";
 
+import { FaDatabase } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa";
+
 function OrganizationVaultList(props) {
   const [expanded, setExpanded] = useState([]);
   const { authTokens, user } = useContext(Authcontext);
@@ -202,7 +205,7 @@ function OrganizationVaultList(props) {
           alignItems: 'center',
           gap: 1
         }}>
-          <i className="fa-solid fa-database" style={{ fontSize: '18px' }}></i>
+          <FaDatabase style={{ fontSize: '18px' }} />
           Create New Repository
         </DialogTitle>
 
@@ -243,7 +246,7 @@ function OrganizationVaultList(props) {
             onClick={handleSubmit}
             variant="contained"
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={16} sx={{ color: '#555' }} /> : <i className="fa-solid fa-plus" style={{ fontSize: '12px' }}></i>}
+            startIcon={loading ? <CircularProgress size={16} sx={{ color: '#555' }} /> : <FaPlus style={{ fontSize: '12px' }} />}
             sx={{
               textTransform: 'none',
               backgroundColor: '#2757aa',
@@ -267,7 +270,7 @@ function OrganizationVaultList(props) {
         backgroundColor: '#eef2f7'
       }} className='shadow-lg'>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <i className="fa-solid fa-database" style={{ color: '#2757aa ', fontSize: 20 }}></i>
+          <FaDatabase style={{ color: '#2757aa', fontSize: 20 }} />
           <Typography sx={{
             fontWeight: 500,
             color: '#555',
@@ -291,7 +294,7 @@ function OrganizationVaultList(props) {
               px: 2
             }}
           >
-            <i className="fa-solid fa-plus"></i>
+            <FaPlus style={{ fontSize: '12px' }} />
             <span className="mx-1">New Repo</span>
           </Button>
 
@@ -382,13 +385,8 @@ function OrganizationVaultList(props) {
                           justifyContent: 'center',
                           flexShrink: 0
                         }}>
-                          <i
-                            className="fa-solid fa-database"
-                            style={{
-                              fontSize: "10px",
-                              color: 'white'
-                            }}
-                          />
+                     
+                          <FaDatabase style={{ fontSize: "10px", color: 'white' }} />
                         </Box>
                         <Typography sx={{
                           fontWeight: 500,

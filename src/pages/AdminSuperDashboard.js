@@ -44,21 +44,18 @@ import { People, Timeline } from "@mui/icons-material";
 
 // Other components
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-import ObjComponent from '../components/Admin/ObjStructureComponent';
-import MiniLoader from '../components/Modals/MiniLoaderDialog';
-import OrganizationVaultList from '../components/MainComponents/OrganizationVaultList';
-import OrganizationUsersTable from '../components/Tables/OrganizationUsers';
-import VaultUsersTable from '../components/Tables/VaultUsers';
-import PermissionDialog from '../components/Modals/VaultObjectPermissionsDialog';
-import AddPermissionDialog from '../components/Modals/AddVaultObjectPermissionDialog';
-import GroupUsersDialog from '../components/Modals/ManageGoupUsersDialog';
-import LoginActivityTable from '../components/LoginActivity';
-import { toSentenceCase } from '../components/Utils/Utils';
+
+import { FaArrowLeft } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa6";
+import { FaDatabase } from "react-icons/fa6";
+import { FaLayerGroup } from "react-icons/fa6";
+import { FaUsers } from "react-icons/fa6";
 
 // Constants and utilities
 import * as constants from '../components/Auth/configs';
 import logo from '../images/TechEdgeLogo.png';
-import VaultFormDialog from '../components/Modals/AddVaultModal';
+
 import RegisterVaultUsersForm from '../components/Registration/Register_vault_and _newUsers';
 
 // ============= CONSTANTS =============
@@ -228,7 +225,9 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                     {/* Menu Items */}
                     <ul className="menu-items">
                         <li onClick={onNavigateHome} className="menu-item main-li shadow-lg">
-                            <i className="fa-solid fa-arrow-left" style={{ fontSize: "18px" }}></i>
+                           
+                            <FaArrowLeft style={{ fontSize: "18px" }} />    
+
                             <span style={{ fontSize: "14px" }}>Return Home</span>
                         </li>
 
@@ -237,7 +236,7 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                         <ul className="bottom-buttons">
 
                             <li onClick={onLogout} className="menu-item main-li shadow-lg">
-                                <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
+                                <FaSignOutAlt style={{ fontSize: "18px" }} />
                                 <span style={{ fontSize: "14px" }}>Logout</span>
                             </li>
                         </ul>
@@ -296,7 +295,8 @@ const PropertyRow = memo(({ property, index, onPropertyChange, onRemoveProperty 
         </Grid>
         <Grid item xs={12} sm={2}>
             <ButtonComponent onClick={() => onRemoveProperty(index)} sx={STYLES.smallButtonStyle}>
-                <i className="fas fa-trash mx-1"></i> Remove Property
+                <FaTrash style={{ fontSize: "18px" }} />
+             Remove Property
             </ButtonComponent>
         </Grid>
     </Grid>
@@ -314,7 +314,7 @@ const HeaderBox = memo(({ children, className, sx = {} }) => (
 const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
     <>
         <h6 className='shadow-lg p-3'>
-            <i className="fa-solid fa-database mx-2" style={{ fontSize: '13px', color: '#2757aa' }}></i>
+            <FaDatabase style={{ fontSize: '13px', color: '#2757aa' }} />
             {selectedVault.name} ( Vault Objects )
         </h6>
         <div id='vaultobjects' style={{ fontSize: '13px', marginBottom: '20px' }}>
@@ -330,7 +330,7 @@ const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
                         {vaultObjects.map((row) => (
                             <TableRow key={row.object_id}>
                                 <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '13px', color: '#2a68af' }}></i>
+                                    <FaLayerGroup style={{ fontSize: '13px', color: '#2a68af' }} />
                                     {row.name_singular}
                                 </TableCell>
                                 <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
@@ -346,7 +346,7 @@ const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
 const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers }) => (
     <div id='permissions' style={{ fontSize: '13px', marginBottom: '20px' }}>
         <h6 className='shadow-lg p-2'>
-            <i className="fa-solid fa-database mx-2" style={{ fontSize: '13px' }}></i>
+            <FaDatabase style={{ fontSize: '13px', color: '#2757aa' }} />
             {selectedVault.name} ( User Groups )
         </h6>
         <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>
@@ -359,7 +359,8 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                 className='my-2'
             >
                 <small>
-                    <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group
+
+                    <FaUsers style={{ fontSize: '11px', cursor: 'pointer' }} /> Add New User Group
                 </small>
             </Button>
             <Table className='table-sm p-3' sx={{ minWidth: 300 }} aria-label="simple table">
@@ -374,7 +375,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                     {userGroups.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                <i className="fas fa-users mx-2" style={{ fontSize: '13px', color: '#2a68af' }}></i>
+                                <FaUsers style={{ fontSize: '13px', color: '#2a68af' }} />
                                 {row.title}
                             </TableCell>
                             <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
@@ -387,7 +388,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                                     style={{ textTransform: 'none' }}
                                 >
                                     <small>
-                                        <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users
+                                        <FaUsers style={{ fontSize: '11px', cursor: 'pointer' }} /> Manage Users
                                     </small>
                                 </Button>
                             </TableCell>

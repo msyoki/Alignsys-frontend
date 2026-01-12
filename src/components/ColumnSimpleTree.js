@@ -8,6 +8,9 @@ import FileExtIcon from './FileExtIcon';
 import { formatDate } from './Utils/Utils'
 import CheckOutStatusBadgeIcon from './CheckoutStatusBadge';
 
+import { FaBook } from "react-icons/fa";
+import { FaFolder } from "react-icons/fa6";
+
 
 const ColumnSimpleTree = ({
 
@@ -27,6 +30,7 @@ const ColumnSimpleTree = ({
   setSelectedItemId,
   renderHeight,
   a11yProps,
+  handleTabAction,
 
   // Column visibility
   showNameColumn = true,
@@ -45,13 +49,13 @@ const ColumnSimpleTree = ({
   statusColumnLabel = "Status",
 
   // Font sizes
-  nameColumnFontSize = 12.5,
+  nameColumnFontSize = 12,
   dateColumnFontSize = 12,
   objectTypeNameFontSize = 12,
   sizeColumnFontSize = 12,
   ownerColumnFontSize = 12,
-  statusColumnFontSize = 11,
-  headerFontSize = 11.5
+  statusColumnFontSize = 12,
+  headerFontSize = 12
 }) => {
 
   // State
@@ -278,43 +282,7 @@ const ColumnSimpleTree = ({
         {isDocument && item.isSingleFile ? (
           <>
             {item.isCheckedOut ? (
-              // <Badge
-              //   overlap="circular"
-              //   badgeContent={
-              //     <i
-              //       className="fas fa-check-circle"
-              //       style={{
-              //         color: '#3fa34d', //#f21b3f red 
-              //         fontSize: '8px',                 // slightly sharper rendering
-              //         textShadow: '0 0 1px #fff, 0 0 1px #fff, 0 0 2px #fff', // 
-              //         filter: 'drop-shadow(0 0 0.5px #fff)',                  // subtle extra edge
-              //       }}
-              //     ></i>
-              //   }
-              //   anchorOrigin={{
-              //     vertical: 'bottom',
-              //     horizontal: 'left',
-              //   }}
-              //   sx={{
-              //     '.MuiBadge-badge': {
-              //       background: 'transparent',
-              //       padding: 0,
-              //       marginBottom: '-3px',  // fine-tuned for icon shape alignment
-              //       marginLeft: '-5px',
-              //       minWidth: 0,
-              //       height: 'auto',
-              //       boxShadow: 'none',
-              //     },
-              //   }}
-              // >
-              //   <FileExtIcon
-              //     fontSize={17}
-              //     guid={selectedVault?.guid}
-              //     objectId={item.id}
-              //     classId={classId}
-              //     version={item.versionId}
-              //   />
-              // </Badge>
+    
               <CheckOutStatusBadgeIcon
                 color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
                 icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
@@ -322,7 +290,7 @@ const ColumnSimpleTree = ({
                 offsetY="-3px"
               >
                 <FileExtIcon
-                  fontSize={17}
+                  fontSize={18}
                   guid={selectedVault?.guid}
                   objectId={item.id}
                   classId={classId}
@@ -334,7 +302,7 @@ const ColumnSimpleTree = ({
 
             ) : (
               <FileExtIcon
-                fontSize={17}
+                fontSize={18}
                 guid={selectedVault?.guid}
                 objectId={item.id}
                 classId={classId}
@@ -343,14 +311,13 @@ const ColumnSimpleTree = ({
           </>
 
         ) : (
-          <Box
-            component="i"
-            className={isDocument ? 'fas fa-book' : 'fa-solid fa-folder'}
-            sx={{
-              fontSize: 15,
-              color: isDocument ? '#7cb518' : '#2a68af',
-            }}
-          />
+          <Box sx={{ fontSize: 18, color: isDocument ? '#7cb518' : '#2a68af', display: 'flex', alignItems: 'center' }}>
+            {isDocument ? (
+              <FaBook size={18} color="#7cb518" />
+            ) : (
+              <FaFolder size={18} color="#2a68af" />
+            )}
+          </Box>
         )}
 
         <Tooltip title={getTooltipTitle?.(item) ?? item.title ?? ''} placement="right" arrow>
@@ -535,7 +502,7 @@ const ColumnSimpleTree = ({
             ...(col.flex ? { flex: 1 } : { width: columnWidths[col.width] || 160, flexShrink: 0 }),
             backgroundColor: isSelected ? '#e5e5e5 !important' : '#fff !important',
             transition: isDragging ? 'none' : 'width 200ms ease-in-out',
-            fontSize: col.fontSize || 13,
+            fontSize: col.fontSize || 11,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -575,6 +542,7 @@ const ColumnSimpleTree = ({
           <Box onContextMenu={e => {
             e.preventDefault();
             onItemRightClick?.(e, item);
+            console.log('Right-clicked item:', item);
           }} sx={{ display: 'flex', alignItems: 'center', width: '100%', minHeight: 20 }}>
             {visibleColumns.map((col, idx) => renderRowCell(col, item, idx))}
           </Box>
@@ -582,6 +550,8 @@ const ColumnSimpleTree = ({
       >
         {!item.isSingleFile && (
           <MultifileFiles
+            onItemClick={onItemClick}
+            onItemDoubleClick={onItemDoubleClick}
             item={item}
             selectedItemId={selectedItemId}
             setSelectedItemId={setSelectedItemId}
@@ -591,6 +561,9 @@ const ColumnSimpleTree = ({
             setExtension={setExtension}
             setLoadingFile={setLoadingFile}
             a11yProps={a11yProps}
+            fontSize={18}
+            mfilesId={mfilesId}
+            handleTabAction={handleTabAction}
           />
         )}
         <LinkedObjectsTree

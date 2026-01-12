@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import DynamicFileViewer from '../Viewer/DynamicFileViewer';
-import SignButton from '../SignDocument';
 import axios from 'axios';
 import * as constants from '../Auth/configs';
 import LookupMultiSelect from '../CustomFormTags/UpdateObjectLookupMultiSelect';
 import LookupSelect from '../CustomFormTags/UpdateObjectLookup';
-import LinearProgress from '@mui/material/LinearProgress';
-import { Dialog,DialogContent,DialogTitle,DialogActions,Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, CircularProgress, Badge, IconButton, Collapse } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, DialogActions, Tabs, Tab, Box, List, ListItem, Typography, Select, MenuItem, Button, Checkbox, FormControlLabel, FormGroup, CircularProgress, Badge, IconButton, Collapse } from '@mui/material';
 import Bot from '../Bot/Bot';
 
 import CommentsComponent from '../CommentsComponent';
@@ -16,15 +14,16 @@ import FileExtText from '../FileExtText';
 import ConfirmDeleteObject from '../Modals/ConfirmDeleteObject';
 import TimedAlert from '../TimedAlert';
 import { Tooltip } from '@mui/material';
-import BotLLM from '../Bot/BotLLM';
 import { ResizableTextarea } from '../CustomFormTags/ResizableTextArea';
-import AllyBotMessage from '../AllyText';
 import AnimatedAndroidIcon from '../Modals/AnimatedBot';
 import CheckOutStatusBadgeIcon from '../CheckoutStatusBadge';
-import PermissionsCard from '../AutomaticPermissionsButton';
 import AutomaticPermissionsButton from '../AutomaticPermissionsButton';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import MetadataClassChange from '../MetadataClassChange';
+import { FaFolderPlus } from "react-icons/fa6";
+import { FaFileCirclePlus } from "react-icons/fa6";
+import { FaInfoCircle } from "react-icons/fa";
+import { FaBook } from "react-icons/fa";
+import { FaFolder } from "react-icons/fa";
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -883,7 +882,7 @@ const ObjectData = (props) => {
             py: 2
           }}
         >
-          <i className="fas fa-folder-plus mx-2"></i>
+          <FaFolderPlus className="mx-2" />
           Select Class
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 2 }}>
@@ -942,10 +941,9 @@ const ObjectData = (props) => {
                           }}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <i
-                              className={`fas ${props.selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
-                              style={{ color: '#2a68af', fontSize: '16px' }}
-                            />
+
+                            {props.selectedObjectId === 0 ? <FaFileCirclePlus style={{ color: '#2a68af', fontSize: '16px' }} /> : <FaFolderPlus style={{ color: '#2a68af', fontSize: '16px' }} />}
+
                             <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
                               {member.className}
                             </Typography>
@@ -1008,10 +1006,8 @@ const ObjectData = (props) => {
                             }}
                           >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <i
-                                className={`fas ${props.selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
-                                style={{ color: '#2a68af', fontSize: '16px' }}
-                              />
+                              {props.selectedObjectId === 0 ? <FaFileCirclePlus style={{ color: '#2a68af', fontSize: '16px' }} /> : <FaFolderPlus style={{ color: '#2a68af', fontSize: '16px' }} />}
+
                               <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
                                 {member.className}
                               </Typography>
@@ -1096,7 +1092,7 @@ const ObjectData = (props) => {
                 justifyContent: 'center',
                 mx: 'auto'
               }}>
-                <i className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+                <FaInfoCircle className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
                 {props.loadingobject ? (
                   <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
                     <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Loading metadata<span>.</span><span>.</span><span>.</span>
@@ -1192,24 +1188,29 @@ const ObjectData = (props) => {
                               overflow: 'hidden',
                             }}
                           >
-                            <i
-                              className={
-                                (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
-                                  props.selectedObject.isSingleFile === false
-                                  ? 'fas fa-book'
-                                  : 'fa-solid fa-folder'
-                              }
-                              style={{
-                                color:
-                                  (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
-                                    props.selectedObject.isSingleFile === false
-                                    ? '#7cb518'
-                                    : '#2a68af',
-                                fontSize: '25px',
-                                marginRight: '10px',
-                                flexShrink: 0,
-                              }}
-                            />
+                            {(
+                              (props.selectedObject.objectTypeId === 0 ||
+                                props.selectedObject.objectID === 0) &&
+                              props.selectedObject.isSingleFile === false
+                            ) ? (
+                              <FaBook
+                                style={{
+                                  color: '#7cb518',
+                                  fontSize: '25px',
+                                  marginRight: '10px',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            ) : (
+                              <FaFolder
+                                style={{
+                                  color: '#2a68af',
+                                  fontSize: '25px',
+                                  marginRight: '10px',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
 
                             <Box
                               sx={{

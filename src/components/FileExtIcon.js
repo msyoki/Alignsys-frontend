@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as constants from './Auth/configs';
+import { FaRegFilePdf } from "react-icons/fa6";
+import { BsFiletypeCsv } from "react-icons/bs";
+import { FaRegFileWord } from "react-icons/fa6";
+import { BsFiletypeTxt } from "react-icons/bs";
+import { FaEnvelope } from "react-icons/fa";
+import { FaInternetExplorer } from "react-icons/fa";
+import { BsFiletypePptx } from "react-icons/bs";
+import { VscVscode } from "react-icons/vsc";
+import { CiFileOn } from "react-icons/ci";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
+import { CiImageOn } from "react-icons/ci";
+import { HiOutlineAnnotation } from "react-icons/hi";
 
 const FileExtIcon = (props) => {
   const [extension, setExtension] = useState(null);
@@ -46,7 +58,7 @@ const FileExtIcon = (props) => {
   }, [props.guid, props.objectId, props.classId, props.version ?? null]); // Removed props.isMultifile as it's not used
 
   const iconStyle = {
-    fontSize: props.fontSize || '20px',
+    fontSize: props.fontSize || '15px',
   };
 
   if (loading) {
@@ -62,32 +74,34 @@ const FileExtIcon = (props) => {
   // Render icons based on extension
   switch (extension) {
     case 'pdf':
-      return <i className="fa-regular fa-file-pdf shadow-sm" style={{ ...iconStyle, color: '#f21b3f' }}></i>;
+      return <FaRegFilePdf style={{ ...iconStyle, color: '#f21b3f' }} />;
     case 'csv':
-      return <i className="fas fa-file-csv shadow-sm" style={{ ...iconStyle, color: '#7cb518' }}></i>;
+      return <BsFiletypeCsv style={{ ...iconStyle, color: '#7cb518' }} />;
     case 'txt':
-      return <i className="fas fa-file-alt shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
+      return <BsFiletypeTxt style={{ ...iconStyle, color: '#555b6e' }} />;
     case 'msg':
-      return <i className="fa-solid fa-envelope shadow-sm" style={{ ...iconStyle, color: '#ffb703' }}></i>;
+      return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
     case 'webp':
-      return <i className="fa-brands fa-internet-explorer shadow-sm" style={{ ...iconStyle, color: '#2757aa' }}></i>;
+      return <FaInternetExplorer style={{ ...iconStyle, color: '#2757aa' }} />;
     case 'xlsx':
     case 'xls':
-      return <i className="far fa-file-excel shadow-sm" style={{ ...iconStyle, color: '#217045' }}></i>;
+      return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
     case 'ppt':
     case 'pptx':
-      return <i className="fa-solid fa-file-powerpoint shadow-sm" style={{ ...iconStyle, color: '#d34628' }}></i>;
+      return <BsFiletypePptx style={{ ...iconStyle, color: '#d34628' }} />;
     case 'docx':
     case 'doc':
-      return <i className="fas fa-file-word shadow-sm" style={{ ...iconStyle, color: '#35558b' }}></i>;
+      return <FaRegFileWord style={{ ...iconStyle, color: '#35558b' }} />;
     case 'png':
     case 'jpeg':
     case 'jpg':
-      return <i className="fas fa-file-image shadow-sm" style={{ ...iconStyle, color: '#2a68af' }}></i>;
+      return <CiImageOn style={{ ...iconStyle, color: '#2a68af' }} />;
+    case 'xfdf':
+      return <HiOutlineAnnotation style={{ ...iconStyle, color: '#ffb703' }} />;
     case 'vssettings':
-      return <i className="fa-solid fa-file-code shadow-sm" style={{ ...iconStyle, color: '#555b6e' }}></i>;
+      return <VscVscode style={{ ...iconStyle, color: '#555b6e' }} />;
     default:
-      return <i className="fas fa-file shadow-sm" style={{ ...iconStyle, color: '#e5e5e5' }}></i>;
+      return <CiFileOn style={{ ...iconStyle, color: '#e5e5e5' }} />;
   }
 };
 

@@ -19,6 +19,9 @@ import {
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import logo from '../../../images/ZFWHITE.png';
 
+import { FaFolderPlus } from "react-icons/fa6";
+import { FaFileCirclePlus } from "react-icons/fa6";
+
 const ClassSelectionDialog = ({
     open,
     onClose,
@@ -37,7 +40,7 @@ const ClassSelectionDialog = ({
     useEffect(() => {
         if (open && (groupedItems || ungroupedItems)) {
             const initialExpanded = {};
-            
+
             if (groupedItems) {
                 groupedItems.forEach(group => {
                     initialExpanded[group.classGroupId] = false;
@@ -47,7 +50,7 @@ const ClassSelectionDialog = ({
             if (ungroupedItems && ungroupedItems.length > 0) {
                 initialExpanded['ungrouped'] = false;
             }
-            
+
             setExpandedGroups(initialExpanded);
         }
     }, [open, groupedItems, ungroupedItems]);
@@ -103,15 +106,11 @@ const ClassSelectionDialog = ({
                 <img src={logo} alt="Loading" width="130px" className="mx-3" />
                 <span className="flex items-center mx-3">
                     {selectedObjectId === 0 ? (
-                        <i
-                            style={{ color: "#fff", fontSize: "20px" }}
-                            className="fa-solid fa-file-circle-plus mx-1"
-                        ></i>
+
+                        <FaFileCirclePlus style={{ color: "#fff", fontSize: "20px" }} className="mx-1" />
                     ) : (
-                        <i
-                            style={{ color: "#fff", fontSize: "20px" }}
-                            className="fas fa-folder-plus mx-1"
-                        ></i>
+                        <FaFolderPlus style={{ color: "#fff", fontSize: "20px" }} className="mx-1" />
+
                     )}{" "}
                     Select {selectedObjectName} Class
                 </span>
@@ -193,7 +192,7 @@ const ClassSelectionDialog = ({
                                     {/* Grouped Classes */}
                                     {groupedItems.map((group) => {
                                         const filteredMembers = filterItems(group.members);
-                                        
+
                                         if (filteredMembers.length === 0) return null;
 
                                         return (
@@ -227,7 +226,7 @@ const ClassSelectionDialog = ({
                                                         )}
                                                     </Box>
                                                 </ListItem>
-                                                
+
                                                 <Collapse in={expandedGroups[group.classGroupId]} timeout="auto" unmountOnExit>
                                                     <List component="div" disablePadding className="ml-2">
                                                         {filteredMembers.map((member) => (
@@ -253,17 +252,23 @@ const ClassSelectionDialog = ({
                                                                 }}
                                                             >
                                                                 <ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
-                                                                    <i
-                                                                        className={`fas ${selectedObjectId === 0
-                                                                            ? "fa-file-circle-plus"
-                                                                            : "fa-folder-plus"
-                                                                        }`}
-                                                                        style={{
-                                                                            color: "#2a68af",
-                                                                            fontSize: "15px",
-                                                                        }}
-                                                                    />
+                                                                    {selectedObjectId === 0 ? (
+                                                                        <FaFileCirclePlus
+                                                                            style={{
+                                                                                color: "#2a68af",
+                                                                                fontSize: "15px",
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <FaFolderPlus
+                                                                            style={{
+                                                                                color: "#2a68af",
+                                                                                fontSize: "15px",
+                                                                            }}
+                                                                        />
+                                                                    )}
                                                                 </ListItemIcon>
+
                                                                 <ListItemText
                                                                     sx={{
                                                                         "& .MuiTypography-root": { fontSize: "13px" },
@@ -311,7 +316,7 @@ const ClassSelectionDialog = ({
                                                         )}
                                                     </Box>
                                                 </ListItem>
-                                                
+
                                                 <Collapse in={expandedGroups['ungrouped']} timeout="auto" unmountOnExit>
                                                     <List component="div" disablePadding className="ml-2">
                                                         {filterItems(ungroupedItems).map((member) => (
@@ -337,16 +342,22 @@ const ClassSelectionDialog = ({
                                                                 }}
                                                             >
                                                                 <ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
-                                                                    <i
-                                                                        className={`fas ${selectedObjectId === 0
-                                                                            ? "fa-file-circle-plus"
-                                                                            : "fa-folder-plus"
-                                                                        }`}
-                                                                        style={{
-                                                                            color: "#2a68af",
-                                                                            fontSize: "15px",
-                                                                        }}
-                                                                    />
+                                                                 
+                                                                     {selectedObjectId === 0 ? (
+                                                                        <FaFileCirclePlus
+                                                                            style={{
+                                                                                color: "#2a68af",
+                                                                                fontSize: "15px",
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <FaFolderPlus
+                                                                            style={{
+                                                                                color: "#2a68af",
+                                                                                fontSize: "15px",
+                                                                            }}
+                                                                        />
+                                                                    )}
                                                                 </ListItemIcon>
                                                                 <ListItemText
                                                                     sx={{
