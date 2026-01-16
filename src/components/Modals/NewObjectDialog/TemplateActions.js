@@ -1,7 +1,8 @@
 import React from 'react';
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import FileExtIcon from '../../FileExtIcon';
-import FileExtText from '../../FileExtText';
+import FileExtText from '../../FileExtText';import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const TemplateActions = ({
     templateIsTrue,
@@ -15,7 +16,7 @@ const TemplateActions = ({
             <a
                 href="#"
                 style={{
-                    color: '#2757aa',
+                    color: THEME_COLORS.primary,
                     textDecoration: 'none',
                     transition: 'color 0.2s ease'
                 }}
@@ -90,7 +91,7 @@ const TemplateActions = ({
                     </ListItem>
                 ))
             ) : (
-                <p className="text-center my-2" style={{ color: "#2757aa" }}>
+                <p className="text-center my-2" style={{ color: THEME_COLORS.primary }}>
                     No templates available
                 </p>
             )}

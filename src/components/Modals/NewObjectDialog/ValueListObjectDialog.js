@@ -14,6 +14,8 @@ import logo from '../../../images/ZFWHITE.png';
 import FileUploadComponent from '../../FileUpload';
 import PropertiesList from './PropertiesList';
 import TemplateActions from './TemplateActions';
+import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const ValueListObjectDialog = ({
     open,
@@ -43,7 +45,7 @@ const ValueListObjectDialog = ({
         <Dialog open={open} maxWidth='xl'>
             <DialogTitle
                 className='p-2 d-flex justify-content-between align-items-center'
-                style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
             >
                 <img className="mx-3" src={logo} alt="Loading" width="180px" />
                 <span className="ml-auto mx-3">
@@ -85,7 +87,7 @@ const ValueListObjectDialog = ({
 
             <DialogActions
                 style={{
-                    backgroundColor: '#ecf4fc',
+                    backgroundColor: THEME_COLORS.surfaceLight,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
@@ -108,7 +110,7 @@ const ValueListObjectDialog = ({
                                 <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
                                     <a
                                         href="#"
-                                        style={{ color: '#2757aa', textDecoration: 'none', fontSize: '14.5px' }}
+                                        style={{ color: THEME_COLORS.primary, textDecoration: 'none', fontSize: '14.5px' }}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             onDontUseTemplates();
@@ -125,7 +127,7 @@ const ValueListObjectDialog = ({
                                             <Typography
                                                 variant="caption"
                                                 sx={{
-                                                    color: '#2757aa',
+                                                    color: THEME_COLORS.primary,
                                                     fontWeight: 600,
                                                     fontSize: '12px',
                                                     mb: 0.5,

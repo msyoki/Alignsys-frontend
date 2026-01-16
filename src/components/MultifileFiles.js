@@ -25,6 +25,7 @@ import OfficeApp from './Modals/OfficeAppDialog';
 import TimedAlert from './TimedAlert';
 import PdfMergeDialog from './Modals/PdfMergeDialog';
 import PdfConversionDialog from './Modals/PdfConversionDialog';
+import {THEME_COLORS} from '../constants/themeColors';
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -98,7 +99,7 @@ const MultifileFiles = React.memo((props) => {
             case 'msg':
                 return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
             case 'webp':
-                return <FaInternetExplorer style={{ ...iconStyle, color: '#2757aa' }} />;
+                return <FaInternetExplorer style={{ ...iconStyle, color: THEME_COLORS.primary }} />;
             case 'xlsx':
             case 'xls':
                 return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
@@ -461,7 +462,9 @@ const MultifileFiles = React.memo((props) => {
             }
             props.a11yProps(1);
             props.setBlob(blobData);
+            console.log("Blob data:", blobData);
             props.setLoadingFile(false);
+            console.log("File downloaded successfully");
         } catch (error) {
             props.setLoadingFile(false);
             console.error("Download failed:", error);

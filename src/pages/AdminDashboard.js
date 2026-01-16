@@ -18,6 +18,8 @@ import '../styles/Dashboard.css';
 import '../styles/Custombuttons.css';
 import '../styles/Navbar.css';
 
+import { THEME_COLORS } from '../constants/themeColors';
+import { THEME_CONFIG } from '../config/theme.config';
 // Material-UI components
 import {
     Typography,
@@ -101,7 +103,7 @@ const STYLES = {
     headerBox: {
         fontSize: '12.8px',
         backgroundColor: '#fff',
-        color: '#2757aa',
+        color: THEME_COLORS.primary,
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
@@ -323,7 +325,7 @@ const HeaderBox = memo(({ children, className, sx = {} }) => (
 const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
     <>
         <h6 className='shadow-lg p-3'>
-            <i className="fa-solid fa-database mx-2" style={{ fontSize: '12.8px', color: '#2757aa' }}></i>
+            <i className="fa-solid fa-database mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
             {selectedVault.name} ( Vault Objects )
         </h6>
         <div id='vaultobjects' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
@@ -860,11 +862,11 @@ function AdminDashboard() {
                                             },
                                         }}
                                     >
-                                        <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: '#2757aa' }} />
+                                        <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: THEME_COLORS.primary }} />
                                     </Box>
 
                                     <img
-                                        src={logo2}
+                                        src={THEME_CONFIG.logos.brandLogo}
                                         alt="Logo"
                                         width="auto"
                                         height="30"
@@ -881,7 +883,7 @@ function AdminDashboard() {
                                         sx={{
                                             width: 36,
                                             height: 36,
-                                            backgroundColor: '#2757aa',
+                                            backgroundColor: THEME_COLORS.primary,
                                             fontSize: '12.8px',
                                         }}
                                     />
@@ -1081,7 +1083,7 @@ function AdminDashboard() {
                             {viewStates.loginAccounts && (
                                 <div id='usermanagement' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: '#2757aa' }}></i>
+                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
                                         LOGIN ACCOUNTS
                                     </p>
                                     <OrganizationUsersTable users={organizationusers} />
@@ -1091,7 +1093,7 @@ function AdminDashboard() {
                             {viewStates.loginActivity && (
                                 <div id='loginactivity' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: '#2757aa' }}></i>
+                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
                                         ACTIVITY LOGS
                                     </p>
                                     <LoginActivityTable user={user} />
@@ -1101,8 +1103,8 @@ function AdminDashboard() {
                             {viewStates.vaultUsers && (
                                 <div className='p-2' id='vaultusermanagement' style={{ fontSize: '12.8px' }}>
                                     <p className='shadow-lg p-2'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12px', color: '#2757aa' }}></i>
-                                        <span style={{ color: '#2757aa' }}>  {toUpperCase(selectedItems.vault.name)}</span>  ACCOUNTS
+                                        <i className="fas fa-users mx-2" style={{ fontSize: '12px', color: THEME_COLORS.primary }}></i>
+                                        <span style={{ color: THEME_COLORS.primary }}>  {toUpperCase(selectedItems.vault.name)}</span>  ACCOUNTS
 
                                     </p>
                                     <VaultUsersTable

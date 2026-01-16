@@ -4,7 +4,8 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import LoadingMini from '../Loaders/LoaderMini';
 import logo from '../../images/ZFBLU.png';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';import { THEME_COLORS } from '../../constants/themeColors';
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -40,7 +41,7 @@ export default function MiniLoader(props) {
           >
            
           <img className="my-3" src={logo} alt="logo" width="300px" />
-           <CircularProgress size={40} sx={{ color: '#2757aa', mb: 2 }} />
+           <CircularProgress size={40} sx={{ color: THEME_COLORS.primary, mb: 2 }} />
             <Typography variant="body2" color="textPrimary">
               {props.loaderMsg ? (
         

@@ -14,7 +14,8 @@ import * as constants from './Auth/configs';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus } from "react-icons/fa";
-import { FaDatabase } from "react-icons/fa6";
+import { FaDatabase } from "react-icons/fa6";import { THEME_COLORS } from '../constants/themeColors';
+
 
 function AttachExistingVault(props) {
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -110,11 +111,11 @@ function AttachExistingVault(props) {
                     onClick={handleDialogOpen}
                     sx={{
                         mt: 2,
-                        color: '#2757aa',
-                        borderColor: '#2757aa',
+                        color: THEME_COLORS.primary,
+                        borderColor: THEME_COLORS.primary,
                         fontSize: '12px',
                         '&:hover': {
-                            backgroundColor: '#2757aa',
+                            backgroundColor: THEME_COLORS.primary,
                             color: 'white',
                         },
                     }}
@@ -125,11 +126,11 @@ function AttachExistingVault(props) {
             )}
 
             <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                {/* <DialogTitle sx={{ fontSize: '18px', fontWeight: 'bold', color: '#2757aa' }}>
+                {/* <DialogTitle sx={{ fontSize: '18px', fontWeight: 'bold', color: THEME_COLORS.primary }}>
                     Attach Existing Vault
                 </DialogTitle> */}
                 <DialogTitle sx={{
-                    backgroundColor: '#2757aa',
+                    backgroundColor: THEME_COLORS.primary,
                     color: 'white',
                     fontSize: '16px',
                     fontWeight: 600,
@@ -193,7 +194,7 @@ function AttachExistingVault(props) {
                         variant="contained"
                         disabled={!isFormValid || isSubmitting}
                         sx={{
-                            backgroundColor: '#2757aa',
+                            backgroundColor: THEME_COLORS.primary,
                             fontSize: '14px',
                             '&:hover': {
                                 backgroundColor: '#153a7a',

@@ -5,7 +5,8 @@ import { Tooltip, Box } from '@mui/material';
 import LoadingDialog from '../Loaders/LoaderDialog';
 import SignButton from '../SignDocument';
 import { Typography, CircularProgress, Button, Select, FormControl, InputLabel, MenuItem, Slider } from "@mui/material";
-import SignOptions from '../SignButton';
+import SignOptions from '../SignButton';import { THEME_COLORS } from '../../constants/themeColors';
+
 import '../../styles/PDFViewerTechedge.css';
 
 // Configure PDF.js worker
@@ -286,9 +287,9 @@ const PDFViewerPreview3 = (props) => {
           {/* Toggle Sidebar Button */}
           <span className="d-flex align-items-center cursor-pointer mx-3" onClick={toggleAside}>
             <Tooltip title={isAsideOpen ? "Close thumbnail" : "Open thumbnail view"}>
-              <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: '#2757aa' }} />
+              <i className={`mx-1 ${isAsideOpen ? "fa-solid fa-bars-staggered" : "fas fa-bars"}`} style={{ fontSize: '18px', color: THEME_COLORS.primary }} />
               <span className="text-muted mx-1" style={{ fontSize: '12.8px', cursor: 'pointer' }}>
-                <span style={{ color: '#2757aa' }}>{isAsideOpen ? "Close Thumbnail" : "Open Thumbnail"}</span>
+                <span style={{ color: THEME_COLORS.primary }}>{isAsideOpen ? "Close Thumbnail" : "Open Thumbnail"}</span>
               </span>
             </Tooltip>
           </span>
@@ -310,7 +311,7 @@ const PDFViewerPreview3 = (props) => {
             <i
               onClick={zoomOut}
               className="fa-solid fa-magnifying-glass-minus"
-              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+              style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }}
             />
 
             <Slider
@@ -326,7 +327,7 @@ const PDFViewerPreview3 = (props) => {
             <i
               onClick={zoomIn}
               className="fa-solid fa-magnifying-glass-plus"
-              style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+              style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }}
             />
 
             <span
@@ -339,14 +340,14 @@ const PDFViewerPreview3 = (props) => {
               <i
                 onClick={resetZoom}
                 className="fa-solid fa-rotate-right me-1"
-                style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }}
+                style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }}
               />
             </Tooltip>
           </div>
 
           {/* Download PDF */}
           <Tooltip title="Download PDF">
-            <i onClick={() => handleDownload(props.blob, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+            <i onClick={() => handleDownload(props.blob, props.fileExtension, props.fileName)} className="fas fa-download" style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
           </Tooltip>
 
 

@@ -11,7 +11,8 @@ import {
     FormControl,
     InputLabel
 } from '@mui/material';
-import logo from '../../images/ZFWHITE.png';
+import logo from '../../images/ZFWHITE.png';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const VaultFormDialog = ({ open, onClose }) => {
     const [Organization, setOrganization] = useState('');
@@ -35,7 +36,7 @@ const VaultFormDialog = ({ open, onClose }) => {
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle
                 className="p-2 d-flex justify-content-between align-items-center"
-                style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
             >
                 <img className="mx-3" src={logo} alt="Loading" width="130px" />
                 <span className="ml-auto mx-3" style={{ fontSize: '13px' }}>

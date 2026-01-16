@@ -21,6 +21,7 @@ import '../styles/Custombuttons.css';
 import image from '../images/ZFBLU.png';
 import logo2 from '../images/ZFWHITE.png';
 import * as constants from '../components/Auth/configs';
+import { THEME_COLORS } from '../constants/themeColors';
 import { CircularProgress } from '@mui/material';
 
 const Login = () => {
@@ -72,7 +73,7 @@ const Login = () => {
             </Box> */}
 
             {/* Title */}
-            <div className="d-flex justify-content-center align-items-center my-4" style={{ color: '#2757aa' }}>
+            <div className="d-flex justify-content-center align-items-center my-4" style={{ color: THEME_COLORS.primary }}>
               <h5 className="mb-0 text-dark">
                 LOGIN
               </h5>
@@ -133,7 +134,7 @@ const Login = () => {
 
             {/* Forgot password */}
             <div className="d-flex justify-content-end mb-3">
-              <Link to="/password-reset" style={{ fontSize: '13px', color: '#2757aa', textDecoration: 'none' }}>
+              <Link to="/password-reset" style={{ fontSize: '13px', color: THEME_COLORS.primary, textDecoration: 'none' }}>
                 Forgot password?
               </Link>
             </div>
@@ -155,10 +156,10 @@ const Login = () => {
                     px: 2,
                     py: 1,
                     width: '100%',
-                    backgroundColor: miniLoader ? '#ccc' : '#2757aa',
+                    backgroundColor: miniLoader ? '#ccc' : THEME_COLORS.primary,
                     color: '#fff',
                     '&:hover': {
-                      backgroundColor: miniLoader ? '#ccc' : '#1e4794',
+                      backgroundColor: miniLoader ? '#ccc' : THEME_COLORS.primaryDark,
                     },
                   }}
                 >
@@ -174,11 +175,11 @@ const Login = () => {
               Go to{' '}
               {process.env.REACT_APP_ONSITE !== 'true' && (
                 <>
-                  <Link to="/register" style={{ color: '#2757aa', textDecoration: 'none' }}>Register an Organization</Link>
+                  <Link to="/register" style={{ color: THEME_COLORS.primary, textDecoration: 'none' }}>Register an Organization</Link>
                   <span className="mx-1"> | </span>
                 </>
               )}
-              <a href="https://dss.alignsys.tech" target="_blank" rel="noopener noreferrer" style={{ color: '#2757aa', textDecoration: 'none' }}>
+              <a href="https://dss.alignsys.tech" target="_blank" rel="noopener noreferrer" style={{ color: THEME_COLORS.primary, textDecoration: 'none' }}>
                 DSS – Digital Signing Service
               </a>
             </p>
@@ -192,7 +193,7 @@ const Login = () => {
         <div
           className="d-none d-md-flex right-side w-100 w-md-50 flex-column justify-content-center align-items-center"
           style={{
-            backgroundColor: '#2757aa',
+            backgroundColor: THEME_COLORS.primary,
             padding: '40px 20px',
             textAlign: 'center',
           }}

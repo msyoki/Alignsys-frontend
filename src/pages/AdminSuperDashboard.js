@@ -17,7 +17,7 @@ import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Dashboard.css';
 import '../styles/Custombuttons.css';
 import '../styles/Navbar.css';
-
+import { THEME_COLORS } from '../constants/themeColors';
 // Material-UI components
 import {
     Typography,
@@ -94,7 +94,7 @@ const STYLES = {
     headerBox: {
         fontSize: '13px',
         backgroundColor: '#fff',
-        color: '#2757aa',
+        color: THEME_COLORS.primary,
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
@@ -314,7 +314,7 @@ const HeaderBox = memo(({ children, className, sx = {} }) => (
 const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
     <>
         <h6 className='shadow-lg p-3'>
-            <FaDatabase style={{ fontSize: '13px', color: '#2757aa' }} />
+            <FaDatabase style={{ fontSize: '13px', color: THEME_COLORS.primary }} />
             {selectedVault.name} ( Vault Objects )
         </h6>
         <div id='vaultobjects' style={{ fontSize: '13px', marginBottom: '20px' }}>
@@ -346,7 +346,7 @@ const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
 const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers }) => (
     <div id='permissions' style={{ fontSize: '13px', marginBottom: '20px' }}>
         <h6 className='shadow-lg p-2'>
-            <FaDatabase style={{ fontSize: '13px', color: '#2757aa' }} />
+            <FaDatabase style={{ fontSize: '13px', color: THEME_COLORS.primary }} />
             {selectedVault.name} ( User Groups )
         </h6>
         <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>

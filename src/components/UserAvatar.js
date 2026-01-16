@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState } from "react";import { THEME_COLORS } from '../constants/themeColors';
+
 import {
   Avatar,
   Tooltip,
@@ -42,7 +43,7 @@ export default function UserAvatarMenu(props) {
             sx={{
               width: 36,
               height: 36,
-              backgroundColor: "#2757aa",
+              backgroundColor: THEME_COLORS.primary,
               fontSize: "12.8px",
             }}
           />
@@ -78,11 +79,11 @@ export default function UserAvatarMenu(props) {
 >
   {/* User Info Section */}
   <Box sx={{ px: 1.5, py: 0.8, bgcolor: "grey.100", borderRadius: "0 0 6px 6px" }}>
-    <Typography variant="subtitle2" fontWeight="600" sx={{ color: "#2757aa", fontSize: "12px" }}>
+    <Typography variant="subtitle2" fontWeight="600" sx={{ color: THEME_COLORS.primary, fontSize: "12px" }}>
       <span className="mr-2" style={{fontWeight:'lighter'}}>Hi!</span> {fullName}
     </Typography>
 
-    <Box sx={{ backgroundColor: '#2757aa', color: '#fff', borderRadius: 1.5, p: 0.8, mt: 0.6 }}>
+    <Box sx={{ backgroundColor: THEME_COLORS.primary, color: '#fff', borderRadius: 1.5, p: 0.8, mt: 0.6 }}>
       <Box display="flex" alignItems="center">
         <i className="fas fa-envelope" style={{ fontSize: "10px", marginRight: 6 }} />
         <Typography variant="caption" sx={{ fontSize: "10px" }}>
@@ -104,7 +105,7 @@ export default function UserAvatarMenu(props) {
   {/* Reset Password */}
   <MenuItem onClick={handlePasswordReset} sx={{ py: 0.6 }}>
     <ListItemIcon sx={{ minWidth: 26 }}>
-      <i className="fas fa-key" style={{ fontSize: "12px", color: "#2757aa" }} />
+      <i className="fas fa-key" style={{ fontSize: "12px", color: THEME_COLORS.primary }} />
     </ListItemIcon>
     <Typography variant="body2" sx={{ fontSize: "12px" }}>Reset Password</Typography>
   </MenuItem>
@@ -112,7 +113,7 @@ export default function UserAvatarMenu(props) {
   {/* Logout */}
   <MenuItem onClick={handleLogout} sx={{ py: 0.6 }}>
     <ListItemIcon sx={{ minWidth: 26 }}>
-      <i className="fas fa-sign-out-alt" style={{ fontSize: "12px", color: "#2757aa" }} />
+      <i className="fas fa-sign-out-alt" style={{ fontSize: "12px", color: THEME_COLORS.primary }} />
     </ListItemIcon>
     <Typography variant="body2" sx={{ fontSize: "12px" }}>Logout</Typography>
   </MenuItem>

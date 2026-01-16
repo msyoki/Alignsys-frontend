@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
 import { Box, Tooltip, MenuItem, FormControl, Select } from '@mui/material';
-import axios from 'axios';
+import axios from 'axios';import { THEME_COLORS } from '../../constants/themeColors';
+
 import '../../styles/Bot.css';
 
 // Lazy load heavy dependencies
@@ -25,7 +26,7 @@ const CodeBlock = memo(({ language, value }) => (
 const Message = memo(({ message }) => (
     <div className={`message ${message.type}`}>
         {message.type !== 'user' && (
-            <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+            <i className="fa-brands fa-android" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
         )}
         <div className={`message-content ${message.type}-message`}>
             <Suspense fallback={<div>{message.content}</div>}>
@@ -42,7 +43,7 @@ const Message = memo(({ message }) => (
 
 const LoadingIndicator = memo(() => (
     <div className="message">
-        <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+        <i className="fa-brands fa-android" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
         <div className="loading-indicator">
             Analysing <span>.</span><span>.</span><span>.</span>
         </div>
@@ -303,7 +304,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                         <i
                             className="fa-brands fa-android"
                             style={{
-                                color: '#2757aa',
+                                color: THEME_COLORS.primary,
                                 fontSize: '20px',
                                 marginRight: '12px'
                             }}
@@ -336,10 +337,10 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                                         borderColor: '#e0e0e0',
                                     },
                                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#2757aa',
+                                        borderColor: THEME_COLORS.primary,
                                     },
                                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#2757aa',
+                                        borderColor: THEME_COLORS.primary,
                                         borderWidth: '1px',
                                     },
                                 }}
@@ -372,7 +373,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                                                 <i
                                                     className="fas fa-check"
                                                     style={{
-                                                        color: '#2757aa',
+                                                        color: THEME_COLORS.primary,
                                                         fontSize: '10px',
                                                         marginRight: '8px'
                                                     }}
@@ -409,7 +410,7 @@ const Bot = memo(({ blob, objectTitle, messages, setMessages,file_ext }) => {
                                         className="fa-solid fa-eraser"
                                         style={{
                                             fontSize: '18px',
-                                            color: '#2757aa'
+                                            color: THEME_COLORS.primary
                                         }}
                                     />
                                 </Box>

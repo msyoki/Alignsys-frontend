@@ -29,6 +29,8 @@ import AttachExistingVault from "../AttachExistingVault";
 
 import { FaDatabase } from "react-icons/fa6";
 import { FaPlus } from "react-icons/fa";
+import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function OrganizationVaultList(props) {
   const [expanded, setExpanded] = useState([]);
@@ -153,10 +155,10 @@ function OrganizationVaultList(props) {
   // Compact TreeItem styles
   const getTreeItemStyles = (isSelected) => ({
     margin: '1px 0',
-    backgroundColor: isSelected ? '#ecf4fc !important' : 'transparent !important',
-    border: isSelected ? '1px solid #ecf4fc' : '1px solid transparent',
+    backgroundColor: isSelected ? `${THEME_COLORS.surfaceLight} !important` : 'transparent !important',
+    border: isSelected ? `1px solid ${THEME_COLORS.surfaceLight}` : '1px solid transparent',
     "&:hover": {
-      backgroundColor: isSelected ? '#ecf4fc !important' : '#f8f9fa !important'
+      backgroundColor: isSelected ? `${THEME_COLORS.surfaceLight} !important` : '#f8f9fa !important'
     },
     "& .MuiTreeItem-content": {
       backgroundColor: 'transparent !important',
@@ -176,7 +178,7 @@ function OrganizationVaultList(props) {
     marginLeft: '16px',
     marginTop: '1px',
     borderRadius: '3px !important',
-    backgroundColor: isSelected ? '#ecf4fc !important' : 'transparent !important',
+    backgroundColor: isSelected ? `${THEME_COLORS.surfaceLight} !important` : 'transparent !important',
     "& .MuiTreeItem-content": {
       borderRadius: '3px !important',
       backgroundColor: 'transparent !important',
@@ -197,7 +199,7 @@ function OrganizationVaultList(props) {
         maxWidth="sm"
       >
         <DialogTitle sx={{
-          backgroundColor: '#2757aa',
+          backgroundColor: THEME_COLORS.primary,
           color: 'white',
           fontSize: '16px',
           fontWeight: 600,
@@ -249,7 +251,7 @@ function OrganizationVaultList(props) {
             startIcon={loading ? <CircularProgress size={16} sx={{ color: '#555' }} /> : <FaPlus style={{ fontSize: '12px' }} />}
             sx={{
               textTransform: 'none',
-              backgroundColor: '#2757aa',
+              backgroundColor: THEME_COLORS.primary,
               '&:hover': {
                 backgroundColor: '#1e4a8c'
               }
@@ -270,7 +272,7 @@ function OrganizationVaultList(props) {
         backgroundColor: '#eef2f7'
       }} className='shadow-lg'>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FaDatabase style={{ color: '#2757aa', fontSize: 20 }} />
+          <FaDatabase style={{ color: THEME_COLORS.primary, fontSize: 20 }} />
           <Typography sx={{
             fontWeight: 500,
             color: '#555',
@@ -379,7 +381,7 @@ function OrganizationVaultList(props) {
                           width: 20,
                           height: 20,
                           borderRadius: '4px',
-                          backgroundColor: '#2757aa',
+                          backgroundColor: THEME_COLORS.primary,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

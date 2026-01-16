@@ -24,6 +24,8 @@ import { FaFileCirclePlus } from "react-icons/fa6";
 import { FaInfoCircle } from "react-icons/fa";
 import { FaBook } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
+import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function CustomTabPanel({ children, value, index, ...other }) {
   return (
@@ -35,7 +37,7 @@ function CustomTabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#ecf4fc' }}>
+        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: THEME_COLORS.surfaceLight }}>
           {children}
         </Box>
       )}
@@ -876,7 +878,7 @@ const ObjectData = (props) => {
       >
         <DialogTitle
           sx={{
-            backgroundColor: '#2757aa',
+            backgroundColor: THEME_COLORS.primary,
             color: '#fff',
             fontSize: '14px',
             py: 2
@@ -901,7 +903,7 @@ const ObjectData = (props) => {
                     button
                     // onClick={() => toggleGroup(group.classGroupId)}
                     sx={{
-                      backgroundColor: '#ecf4fc',
+                      backgroundColor: THEME_COLORS.surfaceLight,
                       mb: 0.5,
                       py: 1,
                       borderRadius: '4px'
@@ -912,15 +914,15 @@ const ObjectData = (props) => {
                         sx={{
                           fontSize: '13px',
                           fontWeight: 600,
-                          color: '#2757aa'
+                          color: THEME_COLORS.primary
                         }}
                       >
                         {group.classGroupName}
                       </Typography>
                       {expandedGroups[group.classGroupId] ? (
-                        <ExpandLess sx={{ color: '#2757aa' }} />
+                        <ExpandLess sx={{ color: THEME_COLORS.primary }} />
                       ) : (
-                        <ExpandMore sx={{ color: '#2757aa' }} />
+                        <ExpandMore sx={{ color: THEME_COLORS.primary }} />
                       )}
                     </Box>
                   </ListItem>
@@ -975,15 +977,15 @@ const ObjectData = (props) => {
                         sx={{
                           fontSize: '13px',
                           fontWeight: 600,
-                          color: '#2757aa'
+                          color: THEME_COLORS.primary
                         }}
                       >
                         Ungrouped
                       </Typography>
                       {expandedGroups['ungrouped'] ? (
-                        <ExpandLess sx={{ color: '#2757aa' }} />
+                        <ExpandLess sx={{ color: THEME_COLORS.primary }} />
                       ) : (
-                        <ExpandMore sx={{ color: '#2757aa' }} />
+                        <ExpandMore sx={{ color: THEME_COLORS.primary }} />
                       )}
                     </Box>
                   </ListItem>
@@ -1092,10 +1094,10 @@ const ObjectData = (props) => {
                 justifyContent: 'center',
                 mx: 'auto'
               }}>
-                <FaInfoCircle className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+                <FaInfoCircle className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
                 {props.loadingobject ? (
                   <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
-                    <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Loading metadata<span>.</span><span>.</span><span>.</span>
+                    <CircularProgress size="20px" style={{ color: THEME_COLORS.primary, marginRight: '10px' }} />  Loading metadata<span>.</span><span>.</span><span>.</span>
                   </Typography>
 
                 ) : (
@@ -1237,7 +1239,7 @@ const ObjectData = (props) => {
                         <Box onClick={navigateToComments} sx={{ position: "relative", display: "flex", alignItems: "center" }}>
                           <i
                             className="fas fa-comment-alt"
-                            style={{ fontSize: "18px", cursor: "pointer", color: '#2757aa' }}
+                            style={{ fontSize: "18px", cursor: "pointer", color: THEME_COLORS.primary }}
                           />
                           <Box
                             sx={{
@@ -1269,7 +1271,7 @@ const ObjectData = (props) => {
                           style={{
                             fontSize: '20px',
                             cursor: 'pointer',
-                            color: '#2757aa',
+                            color: THEME_COLORS.primary,
                             padding: '4px'
                           }}
                         />
@@ -1283,7 +1285,7 @@ const ObjectData = (props) => {
                           style={{
                             fontSize: '20px',
                             cursor: 'pointer',
-                            color: '#2757aa',
+                            color: THEME_COLORS.primary,
                             padding: '4px'
                           }}
                         />
@@ -1409,7 +1411,7 @@ const ObjectData = (props) => {
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 '&:hover': {
-                                  borderColor: '#2757aa',
+                                  borderColor: THEME_COLORS.primary,
                                   backgroundColor: '#f8f9fa'
                                 }
                               }}
@@ -1465,7 +1467,7 @@ const ObjectData = (props) => {
                                 <p className="my-1">
                                   <i
                                     className="fa-solid fa-arrows-spin mx-2"
-                                    style={{ color: '#2757aa' }}
+                                    style={{ color: THEME_COLORS.primary }}
                                   />
                                   <span>{props.selectedObjWf.workflowTitle || ''}</span>
                                 </p>
@@ -1556,7 +1558,7 @@ const ObjectData = (props) => {
                                     {props.newWF && (
                                       <i
                                         className="fa-solid fa-arrows-spin mx-2"
-                                        style={{ color: '#2757aa' }}
+                                        style={{ color: THEME_COLORS.primary }}
                                       />
                                     )}
                                     <Select
@@ -1591,7 +1593,7 @@ const ObjectData = (props) => {
                                         value=""
                                         className="shadow-sm"
                                         style={{
-                                          color: '#2757aa',
+                                          color: THEME_COLORS.primary,
                                           fontSize: '12.8px',
                                           position: 'sticky',
                                           top: 0,
@@ -1647,7 +1649,7 @@ const ObjectData = (props) => {
                                         value=""
                                         className="shadow-sm"
                                         style={{
-                                          color: '#2757aa',
+                                          color: THEME_COLORS.primary,
                                           fontSize: '12.8px',
                                           position: 'sticky',
                                           top: 0,
@@ -1761,12 +1763,12 @@ const ObjectData = (props) => {
                   mx: 'auto'
                 }}
               >
-                <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+                <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
                 {props.loadingfile ? (
                   <>
                     <Typography component="div" variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator-text text-dark">
-                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Buffering file<span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: THEME_COLORS.primary, marginRight: '10px' }} />  Buffering file<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
@@ -1801,13 +1803,13 @@ const ObjectData = (props) => {
                   mx: 'auto'
                 }}
               >
-                {/* <i className="fa-brands fa-android my-2" style={{ fontSize: '120px', color: '#2757aa' }} /> */}
+                {/* <i className="fa-brands fa-android my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} /> */}
                 <AnimatedAndroidIcon />
                 {props.loadingfile ? (
                   <>
                     <Typography component="div" variant="body2" className='my-2' sx={{ textAlign: 'center' }}>
                       <div className="loading-indicator text-dark">
-                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Starting chat<span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: THEME_COLORS.primary, marginRight: '10px' }} />  Starting chat<span>.</span><span>.</span><span>.</span>
                       </div>
                     </Typography>
                     <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '12.8px' }}>
@@ -1854,11 +1856,11 @@ const ObjectData = (props) => {
                     mx: 'auto'
                   }}
                 >
-                  <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: '#2757aa' }} />
+                  <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
                   <div style={{ fontSize: '16px', marginBottom: '8px' }}>
                     {props.loadingcomments ? (
                       <div className="loading-indicator text-dark">
-                        <CircularProgress size="20px" style={{ color: "#2757aa", marginRight: '10px' }} />  Loading comments <span>.</span><span>.</span><span>.</span>
+                        <CircularProgress size="20px" style={{ color: THEME_COLORS.primary, marginRight: '10px' }} />  Loading comments <span>.</span><span>.</span><span>.</span>
                       </div>
                     ) : (
                       <>

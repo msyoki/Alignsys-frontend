@@ -18,6 +18,8 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import FormField from './FormField';
 import FileExtIcon from '../../FileExtIcon';
 import FileExtText from '../../FileExtText';
+import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const PropertiesList = ({
     properties,
@@ -197,7 +199,7 @@ const PropertiesList = ({
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 '&:hover': {
-                                    borderColor: '#2757aa',
+                                    borderColor: THEME_COLORS.primary,
                                     backgroundColor: '#f8f9fa'
                                 }
                             }}
@@ -224,7 +226,7 @@ const PropertiesList = ({
             >
                 <DialogTitle
                     sx={{
-                        backgroundColor: '#2757aa',
+                        backgroundColor: THEME_COLORS.primary,
                         color: '#fff',
                         fontSize: '14px',
                         py: 2
@@ -245,7 +247,7 @@ const PropertiesList = ({
                                 padding: '8px 12px',
                                 backgroundColor: 'white',
                                 '&:focus-within': {
-                                    borderColor: '#2757aa',
+                                    borderColor: THEME_COLORS.primary,
                                 }
                             }}
                         >
@@ -298,7 +300,7 @@ const PropertiesList = ({
                                         button
                                         onClick={() => toggleGroup(group.classGroupId)}
                                         sx={{
-                                            backgroundColor: '#ecf4fc',
+                                            backgroundColor: THEME_COLORS.surfaceLight,
                                             mb: 0.5,
                                             py: 1,
                                             borderRadius: '4px'
@@ -309,15 +311,15 @@ const PropertiesList = ({
                                                 sx={{
                                                     fontSize: '13px',
                                                     fontWeight: 600,
-                                                    color: '#2757aa'
+                                                    color: THEME_COLORS.primary
                                                 }}
                                             >
                                                 {group.classGroupName}
                                             </Typography>
                                             {expandedGroups[group.classGroupId] ? (
-                                                <ExpandLess sx={{ color: '#2757aa' }} />
+                                                <ExpandLess sx={{ color: THEME_COLORS.primary }} />
                                             ) : (
-                                                <ExpandMore sx={{ color: '#2757aa' }} />
+                                                <ExpandMore sx={{ color: THEME_COLORS.primary }} />
                                             )}
                                         </Box>
                                     </ListItem>
@@ -368,7 +370,7 @@ const PropertiesList = ({
                                         button
                                         onClick={() => toggleGroup('ungrouped')}
                                         sx={{
-                                            backgroundColor: '#ecf4fc',
+                                            backgroundColor: THEME_COLORS.surfaceLight,
                                             mb: 0.5,
                                             py: 1,
                                             borderRadius: '4px'
@@ -379,15 +381,15 @@ const PropertiesList = ({
                                                 sx={{
                                                     fontSize: '13px',
                                                     fontWeight: 600,
-                                                    color: '#2757aa'
+                                                    color: THEME_COLORS.primary
                                                 }}
                                             >
                                                 Ungrouped
                                             </Typography>
                                             {expandedGroups['ungrouped'] ? (
-                                                <ExpandLess sx={{ color: '#2757aa' }} />
+                                                <ExpandLess sx={{ color: THEME_COLORS.primary }} />
                                             ) : (
-                                                <ExpandMore sx={{ color: '#2757aa' }} />
+                                                <ExpandMore sx={{ color: THEME_COLORS.primary }} />
                                             )}
                                         </Box>
                                     </ListItem>

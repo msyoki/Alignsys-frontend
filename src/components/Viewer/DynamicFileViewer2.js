@@ -10,7 +10,8 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import PDFViewerPreview from './Pdf2';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField } from '@mui/material';
-import * as constants from '../Auth/configs';
+import * as constants from '../Auth/configs';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -155,30 +156,30 @@ const ImageViewer = React.memo(({ src, setUploadedFile }) => {
       <ImageControls>
         <div className="d-flex align-items-center gap-2 mx-1">
           <span className='mx-2'>
-            <i onClick={handlers.zoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+            <i onClick={handlers.zoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
             <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
               {zoomDisplay}%
             </span>
-            <i onClick={handlers.zoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: '#2757aa', cursor: 'pointer' }} />
+            <i onClick={handlers.zoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
           </span>
           <Tooltip title="Reset Zoom">
-            <button onClick={handlers.reset} className="btn btn-light px-1 py-0" style={{ fontSize: '12.5px', border: '1px solid #2757aa', color: '#2757aa' }}>
+            <button onClick={handlers.reset} className="btn btn-light px-1 py-0" style={{ fontSize: '12.5px', border: `1px solid ${THEME_COLORS.primary}`, color: THEME_COLORS.primary }}>
               <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '12px' }} />
               Reset
             </button>
           </Tooltip>
           <Tooltip title="Rotate Left">
-            <RotateLeftIcon sx={{ color: '#2757aa', fontSize: '20px', cursor: 'pointer' }} onClick={handlers.rotateLeft} />
+            <RotateLeftIcon sx={{ color: THEME_COLORS.primary, fontSize: '20px', cursor: 'pointer' }} onClick={handlers.rotateLeft} />
           </Tooltip>
           <Tooltip title="Rotate Right">
-            <RotateRightIcon sx={{ color: '#2757aa', fontSize: '20px', cursor: 'pointer' }} onClick={handlers.rotateRight} />
+            <RotateRightIcon sx={{ color: THEME_COLORS.primary, fontSize: '20px', cursor: 'pointer' }} onClick={handlers.rotateRight} />
           </Tooltip>
         </div>
         <Tooltip title="Download Image">
-          <i onClick={handlers.download} className="fas fa-download" style={{ fontSize: '18px', color: '#2757aa', cursor: 'pointer' }} />
+          <i onClick={handlers.download} className="fas fa-download" style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
         </Tooltip>
         <Tooltip title="Delete File">
-          <i onClick={handlers.delete} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
+          <i onClick={handlers.delete} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
         </Tooltip>
       </ImageControls>
       <ImageWrapper>
@@ -252,7 +253,7 @@ const TextViewer = React.memo(({ content, setUploadedFile }) => {
             {darkMode ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
           </Button>
           <Tooltip title="Delete File">
-            <i onClick={handlers.delete} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
+            <i onClick={handlers.delete} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
           </Tooltip>
         </ButtonContainer>
       </ControlsContainer>
@@ -386,7 +387,7 @@ const CSVViewer = React.memo(({ csvString, setUploadedFile }) => {
             <i
               onClick={handleDelete}
               className="fa-solid fa-trash"
-              style={{ fontSize: '22px', color: '#2757aa', cursor: 'pointer' }}
+              style={{ fontSize: '22px', color: THEME_COLORS.primary, cursor: 'pointer' }}
             />
           </Tooltip>
         </Box>
@@ -653,7 +654,7 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
                 <i
                   onClick={handleOfficeDelete}
                   className="fa-solid fa-trash"
-                  style={{ fontSize: '22px', color: '#2757aa', cursor: 'pointer' }}
+                  style={{ fontSize: '22px', color: THEME_COLORS.primary, cursor: 'pointer' }}
                 />
               </Tooltip>
             </Box>

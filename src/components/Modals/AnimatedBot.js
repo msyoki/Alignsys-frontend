@@ -1,9 +1,10 @@
-import React from "react";
+import React from "react";import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const AnimatedAndroidIcon = () => {
   const iconStyle = {
     fontSize: '120px',
-    color: '#2757aa',
+    color: THEME_COLORS.primary,
     display: 'inline-block',
     animation: 'pulse 1.5s infinite',
   };

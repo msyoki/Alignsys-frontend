@@ -21,6 +21,8 @@ import logo from '../../../images/ZFWHITE.png';
 
 import { FaFolderPlus } from "react-icons/fa6";
 import { FaFileCirclePlus } from "react-icons/fa6";
+import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const ClassSelectionDialog = ({
     open,
@@ -101,7 +103,7 @@ const ClassSelectionDialog = ({
         <Dialog open={open} fullWidth maxWidth="sm">
             <DialogTitle
                 className="p-2 d-flex justify-content-between align-items-center"
-                style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
+                style={{ backgroundColor: THEME_COLORS.primary, color: "#fff", fontSize: "14px" }}
             >
                 <img src={logo} alt="Loading" width="130px" className="mx-3" />
                 <span className="flex items-center mx-3">
@@ -150,8 +152,8 @@ const ClassSelectionDialog = ({
                                     sx={{
                                         textTransform: 'none',
                                         fontSize: '13px',
-                                        color: '#2757aa',
-                                        borderColor: '#2757aa',
+                                        color: THEME_COLORS.primary,
+                                        borderColor: THEME_COLORS.primary,
                                         '&:hover': {
                                             borderColor: '#1e4a8a',
                                             backgroundColor: '#f0f4f8'
@@ -168,8 +170,8 @@ const ClassSelectionDialog = ({
                                     sx={{
                                         textTransform: 'none',
                                         fontSize: '13px',
-                                        color: '#2757aa',
-                                        borderColor: '#2757aa',
+                                        color: THEME_COLORS.primary,
+                                        borderColor: THEME_COLORS.primary,
                                         '&:hover': {
                                             borderColor: '#1e4a8a',
                                             backgroundColor: '#f0f4f8'
@@ -202,7 +204,7 @@ const ClassSelectionDialog = ({
                                                     onClick={() => toggleGroup(group.classGroupId)}
                                                     className="p-2"
                                                     sx={{
-                                                        backgroundColor: "#ecf4fc",
+                                                        backgroundColor: THEME_COLORS.surfaceLight,
                                                         borderRadius: '4px',
                                                         '&:hover': {
                                                             backgroundColor: '#d9e9f7'
@@ -214,15 +216,15 @@ const ClassSelectionDialog = ({
                                                             sx={{
                                                                 fontSize: '13px',
                                                                 fontWeight: 600,
-                                                                color: '#2757aa'
+                                                                color: THEME_COLORS.primary
                                                             }}
                                                         >
                                                             {group.classGroupName}
                                                         </Typography>
                                                         {expandedGroups[group.classGroupId] ? (
-                                                            <ExpandLess sx={{ color: '#2757aa', fontSize: '15px' }} />
+                                                            <ExpandLess sx={{ color: THEME_COLORS.primary, fontSize: '15px' }} />
                                                         ) : (
-                                                            <ExpandMore sx={{ color: '#2757aa', fontSize: '15px' }} />
+                                                            <ExpandMore sx={{ color: THEME_COLORS.primary, fontSize: '15px' }} />
                                                         )}
                                                     </Box>
                                                 </ListItem>
@@ -292,7 +294,7 @@ const ClassSelectionDialog = ({
                                                     onClick={() => toggleGroup('ungrouped')}
                                                     className="p-2"
                                                     sx={{
-                                                        backgroundColor: "#ecf4fc",
+                                                        backgroundColor: THEME_COLORS.surfaceLight,
                                                         borderRadius: '4px',
                                                         '&:hover': {
                                                             backgroundColor: '#d9e9f7'
@@ -304,15 +306,15 @@ const ClassSelectionDialog = ({
                                                             sx={{
                                                                 fontSize: '13px',
                                                                 fontWeight: 600,
-                                                                color: '#2757aa'
+                                                                color: THEME_COLORS.primary
                                                             }}
                                                         >
                                                             Ungrouped
                                                         </Typography>
                                                         {expandedGroups['ungrouped'] ? (
-                                                            <ExpandLess sx={{ color: '#2757aa', fontSize: '15px' }} />
+                                                            <ExpandLess sx={{ color: THEME_COLORS.primary, fontSize: '15px' }} />
                                                         ) : (
-                                                            <ExpandMore sx={{ color: '#2757aa', fontSize: '15px' }} />
+                                                            <ExpandMore sx={{ color: THEME_COLORS.primary, fontSize: '15px' }} />
                                                         )}
                                                     </Box>
                                                 </ListItem>

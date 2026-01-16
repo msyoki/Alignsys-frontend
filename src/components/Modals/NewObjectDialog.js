@@ -48,7 +48,8 @@
 // import FileExtText from '../FileExtText';
 // import AiMultiFileUpload from '../features/ai/AiFileUpload';
 // import AddValuelistItem from './AddValueList';
-// import NewVLObjectDialog from './NewVLObject';
+// import NewVLObjectDialog from './NewVLObject';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 // const allIcons = {
 //     faFileAlt,
@@ -83,7 +84,7 @@
 //         <Dialog open={open} fullWidth>
 //             <DialogTitle
 //                 className='p-2 d-flex justify-content-between align-items-center'
-//                 style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '14px' }}
+//                 style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '14px' }}
 //             >
 //                 <img className="mx-3" src={logo} alt="Loading" width="130px" />
 //                 <span className="ml-auto mx-3">
@@ -172,7 +173,7 @@
 //         <Dialog open={open} fullWidth maxWidth="sm">
 //             <DialogTitle
 //                 className="p-2 d-flex justify-content-between align-items-center"
-//                 style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
+//                 style={{ backgroundColor: THEME_COLORS.primary, color: "#fff", fontSize: "14px" }}
 //             >
 //                 <img src={logo} alt="Loading" width="130px" className="mx-3" />
 //                 <span className="flex items-center mx-3">
@@ -387,7 +388,7 @@
 //     <Dialog open={open} fullWidth>
 //         <DialogTitle
 //             className="p-2 d-flex justify-content-between align-items-center"
-//             style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
+//             style={{ backgroundColor: THEME_COLORS.primary, color: "#fff", fontSize: "14px" }}
 //         >
 //             <img src={logo} alt="Loading" width="130px" className="mx-3" />
 //             <span className="flex items-center mx-3 cursor-pointer">
@@ -420,7 +421,7 @@
 //                         </ListItem>
 //                     ))
 //                 ) : (
-//                     <p className="text-center my-2" style={{ color: "#2757aa" }}>
+//                     <p className="text-center my-2" style={{ color: THEME_COLORS.primary }}>
 //                         No templates available
 //                     </p>
 //                 )}
@@ -825,7 +826,7 @@
 //             <a
 //                 href="#"
 //                 style={{
-//                     color: '#2757aa',
+//                     color: THEME_COLORS.primary,
 //                     textDecoration: 'none',
 //                     transition: 'color 0.2s ease'
 //                 }}
@@ -901,7 +902,7 @@
 //                     </ListItem>
 //                 ))
 //             ) : (
-//                 <p className="text-center my-2" style={{ color: "#2757aa" }}>
+//                 <p className="text-center my-2" style={{ color: THEME_COLORS.primary }}>
 //                     No templates available
 //                 </p>
 //             )}
@@ -1374,7 +1375,7 @@
 //                     <Dialog open={props.isFormOpen} maxWidth='xl'>
 //                         <DialogTitle
 //                             className='p-2 d-flex justify-content-between align-items-center'
-//                             style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+//                             style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
 //                         >
 //                             <img className="mx-3" src={logo} alt="Loading" width="180px" />
 //                             <span className="ml-auto mx-3">
@@ -1481,7 +1482,7 @@
 //                                         <a
 //                                             href="#"
 //                                             style={{
-//                                                 color: '#2757aa',
+//                                                 color: THEME_COLORS.primary,
 //                                                 textDecoration: 'none',
 //                                                 fontSize: '14.5px'
 //                                             }}
@@ -1502,7 +1503,7 @@
 //                                                 <Typography
 //                                                     variant="caption"
 //                                                     sx={{
-//                                                         color: '#2757aa',
+//                                                         color: THEME_COLORS.primary,
 //                                                         fontWeight: 600,
 //                                                         fontSize: '12px',
 //                                                         mb: 0.5,

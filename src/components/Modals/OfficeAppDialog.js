@@ -10,7 +10,8 @@ import {
   Box
 } from '@mui/material';
 import * as constants from '../Auth/configs';
-import axios from 'axios';
+import axios from 'axios';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 
 function OfficeApp(props) {
@@ -140,7 +141,7 @@ function OfficeApp(props) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
             <i
               className="fas fa-plug"
-              style={{ fontSize: '14px', color: '#2757aa', marginTop: '1px' }}
+              style={{ fontSize: '14px', color: THEME_COLORS.primary, marginTop: '1px' }}
             />
             <Typography
               variant="body2"
@@ -151,7 +152,7 @@ function OfficeApp(props) {
               }}
             >
               Need the plugin?&nbsp;
-              <Box component="span" sx={{ color: '#2757aa', fontWeight: 500 }}>
+              <Box component="span" sx={{ color: THEME_COLORS.primary, fontWeight: 500 }}>
                 Download Alignsys Plug-In App
               </Box>
             </Typography>
@@ -164,7 +165,7 @@ function OfficeApp(props) {
             sx={{
               fontSize: '12px',
               textTransform: 'none',
-              color: '#2757aa',
+              color: THEME_COLORS.primary,
               '&:hover': { backgroundColor: '#e8f0fe' },
               px: 1,
               minWidth: 'auto',
@@ -191,7 +192,7 @@ function OfficeApp(props) {
                 mt: 0.5,
               }}
             >
-              <i className="fa-solid fa-circle-info" style={{ fontSize: '20px', color: '#2757aa' }} />
+              <i className="fa-solid fa-circle-info" style={{ fontSize: '20px', color: THEME_COLORS.primary }} />
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography

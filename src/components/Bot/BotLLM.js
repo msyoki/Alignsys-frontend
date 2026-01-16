@@ -5,7 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import '../../styles/Bot.css';
-import { Tooltip } from '@mui/material';
+import { Tooltip } from '@mui/material';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const LLM_API_URL = 'https://llm.alignsys.tech';
 
@@ -251,7 +252,7 @@ const BotLLM = (props) => {
                 {messages?.length > 0 && (
                     <Tooltip title="Clear chat and start new ..." onClick={clearChat}>
                         <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                            <span className="fa-solid fa-eraser mx-2" style={{ fontSize: '20px', color: '#2757aa' }}></span>
+                            <span className="fa-solid fa-eraser mx-2" style={{ fontSize: '20px', color: THEME_COLORS.primary }}></span>
                         </div>
                     </Tooltip>
                 )}
@@ -301,7 +302,7 @@ const BotLLM = (props) => {
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.type}`}>
                         {message.type !== 'user' && (
-                            <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+                            <i className="fa-brands fa-android" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
                         )}
                         <div className={`message-content ${message.type}-message`}>
                             <ReactMarkdown components={{ code: CodeBlock }}>
@@ -317,7 +318,7 @@ const BotLLM = (props) => {
                 {/* Loading Indicator */}
                 {loading && (
                     <div className="message">
-                        <i className="fa-brands fa-android" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+                        <i className="fa-brands fa-android" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
                         <div className="loading-indicator">
                             Analysing <span>.</span><span>.</span><span>.</span>
                         </div>

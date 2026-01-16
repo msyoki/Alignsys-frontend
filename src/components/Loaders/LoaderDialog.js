@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import logo from "../../images/ZFBLU.webp";
+import logo from "../../images/ZFBLU.webp";import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const LoadingDialog = ({ opendialogloading }) => {
   const [fullWidth] = useState(true);
@@ -19,7 +20,7 @@ const LoadingDialog = ({ opendialogloading }) => {
         <div className="text-center m-4 p-4 ">
           <img className="my-3" src={logo} alt="logo" width="300px" />
           <Box className="my-2" sx={{ width: '100%', margin: 'auto' }}>
-            <CircularProgress size="40px" style={{ color: "#2757aa" }} />
+            <CircularProgress size="40px" style={{ color: THEME_COLORS.primary }} />
           </Box>
           <p className="mt-2" style={{ fontSize: '13px' }}>
             Please wait, processing...

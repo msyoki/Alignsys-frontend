@@ -30,12 +30,16 @@ import ColumnSimpleTree from '../ColumnSimpleTree';
 
 // Constants and assets
 import * as constants from '../Auth/configs';
+
 import logo from '../../images/ZFBLU.png';
 import PdfConversionDialog from '../Modals/PdfConversionDialog';
 import PdfMergeDialog from '../Modals/PdfMergeDialog';
 import ChartGenerator from '../Reports/ChartGenerator';
 import UserAvatarMenu from '../UserAvatar';
 import History from '../Modals/History';
+import { THEME_COLORS } from '../../constants/themeColors';
+import { THEME_CONFIG } from '../../config/theme.config';
+
 
 
 
@@ -513,9 +517,12 @@ const DocumentList = (props) => {
 
 
 
+
       // Set file extension
       const extension = fileData[0]?.extension?.replace('.', '') || '';
       setExtension(extension);
+      console.log("File downloaded successfully")
+      
 
       return { blob: blobData, extension, fileId, success: true };
     } catch (error) {
@@ -524,7 +531,9 @@ const DocumentList = (props) => {
       setBlob(null);
       setBlobReport(null);
       setExtension('');
-      throw new Error(`Download failed: ${error.message}`);
+      console.log('Document download error:', error);
+      // throw new Error(`Download failed: ${error.message}`);
+      
     } finally {
       setLoadingFile(false);
     }
@@ -1399,7 +1408,7 @@ const DocumentList = (props) => {
         {
           label: (
             <>
-              <FaArrowsSpin style={{ color: '#2757aa' }} />
+              <FaArrowsSpin style={{ color: THEME_COLORS.primary }} />
               <span className="mx-3">Convert to PDF (Overwrite Original Copy) </span>
             </>
           ),
@@ -1411,7 +1420,7 @@ const DocumentList = (props) => {
         {
           label: (
             <>
-              <FaArrowsSpin style={{ color: '#2757aa' }} />
+              <FaArrowsSpin style={{ color: THEME_COLORS.primary }} />
               <span className="mx-3">Convert to PDF (Keep Original Copy)</span>
             </>
           ),
@@ -1428,7 +1437,7 @@ const DocumentList = (props) => {
       rightClickActions.push({
         label: (
           <>
-            <TbArrowMerge style={{ color: '#2757aa' }} />
+            <TbArrowMerge style={{ color: THEME_COLORS.primary }} />
             <span className="mx-3">Consolidate Linked Documents</span>
           </>
         ),
@@ -1660,7 +1669,7 @@ const DocumentList = (props) => {
             py: 1,
             fontSize: '12.8px',
             backgroundColor: '#fff',
-            color: '#2757aa',
+            color: THEME_COLORS.primary,
             overflow: 'hidden',
             maxHeight: '56px'
           }}>
@@ -1683,15 +1692,15 @@ const DocumentList = (props) => {
                   },
                 }}
               >
-                <FaBars style={{ fontSize: '25px', color: '#2757aa' }} />
+                <FaBars style={{ fontSize: '25px', color: THEME_COLORS.primary }} />
 
               </Box>
               <img
-                src={logo}
+                src={THEME_CONFIG.logos.brandLogo}
                 alt="Logo"
                 className="shadow-sm"
                 style={{
-                  height: "40px",
+                  height: "35px",
                   cursor: "pointer",
                   padding: "5px",
                   transition: "transform 0.2s ease-in-out",
@@ -1721,7 +1730,7 @@ const DocumentList = (props) => {
           <Box sx={{
             display: 'flex',
             justifyContent: 'center',
-            backgroundColor: '#ecf4fc',
+            backgroundColor: THEME_COLORS.surfaceLight,
             p: 1.5
           }}>
             <Box sx={{ display: 'flex', width: '100%' }}>
@@ -1778,15 +1787,26 @@ const DocumentList = (props) => {
             onChange={handleChange}
             sx={{
               borderColor: 'divider',
-              backgroundColor: '#ecf4fc',
+              backgroundColor: THEME_COLORS.surfaceLight,
               minHeight: '36px',
               '& .MuiTab-root': {
                 minHeight: '36px',
                 height: '36px',
                 p: '4px 12.8px',
-                backgroundColor: '#ecf4fc',
+                backgroundColor: THEME_COLORS.surfaceLight,
                 minWidth: 'auto',
-                textTransform: 'none'
+                textTransform: 'none',
+                color: '#ccc',
+                '&.Mui-selected': {
+                  color: `${THEME_COLORS.primary} !important`,
+                  fontWeight: 'normal !important',
+                }
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: `${THEME_COLORS.primary} !important`,
+                height: '1px',
+                fontWeight: 'normal !important',
+
               }
             }}
           >
@@ -1796,7 +1816,7 @@ const DocumentList = (props) => {
                 label={
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {label === 'Home' && (
-                      <BiHomeAlt2 style={{ fontSize: '16px', color: selectedTab === 'Home' ? '#2757aa' : '#ccc' }} />
+                      <BiHomeAlt2 style={{ fontSize: '16px', color: selectedTab === 'Home' ? THEME_COLORS.primary : '#ccc' }} />
                     )}
                     {label}
                   </span>
@@ -1845,13 +1865,13 @@ const DocumentList = (props) => {
                   <Box sx={{
                     p: 1,
                     fontSize: '12.8px',
-                    backgroundColor: '#ecf4fc',
+                    backgroundColor: THEME_COLORS.surfaceLight,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
                     // color: '#333'
                   }}>
-                    <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                    <CiCircleList style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                     Search Results
                   </Box>
                   <Loader />
@@ -1863,13 +1883,13 @@ const DocumentList = (props) => {
                       <Box sx={{
                         p: 1,
                         fontSize: '12.8px',
-                        backgroundColor: '#ecf4fc',
+                        backgroundColor: THEME_COLORS.surfaceLight,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
                         // color: '#333'
                       }}>
-                        <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                        <CiCircleList style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                         Search Results
                       </Box>
                       {props.data?.length > 0 ? (
@@ -1904,7 +1924,7 @@ const DocumentList = (props) => {
                           p: 3,
                           backgroundColor: '#fff'
                         }}>
-                          <FaSearch style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                          <FaSearch style={{ fontSize: '40px', color: THEME_COLORS.primary, marginBottom: '16px' }} />
 
                           <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                             No Results Found
@@ -1978,13 +1998,13 @@ const DocumentList = (props) => {
                       <Box sx={{
                         p: 1,
                         fontSize: '12.8px',
-                        backgroundColor: '#ecf4fc',
+                        backgroundColor: THEME_COLORS.surfaceLight,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
                         // color: '#333'
                       }}>
-                        <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                        <CiCircleList style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
 
                         {title} ({props[dataKey]?.length || 0})
                       </Box>
@@ -1997,13 +2017,13 @@ const DocumentList = (props) => {
                           <Box sx={{
                             p: 1,
                             fontSize: '12.8px',
-                            backgroundColor: '#ecf4fc',
+                            backgroundColor: THEME_COLORS.surfaceLight,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
                             // color: '#333'
                           }}>
-                            <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                            <CiCircleList style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                             {title} ({props[dataKey].length})
                           </Box>
                           <ColumnSimpleTree
@@ -2034,13 +2054,13 @@ const DocumentList = (props) => {
                           <Box sx={{
                             p: 1,
                             fontSize: '12.8px',
-                            backgroundColor: '#ecf4fc',
+                            backgroundColor: THEME_COLORS.surfaceLight,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
                             // color: '#333'
                           }}>
-                            <CiCircleList style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                            <CiCircleList style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                             {emptyTitle}
                           </Box>
                           <Box sx={{
@@ -2052,7 +2072,7 @@ const DocumentList = (props) => {
                             p: 3,
                             backgroundColor: '#fff'
                           }}>
-                            <FaBan style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                            <FaBan style={{ fontSize: '40px', color: THEME_COLORS.primary, marginBottom: '16px' }} />
                             <Typography variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
                               No Results Found
                             </Typography>
@@ -2096,7 +2116,7 @@ const DocumentList = (props) => {
           ref={col2Ref}
           sx={{
             width: isMobile ? '100%' : '60%',
-            backgroundColor: '#ecf4fc',
+            backgroundColor: THEME_COLORS.surfaceLight,
             minWidth: '25%',
             height: '100%'
           }}

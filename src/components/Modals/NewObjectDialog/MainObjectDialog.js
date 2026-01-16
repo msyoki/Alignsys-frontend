@@ -15,7 +15,8 @@ import {
 import { FaPlus } from "react-icons/fa";
 import { FaFolderPlus } from "react-icons/fa6";
 
-import logo from '../../../images/ZFWHITE.png';
+import logo from '../../../images/ZFWHITE.png';import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const MainObjectDialog = ({
     open,
@@ -37,7 +38,7 @@ const MainObjectDialog = ({
         <Dialog open={open} fullWidth>
             <DialogTitle
                 className='p-2 d-flex justify-content-between align-items-center'
-                style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '14px' }}
+                style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '14px' }}
             >
                 <img className="mx-3" src={logo} alt="Loading" width="130px" />
                 <span className="ml-auto mx-3">

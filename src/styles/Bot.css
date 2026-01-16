@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #ecf4fc;
+  background-color: var(--color-surface-light);
   color: black !important;
   font-size: 13px;
 }
@@ -26,7 +26,7 @@
   align-items: center;
   gap: 8px;
   color: black;
-  background-color: #ecf4fc;
+  background-color: var(--color-surface-light);
 }
 
 .chat-messages {
@@ -51,7 +51,7 @@
 }
 
 .message.user .message-content {
-  background-color: #2757aa;
+  background-color: var(--color-primary);
   color: #fff;
   border-radius: 8px;
   padding: 10px;
@@ -108,7 +108,7 @@
 }
 
 .chat-input:focus {
-  border-color: #2757aa;
+  border-color: var(--color-primary);
   outline: none;
 }
 
@@ -119,7 +119,7 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #2757aa;
+  color: var(--color-primary);
   font-size: 16px;
   cursor: pointer;
 }
@@ -167,6 +167,6 @@
 }
 
 .summarize-btn:hover {
-  border: 1px solid #2757aa;
+  border: 1px solid var(--color-primary);
   box-shadow: 0 0 5px rgba(39, 87, 170, 0.4);
 }

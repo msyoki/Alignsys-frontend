@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Tooltip, Box } from '@mui/material';
+import { Menu, MenuItem, Tooltip, Box } from '@mui/material';import { THEME_COLORS } from '../constants/themeColors';
+
 
 const AddButtonWithMenu = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,7 +25,7 @@ const AddButtonWithMenu = (props) => {
           style={{
             fontSize: '30px',
             cursor: 'pointer',
-            color: '#2757aa',
+            color: THEME_COLORS.primary,
             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
           }}
         ></i>
@@ -59,7 +60,7 @@ const AddButtonWithMenu = (props) => {
             }}
             className='shadow-sm '
           >
-           <i class="fa-solid fa-plus mx-2"  style={{ color: '#2757aa' }}></i>  Create New ...
+           <i class="fa-solid fa-plus mx-2"  style={{ color: THEME_COLORS.primary }}></i>  Create New ...
           </Box>
 
           {/* Scrollable Items */}
@@ -86,7 +87,7 @@ const AddButtonWithMenu = (props) => {
                         ? 'fas fa-file-circle-plus'
                         : 'fas fa-folder-plus'
                         } mx-2`}
-                      style={{ color: '#2757aa', fontSize: '18px' }}
+                      style={{ color: THEME_COLORS.primary, fontSize: '18px' }}
                     ></i>
                     {item.namesingular}
                   </MenuItem>

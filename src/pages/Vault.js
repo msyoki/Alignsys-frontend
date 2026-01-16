@@ -21,7 +21,9 @@ import logo from '../images/ZFWHITE.png';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
 import axios from 'axios';
-import AttachExistingVault from '../components/AttachExistingVault';
+import AttachExistingVault from '../components/AttachExistingVault';import { THEME_COLORS } from '../constants/themeColors';
+
+
 
 const VaultSelectForm = () => {
   const { authTokens, user ,logoutUser} = useContext(Authcontext);
@@ -71,7 +73,7 @@ const VaultSelectForm = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#2757aa' }}>
+    <div style={{ backgroundColor: THEME_COLORS.primary }}>
       <Container
         maxWidth="sm"
         className="p-2"
@@ -101,7 +103,7 @@ const VaultSelectForm = () => {
             component="form"
             className="shadow-lg "
             sx={{
-              backgroundColor: '#2757aa',
+              backgroundColor: THEME_COLORS.primary,
               width: '100%',
               display: 'flex',
               flexDirection: 'column',
@@ -154,7 +156,7 @@ const VaultSelectForm = () => {
                   value={vault.guid}
                   sx={{ fontSize: '14px' }}
                 >
-                  <i className="fa-solid fa-database me-2" style={{ color: '#2757aa' }}></i> {vault.name}
+                  <i className="fa-solid fa-database me-2" style={{ color: THEME_COLORS.primary }}></i> {vault.name}
                 </MenuItem>
               ))}
             </Select>
@@ -169,11 +171,11 @@ const VaultSelectForm = () => {
               onClick={handleAdminDashboard}
               sx={{
                 mt: 2,
-                color: '#2757aa',
-                borderColor: '#2757aa',
+                color: THEME_COLORS.primary,
+                borderColor: THEME_COLORS.primary,
                 fontSize: '12px',
                 '&:hover': {
-                  backgroundColor: '#2757aa',
+                  backgroundColor: THEME_COLORS.primary,
                   color: 'white',
                 },
               }}
@@ -187,11 +189,11 @@ const VaultSelectForm = () => {
               onClick={logoutUser}
               sx={{
                 mt: 2,
-                color: '#2757aa',
-                borderColor: '#2757aa',
+                color: THEME_COLORS.primary,
+                borderColor: THEME_COLORS.primary,
                 fontSize: '12px',
                 '&:hover': {
-                  backgroundColor: '#2757aa',
+                  backgroundColor: THEME_COLORS.primary,
                   color: 'white',
                 },
               }}

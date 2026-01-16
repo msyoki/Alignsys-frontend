@@ -14,6 +14,7 @@ import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 
 
+
 import { FaRegFilePdf } from "react-icons/fa6";
 import { BsFiletypeCsv } from "react-icons/bs";
 import { FaRegFileWord } from "react-icons/fa6";
@@ -27,7 +28,8 @@ import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import { CiImageOn } from "react-icons/ci";
 import { HiOutlineAnnotation } from "react-icons/hi";
 
-import { BsFiles } from "react-icons/bs";
+import { BsFiles } from "react-icons/bs";import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const PdfConversionDialog = ({
   open,
@@ -65,7 +67,7 @@ const PdfConversionDialog = ({
               case 'msg':
                   return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
               case 'webp':
-                  return <FaInternetExplorer style={{ ...iconStyle, color: '#2757aa' }} />;
+                  return <FaInternetExplorer style={{ ...iconStyle, color: THEME_COLORS.primary }} />;
               case 'xlsx':
               case 'xls':
                   return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;

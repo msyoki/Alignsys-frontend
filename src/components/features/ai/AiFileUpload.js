@@ -9,7 +9,8 @@ import {
     Paper,
     Typography,
 } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";import { THEME_COLORS } from '../../../constants/themeColors';
+
 import "./style.css";
 
 function AiMultiFileUpload(props) {
@@ -135,7 +136,7 @@ function AiMultiFileUpload(props) {
                             >
                                 <i
                                     className="fas fa-upload"
-                                    style={{ fontSize: 28, color: "#2757aa", marginBottom: 8 }}
+                                    style={{ fontSize: 28, color: THEME_COLORS.primary, marginBottom: 8 }}
                                 />
 
                                 <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1 }}>

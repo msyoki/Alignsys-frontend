@@ -1,8 +1,9 @@
 import React from "react";
-import logo from "../../images/ZFWHITE.webp";
+import logo from "../../images/ZFWHITE.png";
 import '../../styles/Loader.css'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { THEME_COLORS } from "../../constants/themeColors";
 
 const Loading = () => (
   <div 
@@ -14,7 +15,8 @@ const Loading = () => (
     top: 0, 
     left: 0, 
     margin: 0, 
-    overflow: "hidden"
+    overflow: "hidden",
+    backgroundColor: THEME_COLORS.primary,
   }}
 >
   <Box className="my-4 text-center">

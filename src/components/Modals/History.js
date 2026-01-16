@@ -20,7 +20,8 @@ import SimpleIconTree from '../SimpleIconTree';
 import axios from 'axios';
 import * as constants from '../Auth/configs';
 import DynamicFileViewer3 from '../Viewer/DynamicFileViewer3';
-import Loader from '../Loaders/LoaderMini';
+import Loader from '../Loaders/LoaderMini';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function TabPanel({ children, value, index }) {
   return (
@@ -398,7 +399,7 @@ export default function History(props) {
                 onClick={() => setConfirmDialogOpen(true)}
                 variant="contained"
                 size="small"
-                sx={{ textTransform: 'none', backgroundColor: '#2757aa' }}
+                sx={{ textTransform: 'none', backgroundColor: THEME_COLORS.primary }}
                 disabled={rollbackLoading}
                 className="mx-4"
               >
@@ -439,7 +440,7 @@ export default function History(props) {
               color="primary"
               variant="contained"
               size="small"
-              sx={{ textTransform: 'none', backgroundColor: '#2757aa' }}
+              sx={{ textTransform: 'none', backgroundColor: THEME_COLORS.primary }}
               disabled={rollbackLoading}
             >
               {rollbackLoading ? <CircularProgress size={16} sx={{ color: '#fff', mr: 1 }} /> : 'Confirm'}

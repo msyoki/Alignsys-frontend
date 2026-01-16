@@ -10,7 +10,8 @@ import {
     ListItemIcon,
     ListItemText
 } from '@mui/material';
-import logo from '../../../images/ZFWHITE.png';
+import logo from '../../../images/ZFWHITE.png';import { THEME_COLORS } from '../../../constants/themeColors';
+
 
 const TemplateSelectionDialog = ({
     open,
@@ -24,7 +25,7 @@ const TemplateSelectionDialog = ({
     <Dialog open={open} fullWidth>
         <DialogTitle
             className="p-2 d-flex justify-content-between align-items-center"
-            style={{ backgroundColor: "#2757aa", color: "#fff", fontSize: "14px" }}
+            style={{ backgroundColor: THEME_COLORS.primary, color: "#fff", fontSize: "14px" }}
         >
             <img src={logo} alt="Loading" width="130px" className="mx-3" />
             <span className="flex items-center mx-3 cursor-pointer">
@@ -58,7 +59,7 @@ const TemplateSelectionDialog = ({
                         </ListItem>
                     ))
                 ) : (
-                    <p className="text-center my-2" style={{ color: "#2757aa" }}>
+                    <p className="text-center my-2" style={{ color: THEME_COLORS.primary }}>
                         No templates available
                     </p>
                 )}

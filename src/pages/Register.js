@@ -1,9 +1,11 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { THEME_COLORS } from '../constants/themeColors';
 import '../styles/Login.css'; // Import CSS file for styling
 import logo from '../images/m.png';
 import Authcontext from '../components/Auth/Authprovider';
 import '../styles/Custombuttons.css';
+
 
 import { Link, useNavigate } from "react-router-dom";
 import InputLabel from '@mui/material/InputLabel';
@@ -203,10 +205,10 @@ const Register = () => {
                     px: 2,
                     py: 1,
                     minWidth: '40%',
-                    backgroundColor: miniLoader ? '#ccc' : '#2757aa',
+                    backgroundColor: miniLoader ? '#ccc' : THEME_COLORS.primary,
                     color: '#fff',
                     '&:hover': {
-                      backgroundColor: miniLoader ? '#ccc' : '#1e4794',
+                      backgroundColor: miniLoader ? '#ccc' : THEME_COLORS.primaryDark,
                     },
                   }}
                 >
@@ -217,7 +219,7 @@ const Register = () => {
 
             <div className="text-center">
               <p className="mt-3" style={{ fontSize: '13px' }}>Already have an account?
-                <Link className='mx-2' to={'/login'} style={{ textDecoration: 'none', color: '#2757aa' }}>Login Here</Link>
+                <Link className='mx-2' to={'/login'} style={{ textDecoration: 'none', color: THEME_COLORS.primary }}>Login Here</Link>
               </p>
             </div>
           </form>

@@ -3,6 +3,7 @@ import { FormControl, InputLabel, Select, MenuItem , Box} from '@mui/material';
 import Authcontext from '../components/Auth/Authprovider';
 import axios from 'axios';
 import * as constants from './Auth/configs';
+import { THEME_COLORS } from '../constants/themeColors';
 
 const VaultSelectForm = ({ onVaultChange }) => {
   const { authTokens } = useContext(Authcontext);
@@ -57,7 +58,7 @@ const VaultSelectForm = ({ onVaultChange }) => {
         displayEmpty
         className='rounded-pill'
         sx={{
-          color: '#1C4690',
+          color: THEME_COLORS.primary,
           fontSize: '12px',
           flexGrow: 1,
         }}
@@ -65,7 +66,7 @@ const VaultSelectForm = ({ onVaultChange }) => {
           PaperProps: {
             style: {
               maxHeight: 250,
-              color: '#1C4690',
+              color: THEME_COLORS.primary,
             },
           },
         }}
@@ -75,7 +76,7 @@ const VaultSelectForm = ({ onVaultChange }) => {
         </MenuItem>
         {vaults.map((vault) => (
           <MenuItem key={vault.guid} value={vault.guid}>
-            <i className="fa-solid  fa-database me-2" style={{ color: '#1C4690' }}></i>
+            <i className="fa-solid  fa-database me-2" style={{ color: THEME_COLORS.primary }}></i>
             <span className="text-dark" style={{ fontSize: '12px' }}>{vault.name}</span>
           </MenuItem>
         ))}

@@ -1,9 +1,12 @@
+/* Import theme variables first */
+@import './theme-variables.css';
+
 :root {
-  --primary-color: #2757aa;
-  --secondary-color: #1C4690;
+  --primary-color: var(--color-primary, #2757aa);
+  --secondary-color: var(--color-secondary, #ffffff);
   --text-color: #fff;
   --hover-bg-color: #fff;
-  --hover-text-color: #1C4690;
+  --hover-text-color: var(--color-primary-dark, #1a3a7a);
   --highlight-color: #fff;
 }
 
@@ -123,7 +126,7 @@
   height: 100vh;
   overflow-y: hidden;
   overflow-x: hidden;
-  background-color: #ecf4fc;
+  background-color: var(--color-surface-light);
   color: #555b6e;
 
   /* Smooth slide with sidebar */

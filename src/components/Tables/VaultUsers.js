@@ -29,10 +29,12 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+
 import logo from '../../images/ZFWHITE.png';
 import TimedAlert from '../TimedAlert';
 import * as constants from '../Auth/configs';
-import axios from 'axios';
+import axios from 'axios';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function VaultUsersTable(props) {
   // Pagination state
@@ -260,7 +262,7 @@ function VaultUsersTable(props) {
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
         <DialogTitle
           className="p-2 d-flex justify-content-between align-items-center"
-          style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+          style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
         >
           <img className="mx-3" src={logo} alt="Loading" width="180px" />
           <span className="ml-auto mx-3">
@@ -605,7 +607,7 @@ function VaultUsersTable(props) {
                         fontSize: '10px',
                         height: '20px',
                         backgroundColor: '#e3f2fd',
-                        color: '#2757aa',
+                        color: THEME_COLORS.primary,
                         fontWeight: 500,
                       }}
                     />

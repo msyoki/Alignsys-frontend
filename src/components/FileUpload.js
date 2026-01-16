@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Box, Tooltip, IconButton } from '@mui/material';
 import '../styles/FileUpload.css';
-import DynamicFileViewer3 from './Viewer/DynamicFileViewer3';
+import DynamicFileViewer3 from './Viewer/DynamicFileViewer3';import { THEME_COLORS } from '../constants/themeColors';
+
 
 const FileUploadComponent = (props) => {
     const [fileData, setFileData] = useState(null);
@@ -109,7 +110,7 @@ const FileUploadComponent = (props) => {
                             size="small"
                             onClick={open}
                             sx={{
-                                color: '#2757aa',
+                                color: THEME_COLORS.primary,
                                 '&:hover': {
                                     backgroundColor: 'rgba(39, 87, 170, 0.1)',
                                 },
@@ -154,7 +155,7 @@ const FileUploadComponent = (props) => {
                         >
                             <Box
                                 sx={{
-                                    backgroundColor: '#2757aa',
+                                    backgroundColor: THEME_COLORS.primary,
                                     color: '#fff',
                                     px: 4,
                                     py: 2,
@@ -189,7 +190,7 @@ const FileUploadComponent = (props) => {
                             <p>Upload a file</p>
                             <i
                                 className="fas fa-file-upload"
-                                style={{ fontSize: 40, color: '#2757aa', margin: 16 }}
+                                style={{ fontSize: 40, color: THEME_COLORS.primary, margin: 16 }}
                             />
                             <p>Drag & drop a file here, or use the button</p>
 

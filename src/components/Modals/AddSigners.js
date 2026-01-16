@@ -1,4 +1,5 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";import { THEME_COLORS } from '../../constants/themeColors';
+
 import {
     Dialog,
     Grid,
@@ -133,7 +134,7 @@ const AddSignersDialog = (props) => {
                                     mb: 1,
                                 }}
                             >
-                                <i className="fas fa-user-circle" style={{ color: "#2757aa", marginRight: "6px" }}></i>
+                                <i className="fas fa-user-circle" style={{ color: THEME_COLORS.primary, marginRight: "6px" }}></i>
                                 <span style={{ marginRight: "8px", color: "#000", fontSize: '12.8px' }}>{item.email}</span>
 
 
@@ -147,7 +148,7 @@ const AddSignersDialog = (props) => {
                             {index < signers.length - 1 && (
                                 <i
                                     className="fas fa-arrow-right"
-                                    style={{ color: "#2757aa", fontSize: "16px", marginRight: "8px" }}
+                                    style={{ color: THEME_COLORS.primary, fontSize: "16px", marginRight: "8px" }}
                                 ></i>
                             )}
                         </React.Fragment>
@@ -164,9 +165,9 @@ const AddSignersDialog = (props) => {
             (
                 <form onSubmit={onSubmit} noValidate>
                     <div className='p-3' style={{ backgroundColor: '#e9f2ff', borderRadius: '8px', marginBottom: '16px', fontSize: '13px' }}>
-                        <span style={{ color: '#2757aa' }}>Instructions</span>: Add signers in the order they should sign. Once the list is complete, proceed to send for signing.
+                        <span style={{ color: THEME_COLORS.primary }}>Instructions</span>: Add signers in the order they should sign. Once the list is complete, proceed to send for signing.
                     </div>
-                    <h5 className="mb-2" style={{ fontSize: 13, color: '#2757aa' }}>
+                    <h5 className="mb-2" style={{ fontSize: 13, color: THEME_COLORS.primary }}>
                         <i className="fas fa-user-plus me-2"></i>Add new signer
                     </h5>
 
@@ -219,7 +220,7 @@ const AddSignersDialog = (props) => {
                             disabled={loadingAddSigner}
                             fullWidth
                             sx={{
-                                backgroundColor: "#2757aa",
+                                backgroundColor: THEME_COLORS.primary,
                                 "&:hover": { backgroundColor: "#1e4a8c" },
                                 borderRadius: "8px",
                                 py: 1,
@@ -303,7 +304,7 @@ const AddSignersDialog = (props) => {
                                 >
                                     <Typography
                                         variant="subtitle1"
-                                        sx={{ color: "#2757aa", fontWeight: 500 }}
+                                        sx={{ color: THEME_COLORS.primary, fontWeight: 500 }}
                                     >
                                         Signers ({props.signers.length})
                                     </Typography>

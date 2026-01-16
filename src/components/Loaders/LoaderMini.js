@@ -2,7 +2,8 @@ import React from "react";
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 const LoadingMini = ({ msg }) => (
   <Box
@@ -16,7 +17,7 @@ const LoadingMini = ({ msg }) => (
       p: 2
     }}
   >
-    {/* <CircularProgress size={40} sx={{ color: '#2757aa', mb: 2 }} /> */}
+    {/* <CircularProgress size={40} sx={{ color: THEME_COLORS.primary, mb: 2 }} /> */}
 
     <Typography variant="body2" color="textPrimary">
       {msg ? (
@@ -26,7 +27,7 @@ const LoadingMini = ({ msg }) => (
         </span>
       ) : (
         <span style={{ color: '#555', fontSize:'12px' }} className="loading-indicator ">
-          <CircularProgress size="20px"  style={{ color: "#2757aa" , marginRight:'10px'}} />  Fetching, please wait <span>.</span><span>.</span><span>.</span>
+          <CircularProgress size="20px"  style={{ color: THEME_COLORS.primary , marginRight:'10px'}} />  Fetching, please wait <span>.</span><span>.</span><span>.</span>
         </span>
       )}
     </Typography>

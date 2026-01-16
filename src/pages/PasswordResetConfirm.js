@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Container, Typography, Box, CircularProgress, InputLabel } from '@mui/material';
+import { THEME_COLORS } from '../constants/themeColors';
 import Logo from '../images/ZFBLU.webp';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import * as constants from '../components/Auth/configs'
 import { Button } from '@mui/material';
+
 const PasswordResetConfirm = () => {
     const { uid, token } = useParams();
     const navigate = useNavigate();
@@ -59,7 +61,7 @@ const PasswordResetConfirm = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: '#2757aa',
+                backgroundColor: THEME_COLORS.primary,
             }}
         >
             <Container
@@ -165,7 +167,7 @@ const PasswordResetConfirm = () => {
                             style={{
                                 fontSize: '12.5px',
                                 color: !resetSuccessful ? '#30343f' : '#fff',
-                                backgroundColor: !resetSuccessful ? '#ffda75' : '#2757aa',
+                                backgroundColor: !resetSuccessful ? '#ffda75' : THEME_COLORS.primary,
                                 cursor: 'pointer',
                                 width: '40%',
                                 padding: '10px',

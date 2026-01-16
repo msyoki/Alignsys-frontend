@@ -6,7 +6,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Tabs, Tab, List, ListItem, Typography, Select, MenuItem, Button } from '@mui/material';
 import { Tooltip } from '@mui/material';
 import FileExtIcon from './FileExtIcon';
-import FileExtText from './FileExtText';
+import FileExtText from './FileExtText';import { THEME_COLORS } from '../constants/themeColors';
+
 
 const CommentsComponent = (props) => {
   const [newComment, setNewComment] = useState('');
@@ -78,7 +79,7 @@ const CommentsComponent = (props) => {
             {props.comments?.length > 0 && (
               <Tooltip onClick={refreshComments} title="Refresh comments">
                 <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '20px', color: '#2757aa' }} className="fas fa-sync-alt mx-2 "></span>
+                  <span style={{ fontSize: '20px', color: THEME_COLORS.primary }} className="fas fa-sync-alt mx-2 "></span>
                 </div>
               </Tooltip>
             )}
@@ -158,7 +159,7 @@ const CommentsComponent = (props) => {
                 const [boldText, regularText] = comment.coment.split(':');
                 return (
                   <div key={index} className="message">
-                    <i className="fas fa-user" style={{ color: '#2757aa', fontSize: '20px' }}></i>
+                    <i className="fas fa-user" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
                     <div className="message-content user-message">
                       <div style={{ fontSize: '12px', color: '#555b6e', marginBottom: '4px' }}>
                         <strong>{boldText}</strong> • {comment.modifiedDate}
@@ -173,7 +174,7 @@ const CommentsComponent = (props) => {
 
             {loading && (
               <div className="message">
-                <i className="fas fa-comment-alt" style={{ color: '#2757aa' }}></i>
+                <i className="fas fa-comment-alt" style={{ color: THEME_COLORS.primary }}></i>
                 <div className="loading-indicator">
                   Posting<span>.</span><span>.</span><span>.</span>
                 </div>

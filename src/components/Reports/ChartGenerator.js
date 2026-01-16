@@ -7,7 +7,9 @@ import {
   CircularProgress,
   Typography
 } from "@mui/material";
-import DynamicChart from "./DynamicChart"; // The chart component from previous step
+import DynamicChart from "./DynamicChart"; import { THEME_COLORS } from '../../constants/themeColors';
+// The chart component from previous step
+
 
 const ChartGenerator = (props) => {
   const [query, setQuery] = useState("");
@@ -69,7 +71,7 @@ const ChartGenerator = (props) => {
           color: "#333",
         }}
       >
-        <span style={{ color: "#2757aa", fontWeight: 500 }}>How it works:  </span>
+        <span style={{ color: THEME_COLORS.primary, fontWeight: 500 }}>How it works:  </span>
         Provide a short description of the data or analysis you want to visualize.
         For example: <i>"Show sales by region for the last quarter"</i>.
       </div>
@@ -101,7 +103,7 @@ const ChartGenerator = (props) => {
           variant="contained"
           size="medium"
           disabled={loading}
-          sx={{ mt: 1, bgcolor: "#2757aa", "&:hover": { bgcolor: "#456badff" }, textTransform: "none" }}
+          sx={{ mt: 1, bgcolor: THEME_COLORS.primary, "&:hover": { bgcolor: "#456badff" }, textTransform: "none" }}
         >
           {loading ? <CircularProgress size={24} /> : "Generate Report"}
         </Button>

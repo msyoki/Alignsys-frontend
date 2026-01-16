@@ -1,6 +1,7 @@
 import { color } from "@chakra-ui/react";
 import { collapseClasses } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";import { THEME_COLORS } from '../constants/themeColors';
+
 
 const AllyBotMessage = () => {
   const fullText = "Hello, I’m Ally. Please select a document to interact with.";
@@ -28,7 +29,7 @@ const AllyBotMessage = () => {
     typeMessage();
   }, []);
 
-  return <div style={{color:'#2757aa'}}>{displayedText}<span className="blinking-cursor">|</span></div>;
+  return <div style={{color: THEME_COLORS.primary}}>{displayedText}<span className="blinking-cursor">|</span></div>;
 };
 
 export default AllyBotMessage;

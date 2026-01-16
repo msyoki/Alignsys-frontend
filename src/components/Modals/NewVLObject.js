@@ -1,4 +1,6 @@
 import React from 'react';
+import { THEME_COLORS } from '../../constants/themeColors';
+
 import {
   Dialog,
   DialogTitle,
@@ -17,7 +19,7 @@ const NewVLObjectDialog = (props) => {
     <Dialog open={props.isFormOpen} maxWidth="xl">
       <DialogTitle
         className="p-2 d-flex justify-content-between align-items-center"
-        style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+        style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
       >
         <img className="mx-3" src={props.logo} alt="Logo" width="180px" />
         <span className="ml-auto mx-3">
@@ -84,7 +86,7 @@ const NewVLObjectDialog = (props) => {
 
       <DialogActions
         style={{
-          backgroundColor: '#ecf4fc',
+          backgroundColor: THEME_COLORS.surfaceLight,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
@@ -106,7 +108,7 @@ const NewVLObjectDialog = (props) => {
             <Typography variant="body2" sx={{ color: '#666', fontSize: '13px' }}>
               <a
                 href="#"
-                style={{ color: '#2757aa', textDecoration: 'none', fontSize: '14.5px' }}
+                style={{ color: THEME_COLORS.primary, textDecoration: 'none', fontSize: '14.5px' }}
                 onClick={(e) => {
                   e.preventDefault();
                   props.dontUseTemplates();
@@ -122,7 +124,7 @@ const NewVLObjectDialog = (props) => {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#2757aa',
+                    color: THEME_COLORS.primary,
                     fontWeight: 600,
                     fontSize: '12px',
                     mb: 0.5,

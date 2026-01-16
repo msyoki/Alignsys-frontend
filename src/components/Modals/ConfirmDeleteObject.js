@@ -8,7 +8,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
-import logo from '../../images/ZFWHITE.webp'
+import logo from '../../images/ZFWHITE.webp'import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function ConfirmDeleteObject(props) {
     return (
@@ -16,7 +17,7 @@ function ConfirmDeleteObject(props) {
 
             {/* <DialogTitle
                 className='p-2 d-flex justify-content-between align-items-center'
-                style={{ backgroundColor: '#2757aa', color: '#fff', fontSize: '15px' }}
+                style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
             >
 
                 <img className="mx-3" src={logo} alt="Loading" width="130px" />
@@ -25,12 +26,12 @@ function ConfirmDeleteObject(props) {
             {/* Content */}
             <DialogContent sx={{ p: 2, textAlign: 'center', width: '400px' }} >
         
-                <i class="fa-solid fa-triangle-exclamation  mx-2 my-2" style={{ color: '#2757aa', fontSize: 60 }}></i>
+                <i class="fa-solid fa-triangle-exclamation  mx-2 my-2" style={{ color: THEME_COLORS.primary, fontSize: 60 }}></i>
                
                 <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
                     Are you sure you want to delete?
                 </Typography>
-                <Typography  variant="body1" sx={{  mt: 1 , color:'#2757aa', fontSize:'12px'}}>
+                <Typography  variant="body1" sx={{  mt: 1 , color: THEME_COLORS.primary, fontSize:'12px'}}>
                     {props.objectTitle}
                 </Typography>
             </DialogContent>

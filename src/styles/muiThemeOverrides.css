@@ -1,0 +1,45 @@
+/* Material-UI Tab Global Overrides */
+
+/* Ensure tab indicator uses theme primary color */
+.MuiTabs-indicator {
+  background-color: var(--color-primary) !important;
+  height: 3px !important;
+}
+
+/* Selected tab text color */
+.MuiTab-textColorPrimary.Mui-selected {
+  color: var(--color-primary) !important;
+}
+
+/* Override MuiButtonBase ripple color for tabs */
+.MuiTab-root:hover {
+  background-color: transparent !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: var(--color-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Prevent MUI default blue color */
+.MuiTabs-root .MuiTab-root {
+  color: #999 !important;
+}
+
+.MuiTabs-root .MuiTab-root.Mui-selected {
+  color: var(--color-primary) !important;
+}
+
+/* Override any inline styles */
+.MuiTabs-flexContainer .MuiTab-root.Mui-selected {
+  color: var(--color-primary) !important;
+}
+
+/* Ensure the ripple effect also uses theme color */
+.MuiTouchRipple-root {
+  color: var(--color-primary) !important;
+}
+
+.MuiTab-root .MuiTouchRipple-root {
+  color: var(--color-primary) !important;
+}

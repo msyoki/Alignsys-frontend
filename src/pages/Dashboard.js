@@ -26,6 +26,7 @@ import {
   faFolder, faUserFriends, faPlus, faTag
 } from '@fortawesome/free-solid-svg-icons';
 import TaskMessenger from '../components/features/ai/TaskMessenger';
+import { THEME_COLORS } from '../constants/themeColors';
 
 const allIcons = {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends,
@@ -241,7 +242,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
 
       "&::-webkit-scrollbar": { width: "3px" },
       "&::-webkit-scrollbar-thumb": {
-        background: "#2757aa",
+        background: THEME_COLORS.primary,
         borderRadius: "10px",
       },
     }}
@@ -255,7 +256,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
           onClick={() => fetchItemData(item.objectid, item.namesingular)}
           sx={{
             cursor: "pointer",
-            backgroundColor: hoveredItem === item.objectid ? "#ecf4fc" : "#fff",
+            backgroundColor: hoveredItem === item.objectid ? THEME_COLORS.surfaceLight : "#fff",
             color: "#333",
             py: 0,
             px: 0,
@@ -286,16 +287,16 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
           {/* ICON */}
    
           {item.objectid === 0 ? (
-            <FaFileCirclePlus style={{ color: "#2757aa", fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+            <FaFileCirclePlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
           ) : (
-            <FaFolderPlus style={{ color: "#2757aa", fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+            <FaFolderPlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
           )}
 
 
           {/* TEXT */}
           <ListItemText
             primary={item.namesingular}
-            primaryTypographyProps={{ fontSize: "12px" }}
+            primaryTypographyProps={{ fontSize: "13px" }}
             sx={{
               marginX: 0.5,
               padding: 0,

@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Typography, Box, CircularProgress, InputLabel } from '@mui/material';
+import { THEME_COLORS } from '../constants/themeColors';
 import Logo from '../images/ZFBLU.webp';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import * as constants from '../components/Auth/configs'
 import TimedAlert from '../components/TimedAlert';
 import { Button } from '@mui/material';
+
 const PasswordResetRequest = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
@@ -85,7 +87,7 @@ const PasswordResetRequest = () => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    backgroundColor: '#2757aa', // Full page background color
+                    backgroundColor: THEME_COLORS.primary, // Full page background color
                     padding: 2,
                 }}
             >
@@ -181,7 +183,7 @@ const PasswordResetRequest = () => {
                                 style={{
                                     fontSize: '12.5px',
                                     color: linksent ? '#30343f' : '#fff',
-                                    backgroundColor: linksent ? '#ffda75' : '#2757aa',
+                                    backgroundColor: linksent ? '#ffda75' : THEME_COLORS.primary,
                                     cursor: 'pointer',
                                     width: '40%',
                                     padding: '10px',
@@ -213,7 +215,7 @@ const PasswordResetRequest = () => {
                             style={{
                                 fontSize: '12.5px',
                                 color: linksent ? '#fff' : '#30343f',
-                                backgroundColor: linksent ? '#2757aa' : '#ffda75',
+                                backgroundColor: linksent ? THEME_COLORS.primary : '#ffda75',
                                 cursor: 'pointer',
                                 width: '40%',
                                 padding: '10px',

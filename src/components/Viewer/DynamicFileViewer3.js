@@ -5,7 +5,8 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import PDFViewerPreview4 from './Pdf4';
+import PDFViewerPreview4 from './Pdf4';import { THEME_COLORS } from '../../constants/themeColors';
+
 // FileExtIcon intentionally unused in this viewer
 
 // ==== Styled Components ====
@@ -273,7 +274,7 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
   if (!base64 || !extension) {
     return (
       <Box sx={{ textAlign: 'center', mt: '20%', color: '#555' }}>
-        <i className="fas fa-tv" style={{ fontSize: 80, color: '#2757aa' }} />
+        <i className="fas fa-tv" style={{ fontSize: 80, color: THEME_COLORS.primary }} />
         <Typography variant="body2" sx={{ mt: 2, fontSize: 13 }}>
           Nothing to preview - Select a file to view
         </Typography>
@@ -314,7 +315,7 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
     default:
       return (
         <Box sx={{ textAlign: 'center', mt: '20%', color: '#555' }}>
-          <i className="fa-solid fa-ban" style={{ fontSize: 80, color: '#2757aa' }} />
+          <i className="fa-solid fa-ban" style={{ fontSize: 80, color: THEME_COLORS.primary }} />
           <Typography variant="body2" sx={{ mt: 2, fontSize: 13 }}>
             Unsupported format "{extension}"
           </Typography>

@@ -4,7 +4,8 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     TablePagination, Button, TextField, Typography, Avatar, Chip, Box
 } from '@mui/material';
-import * as constants from './Auth/configs';
+import * as constants from './Auth/configs';import { THEME_COLORS } from '../constants/themeColors';
+
 
 
 const cellStyle = {
@@ -198,7 +199,7 @@ function LoginActivityTable(props) {
                                                     fontSize: '10px',
                                                     height: '20px',
                                                     backgroundColor: '#e3f2fd',
-                                                    color: '#2757aa',
+                                                    color: THEME_COLORS.primary,
                                                     fontWeight: 500
                                                 }}
                                             />

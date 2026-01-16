@@ -24,6 +24,8 @@ import { FaChevronUp } from "react-icons/fa6";
 import { FaFolderPlus } from "react-icons/fa6";
 import { FaTable } from "react-icons/fa";
 import { FaBan } from "react-icons/fa";
+import { THEME_COLORS } from '../../constants/themeColors';
+
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -67,7 +69,7 @@ const TREE_ITEM_OBJECT_STYLES = {
 
 const SECTION_HEADER_STYLES = {
     fontSize: '12px',
-    backgroundColor: '#ecf4fc',
+    backgroundColor: THEME_COLORS.surfaceLight,
     cursor: 'pointer',
     display: 'flex'
 };
@@ -78,7 +80,7 @@ const BOX_PADDING_STYLES = {
 
 const NAVIGATION_STYLES = {
     fontSize: '12px',
-    backgroundColor: '#ecf4fc',
+    backgroundColor: THEME_COLORS.surfaceLight,
     cursor: 'pointer',
     gap: '4px',
 };
@@ -160,7 +162,7 @@ const NavigationBreadcrumb = memo(
             <div
                 className="d-flex align-items-center flex-wrap "
                 style={{
-                    backgroundColor: "#ecf4fc",
+                    backgroundColor: THEME_COLORS.surfaceLight,
                     color: "#333",
                     borderRadius: "4px",
                     padding: "10px 6px",
@@ -171,7 +173,7 @@ const NavigationBreadcrumb = memo(
                 }}
             >
             
-                <FaTable className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                <FaTable className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
 
                 {visibleItems.map((item, index) => (
                     <React.Fragment key={index}>
@@ -205,7 +207,7 @@ const NavigationBreadcrumb = memo(
 
                         {index < visibleItems.length - 1 && (
                        
-                            <FaChevronRight style={{ color: "#2757aa", fontSize: "9px", opacity: 0.8 }} />
+                            <FaChevronRight style={{ color: THEME_COLORS.primary, fontSize: "9px", opacity: 0.8 }} />
                         )}
                     </React.Fragment>
                 ))}
@@ -215,13 +217,13 @@ const NavigationBreadcrumb = memo(
                         <span style={{ fontSize: "11px", color: "#333", opacity: 0.8 }}>
                             ...
                         </span>
-                        <FaChevronDown onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: "#2757aa", marginLeft: "2px" }} />
+                        <FaChevronDown onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: THEME_COLORS.primary, marginLeft: "2px" }} />
                     </>
                 )}
 
                 {!collapsed && isCollapsible && (
                   
-                    <FaChevronUp onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: "#2757aa", marginLeft: "2px" }} />
+                    <FaChevronUp onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: THEME_COLORS.primary, marginLeft: "2px" }} />
                 )}
             </div>
         );
@@ -287,7 +289,7 @@ const ViewFolderItem = memo(({ item, index, selectedItemId, onFetchMainViewObjec
                     >
                         
 
-                        <FaTable className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
+                        <FaTable className='mx-2' style={{ color: THEME_COLORS.primary, fontSize: '20px' }} />
                         <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
@@ -319,7 +321,7 @@ const ViewListItem = memo(({ view, index, selectedItemId, onFetchMainViewObjects
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        <FaTable className='mx-2' style={{ color: '#2757aa', fontSize: '20px' }} />
+                        <FaTable className='mx-2' style={{ color: THEME_COLORS.primary, fontSize: '20px' }} />
                         <span style={{ fontSize: '12px' }} className='list-text'>{view.viewName}</span>
                     </Box>
                 }
@@ -868,7 +870,7 @@ const ViewsList = (props) => {
                                     position: 'sticky',
                                     top: 0,
                                     zIndex: 100,
-                                    backgroundColor: '#ecf4fc',
+                                    backgroundColor: THEME_COLORS.surfaceLight,
                                     overflow: 'hidden', // prevents internal scrolling
                                     whiteSpace: 'nowrap',
 
@@ -973,7 +975,7 @@ const ViewsList = (props) => {
                                             }}
                                         >
                                         
-                                            <FaBan className="mx-2" style={{ fontSize: '40px', color: '#2757aa', marginBottom: '16px' }} />
+                                            <FaBan className="mx-2" style={{ fontSize: '40px', color: THEME_COLORS.primary, marginBottom: '16px' }} />
                                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                                                 No Results Found
                                             </Typography>
@@ -996,11 +998,11 @@ const ViewsList = (props) => {
                                         style={SECTION_HEADER_STYLES}
                                     >
                                         <span className="d-flex align-items-center">
-                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                                            
                                             Common Views
                                         </span>
-                                        <small style={{ color: '#2757aa', fontSize: '12px' }}>({filteredCommonViews.length})</small>
+                                        <small style={{ color: THEME_COLORS.primary, fontSize: '12px' }}>({filteredCommonViews.length})</small>
                                     </h6>
                                     {showCommonViewSublist && (
                                         <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
@@ -1026,10 +1028,10 @@ const ViewsList = (props) => {
                                         style={SECTION_HEADER_STYLES}
                                     >
                                         <span className="d-flex align-items-center">
-                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: '#2757aa' }} />
+                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                                             Other Views
                                         </span>
-                                        <small style={{ color: '#2757aa', fontSize: '12px' }}>({filteredOtherViews.length})</small>
+                                        <small style={{ color: THEME_COLORS.primary, fontSize: '12px' }}>({filteredOtherViews.length})</small>
                                     </h6>
                                     {showOtherViewSublist && (
                                         <div style={{

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import '../../styles/PDFViewerTechedge.css';
-import { Tooltip } from '@mui/material';
+import { Tooltip } from '@mui/material';import { THEME_COLORS } from '../../constants/themeColors';
+
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -180,16 +181,16 @@ const PDFViewerPreview = (props) => {
                     </span>
                     {/* Zoom Controls */}
                     <div className="d-flex align-items-center gap-2 mx-3">
-                        <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
+                        <i onClick={zoomOut} className="fa-solid fa-magnifying-glass-minus" style={{ fontSize: '25px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
                         <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
                             {Math.round(zoom * 100)}%
                         </span>
-                        <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
+                        <i onClick={zoomIn} className="fa-solid fa-magnifying-glass-plus" style={{ fontSize: '25px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
                     </div>
                     {/* Upload a different file */}
                     <div className="d-flex align-items-center gap-2 mx-3">
                         <Tooltip title="Upload a different file ">
-                            <i onClick={() => props.setUploadedFile(null)} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: '#2757aa', cursor: 'pointer' }} />
+                            <i onClick={() => props.setUploadedFile(null)} className="fa-solid fa-trash me-1" style={{ fontSize: '25px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
                         </Tooltip>
                     </div>
                 </div>
