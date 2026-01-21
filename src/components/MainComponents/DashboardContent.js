@@ -1212,7 +1212,7 @@ const DocumentList = (props) => {
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
 
-        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt','jpeg','png','jpg'].includes(extension)) {
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt','jpeg','png','jpg','txt'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
             guid: props.selectedVault.guid,
@@ -1402,7 +1402,7 @@ const DocumentList = (props) => {
     }
 
     // Convert to PDF actions
-    const convertibleExtensions = ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif'];
+    const convertibleExtensions = ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'webp', 'tif', 'jpg', 'jpeg', 'png', 'gif', 'txt'];
     if (isSingleFile && !isCheckedOut && canEdit && fileExt && convertibleExtensions.includes(fileExt)) {
       rightClickActions.push(
         {

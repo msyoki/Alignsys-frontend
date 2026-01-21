@@ -68,7 +68,7 @@ const TREE_ITEM_OBJECT_STYLES = {
 };
 
 const SECTION_HEADER_STYLES = {
-    fontSize: '12px',
+    fontSize: '13px',
     backgroundColor: THEME_COLORS.surfaceLight,
     cursor: 'pointer',
     display: 'flex'
@@ -87,7 +87,7 @@ const NAVIGATION_STYLES = {
 
 const DATE_SPAN_STYLES = {
     marginLeft: 'auto',
-    fontSize: '12px',
+    fontSize: '13px',
     color: '#888',
     whiteSpace: 'nowrap'
 };
@@ -1002,7 +1002,7 @@ const ViewsList = (props) => {
                                            
                                             Common Views
                                         </span>
-                                        <small style={{ color: THEME_COLORS.primary, fontSize: '12px' }}>({filteredCommonViews.length})</small>
+                                        <small style={{ color: THEME_COLORS.primary, fontSize: '13px' }}>({filteredCommonViews.length})</small>
                                     </h6>
                                     {showCommonViewSublist && (
                                         <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
@@ -1031,7 +1031,7 @@ const ViewsList = (props) => {
                                             <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
                                             Other Views
                                         </span>
-                                        <small style={{ color: THEME_COLORS.primary, fontSize: '12px' }}>({filteredOtherViews.length})</small>
+                                        <small style={{ color: THEME_COLORS.primary, fontSize: '13px' }}>({filteredOtherViews.length})</small>
                                     </h6>
                                     {showOtherViewSublist && (
                                         <div style={{

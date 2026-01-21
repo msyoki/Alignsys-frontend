@@ -97,7 +97,7 @@ const SidebarMenu = React.memo(({
           minHeight: "56px",
           maxHeight: "56px",
           overflow: "hidden",
-
+          flexShrink: 0,
         }}
       >
         <img
@@ -177,8 +177,8 @@ const SidebarMenu = React.memo(({
 
       {/* Bottom Buttons */}
       <div>
-        <ul className="bottom-buttons">
-          {user.is_admin === "True" && (
+        <ul className="menu-items bottom-buttons">
+          {user.is_admin && (
             // <li onClick={adminPage} className="menu-item main-li shadow-lg">
             //   <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
             //   <span style={{ fontSize: "14px" }}>Admin</span>
@@ -232,7 +232,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
     dense
     disablePadding
     sx={{
-      maxHeight: isVisible ? "350px" : "0",
+      maxHeight: isVisible ? "calc(100vh - 200px)" : "0",
       overflowY: "auto",
       width: "100%",
       opacity: isVisible ? "1" : "0",

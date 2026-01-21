@@ -49,13 +49,13 @@ const ColumnSimpleTree = ({
   statusColumnLabel = "Status",
 
   // Font sizes
-  nameColumnFontSize = 12,
+  nameColumnFontSize = 13,
   dateColumnFontSize = 12,
-  objectTypeNameFontSize = 12,
-  sizeColumnFontSize = 12,
-  ownerColumnFontSize = 12,
-  statusColumnFontSize = 12,
-  headerFontSize = 12
+  objectTypeNameFontSize = 13,
+  sizeColumnFontSize = 13,
+  ownerColumnFontSize = 13,
+  statusColumnFontSize = 13,
+  headerFontSize = 13
 }) => {
 
   // State

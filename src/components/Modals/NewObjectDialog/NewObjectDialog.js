@@ -262,6 +262,8 @@ const NewObjectDialog = (props) => {
             userID: parseInt(props.mfilesId, 10)
         };
 
+        console.log("Submitting form with payload:", basePayload);
+
         const headers = { 'Content-Type': 'application/json', accept: '*/*' };
 
         try {
@@ -286,6 +288,7 @@ const NewObjectDialog = (props) => {
                 await axios.post(`${constants.mfiles_api}/api/objectinstance/ObjectCreation`, payload, { headers });
                 props.setUploadedFile(null);
             } else {
+                console.log(payload)
                 await axios.post(`${constants.mfiles_api}/api/Templates/ObjectCreation`, payload, { headers });
                 props.setTemplateModalOpen(false);
                 props.setVaultObjectsModal(false);
@@ -345,10 +348,12 @@ const NewObjectDialog = (props) => {
             objectID: valueListObjectId,
             userID: parseInt(props.mfilesId, 10)
         };
+        console.log("Submitting VL object with payload:", basePayload);
 
         const headers = { 'Content-Type': 'application/json', accept: '*/*' };
 
         try {
+            
             await axios.post(`${constants.mfiles_api}/api/objectinstance/ObjectCreation`, basePayload, { headers });
 
             setMiniLoaderVL(false);
