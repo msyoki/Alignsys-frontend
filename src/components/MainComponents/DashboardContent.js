@@ -113,7 +113,7 @@ function a11yProps2(index) {
 
 
 
-const DocumentList = (props) => {
+const DashboardContent = (props) => {
 
 
   const onDrop = useCallback(async (acceptedFiles) => {
@@ -268,7 +268,7 @@ const DocumentList = (props) => {
           props.setData(data);
         });
       }
-    }, 4000); // ⏱ 5 seconds
+    }, 2500); // ⏱ 5 seconds
   };
 
 
@@ -522,7 +522,7 @@ const DocumentList = (props) => {
       const extension = fileData[0]?.extension?.replace('.', '') || '';
       setExtension(extension);
       console.log("File downloaded successfully")
-      
+
 
       return { blob: blobData, extension, fileId, success: true };
     } catch (error) {
@@ -533,7 +533,7 @@ const DocumentList = (props) => {
       setExtension('');
       console.log('Document download error:', error);
       // throw new Error(`Download failed: ${error.message}`);
-      
+
     } finally {
       setLoadingFile(false);
     }
@@ -1212,7 +1212,7 @@ const DocumentList = (props) => {
         const data = response.data;
         const extension = data[0]?.extension?.replace(/^\./, '').toLowerCase();
 
-        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt','jpeg','png','jpg','txt'].includes(extension)) {
+        if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt', 'jpeg', 'png', 'jpg', 'txt'].includes(extension)) {
           setObjectToEditOnOfficeApp({
             ...item,
             guid: props.selectedVault.guid,
@@ -1698,6 +1698,7 @@ const DocumentList = (props) => {
               <img
                 src={THEME_CONFIG.logos.brandLogo}
                 alt="Logo"
+                onClick={() => window.location.reload()}
                 className="shadow-sm"
                 style={{
                   height: "35px",
@@ -1810,33 +1811,82 @@ const DocumentList = (props) => {
               }
             }}
           >
-            {['Home', 'Recent', 'Assigned', 'Deleted', 'Reports'].map((label, index) => (
-              <Tab
-                key={index}
-                label={
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {label === 'Home' && (
-                      <BiHomeAlt2 style={{ fontSize: '16px', color: selectedTab === 'Home' ? THEME_COLORS.primary : '#ccc' }} />
-                    )}
-                    {label}
-                  </span>
-                }
-                onClick={() => {
-                  setSelectedTab(label); // update the selected tab
-                  resetPreview();
-                  if (label === 'Home') {
-                    setSelectedViewObjects([]);
-                    setViewNavigation([]);
-                    setSearched(false);
-                  }
-                  if (label === 'Recent') props.getRecent?.();
-                  if (label === 'Assigned') props.getAssigned?.();
-                  if (label === 'Deleted') props.getDeleted?.();
-                }}
-                {...a11yProps(index)}
-              />
+            {['Home', 'Recent', 'Assigned', 'Deleted', 'Reports'].map((label, index) => {
+              const showAssignedCount = label === 'Assigned' && props.assignedData?.length; // number
+              const showDeletedCount = label === 'Deleted' && props.deletedData?.length;
+              return (
+                <Tab
+                  key={index}
+                  label={
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px', // space between icon/text and count
+                      }}
+                    >
+                      {/* Home icon */}
+                      {label === 'Home' && (
+                        <BiHomeAlt2
+                          style={{
+                            fontSize: '16px',
+                            color: selectedTab === 'Home' ? THEME_COLORS.primary : '#ccc',
+                          }}
+                        />
+                      )}
 
-            ))}
+                      {/* Label text */}
+                      <span>{label}</span>
+
+                      {/* Assigned count */}
+                      {showAssignedCount > 0 && (
+                        <span
+                          style={{
+                            marginLeft: '1px',
+                            fontSize: '12px',
+
+                            color: selectedTab === 'Assigned' ? THEME_COLORS.primary : '#ccc'
+                          }}
+                        >
+                          ({props.assignedData.length})
+                        </span>
+                      )}
+
+                       {/* Assigned count */}
+                      {showDeletedCount > 0 && (
+                        <span
+                          style={{
+                            marginLeft: '1px',
+                            fontSize: '12px',
+
+                            color: selectedTab === 'Deleted' ? THEME_COLORS.primary : '#ccc'
+                          }}
+                        >
+                          ({props.deletedData.length})
+                        </span>
+                      )}
+                    </span>
+                  }
+                  onClick={() => {
+                    setSelectedTab(label);
+                    resetPreview();
+
+                    if (label === 'Home') {
+                      setSelectedViewObjects([]);
+                      setViewNavigation([]);
+                      setSearched(false);
+                    }
+                    if (label === 'Recent') props.getRecent?.();
+                    if (label === 'Assigned') props.getAssigned?.();
+                    if (label === 'Deleted') props.getDeleted?.();
+                  }}
+                  {...a11yProps(index)}
+                />
+              );
+            })}
+
+
+
           </Tabs>
 
           {/* Tab Content */}
@@ -2191,4 +2241,4 @@ const DocumentList = (props) => {
   );
 };
 
-export default DocumentList;
+export default DashboardContent;

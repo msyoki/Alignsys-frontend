@@ -344,8 +344,8 @@ const ClassSelectionDialog = ({
                                                                 }}
                                                             >
                                                                 <ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
-                                                                 
-                                                                     {selectedObjectId === 0 ? (
+
+                                                                    {selectedObjectId === 0 ? (
                                                                         <FaFileCirclePlus
                                                                             style={{
                                                                                 color: "#2a68af",
@@ -381,7 +381,7 @@ const ClassSelectionDialog = ({
             </DialogContent>
 
             <DialogActions>
-                <Button
+                {/* <Button
                     sx={{ textTransform: "none" }}
                     className="mx-4 rounded-pill"
                     color="warning"
@@ -390,6 +390,22 @@ const ClassSelectionDialog = ({
                     onClick={onClose}
                 >
                     Close
+                </Button> */}
+                <Button
+                    sx={{
+                        textTransform: 'none',
+                        backgroundColor: '#FFD54F',   // yellow
+                        color: '#000',
+                        '&:hover': {
+                            backgroundColor: '#FFCA28',
+                        },
+                    }}
+                    className="rounded-pill"
+                    size="medium"
+                    variant="contained"
+                    onClick={onClose}
+                >
+                    Cancel
                 </Button>
             </DialogActions>
         </Dialog>

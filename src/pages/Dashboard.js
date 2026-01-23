@@ -316,7 +316,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
 SubList.displayName = 'SubList';
 
 // API Functions Hook - optimized with caching
-const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted) => {
+const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted,setRecentData,setDeletedData,) => {
   const cacheRef = useRef(new Map());
 
   // Clear cache when vault changes
@@ -512,7 +512,7 @@ function Dashboard() {
     getAssigned,
     getVaultObjects,
     getVaultObjects2
-  } = useApiCalls(selectedVault, selectedVault?.vaultId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted);
+  } = useApiCalls(selectedVault, selectedVault?.vaultId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted,setRecentData,setDeletedData,setDeletedData);
 
   // --- Helper Functions (memoized for performance) ---
   const getViewableObjects = useCallback(() => {

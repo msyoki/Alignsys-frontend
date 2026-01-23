@@ -2,7 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Box, Tooltip, IconButton } from '@mui/material';
 import '../styles/FileUpload.css';
-import DynamicFileViewer3 from './Viewer/DynamicFileViewer3';import { THEME_COLORS } from '../constants/themeColors';
+import DynamicFileViewer3 from './Viewer/DynamicFileViewer3';
+import { THEME_COLORS } from '../constants/themeColors';
+import { MdOutlineFileUpload } from "react-icons/md";
 
 
 const FileUploadComponent = (props) => {
@@ -130,7 +132,7 @@ const FileUploadComponent = (props) => {
                         height: '100%',
                         width: '100%',
                         backgroundColor: props.uploadedFile ? 'transparent' : '#ecf4fc',
-                        border: props.uploadedFile ? 'none' : '2px dashed #ccc',
+                        border: props.uploadedFile ? 'none' : `1.4px dashed ${props.fileUploadError ? "#CC3333" : "#ccc"}`,
                         borderRadius: props.uploadedFile ? 0 : 8,
                         position: 'relative',
                         outline: isDragActive ? '1px solid #2757aa' : 'none',
@@ -163,7 +165,7 @@ const FileUploadComponent = (props) => {
                                     fontWeight: 'bold',
                                 }}
                             >
-                                <i className="fas fa-file-upload" style={{ marginRight: 8 }} />
+                                <MdOutlineFileUpload style={{ marginRight: 8 }} />
                                 Drop to replace file
                             </Box>
                         </Box>
@@ -188,8 +190,7 @@ const FileUploadComponent = (props) => {
                             }}
                         >
                             <p>Upload a file</p>
-                            <i
-                                className="fas fa-file-upload"
+                            <MdOutlineFileUpload
                                 style={{ fontSize: 40, color: THEME_COLORS.primary, margin: 16 }}
                             />
                             <p>Drag & drop a file here, or use the button</p>

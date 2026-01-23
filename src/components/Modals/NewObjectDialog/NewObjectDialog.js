@@ -497,6 +497,7 @@ const NewObjectDialog = (props) => {
                 setOpenAlert={setOpenAlert}
                 setAlertSeverity={setAlertSeverity}
                 setAlertMsg={setAlertMsg}
+                fileUploadError={fileUploadError}
             />
 
             {/* Separate dialog for value list objects with SEPARATE state */}

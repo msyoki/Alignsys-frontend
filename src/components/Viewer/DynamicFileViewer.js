@@ -8,7 +8,8 @@ import { Table, Typography, TableBody, TableCell, TableContainer, TableHead, Tab
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import FileExtIcon from '../FileExtIcon';
-import FileExtText from '../FileExtText';import { THEME_COLORS } from '../../constants/themeColors';
+import FileExtText from '../FileExtText';
+import { THEME_COLORS } from '../../constants/themeColors';
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -645,7 +646,7 @@ const DynamicFileViewer = ({
       case 'office':
         return (
           <div className="viewer-container">
-            <Box className='chat-header'>
+            {/* <Box className='chat-header'>
               <button
                 onClick={() =>
                   window.open(`https://view.officeapps.live.com/op/view.aspx?src=${fileUrl}`, "_blank")
@@ -662,7 +663,7 @@ const DynamicFileViewer = ({
               >
                 Open in New Tab
               </button>
-            </Box>
+            </Box> */}
 
             <Box className="chat-header">
               <Box>

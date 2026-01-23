@@ -66,43 +66,45 @@ const ObjectFormDialog = ({
     onClassChange,
     setOpenAlert,
     setAlertSeverity,
-    setAlertMsg
+    setAlertMsg,
+    fileUploadError
+
 }) => {
 
     const getFileIcon = (fileName) => {
         const extension = fileName.split('.').pop().toLowerCase();
         const iconStyle = { fontSize: '25px' };
         switch (extension) {
-         case 'pdf':
-           return <FaRegFilePdf style={{ ...iconStyle, color: '#f21b3f' }} />;
-         case 'csv':
-           return <BsFiletypeCsv style={{ ...iconStyle, color: '#7cb518' }} />;
-         case 'txt':
-           return <BsFiletypeTxt style={{ ...iconStyle, color: '#555b6e' }} />;
-         case 'msg':
-           return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
-         case 'webp':
-           return <FaInternetExplorer style={{ ...iconStyle, color: THEME_COLORS.primary }} />;
-         case 'xlsx':
-         case 'xls':
-           return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
-         case 'ppt':
-         case 'pptx':
-           return <BsFiletypePptx style={{ ...iconStyle, color: '#d34628' }} />;
-         case 'docx':
-         case 'doc':
-           return <FaRegFileWord style={{ ...iconStyle, color: '#35558b' }} />;
-         case 'png':
-         case 'jpeg':
-         case 'jpg':
-           return <CiImageOn style={{ ...iconStyle, color: '#2a68af' }} />;
-         case 'xfdf':
-            return <HiOutlineAnnotation style={{ ...iconStyle, color: '#ffb703' }} />;
-         case 'vssettings':
-           return <VscVscode style={{ ...iconStyle, color: '#555b6e' }} />;
-         default:
-           return <CiFileOn style={{ ...iconStyle, color: '#e5e5e5' }} />;
-       }
+            case 'pdf':
+                return <FaRegFilePdf style={{ ...iconStyle, color: '#f21b3f' }} />;
+            case 'csv':
+                return <BsFiletypeCsv style={{ ...iconStyle, color: '#7cb518' }} />;
+            case 'txt':
+                return <BsFiletypeTxt style={{ ...iconStyle, color: '#555b6e' }} />;
+            case 'msg':
+                return <FaEnvelope style={{ ...iconStyle, color: '#ffb703' }} />;
+            case 'webp':
+                return <FaInternetExplorer style={{ ...iconStyle, color: THEME_COLORS.primary }} />;
+            case 'xlsx':
+            case 'xls':
+                return <PiMicrosoftExcelLogoFill style={{ ...iconStyle, color: '#217045' }} />;
+            case 'ppt':
+            case 'pptx':
+                return <BsFiletypePptx style={{ ...iconStyle, color: '#d34628' }} />;
+            case 'docx':
+            case 'doc':
+                return <FaRegFileWord style={{ ...iconStyle, color: '#35558b' }} />;
+            case 'png':
+            case 'jpeg':
+            case 'jpg':
+                return <CiImageOn style={{ ...iconStyle, color: '#2a68af' }} />;
+            case 'xfdf':
+                return <HiOutlineAnnotation style={{ ...iconStyle, color: '#ffb703' }} />;
+            case 'vssettings':
+                return <VscVscode style={{ ...iconStyle, color: '#555b6e' }} />;
+            default:
+                return <CiFileOn style={{ ...iconStyle, color: '#e5e5e5' }} />;
+        }
     };
     const handleReplaceFile = () => {
         document.getElementById('file-upload-input').click();
@@ -126,11 +128,11 @@ const ObjectFormDialog = ({
                 <img className="mx-3" src={logo} alt="Loading" width="180px" />
                 <span className="ml-auto mx-3">
                     {selectedObjectId === 0 ? (
-                    
+
                         <FaFileCirclePlus style={{ color: "#fff", fontSize: "20px" }} />
 
                     ) : (
-                  
+
                         <FaFolderPlus style={{ color: "#fff", fontSize: "20px" }} />
                     )}
                     <small className='mx-2'>Create {selectedClassName}</small>
@@ -195,6 +197,7 @@ const ObjectFormDialog = ({
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}
+
                         >
                             <Box sx={{
                                 height: uploadedFile ? '350px' : '310px',
@@ -207,6 +210,7 @@ const ObjectFormDialog = ({
                                     handleFileChange={onFileChange}
                                     uploadedFile={uploadedFile}
                                     getFileIcon={getFileIcon}
+                                    fileUploadError={fileUploadError}
                                 />
                             </Box>
 
@@ -274,7 +278,7 @@ const ObjectFormDialog = ({
                                             }}
                                         >
                                             <BsUpload className="mx-2" />
-                              
+
                                             Switch to File Upload / Change Template
                                         </a>
                                     </Typography>
@@ -294,7 +298,7 @@ const ObjectFormDialog = ({
                                                     }}
                                                 >
                                                     <HiTemplate className="mx-2" style={{ fontSize: '15px' }} />
-                                                 
+
 
                                                     Quick Templates
                                                 </Typography>
@@ -320,16 +324,23 @@ const ObjectFormDialog = ({
                 {/* Right Side - Action Buttons */}
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
                     <Button
-                        sx={{ textTransform: 'none' }}
-                        className='rounded-pill'
-                        color="warning"
-                        size='medium'
+                        sx={{
+                            textTransform: 'none',
+                            backgroundColor: '#FFD54F',   // yellow
+                            color: '#000',
+                            '&:hover': {
+                                backgroundColor: '#FFCA28',
+                            },
+                        }}
+                        className="rounded-pill"
+                        size="medium"
                         variant="contained"
                         onClick={onClose}
                         disabled={miniLoader}
                     >
                         Cancel
                     </Button>
+
                     <Button
                         sx={{ textTransform: 'none', position: 'relative' }}
                         className='rounded-pill'
