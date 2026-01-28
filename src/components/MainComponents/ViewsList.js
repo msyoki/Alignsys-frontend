@@ -114,7 +114,7 @@ const TOOLTIP_INNER_STYLES = {
 };
 
 const SCROLLABLE_CONTAINER_STYLES = {
-    height: '27vh',
+    height: '50%vh',
     overflowY: 'auto'
 };
 
@@ -1035,7 +1035,7 @@ const ViewsList = (props) => {
                                     </h6>
                                     {showOtherViewSublist && (
                                         <div style={{
-                                            height: filteredCommonViews?.length < 1 ? '70vh' : '27vh',
+                                            height: filteredCommonViews?.length < 1 ? '70vh' : '50%vh',
                                             overflowY: 'auto',
                                         }} className='text-dark bg-white'>
                                             {filteredOtherViews.map((view, index) => (

@@ -282,7 +282,7 @@ const ColumnSimpleTree = ({
         {isDocument && item.isSingleFile ? (
           <>
             {item.isCheckedOut ? (
-    
+
               <CheckOutStatusBadgeIcon
                 color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
                 icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
@@ -536,7 +536,15 @@ const ColumnSimpleTree = ({
 
         sx={{
           "& .MuiTreeItem-content": { backgroundColor: '#fff !important' },
-          "& .MuiTreeItem-content:hover": { backgroundColor: '#fff !important' }
+          "& .MuiTreeItem-content:hover": { backgroundColor: '#fff !important' },
+          /* 🔑 hide arrow if no children */
+          "& .MuiTreeItem-group:empty": {
+            display: "none",
+          },
+          "& .MuiTreeItem-group:empty ~ .MuiTreeItem-content .MuiTreeItem-iconContainer": {
+            display: "none",
+          },
+
         }}
         label={
           <Box onContextMenu={e => {
@@ -588,8 +596,9 @@ const ColumnSimpleTree = ({
 
       <Box
         sx={{
+          maxHeight: '70vh',
           height: renderHeight ? renderHeight : '55vh',
-          overflowY: 'auto',
+          overflowY: 'scroll',
           overflowX: 'hidden',
           color: '#333',
           marginLeft: '10px',

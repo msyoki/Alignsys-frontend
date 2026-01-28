@@ -1789,10 +1789,8 @@ const DashboardContent = (props) => {
             sx={{
               borderColor: 'divider',
               backgroundColor: THEME_COLORS.surfaceLight,
-              minHeight: '36px',
               '& .MuiTab-root': {
-                minHeight: '36px',
-                height: '36px',
+                height: 'auto',
                 p: '4px 12.8px',
                 backgroundColor: THEME_COLORS.surfaceLight,
                 minWidth: 'auto',
@@ -1907,6 +1905,8 @@ const DashboardContent = (props) => {
                 borderColor: '#fff',
                 backgroundColor: '#fff',
               },
+              height: 'auto',
+              
             }}>
 
             <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
@@ -1958,6 +1958,7 @@ const DashboardContent = (props) => {
                           setSelectedFileId={setSelectedFileId}
                           setExtension={setExtension}
                           setLoadingFile={setLoadingFile}
+                          renderHeight={'inherit'}
                           a11yProps={a11yProps2}
                           headerTitle="Search Results"
                           nameColumnLabel="Name"
@@ -2091,6 +2092,7 @@ const DashboardContent = (props) => {
                             setSelectedFileId={setSelectedFileId}
                             setExtension={setExtension}
                             setLoadingFile={setLoadingFile}
+                            renderHeight={'inherit'}
                             a11yProps={a11yProps2}
                             headerTitle="Search Results"
                             nameColumnLabel="Name"
