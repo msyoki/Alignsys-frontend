@@ -172,7 +172,7 @@ const NavigationBreadcrumb = memo(
                     minHeight: "20px",
                 }}
             >
-            
+
                 <FaTable className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
 
                 {visibleItems.map((item, index) => (
@@ -206,7 +206,7 @@ const NavigationBreadcrumb = memo(
                         </Tooltip>
 
                         {index < visibleItems.length - 1 && (
-                       
+
                             <FaChevronRight style={{ color: THEME_COLORS.primary, fontSize: "9px", opacity: 0.8 }} />
                         )}
                     </React.Fragment>
@@ -222,7 +222,7 @@ const NavigationBreadcrumb = memo(
                 )}
 
                 {!collapsed && isCollapsible && (
-                  
+
                     <FaChevronUp onClick={toggleCollapsed} style={{ cursor: "pointer", fontSize: "10px", color: THEME_COLORS.primary, marginLeft: "2px" }} />
                 )}
             </div>
@@ -254,7 +254,7 @@ const PropertyFolderItem = memo(({ item, index, selectedItemId, onFetchViewData 
                         }}
                     >
                         <FaFolderPlus className='mx-2' style={{ color: '#6a994e', fontSize: '20px' }} />
-                        
+
                         <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
                     </Box>
                 }
@@ -287,7 +287,7 @@ const ViewFolderItem = memo(({ item, index, selectedItemId, onFetchMainViewObjec
                             backgroundColor: isSelected ? '#fcf3c0' : 'inherit'
                         }}
                     >
-                        
+
 
                         <FaTable className='mx-2' style={{ color: THEME_COLORS.primary, fontSize: '20px' }} />
                         <span style={{ fontSize: '12px' }} className='list-text'>{item.title}</span>
@@ -580,7 +580,8 @@ const ViewsList = (props) => {
                 `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`,
                 { headers: { accept: '*/*' } }
             );
-            props.setSelectedViewObjects(response.data);
+            // props.setSelectedViewObjects(response.data);
+            props.setSelectedViewObjects(sortViewResults(response.data));
             setLoading(false);
 
             // setSelectedViewName(item.viewName);
@@ -625,7 +626,8 @@ const ViewsList = (props) => {
                 `${constants.mfiles_api}/api/Views/GetObjectsInView?ViewId=${item.id}&VaultGuid=${props.selectedVault.guid}&UserID=${props.selectedVault?.vaultId}`,
                 { headers: { accept: '*/*' } }
             );
-            props.setSelectedViewObjects(response.data);
+            // props.setSelectedViewObjects(response.data);
+            props.setSelectedViewObjects(sortViewResults(response.data));
             setLoading(false);
 
             // setSelectedViewName(item.title);
@@ -641,6 +643,35 @@ const ViewsList = (props) => {
             // props.setAlertPopMessage("Sorry, we couldn't find any objects matching your request!");
         }
     }, [props.selectedVault, props.setAlertPopOpen, props.setAlertPopSeverity, props.setAlertPopMessage, props.setViewNavigation]);
+
+
+    //  ADD THIS: Sort view results - latest first
+    const sortViewResults = useCallback((data) => {
+        if (!Array.isArray(data) || data.length === 0) return data;
+
+        const folders = [];
+        const objects = [];
+
+        data.forEach(item => {
+            if (item.type === "MFFolderContentItemTypeViewFolder" ||
+                item.type === "MFFolderContentItemTypePropertyFolder") {
+                folders.push(item);
+            } else if (item.type === "MFFolderContentItemTypeObjectVersion") {
+                objects.push(item);
+            }
+        });
+
+        // Sort objects by date (newest first)
+        objects.sort((a, b) => {
+            const dateA = a.lastModifiedUtc || a.statusChanged || a.dateModified || a.id || 0;
+            const dateB = b.lastModifiedUtc || b.statusChanged || b.dateModified || b.id || 0;
+
+            const getTime = (val) => typeof val === 'string' ? new Date(val).getTime() : val;
+            return getTime(dateB) - getTime(dateA); // Descending
+        });
+
+        return [...folders, ...objects]; // Folders first, then sorted objects
+    }, []);
 
     const fetchViewData = useCallback(async (item) => {
         setLoading(true);
@@ -716,7 +747,8 @@ const ViewsList = (props) => {
                     }
                 );
 
-                props.setSelectedViewObjects(response.data);
+                // props.setSelectedViewObjects(response.data);
+                props.setSelectedViewObjects(sortViewResults(response.data));
 
                 console.log('Fetched view data for property folder:', response.data);
             } catch (error) {
@@ -737,6 +769,7 @@ const ViewsList = (props) => {
         props.setViewNavigation,
         props.setViewNavigation2,
         props.setSelectedViewObjects,
+        sortViewResults
     ]);
 
     const handleMenuClose = useCallback(() => {
@@ -939,6 +972,7 @@ const ViewsList = (props) => {
                                                     nameColumnLabel="Name"
                                                     dateColumnLabel="Date Modified"
                                                     renderHeight="60vh"
+                                                    tabIndex={0}
                                                 />
                                             );
                                         })()}
@@ -974,7 +1008,7 @@ const ViewsList = (props) => {
                                                 backgroundColor: '#fff',
                                             }}
                                         >
-                                        
+
                                             <FaBan className="mx-2" style={{ fontSize: '40px', color: THEME_COLORS.primary, marginBottom: '16px' }} />
                                             <Typography variant="body2" sx={{ textAlign: 'center', color: '#333', mb: 1 }}>
                                                 No Results Found
@@ -995,15 +1029,49 @@ const ViewsList = (props) => {
                                     <h6
                                         onClick={() => setshowCommonViewSublist(v => !v)}
                                         className="p-2 text-dark d-flex align-items-center justify-content-between"
-                                        style={SECTION_HEADER_STYLES}
+                                        style={{ ...SECTION_HEADER_STYLES, cursor: 'pointer' }}
                                     >
-                                        <span className="d-flex align-items-center">
-                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
-                                           
-                                            Common Views
+                                        {/* Left */}
+                                        <span className="d-flex align-items-center gap-2">
+                                            <CiCircleList
+                                                style={{ fontSize: '1.4em', color: THEME_COLORS.primary }}
+                                            />
+                                            <span>Common Views</span>
+                                            <small
+                                                style={{
+                                                    color: THEME_COLORS.primary,
+                                                    fontSize: '11px',
+                                                    fontWeight: 500,
+                                                }}
+                                            >
+                                                ({filteredCommonViews.length})
+                                            </small>
                                         </span>
-                                        <small style={{ color: THEME_COLORS.primary, fontSize: '13px' }}>({filteredCommonViews.length})</small>
+
+                                        {/* Right */}
+                                        <span className="d-flex align-items-center gap-2">
+                                            {/* <small
+                                                style={{
+                                                    color: THEME_COLORS.primary,
+                                                    fontSize: '12px',
+                                                    fontWeight: 500,
+                                                }}
+                                            >
+                                                {filteredCommonViews.length}
+                                            </small> */}
+
+                                            <i
+                                                className="fas fa-angle-down"
+                                                style={{
+                                                    fontSize: '16px',
+                                                    color: THEME_COLORS.primary,
+                                                    transition: 'transform 0.25s ease',
+                                                    transform: showCommonViewSublist ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                }}
+                                            />
+                                        </span>
                                     </h6>
+
                                     {showCommonViewSublist && (
                                         <div style={SCROLLABLE_CONTAINER_STYLES} className='text-dark bg-white'>
                                             {filteredCommonViews.map((view, index) => (
@@ -1025,14 +1093,50 @@ const ViewsList = (props) => {
                                     <h6
                                         onClick={() => setshowOtherViewSublist(v => !v)}
                                         className="p-2 text-dark d-flex align-items-center justify-content-between"
-                                        style={SECTION_HEADER_STYLES}
+                                        style={{ ...SECTION_HEADER_STYLES, cursor: 'pointer' }}
                                     >
-                                        <span className="d-flex align-items-center">
-                                            <CiCircleList className="mx-2" style={{ fontSize: '1.5em', color: THEME_COLORS.primary }} />
-                                            Other Views
+                                        {/* Left */}
+                                        <span className="d-flex align-items-center gap-2">
+                                            <CiCircleList
+                                                style={{ fontSize: '1.4em', color: THEME_COLORS.primary }}
+                                            />
+                                            <span>Other Views</span>
+                                            <small
+                                                style={{
+                                                    color: THEME_COLORS.primary,
+                                                    fontSize: '11px',
+                                                    fontWeight: 500,
+                                                }}
+                                            >
+                                                ({filteredOtherViews.length})
+                                            </small>
+
                                         </span>
-                                        <small style={{ color: THEME_COLORS.primary, fontSize: '13px' }}>({filteredOtherViews.length})</small>
+
+                                        {/* Right */}
+                                        <span className="d-flex align-items-center gap-2">
+                                            {/* <small
+                                                style={{
+                                                    color: THEME_COLORS.primary,
+                                                    fontSize: '12px',
+                                                    fontWeight: 500,
+                                                }}
+                                            >
+                                                {filteredOtherViews.length}
+                                            </small> */}
+
+                                            <i
+                                                className="fas fa-angle-down"
+                                                style={{
+                                                    fontSize: '16px',
+                                                    color: THEME_COLORS.primary,
+                                                    transition: 'transform 0.25s ease',
+                                                    transform: showOtherViewSublist ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                }}
+                                            />
+                                        </span>
                                     </h6>
+
                                     {showOtherViewSublist && (
                                         <div style={{
                                             height: filteredCommonViews?.length < 1 ? '70vh' : '50%vh',

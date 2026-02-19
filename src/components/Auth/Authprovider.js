@@ -95,15 +95,16 @@ const extractErrorMessage = (error) => {
 // Enhanced error handler with user-friendly messages
 const handleAuthError = (error) => {
   const status = error.response?.status;
+
   let userMessage = extractErrorMessage(error);
   
   // Enhance messages based on status codes for better user experience
   if (status === 401) {
     // Keep our custom backend messages as they are more specific and helpful
     // Only enhance if the message is too generic
-    if (userMessage === "Invalid credentials" || userMessage === "Unauthorized") {
-      userMessage = "Invalid email/username or password. Please check your credentials and try again.";
-    }
+   
+    userMessage = "Invalid email/username or password. Please check your credentials and try again.";
+    
   } else if (status === 403) {
     if (!userMessage.includes("deactivated") && !userMessage.includes("inactive")) {
       userMessage = "Access denied. Please contact your administrator.";
@@ -153,10 +154,7 @@ const loginUser = async (e) => {
   
     const errorMessage = handleAuthError(error);
     
-    setAlertSeverity("error");
-    setAlertMsg(errorMessage);
-    setOpenAlert(true);
-    
+
     // Enhanced logging for debugging
     console.error("Login error details:", {
       status: error.response?.status,
@@ -166,18 +164,27 @@ const loginUser = async (e) => {
     });
     
     // Optional: Handle specific error scenarios
-    const status = error.response?.status;
-    if (status === 401) {
-      console.log("Authentication failed - check credentials");
-    } else if (status === 403) {
-      console.log("Account access forbidden - possibly deactivated");
-    } else if (status === 503) {
-      console.log("Service temporarily unavailable");
-    } else if (status >= 500) {
-      console.log("Server error occurred");
-    } else if (!error.response) {
-      console.log("Network error occurred");
-    }
+    
+    // const status = error.response?.status;
+    // if (status === 401) {
+    //   console.log("Authentication failed - check credentials");
+    // } else if (status === 403) {
+    //   console.log("Account access forbidden - possibly deactivated");
+    // } else if (status === 503) {
+    //   console.log("Service temporarily unavailable");
+    // } else if (status >= 500) {
+    //   console.log("Server error occurred");
+    // } else if (!error.response) {
+    //   console.log("Network error occurred");
+    // }
+
+
+    let errormsg= handleAuthError(error);
+   
+    setAlertSeverity("error");
+    setAlertMsg(errormsg);
+    setOpenAlert(true);
+    
   }
 };
 

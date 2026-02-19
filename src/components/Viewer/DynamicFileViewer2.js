@@ -10,7 +10,8 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import PDFViewerPreview from './Pdf2';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField } from '@mui/material';
-import * as constants from '../Auth/configs';import { THEME_COLORS } from '../../constants/themeColors';
+import * as constants from '../Auth/configs';
+import { THEME_COLORS } from '../../constants/themeColors';
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -192,8 +193,8 @@ const ImageViewer = React.memo(({ src, setUploadedFile }) => {
       </ImageWrapper>
     </ImageViewerContainer>
   );
-}, (prevProps, nextProps) => 
-  prevProps.src === nextProps.src && 
+}, (prevProps, nextProps) =>
+  prevProps.src === nextProps.src &&
   prevProps.setUploadedFile === nextProps.setUploadedFile
 );
 
@@ -262,8 +263,8 @@ const TextViewer = React.memo(({ content, setUploadedFile }) => {
       </div>
     </div>
   );
-}, (prevProps, nextProps) => 
-  prevProps.content === nextProps.content && 
+}, (prevProps, nextProps) =>
+  prevProps.content === nextProps.content &&
   prevProps.setUploadedFile === nextProps.setUploadedFile
 );
 
@@ -273,7 +274,7 @@ const CSVViewer = React.memo(({ csvString, setUploadedFile }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
+
   // Debounce search to prevent excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -432,8 +433,8 @@ const CSVViewer = React.memo(({ csvString, setUploadedFile }) => {
       </Box>
     </Box>
   );
-}, (prevProps, nextProps) => 
-  prevProps.csvString === nextProps.csvString && 
+}, (prevProps, nextProps) =>
+  prevProps.csvString === nextProps.csvString &&
   prevProps.setUploadedFile === nextProps.setUploadedFile
 );
 
@@ -476,6 +477,13 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
     jpeg: 'image/jpeg',
     png: 'image/png',
     gif: 'image/gif',
+    jfif: 'image/jfif',
+    bmp: 'image/bmp',
+    svg: 'image/svg',
+    tiff: 'image/tiff',
+    tif: 'image/tif',
+    ico: 'image/ico',
+    avif: 'image/avif',
     pdf: 'application/pdf',
     txt: 'text/plain',
     docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -504,11 +512,11 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
       const blob = new Blob([byteArray], { type: mimeType });
       const formData = new FormData();
       formData.append('file', blob, `file.${extension}`);
-      
+
       const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData, {
         signal: abortSignal
       });
-      
+
       const fileUrl = response.data?.data?.url;
       if (fileUrl) {
         const urlObj = new URL(fileUrl);
@@ -537,10 +545,10 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
   // Optimized file processing
   const handleViewFile = useCallback(async () => {
     if (!base64Content || !fileExtension || isProcessing) return;
-    
+
     const ext = fileExtension.toLowerCase();
     const fileId = `${base64Content.slice(0, 100)}_${ext}`;
-    
+
     // Skip processing if same file
     if (currentFileRef.current === fileId && fileUrl) {
       return;
@@ -548,18 +556,18 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
 
     setIsProcessing(true);
     currentFileRef.current = fileId;
-    
+
     const abortController = new AbortController();
-    
+
     try {
       let src = '';
-      
-      if (['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt'].includes(ext)) {
+
+      if ([ 'jpg', 'jpeg', 'png', 'gif','bmp', 'webp', 'svg', 'tiff', 'tif', 'ico', 'avif', 'jfif', 'pdf', 'txt'].includes(ext)) {
         src = generateBase64Url(base64Content, ext);
       } else if (['docx', 'xlsx', 'doc', 'xls'].includes(ext)) {
         src = await uploadBase64WithExtension(base64Content, ext, abortController.signal);
       }
-      
+
       if (src && currentFileRef.current === fileId) {
         setFileUrl(src);
       }
@@ -593,7 +601,12 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
   const fileType = useMemo(() => {
     if (!fileExtension) return 'none';
     const ext = fileExtension.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+    if (
+      [
+        'jpg', 'jpeg', 'png', 'gif',
+        'bmp', 'webp', 'svg', 'tiff', 'tif', 'ico', 'avif', 'jfif'
+      ].includes(ext)
+    ) return 'image';
     if (ext === 'pdf') return 'pdf';
     if (ext === 'txt') return 'text';
     if (['docx', 'doc', 'xlsx', 'xls'].includes(ext)) return 'office';
@@ -672,13 +685,13 @@ const DynamicFileViewer = ({ base64Content, fileExtension, setUploadedFile }) =>
         return <CSVViewer csvString={decodedContent} setUploadedFile={setUploadedFile} />;
       default:
         return (
-          <Box sx={{ 
-            width: '100%', 
-            marginTop: '20%', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center' 
+          <Box sx={{
+            width: '100%',
+            marginTop: '20%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             <Typography variant="h6" sx={{ color: '#666', mb: 2 }}>
               Unsupported file type: {fileExtension}

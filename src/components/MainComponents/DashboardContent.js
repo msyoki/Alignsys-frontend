@@ -13,7 +13,7 @@ import { FaHistory } from "react-icons/fa";
 import { FaBars } from "react-icons/fa6";
 import { FaBan } from "react-icons/fa";
 
-
+import { FiDownload } from "react-icons/fi";
 // Components
 import Loader from '../Loaders/LoaderMini';
 import ObjectData from './ObjectData';
@@ -39,6 +39,8 @@ import UserAvatarMenu from '../UserAvatar';
 import History from '../Modals/History';
 import { THEME_COLORS } from '../../constants/themeColors';
 import { THEME_CONFIG } from '../../config/theme.config';
+
+
 
 
 
@@ -115,6 +117,34 @@ function a11yProps2(index) {
 
 const DashboardContent = (props) => {
 
+  // ✅ ADD THIS: Sort view results - latest first
+  const sortViewResults = useCallback((data) => {
+    if (!Array.isArray(data) || data.length === 0) return data;
+
+    const folders = [];
+    const objects = [];
+
+    data.forEach(item => {
+      if (item.type === "MFFolderContentItemTypeViewFolder" ||
+        item.type === "MFFolderContentItemTypePropertyFolder") {
+        folders.push(item);
+      } else if (item.type === "MFFolderContentItemTypeObjectVersion") {
+        objects.push(item);
+      }
+    });
+
+    // Sort objects by date (newest first)
+    objects.sort((a, b) => {
+      const dateA = a.lastModifiedUtc || a.statusChanged || a.dateModified || a.id || 0;
+      const dateB = b.lastModifiedUtc || b.statusChanged || b.dateModified || b.id || 0;
+
+      const getTime = (val) => typeof val === 'string' ? new Date(val).getTime() : val;
+      return getTime(dateB) - getTime(dateA); // Descending
+    });
+
+    return [...folders, ...objects]; // Folders first, then sorted objects
+  }, []);
+
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
@@ -127,6 +157,8 @@ const DashboardContent = (props) => {
       // Ensure fetchItemData is called
       if (uploadedFile) {
         await props.fetchItemData(0, "Document");
+        // props.setIsDataOpen(true);
+        // props.setIsFormOpen(true);
       }
 
       // Optional alert
@@ -241,34 +273,62 @@ const DashboardContent = (props) => {
     setRefreshKey(prev => prev + 1); // trigger a reload
   };
 
-  const handleTabAction = () => {
-    // Delay everything inside by 5 seconds
-    setTimeout(() => {
-      if (selectedTab) {
-        switch (selectedTab) {
-          case 'Recent':
-            props.getRecent?.();
-            break;
-          case 'Assigned':
-            props.getAssigned?.();
-            break;
-          case 'Deleted':
-            props.getDeleted?.();
-            break;
-          default:
-            reloadViews();
-            break;
-        }
-      }
+  // const handleTabAction = () => {
+  //   // Delay everything inside by 5 seconds
+  //   setTimeout(() => {
+  //     if (selectedTab) {
+  //       switch (selectedTab) {
+  //         case 'Recent':
+  //           props.getRecent?.();
+  //           break;
+  //         case 'Assigned':
+  //           props.getAssigned?.();
+  //           break;
+  //         case 'Deleted':
+  //           props.getDeleted?.();
+  //           break;
+  //         default:
+  //           reloadViews();
+  //           break;
+  //       }
+  //     }
 
-      if (props.searchTerm?.length > 0 && props.data?.length > 0) {
-        props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
-          setLoading(false);
-          setSearched(true);
-          props.setData(data);
-        });
+  //     if (props.searchTerm?.length > 0 && props.data?.length > 0) {
+  //       props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
+  //         setLoading(false);
+  //         setSearched(true);
+  //         props.setData(data);
+  //       });
+  //     }
+  //   }, 2500); // ⏱ 5 seconds
+  // };
+
+  const handleTabAction = async () => {
+    // ✅ REMOVED the 2.5 second setTimeout delay
+
+    if (selectedTab) {
+      switch (selectedTab) {
+        case 'Recent':
+          await props.getRecent?.();
+          break;
+        case 'Assigned':
+          await props.getAssigned?.();
+          break;
+        case 'Deleted':
+          await props.getDeleted?.();
+          break;
+        default:
+          reloadViews();
+          break;
       }
-    }, 2500); // ⏱ 5 seconds
+    }
+
+    if (props.searchTerm?.length > 0 && props.data?.length > 0) {
+      const data = await props.searchObject(props.searchTerm, props.selectedVault.guid);
+      setLoading(false);
+      setSearched(true);
+      props.setData(data);
+    }
   };
 
 
@@ -453,6 +513,7 @@ const DashboardContent = (props) => {
   const handleDocumentDownload = async (item) => {
     setLoadingFile(true);
 
+
     try {
       // Get file metadata
       const filesUrl = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
@@ -538,6 +599,66 @@ const DashboardContent = (props) => {
       setLoadingFile(false);
     }
   };
+
+
+
+  const handleDownload = async (item) => {
+    const classId = item.classId ?? item.classID;
+
+    try {
+      // Get file metadata
+      const filesUrl = `${constants.mfiles_api}/api/objectinstance/GetObjectFiles/${props.selectedVault.guid}/${item.id}/${item.classId ?? item.classID}`;
+      const filesResult = await axios.get(filesUrl, {
+        headers: { Accept: '*/*' },
+        timeout: 0
+      });
+      // console.log(filesResult)
+
+      const fileData = filesResult.data;
+      const fileId = fileData?.[0]?.fileID;
+      const documentGuid = fileData?.[0]?.reportGuid ?? null;
+
+
+      if (!fileId) throw new Error('No file ID found in response');
+
+      setSelectedFileId(fileId);
+
+      // Download blob
+      const classId = item.classId ?? item.classID;
+
+      // console.log(downloadUrlBlob)
+      const downloadUrl = `${constants.mfiles_api}/api/objectinstance/DownloadOtherFiles` +
+        `?ObjectId=${item.id}` +
+        `&VaultGuid=${props.selectedVault.guid}` +
+        `&fileID=${fileId}` +
+        `&ClassId=${classId}`;
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank'; // optional
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log("File downloaded successfully")
+      setAlertPopOpen(true);
+      setAlertPopSeverity("success");
+      setAlertPopMessage("File download started successfully!");
+
+      // return { blob: blobData, extension, fileId, success: true };
+    } catch (error) {
+      console.error('Document download error:', error);
+
+      // throw new Error(`Download failed: ${error.message}`);
+
+    } finally {
+      setLoadingFile(false);
+    }
+
+
+  };
+
+
 
   const getObjectComments = async (item) => {
     setLoadingComments(true);
@@ -676,78 +797,6 @@ const DashboardContent = (props) => {
     await previewObjectInternal(item, true);
   };
 
-  // Update functions
-  // const transformFormValues = async () => {
-  //   try {
-  //     setUpdatingObject(true);
-
-  //     const requestData = {
-  //       objectid: selectedObject.id,
-  //       objectypeid: (selectedObject.objectID !== undefined ? selectedObject.objectID : selectedObject.objectTypeId),
-  //       classid: (selectedObject.classID !== undefined ? selectedObject.classID : selectedObject.classId),
-  //       props: Object.entries(formValues).map(([id, { value, datatype }]) => {
-  //         let transformedValue = value;
-
-  //         switch (datatype) {
-  //           case 'MFDatatypeMultiSelectLookup':
-  //             transformedValue = value.join(", ");
-  //             break;
-  //           case 'MFDatatypeBoolean':
-  //             transformedValue = value ? "true" : "false";
-  //             break;
-  //           case 'MFDatatypeNumber':
-  //           case 'MFDatatypeLookup':
-  //             transformedValue = value.toString();
-  //             break;
-  //           default:
-  //             // No transformation for unknown datatype
-  //             break;
-  //         }
-
-  //         return {
-  //           id: parseInt(id, 10),
-  //           value: transformedValue,
-  //           datatype,
-  //         };
-  //       }),
-  //       userID: parseInt(props.selectedVault?.vaultId, 10),
-  //       vaultGuid: props.selectedVault?.guid || "",
-  //     };
-
-  //     console.log('Request Data:', requestData);
-
-  //     // await axios.put(
-  //     //   `${constants.mfiles_api}/api/objectinstance/UpdateObjectProps`,
-  //     //   requestData,
-  //     //   { headers: { accept: '*/*', 'Content-Type': 'application/json' } }
-  //     // );
-
-  //     setAlertPopOpen(true);
-  //     setAlertPopSeverity("success");
-  //     setAlertPopMessage("Updated successfully! Changes will be reflected next time item is loaded.");
-  //     setFormValues({});
-  //     setPreviewObjectProps([]);
-  //     setSelectedObject({});
-
-  //     handleTabAction()
-
-  //     setTimeout(() => {
-  //       if (selectedObject.id !== 0) {
-  //         previewObject(selectedObject);
-  //       } else {
-  //         previewDocumentObject(selectedObject);
-  //       }
-  //     }, 10000);
-
-  //   } catch (error) {
-  //     console.error('Error updating object props:', error);
-  //     setAlertPopOpen(true);
-  //     setAlertPopSeverity("error");
-  //     setAlertPopMessage("Something went wrong, please try again later!");
-  //   } finally {
-  //     setUpdatingObject(false);
-  //   }
-  // };
   const transformFormValues = async () => {
     const requestData = {
       objectid: selectedObject.id,
@@ -809,15 +858,15 @@ const DashboardContent = (props) => {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
 
-      handleTabAction()
+      // handleTabAction()
 
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject);
-        } else {
-          previewDocumentObject(selectedObject);
-        }
-      }, 5000);
+      // setTimeout(() => {
+      //   if (selectedObject.id !== 0) {
+      //     previewObject(selectedObject);
+      //   } else {
+      //     previewDocumentObject(selectedObject);
+      //   }
+      // }, 5000);
 
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
@@ -857,15 +906,15 @@ const DashboardContent = (props) => {
         headers: { accept: '*/*', 'Content-Type': 'application/json' },
       });
 
-      handleTabAction()
+      // handleTabAction()
 
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject);
-        } else {
-          previewDocumentObject(selectedObject);
-        }
-      }, 5000);
+      // setTimeout(() => {
+      //   if (selectedObject.id !== 0) {
+      //     previewObject(selectedObject);
+      //   } else {
+      //     previewDocumentObject(selectedObject);
+      //   }
+      // }, 5000);
 
       setAlertPopOpen(true);
       setAlertPopSeverity("success");
@@ -925,16 +974,16 @@ const DashboardContent = (props) => {
       );
       setChangedClass(false);
 
-      handleTabAction();
-      resetPreview();
+      // handleTabAction();
+      // resetPreview();
 
-      setTimeout(() => {
-        if (selectedObject.id !== 0) {
-          previewObject(selectedObject);
-        } else {
-          previewDocumentObject(selectedObject);
-        }
-      }, 5000);
+      // setTimeout(() => {
+      //   if (selectedObject.id !== 0) {
+      //     previewObject(selectedObject);
+      //   } else {
+      //     previewDocumentObject(selectedObject);
+      //   }
+      // }, 5000);
 
 
       setAlertPopOpen(true);
@@ -950,52 +999,6 @@ const DashboardContent = (props) => {
     }
   };
 
-
-
-
-  // const updateObjectMetadata = async () => {
-  //   const hasFormValues = Object.keys(formValues || {}).length > 0;
-  //   const hasSelectedState = Boolean(selectedState?.title);
-  //   const hasNewWorkflow = Boolean(newWF?.workflowName);
-
-  //   try {
-  //     setIsUpdatingMetadata(true);
-
-  //     if (changedClass) {
-  //       await updateClassValue()
-  //     }
-
-  //     if (hasFormValues) {
-  //       await transformFormValues();
-  //     }
-
-  //     if (hasSelectedState) {
-  //       await transitionState();
-  //     }
-
-  //     if (hasNewWorkflow) {
-  //       await addNewWorkflowAndState();
-  //     }
-
-  //     if (approvalPayload) {
-  //       await markAssignmentComplete();
-  //     }
-
-  //     // Only reload metadata if not approval-only update
-  //     if (!approvalPayload) {
-  //       await reloadObjectMetadata();
-  //     }
-  //     handleTabAction()
-
-  //   } catch (error) {
-  //     console.error('Error in updateObjectMetadata:', error);
-  //     // Handle error as needed
-  //   } finally {
-  //     setDialogOpen(false);
-  //     setUpdatingObject(false);
-  //     setIsUpdatingMetadata(false);
-  //   }
-  // };
 
   const updateObjectMetadata = async () => {
     const hasFormValues = Object.keys(formValues || {}).length > 0;
@@ -1084,17 +1087,63 @@ const DashboardContent = (props) => {
         }
       }
 
-      // Single reload after all updates
+      // // Single reload after all updates
+      // if (!hasApprovalPayload) {
+      //   // Delay reload to allow backend to process
+      //   await new Promise(resolve => setTimeout(resolve, 2000));
+      //   await reloadObjectMetadata();
+      // }
+
+      // // Single handleTabAction call
+      // handleTabAction();
+
+      // // Show success message if not already shown by individual functions
+      // if (!hasFormValues && !hasSelectedState && !hasNewWorkflow) {
+      //   setAlertPopOpen(true);
+      //   setAlertPopSeverity("success");
+      //   setAlertPopMessage("Update completed successfully!");
+      // }
+
+      //  Single optimized reload after all updates
       if (!hasApprovalPayload) {
-        // Delay reload to allow backend to process
-        await new Promise(resolve => setTimeout(resolve, 2000));
         await reloadObjectMetadata();
       }
 
-      // Single handleTabAction call
-      handleTabAction();
+      //  Refresh view list immediately (no delay)
+      // await handleTabAction();
 
-      // Show success message if not already shown by individual functions
+      //  ✅ Smart refresh based on current tab/view
+      if (selectedTab === 'Home' && !searched && viewNavigation.length > 0) {
+        // Re-fetch current view data
+        const lastNavItem = viewNavigation[viewNavigation.length - 1];
+
+        const properties = viewNavigation
+          .filter(i => i.type === "MFFolderContentItemTypePropertyFolder")
+          .map(i => ({ propId: i.propId, propDatatype: i.propDatatype }));
+
+        try {
+          const response = await axios.post(
+            `${constants.mfiles_api}/api/Views/GetViewPropObjects`,
+            {
+              viewId: lastNavItem.viewId,
+              userID: props.selectedVault?.vaultId,
+              properties,
+              vaultGuid: props.selectedVault.guid,
+            },
+            { headers: { accept: "*/*", "Content-Type": "application/json" } }
+          );
+          // setSelectedViewObjects(response.data);
+          setSelectedViewObjects(sortViewResults(response.data));
+          console.log('✅ View refreshed with latest data');
+        } catch (error) {
+          console.error('Failed to refresh view:', error);
+        }
+      } else {
+        // Use existing logic for Recent/Assigned/Deleted/Search
+        await handleTabAction();
+      }
+
+      // Show success if individual functions didn't already
       if (!hasFormValues && !hasSelectedState && !hasNewWorkflow) {
         setAlertPopOpen(true);
         setAlertPopSeverity("success");
@@ -1106,19 +1155,40 @@ const DashboardContent = (props) => {
       setAlertPopOpen(true);
       setAlertPopSeverity("error");
       setAlertPopMessage(error.message || "Update failed. Please try again.");
+      // } finally {
+      //   setDialogOpen(false);
+      //   setUpdatingObject(false);
+      //   setIsUpdatingMetadata(false);
+      // }
     } finally {
       setDialogOpen(false);
       setUpdatingObject(false);
       setIsUpdatingMetadata(false);
+
+      // ✅ Clear all states that control button visibility
+      setSelectedState({});
+      setCheckedItems({});
+      setClassUpdatePayload({});
+      setChangedClass(false);
     }
   };
 
+  // const reloadObjectMetadata = async () => {
+  //   if (selectedObject.objectTypeId === 0) {
+  //     await previewObject(selectedObject);
+  //   } else {
+  //     await previewDocumentObject(selectedObject);
+  //   }
+  // };
   const reloadObjectMetadata = async () => {
-    if (selectedObject.objectTypeId === 0) {
-      await previewObject(selectedObject);
-    } else {
-      await previewDocumentObject(selectedObject);
-    }
+    //  Only fetch properties and workflow - NOT file content or comments
+    const objectTypeId = selectedObject.objectTypeId ?? selectedObject.objectID;
+    const classId = selectedObject.classId ?? selectedObject.classID;
+
+    await Promise.all([
+      fetchObjectProperties(selectedObject),
+      getSelectedObjWorkflow(objectTypeId, selectedObject.id, classId)
+    ]);
   };
 
   // Event handlers
@@ -1352,6 +1422,7 @@ const DashboardContent = (props) => {
         headers: { 'accept': '*/*' }
       });
       setComments(response.data);
+      console.log(response.data)
     } catch (error) {
       console.error('Error fetching comments:', error);
     } finally {
@@ -1497,6 +1568,22 @@ const DashboardContent = (props) => {
 
           fetchObjectVersions();
           setOpenHistory(true);
+        },
+      });
+    }
+
+    // Download
+    if (isSingleFile && (checkoutByMe || props.user.is_admin === "True")) {
+      rightClickActions.push({
+        label: (
+          <>
+            <FiDownload style={{ color: '#3fa34d' }} />
+            <span className="mx-3">Download </span>
+          </>
+        ),
+        onClick: () => {
+          handleDownload(menuItem);
+          handleMenuClose();
         },
       });
     }
@@ -1661,20 +1748,29 @@ const DashboardContent = (props) => {
           }}
         >
           {/* Header */}
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            px: 1.5,
-            py: 1,
-            fontSize: '12.8px',
-            backgroundColor: '#fff',
-            color: THEME_COLORS.primary,
-            overflow: 'hidden',
-            maxHeight: '56px'
-          }}>
-            {/* Logo + Menu */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 1.5,
+              py: 1,
+              backgroundColor: '#fff',
+              color: THEME_COLORS.primary,
+              height: 56, // fixed height instead of maxHeight
+              overflow: 'hidden',
+            }}
+          >
+            {/* Left Section */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minWidth: 0, // prevents flex overflow issues
+                flexShrink: 1,
+              }}
+            >
               <Box
                 onClick={toggleSidebar}
                 sx={{
@@ -1685,33 +1781,52 @@ const DashboardContent = (props) => {
                   height: 40,
                   cursor: 'pointer',
                   borderRadius: 1,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    backgroundColor: '#fff',
-                    transform: 'scale(1.05)',
-                  },
+                  flexShrink: 0,
                 }}
               >
-                <FaBars style={{ fontSize: '25px', color: THEME_COLORS.primary }} />
-
+                <FaBars style={{ fontSize: '24px', color: THEME_COLORS.primary }} />
               </Box>
-              <img
-                src={THEME_CONFIG.logos.brandLogo}
-                alt="Logo"
-                onClick={() => window.location.reload()}
-                className="shadow-sm"
-                style={{
-                  height: "35px",
-                  cursor: "pointer",
-                  padding: "5px",
-                  transition: "transform 0.2s ease-in-out",
-                }}
-              />
 
+              {/* Logo wrapper */}
+              <Box
+               className='shadow-sm'
+                sx={{
+               
+                  height: 35, // ensures logo doesn't exceed header height
+                  minHeight: 30, // ensures logo doesn't get too small  
+                  // maxWidth: 160, // prevents logo from pushing right section
+                  display: 'flex',
+                  alignItems: 'center',
+                  overflow: 'hidden',
+                  flexShrink: 1,
+                  padding: '2px 4px',
+                }}
+              >
+                <img
+                  src={THEME_CONFIG.logos.brandLogo}
+                  alt="Logo"
+                  onClick={() => window.location.reload()}
+                 
+                  style={{
+                    height: '100%',
+                    width: 'auto',
+                    objectFit: 'contain',
+                    cursor: 'pointer',
+                    display: 'block',
+                  }}
+                />
+              </Box>
             </Box>
 
             {/* Right Section */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                flexShrink: 0, // ensures it never disappears
+              }}
+            >
               <Tooltip title="Switch to a different repository" placement="left" arrow>
                 <Box sx={{ cursor: 'pointer' }}>
                   <VaultSelectForm activeVault={props.selectedVault} />
@@ -1723,9 +1838,9 @@ const DashboardContent = (props) => {
                 stringAvatar={props.stringAvatar}
                 onLogout={props.logoutUser}
               />
-
             </Box>
           </Box>
+
 
           {/* Search Bar */}
           <Box sx={{
@@ -1809,7 +1924,7 @@ const DashboardContent = (props) => {
               }
             }}
           >
-            {['Home', 'Recent', 'Assigned', 'Deleted', 'Reports'].map((label, index) => {
+            {['Home', 'Recent', 'Assigned', props.user.is_admin === "True" ? 'Deleted' : null, 'Reports'].filter(Boolean).map((label, index) => {
               const showAssignedCount = label === 'Assigned' && props.assignedData?.length; // number
               const showDeletedCount = label === 'Deleted' && props.deletedData?.length;
               return (
@@ -1850,7 +1965,7 @@ const DashboardContent = (props) => {
                         </span>
                       )}
 
-                       {/* Assigned count */}
+                      {/* Assigned count */}
                       {showDeletedCount > 0 && (
                         <span
                           style={{
@@ -1868,6 +1983,7 @@ const DashboardContent = (props) => {
                   onClick={() => {
                     setSelectedTab(label);
                     resetPreview();
+                    props.setSearchTerm("")
 
                     if (label === 'Home') {
                       setSelectedViewObjects([]);
@@ -1906,7 +2022,7 @@ const DashboardContent = (props) => {
                 backgroundColor: '#fff',
               },
               height: 'auto',
-              
+
             }}>
 
             <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
@@ -1964,6 +2080,7 @@ const DashboardContent = (props) => {
                           nameColumnLabel="Name"
                           dateColumnLabel="Date Modified"
                           handleTabAction={handleTabAction}
+                          tabIndex={0}
                         />
                       ) : (
                         <Box sx={{
@@ -2098,6 +2215,7 @@ const DashboardContent = (props) => {
                             nameColumnLabel="Name"
                             dateColumnLabel="Date Modified"
                             handleTabAction={handleTabAction}
+                            tabIndex={tabIndex}
 
                           />
                         </>

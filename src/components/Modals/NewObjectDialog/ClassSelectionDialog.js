@@ -376,6 +376,8 @@ const ClassSelectionDialog = ({
                                 </List>
                             )}
                         </div>
+
+
                     </Grid>
                 </Grid>
             </DialogContent>
@@ -389,7 +391,7 @@ const ClassSelectionDialog = ({
                     variant="contained"
                     onClick={onClose}
                 >
-                    Close
+                    AI Classification
                 </Button> */}
                 <Button
                     sx={{

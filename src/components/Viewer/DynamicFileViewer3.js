@@ -5,7 +5,8 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import PDFViewerPreview4 from './Pdf4';import { THEME_COLORS } from '../../constants/themeColors';
+import PDFViewerPreview4 from './Pdf4';
+import { THEME_COLORS } from '../../constants/themeColors';
 
 // FileExtIcon intentionally unused in this viewer
 
@@ -167,7 +168,12 @@ const DynamicFileViewer3 = ({ base64, extension, title }) => {
   const fileType = useMemo(() => {
     if (!extension) return 'none';
     const ext = extension.replace('.', '').toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+    if (
+      [
+        'jpg', 'jpeg', 'png', 'gif',
+        'bmp', 'webp', 'svg', 'tiff', 'tif', 'ico', 'avif', 'jfif'
+      ].includes(ext)
+    ) return 'image';
     if (ext === 'pdf') return 'pdf';
     if (ext === 'txt') return 'text';
     if (['docx', 'doc', 'xlsx', 'xls', 'ppt', 'pptx'].includes(ext)) return 'office';

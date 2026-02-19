@@ -8,7 +8,7 @@ import * as constants from '../Auth/configs'
 import RightClickMenu from "../RightMenu";
 import OfficeApp from "../Modals/OfficeAppDialog";
 import { Tooltip } from '@mui/material';
-import MultifileFiles from "../MultifileFiles";
+import SubMultifileFiles from "./SubMultifileFiles";
 
 
 import { FaBook } from "react-icons/fa";
@@ -242,7 +242,7 @@ const TreeSubItem = memo(({
                         </Box>
                     </div>
                     {isDocument && !isSingleFile && (
-                        <MultifileFiles
+                        <SubMultifileFiles
                             item={subItem}
                             selectedItemId={selectedItemId}
                             selectedVault={selectedVault}
@@ -272,6 +272,7 @@ const SubLinkedObjectsTree = ({
     onItemRightClick,
     setSelectedItemId,
     selectedItemId,
+    treePrefix = '',  // unique positional prefix passed by the parent
 }) => {
     const [linkedObjects, setLinkedObjects] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -458,7 +459,7 @@ const SubLinkedObjectsTree = ({
             {loading ? (
                 <TreeItem
                     sx={LOADING_STYLES}
-                    itemId={`loading-sub-${id}-${classId}`}
+                    itemId={`${treePrefix}loading-sub-${id}-${classId}`}
                     label={
                         <Box >
                             <span className="loading-indicator text-muted" style={{ fontSize: '13px', color: '#333' }}>
@@ -478,8 +479,8 @@ const SubLinkedObjectsTree = ({
                                     "--TreeView-itemPadding": "0px",
                                     "--TreeView-itemIndentation": "0px",
                                 }}
-                                key={`sub-grid-object-${id}-${classId}-${index}`}
-                                itemId={`sub-grid-object-${id}-${classId}-${index}`}
+                                key={`${treePrefix}sub-grid-object-${id}-${classId}-${index}`}
+                                itemId={`${treePrefix}sub-grid-object-${id}-${classId}-${index}`}
                                 label={
                                     <Box sx={{
                                         display: 'flex',
@@ -507,7 +508,7 @@ const SubLinkedObjectsTree = ({
                                         onRightClick={handleRightClick}
                                         onItemClick={handleItemClick}
                                         isDocument={false}
-                                        parentKey={`sub-${id}-${classId}-obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
+                                        parentKey={`${treePrefix}sub-${id}-${classId}-obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                                     />
                                 ))}
                             </TreeItem>
@@ -521,8 +522,8 @@ const SubLinkedObjectsTree = ({
                                 "--TreeView-itemPadding": "0px",
                                 "--TreeView-itemIndentation": "0px",
                             }}
-                            key={`sub-grid-document-${id}-${classId}`}
-                            itemId={`sub-grid-document-${id}-${classId}`}
+                            key={`${treePrefix}sub-grid-document-${id}-${classId}`}
+                            itemId={`${treePrefix}sub-grid-document-${id}-${classId}`}
                             label={
                                 <Box
                                     sx={{
@@ -552,7 +553,7 @@ const SubLinkedObjectsTree = ({
                                         onRightClick={onItemRightClick}
                                         onItemClick={handleItemClick}
                                         isDocument={true}
-                                        parentKey={`sub-${id}-${classId}-doc-${docIndex}`}
+                                        parentKey={`${treePrefix}sub-${id}-${classId}-doc-${docIndex}`}
                                     />
                                 ))
                             )}

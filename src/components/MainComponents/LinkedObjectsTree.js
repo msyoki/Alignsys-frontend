@@ -8,7 +8,7 @@ import * as constants from '../Auth/configs'
 import RightClickMenu from "../RightMenu";
 import OfficeApp from "../Modals/OfficeAppDialog";
 import { Tooltip } from '@mui/material';
-import MultifileFiles from "../MultifileFiles";
+import MultifileFiles from "./MultifileFiles";
 import { SimpleTreeView } from '@mui/x-tree-view';
 
 import { FaBook } from "react-icons/fa";
@@ -502,8 +502,8 @@ const LinkedObjectsTree = ({
             otherObjects.map((obj, index) => (
               <TreeItem
                 sx={TREE_ITEM_STYLES}
-                key={`grid-object-${index}`}
-                itemId={`grid-object-${index}`}
+                key={`grid-object-${id}-${classId}-${index}`}
+                itemId={`grid-object-${id}-${classId}-${index}`}
                 label={
                   <Box sx={{
                     display: 'flex',
@@ -528,8 +528,8 @@ const LinkedObjectsTree = ({
                       "--TreeView-itemPadding": "0px",
                       "--TreeView-itemIndentation": "0px",
                     }}
-                    key={`obj-${subIndex}-${subItem.id}`}
-                    itemId={`obj-${subIndex}-${subItem.id}`}
+                    key={`obj-${id}-${classId}-${index}-${subIndex}-${subItem.id}`}
+                    itemId={`obj-${id}-${classId}-${index}-${subIndex}-${subItem.id}`}
                     label={
                       <TreeSubItem
                         key={`sub-${obj.propertyName}-${subItem.id}-${subIndex}`}
@@ -540,7 +540,7 @@ const LinkedObjectsTree = ({
                         onRightClick={handleRightClick}
                         onItemClick={handleItemClick}
                         isDocument={false}
-                        parentKey={`obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
+                        parentKey={`obj-${id}-${classId}-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                       />
                     }
                   >
@@ -554,10 +554,9 @@ const LinkedObjectsTree = ({
                       onItemRightClick={onItemRightClick}
                       setSelectedItemId={setSelectedItemId}
                       selectedItemId={selectedItemId}
+                      treePrefix={`obj-${id}-${classId}-${index}-${subIndex}-${subItem.id}-`}
                     />
                   </TreeItem>
-
-
                 ))}
               </TreeItem>
             ))}
@@ -567,8 +566,8 @@ const LinkedObjectsTree = ({
 
             <TreeItem
               sx={TREE_ITEM_STYLES}
-              key="grid-document"
-              itemId="grid-document"
+              key={`grid-document-${id}-${classId}`}
+              itemId={`grid-document-${id}-${classId}`}
               label={
                 <Box
                   sx={{
@@ -595,8 +594,8 @@ const LinkedObjectsTree = ({
                       "--TreeView-itemPadding": "0px",
                       "--TreeView-itemIndentation": "0px",
                     }}
-                    key={`doc-${docIndex}-${subItem.id}`}
-                    itemId={`doc-${docIndex}-${subItem.id}`}
+                    key={`doc-${id}-${classId}-${docIndex}-${subIndex}-${subItem.id}`}
+                    itemId={`doc-${id}-${classId}-${docIndex}-${subIndex}-${subItem.id}`}
                     label={
                       <TreeSubItem
                         subItem={subItem}
@@ -606,7 +605,7 @@ const LinkedObjectsTree = ({
                         onRightClick={onItemRightClick}
                         onItemClick={handleItemClick}
                         isDocument
-                        parentKey={`doc-${docIndex}`}
+                        parentKey={`doc-${id}-${classId}-${docIndex}`}
                       />
                     }
                   >
@@ -620,6 +619,7 @@ const LinkedObjectsTree = ({
                       onItemRightClick={onItemRightClick}
                       setSelectedItemId={setSelectedItemId}
                       selectedItemId={selectedItemId}
+                      treePrefix={`doc-${id}-${classId}-${docIndex}-${subIndex}-${subItem.id}-`}
                     />
                   </TreeItem>
 

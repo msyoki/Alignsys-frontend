@@ -204,7 +204,7 @@ const Login = () => {
             style={{
               width: '280px',
               maxWidth: '80%',
-              filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.25))',
+              filter: 'drop-shadow(0px 4px 13px rgba(0,0,0,0.25))',
             }}
           />
 

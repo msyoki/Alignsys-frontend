@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Badge, Box, Tooltip } from '@mui/material';
+import { Badge, Box, Tooltip, Button } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import LinkedObjectsTree from './MainComponents/LinkedObjectsTree';
-import MultifileFiles from './MultifileFiles';
+import MultifileFiles from './MainComponents/MultifileFiles';
 import FileExtText from './FileExtText';
 import FileExtIcon from './FileExtIcon';
 import { formatDate } from './Utils/Utils'
 import CheckOutStatusBadgeIcon from './CheckoutStatusBadge';
-
+import axios from 'axios';
+import * as constants from './Auth/configs';
 import { FaBook } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa6";
 
@@ -31,6 +32,7 @@ const ColumnSimpleTree = ({
   renderHeight,
   a11yProps,
   handleTabAction,
+  tabIndex,
 
   // Column visibility
   showNameColumn = true,
@@ -39,6 +41,7 @@ const ColumnSimpleTree = ({
   showSizeColumn = false,
   showOwnerColumn = false,
   showStatusColumn = false,
+  showActionColumn = tabIndex === 3 ? true : false, // Show Action column only for Deleted Items tab
 
   // Column labels
   nameColumnLabel = "Name",
@@ -47,6 +50,7 @@ const ColumnSimpleTree = ({
   sizeColumnLabel = "Size",
   ownerColumnLabel = "Owner",
   statusColumnLabel = "Status",
+  actionColumnLabel = "Action",
 
   // Font sizes
   nameColumnFontSize = 13,
@@ -55,6 +59,7 @@ const ColumnSimpleTree = ({
   sizeColumnFontSize = 13,
   ownerColumnFontSize = 13,
   statusColumnFontSize = 13,
+  actionColumnFontSize = 10,
   headerFontSize = 13
 }) => {
 
@@ -84,6 +89,37 @@ const ColumnSimpleTree = ({
     return `${(size / Math.pow(1024, idx)).toFixed(1)} ${units[idx]}`;
   }, []);
 
+  const unDeleteObject = async (item) => {
+    try {
+      let payload = {
+        vaultGuid: selectedVault.guid,
+        objectId: item.id,
+        classId: item.classId || item.classID || 0,
+        userId: mfilesId
+      }
+      console.log('UnDeleteObject payload:', payload);
+      const response = await axios.post(
+        `${constants.mfiles_api}/api/ObjectDeletion/UnDeleteObject`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "*/*",
+          },
+        }
+      );
+
+      handleTabAction(); // Refresh Deleted Items tab after undeletion
+
+      return response.data;
+    } catch (error) {
+
+      console.error("UnDeleteObject error:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+
+
 
   const renderStatusBadge = useCallback((item) => (
     <Box sx={{
@@ -97,6 +133,30 @@ const ColumnSimpleTree = ({
       {item.checkedOut ? 'Locked' : 'Available'}
     </Box>
   ), [statusColumnFontSize]);
+
+
+  const renderAction = useCallback(
+    (item) => (
+      <Button
+        size="small"
+        variant="outlined"
+        onClick={(e) => {
+          e.preventDefault();
+          unDeleteObject(item)
+        }}
+
+        sx={{
+          minHeight: 15,
+          padding: '2px 8px',
+          fontSize: actionColumnFontSize,
+          textTransform: 'none', // keeps "Restore" as-is
+        }}
+      >
+        Restore
+      </Button>
+    ),
+    [actionColumnFontSize]
+  );
 
   // Column configuration
   const columns = React.useMemo(() => [
@@ -159,6 +219,7 @@ const ColumnSimpleTree = ({
       resizable: true,
       render: renderStatusBadge
     },
+
     {
       key: 'date',
       show: showDateColumn,
@@ -171,13 +232,27 @@ const ColumnSimpleTree = ({
       fontColor: '#333',
       resizable: true,
       render: item => formatDate(item.lastModifiedUtc)
-    }
+    },
+    {
+      key: 'action',
+      show: showActionColumn,
+      label: actionColumnLabel,
+      width: 'action',
+      align: 'center',
+      fontSize: actionColumnFontSize,
+      minWidth: 3,
+      maxWidth: 3,
+      height: 3,
+      resizable: true,
+      render: renderAction
+    },
   ], [
     showNameColumn,
     showObjectTypeName,
     showSizeColumn,
     showOwnerColumn,
     showStatusColumn,
+    showActionColumn,
     showDateColumn,
     nameColumnLabel,
     objectTypeNameLabel,
@@ -312,11 +387,36 @@ const ColumnSimpleTree = ({
 
         ) : (
           <Box sx={{ fontSize: 18, color: isDocument ? '#7cb518' : '#2a68af', display: 'flex', alignItems: 'center' }}>
-            {isDocument ? (
-              <FaBook size={18} color="#7cb518" />
+
+            {item.isCheckedOut ? (
+
+              <CheckOutStatusBadgeIcon
+                color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
+                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
+                offsetX="-6px"
+                offsetY="-3px"
+              >
+                {isDocument ? (
+
+                  <FaBook size={18} color="#7cb518" />
+                ) : (
+                  <FaFolder size={18} color="#2a68af" />
+                )}
+
+              </CheckOutStatusBadgeIcon>
+
+
             ) : (
-              <FaFolder size={18} color="#2a68af" />
-            )}
+              <>
+                {isDocument ? (
+
+                  <FaBook size={18} color="#7cb518" />
+                ) : (
+                  <FaFolder size={18} color="#2a68af" />
+                )}
+              </>)
+            }
+
           </Box>
         )}
 
@@ -528,16 +628,21 @@ const ColumnSimpleTree = ({
       <TreeItem
         itemId={`item-${i}`}
         onClick={() => {
-          console.log('Clicked item:', item);
-          setSelectedItemId(`${item.id}-${item.title}`);
-          onItemClick?.(item);
+          if (tabIndex === 3) {
+            return null
+          } else {
+            console.log('Clicked item:', item);
+            setSelectedItemId(`${item.id}-${item.title}`);
+            onItemClick?.(item);
+          }
+
         }}
         onDoubleClick={() => onItemDoubleClick?.(item)}
 
         sx={{
           "& .MuiTreeItem-content": { backgroundColor: '#fff !important' },
           "& .MuiTreeItem-content:hover": { backgroundColor: '#fff !important' },
-          /* 🔑 hide arrow if no children */
+          /*  hide arrow if no children */
           "& .MuiTreeItem-group:empty": {
             display: "none",
           },
@@ -584,7 +689,6 @@ const ColumnSimpleTree = ({
           onItemRightClick={onItemRightClick}
           setSelectedItemId={setSelectedItemId}
           selectedItemId={selectedItemId}
-
         />
       </TreeItem>
     </SimpleTreeView>

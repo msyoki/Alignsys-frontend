@@ -21,7 +21,8 @@ import logo from '../images/ZFWHITE.png';
 import Authcontext from '../components/Auth/Authprovider';
 import * as constants from '../components/Auth/configs';
 import axios from 'axios';
-import AttachExistingVault from '../components/AttachExistingVault';import { THEME_COLORS } from '../constants/themeColors';
+import AttachExistingVault from '../components/AttachExistingVault';
+import { THEME_COLORS } from '../constants/themeColors';
 
 
 
@@ -140,7 +141,7 @@ const VaultSelectForm = () => {
               displayEmpty
               size="medium"
               sx={{
-                fontSize: '12px',
+                fontSize: '13px',
                 '& .MuiSelect-select': {
                   fontSize: '14px',
                 },
@@ -165,7 +166,7 @@ const VaultSelectForm = () => {
 
 
           {/* Admin Dashboard Button */}
-          {user.is_admin && (
+          {user.is_admin === "True"&& (
             <Button
               variant="outlined"
               onClick={handleAdminDashboard}
@@ -173,7 +174,7 @@ const VaultSelectForm = () => {
                 mt: 2,
                 color: THEME_COLORS.primary,
                 borderColor: THEME_COLORS.primary,
-                fontSize: '12px',
+                fontSize: '13px',
                 '&:hover': {
                   backgroundColor: THEME_COLORS.primary,
                   color: 'white',
@@ -191,7 +192,7 @@ const VaultSelectForm = () => {
                 mt: 2,
                 color: THEME_COLORS.primary,
                 borderColor: THEME_COLORS.primary,
-                fontSize: '12px',
+                fontSize: '13px',
                 '&:hover': {
                   backgroundColor: THEME_COLORS.primary,
                   color: 'white',

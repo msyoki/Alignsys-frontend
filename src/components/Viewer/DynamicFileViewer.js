@@ -478,7 +478,13 @@ const DynamicFileViewer = ({
   const fileType = useMemo(() => {
     if (!fileExtension) return 'none';
     const ext = fileExtension.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+    if (
+      [
+        'jpg', 'jpeg', 'png', 'gif',
+        'bmp', 'webp', 'svg', 'tiff', 'tif', 'ico', 'avif', 'jfif'
+      ].includes(ext)
+    ) return 'image';
+
     if (ext === 'pdf') return 'pdf';
     if (ext === 'txt') return 'text';
     if (['docx', 'doc', 'xlsx', 'xls', 'ppt'].includes(ext)) return 'office';

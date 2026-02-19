@@ -193,7 +193,7 @@ const FileUploadComponent = (props) => {
                             <MdOutlineFileUpload
                                 style={{ fontSize: 40, color: THEME_COLORS.primary, margin: 16 }}
                             />
-                            <p>Drag & drop a file here, or use the button</p>
+                            <p>Drag & drop a file here, or click  here to upload </p>
 
                             {props.fileUploadError && (
                                 <div style={{ color: '#CC3333', fontSize: 13 }}>

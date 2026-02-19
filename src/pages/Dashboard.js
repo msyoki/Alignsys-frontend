@@ -178,7 +178,7 @@ const SidebarMenu = React.memo(({
       {/* Bottom Buttons */}
       <div>
         <ul className="menu-items bottom-buttons">
-          {user.is_admin && (
+          {user.is_admin === "True" && (
             // <li onClick={adminPage} className="menu-item main-li shadow-lg">
             //   <i className="fas fa-user-shield" style={{ fontSize: "18px" }}></i>
             //   <span style={{ fontSize: "14px" }}>Admin</span>
@@ -285,7 +285,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
 
         >
           {/* ICON */}
-   
+
           {item.objectid === 0 ? (
             <FaFileCirclePlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
           ) : (
@@ -316,7 +316,7 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
 SubList.displayName = 'SubList';
 
 // API Functions Hook - optimized with caching
-const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted,setRecentData,setDeletedData,) => {
+const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted, setRecentData, setDeletedData,) => {
   const cacheRef = useRef(new Map());
 
   // Clear cache when vault changes
@@ -346,7 +346,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
     setIsLoadingRecent(true);
     try {
       const { data } = await axios.get(
-        `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${mfilesId}`
+        `${constants.mfiles_api}/api/Views/GetRecent/${selectedVault.guid}/${selectedVault?.vaultId}`
       );
 
       // Sort by most recent date first (descending order)
@@ -371,7 +371,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
     setIsLoadingDeleted(true);
     try {
       const response = await axios.get(
-        `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${mfilesId}`
+        `${constants.mfiles_api}/api/ObjectDeletion/GetDeletedObject/${selectedVault.guid}/${selectedVault?.vaultId}`
       );
       setDeletedData(response.data);
       setIsLoadingDeleted(false);
@@ -387,7 +387,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
     setIsLoadingAssigned(true);
     try {
       const response = await axios.get(
-        `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${mfilesId}`
+        `${constants.mfiles_api}/api/Views/GetAssigned/${selectedVault.guid}/${selectedVault?.vaultId}`
       );
 
       // Sort by most recent date first
@@ -410,7 +410,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
 
   const getVaultObjects = useCallback((setVaultObjectsList, setOpenObjectModal) => {
     axios.get(
-      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${selectedVault?.vaultId}`
     )
       .then((response) => {
         setVaultObjectsList(response.data);
@@ -424,7 +424,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
 
   const getVaultObjects2 = useCallback((setVaultObjectsList) => {
     axios.get(
-      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${mfilesId}`
+      `${constants.mfiles_api}/api/MfilesObjects/GetVaultsObjects/${selectedVault.guid}/${selectedVault?.vaultId}`
     )
       .then((response) => {
         setVaultObjectsList(response.data);
@@ -432,7 +432,7 @@ const useApiCalls = (selectedVault, mfilesId, setIsLoadingRecent, setIsLoadingAs
       .catch((error) => {
         console.error("Failed to fetch vault objects (2)", error);
       });
-  }, [selectedVault?.guid, mfilesId]);
+  }, [selectedVault?.guid, selectedVault?.vaultId]);
 
   return {
     searchObject,
@@ -512,7 +512,7 @@ function Dashboard() {
     getAssigned,
     getVaultObjects,
     getVaultObjects2
-  } = useApiCalls(selectedVault, selectedVault?.vaultId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted,setRecentData,setDeletedData,setDeletedData);
+  } = useApiCalls(selectedVault, selectedVault?.vaultId, setIsLoadingRecent, setIsLoadingAssigned, setIsLoadingDeleted, setRecentData, setDeletedData, setDeletedData);
 
   // --- Helper Functions (memoized for performance) ---
   const getViewableObjects = useCallback(() => {
@@ -833,10 +833,14 @@ function Dashboard() {
   }, []);
 
   const resetViews = useCallback(() => {
-    getRecent();
-    getAssigned();
-    getDeleted();
-  }, []);
+    if (!selectedVault) {
+      console.warn('Cannot reset views: selectedVault is null');
+      return;
+    }
+    getRecent(setRecentData);
+    getAssigned(setAssignedData);
+    getDeleted(setDeletedData);
+  }, [selectedVault, getRecent, getAssigned, getDeleted]);
 
   // --- useEffect Hooks (keeping original logic) ---
   useEffect(() => {
@@ -867,11 +871,12 @@ function Dashboard() {
 
 
   useEffect(() => {
+
     if (selectedVault) {
       getVaultObjects2(setVaultObjectsList);
-      // getRecent(setRecentData);
-      // getAssigned(setAssignedData);
-      // getDeleted(setDeletedData);
+      getRecent(setRecentData);
+      getAssigned(setAssignedData);
+      getDeleted(setDeletedData);
     }
   }, [selectedVault, selectedVault?.vaultId, getVaultObjects2, getRecent, getAssigned, getDeleted, setVaultObjectsList, setRecentData, setAssignedData, setDeletedData]);
 
@@ -976,6 +981,7 @@ function Dashboard() {
             </div>
           </Tooltip>
           <DashboardContent
+
             droppedFile={droppedFile}
             setDroppedFile={setDroppedFile}
             searchTerm={searchTerm}
@@ -1024,6 +1030,7 @@ function Dashboard() {
             isLoadingDeleted={isLoadingDeleted}
             groupedItems={groupedItems}
             ungroupedItems={ungroupedItems}
+            setIsFormOpen={setIsFormOpen}
           />
         </main>
       </div>

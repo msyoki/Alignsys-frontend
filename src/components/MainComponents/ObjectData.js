@@ -731,7 +731,7 @@ const ObjectData = (props) => {
                 mt: datatypeMap.multiLineText ? 0.25 : 0,
               }}
             >
-              {item.propName}
+              {item.propName} 
               {item.isRequired && <span style={{ color: '#d32f2f', marginLeft: 2 }}>*</span>}:
             </Typography>
 
@@ -1397,36 +1397,7 @@ const ObjectData = (props) => {
                           {props.selectedObject.classTypeName || getPropValue('Class') || ''}
 
                         </Typography>
-                        {/* <Box className="my-2" sx={{ flex: 1, fontSize: '13px', textAlign: 'start', color: '#555b6e', mr: 4 }}>
-                          {allClasses.length > 1 ? (
-                            <Box
-                              onClick={handleOpenDialog}
-                              sx={{
-                                cursor: 'pointer',
-                                padding: '8px 12px',
-                                border: '1px solid #c4c4c4',
-                                borderRadius: '4px',
-                                backgroundColor: 'white',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                '&:hover': {
-                                  borderColor: THEME_COLORS.primary,
-                                  backgroundColor: '#f8f9fa'
-                                }
-                              }}
-                            >
-                              <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
-                                {props.selectedObject.classTypeName}
-                              </Typography>
-                              <i className="fas fa-chevron-down" style={{ fontSize: '12px', color: '#555b6e' }}></i>
-                            </Box>
-                          ) : (
-                            <Typography sx={{ fontSize: '13px', color: '#555b6e', padding: '8px 0' }}>
-                              {props.selectedObject.classTypeName}
-                            </Typography>
-                          )}
-                        </Box> */}
+
                       </Box>
                     </ListItem>
 

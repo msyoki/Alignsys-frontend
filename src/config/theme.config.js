@@ -6,13 +6,16 @@
  */
 
 // Import logo images
+import uon from '../images/uon.png';
 import logoBluPNG from '../images/ZFBLU.png';
 import zamara from '../images/zamaraLogo.png'
 import waica from '../images/waica.png'
-import java from '../images/java2.png'
+import java from '../images/Java.png'
 import logoWhitePNG from '../images/ZFWHITE.png';
+import scania from '../images/scania.png';
 import logoMiniPNG from '../images/m.png';
 import logoWebp from '../images/ZFBLU.webp';
+import { JavascriptTwoTone } from '@mui/icons-material';
 
 export const THEME_CONFIG = {
     // Primary brand colors
@@ -35,8 +38,8 @@ export const THEME_CONFIG = {
 
         secondary: '#ffffff',         // Secondary color
         background: '#f5f5f5',        // Background color
-        
-        
+
+
         text: {
             primary: '#333333',         // Primary text color
             secondary: '#666666',       // Secondary text color
@@ -51,7 +54,7 @@ export const THEME_CONFIG = {
 
     // Logo configuration
     logos: {
-        brandLogo:  logoBluPNG, //java, //zamara, //logoBluPNG,
+        brandLogo: logoBluPNG, //java, //zamara, //logoBluPNG,
         SystemLogo: logoWhitePNG
 
     },

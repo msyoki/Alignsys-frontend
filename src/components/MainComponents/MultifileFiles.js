@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Box, Tooltip, CircularProgress } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import FileExtIcon from './FileExtIcon';
-import FileExtText from './FileExtText';
+import FileExtIcon from '../FileExtIcon';
+import FileExtText from '../FileExtText';
 import axios from 'axios';
-import * as constants from './Auth/configs';
+import * as constants from '../Auth/configs';
 
 import { FaRegFilePdf } from "react-icons/fa6";
 import { BsFiletypeCsv } from "react-icons/bs";
@@ -19,13 +19,13 @@ import { CiFileOn } from "react-icons/ci";
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import { CiImageOn } from "react-icons/ci";
 import { HiOutlineAnnotation } from "react-icons/hi";
-import RightClickMenu from './RightMenu';
+import RightClickMenu from '../RightMenu';
 import { BsFiles } from "react-icons/bs";
-import OfficeApp from './Modals/OfficeAppDialog';
-import TimedAlert from './TimedAlert';
-import PdfMergeDialog from './Modals/PdfMergeDialog';
-import PdfConversionDialog from './Modals/PdfConversionDialog';
-import {THEME_COLORS} from '../constants/themeColors';
+import OfficeApp from '../Modals/OfficeAppDialog';
+import TimedAlert from '../TimedAlert';
+import PdfMergeDialog from '../Modals/PdfMergeDialog';
+import PdfConversionDialog from '../Modals/PdfConversionDialog';
+import { THEME_COLORS } from '../../constants/themeColors';
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -50,7 +50,7 @@ const MultifileFiles = React.memo((props) => {
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [expandedItems, setExpandedItems] = useState(['multifile-root']);
+    const [expandedItems, setExpandedItems] = useState([`multifile-root-${props.item?.id}-${props.item?.classId ?? props.item?.classID}`]);
 
     const [objectToEditOnOffice, setObjectToEditOnOfficeApp] = useSessionState('ss_objectToEditOnOfficeApp', {});
     const [openOfficeApp, setOpenOfficeApp] = useSessionState('ss_openOfficeApp', false);
@@ -131,7 +131,7 @@ const MultifileFiles = React.memo((props) => {
 
 
     const handlePdfConversionConfirm = () => {
-     
+
         if (pdfConversionItem) {
             setIsConvertingToPdf(true);
             convertToPDF(pdfConversionItem, pdfOverwriteOriginal);
@@ -243,7 +243,7 @@ const MultifileFiles = React.memo((props) => {
             separateFile: overWriteOriginal ? false : true,
             userID: props.mfilesId
         };
-    
+
 
         try {
             const response = await axios.post(
@@ -277,9 +277,9 @@ const MultifileFiles = React.memo((props) => {
     const openApp = useCallback((doc) => {
         // doc is a file from documents array with its own fileID and extension
         const extension = doc.extension?.replace(/^\./, '').toLowerCase();
-      
+
         if (['csv', 'xlsx', 'xls', 'doc', 'docx', 'txt', 'pdf', 'ppt', 'jpeg', 'png', 'jpg'].includes(extension)) {
-       
+
             setObjectToEditOnOfficeApp({
                 ...props.item, // Parent object data
                 guid: props.selectedVault.guid,
@@ -294,7 +294,7 @@ const MultifileFiles = React.memo((props) => {
     const handleRightClick = useCallback((e, item) => {
         e.preventDefault();
         e.stopPropagation();
-     
+
         setMenuAnchor(e.currentTarget);
         setMenuItem(item);
         setFile(item);
@@ -327,7 +327,7 @@ const MultifileFiles = React.memo((props) => {
                 onClick: (item, event) => {
                     event?.preventDefault();
                     event?.stopPropagation();
-              
+
                     openApp(menuItem); // menuItem contains the specific file with fileID
                     handleMenuClose();
                 }
@@ -345,7 +345,7 @@ const MultifileFiles = React.memo((props) => {
                         onClick: (item, event) => {
                             event?.preventDefault();
                             event?.stopPropagation();
-                          
+
                             handlePdfConversionRequest(menuItem, true);
                             // onvertToPDF(menuItem, true); // Pass the specific file doc
                             handleMenuClose();
@@ -377,7 +377,7 @@ const MultifileFiles = React.memo((props) => {
 
     // Optimized data fetching with proper cleanup
     useEffect(() => {
-      
+
         if (!apiUrl) {
             setLoading(false);
             setDocuments([]);
@@ -398,7 +398,7 @@ const MultifileFiles = React.memo((props) => {
 
                 if (isMounted) {
                     setDocuments(response.data || []);
-                
+
                 }
             } catch (err) {
                 if (isMounted && !axios.isCancel(err)) {
@@ -423,15 +423,24 @@ const MultifileFiles = React.memo((props) => {
 
     // Memoized tree item styles to prevent recreation
     const treeItemStyles = useMemo(() => ({
-        fontSize: "13px",
-        "& .MuiTreeItem-label": { fontSize: "13px !important" },
-        "& .MuiTypography-root": { fontSize: "13px !important" },
-        backgroundColor: '#fff !important',
-        "&:hover": { backgroundColor: '#fff !important' },
-        borderRadius: "0px !important",
-        "& .MuiTreeItem-content": { borderRadius: "0px !important" },
-        "& .MuiTreeItem-content.Mui-selected": { backgroundColor: '#fff !important' },
-        "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: '#fff !important' },
+        ml: 3, // Reduced from 13px to 8px
+        backgroundColor: '#fff',
+        "&:hover": { backgroundColor: "#fff !important" },
+        "& .MuiTreeItem-content:hover": { backgroundColor: "#fff !important" },
+        "& .MuiTreeItem-content.Mui-selected": { backgroundColor: "#fff !important" },
+        "& .MuiTreeItem-content.Mui-selected:hover": { backgroundColor: "#fff !important" },
+        borderRadius: 0,
+        "& .MuiTreeItem-content": { borderRadius: 0 },
+        "--TreeView-itemPadding": "0px",
+        "--TreeView-itemIndentation": "0px",
+        padding: 0,
+        /* 🔑 hide arrow if no children */
+        "& .MuiTreeItem-group:empty": {
+            display: "none",
+        },
+        "& .MuiTreeItem-group:empty ~ .MuiTreeItem-content .MuiTreeItem-iconContainer": {
+            display: "none",
+        },
     }), []);
 
     // Handle expand/collapse
@@ -476,7 +485,7 @@ const MultifileFiles = React.memo((props) => {
     const documentItems = useMemo(() => {
         return documents.map((doc, index) => {
             const isSelected = props.selectedItemId === `${doc.fileID}-${doc.fileTitle}`;
-            const itemId = `${doc.fileID}-multifile-${index}`;
+            const itemId = `multifile-${props.item?.id}-${doc.fileID}-${index}`;
 
             return (
                 <TreeItem
@@ -493,11 +502,7 @@ const MultifileFiles = React.memo((props) => {
                         <Box
                             display="flex"
                             alignItems="center"
-                            sx={{
-                                p: 0.5,
-                                backgroundColor: isSelected ? '#e5e5e5' : '#fff',
-                                overflow: 'hidden'
-                            }}
+                           
                         >
                             <Tooltip
                                 title={doc?.fileTitle ? `${doc.fileTitle}.${doc.extension}` : 'No title'}
@@ -610,19 +615,18 @@ const MultifileFiles = React.memo((props) => {
                 }}
             >
                 <TreeItem
-                    itemId="multifile-root"
+                    itemId={`multifile-root-${props.item?.id}-${props.item?.classId ?? props.item?.classID}`}
                     sx={{
                         ...treeItemStyles,
-                        marginLeft: '8px' // Reduced from 15px
                     }}
                     label={
                         <Box
                             display="flex"
                             alignItems="center"
-                            gap="10px" // Replaces marginLeft for consistent spacing
+                            gap="1"
                             sx={{
                                 padding: '2px 0', // Reduced from 3px
-                                color: '#333'
+                                color: 'red'
                             }}
                         >
                             <BsFiles style={{ fontSize: '15px', color: '#8d99ae' }} />
