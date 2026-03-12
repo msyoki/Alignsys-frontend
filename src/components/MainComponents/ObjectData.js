@@ -26,18 +26,34 @@ import { FaBook } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
 import { THEME_COLORS } from '../../constants/themeColors';
 
-
-function CustomTabPanel({ children, value, index, ...other }) {
+import { FaTv } from "react-icons/fa6";
+import { FaComments } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa6";
+import { FaTrash } from "react-icons/fa";
+import { FaSquareFull } from "react-icons/fa";
+import { LiaLongArrowAltRightSolid } from "react-icons/lia";
+import { FaArrowsSpin } from "react-icons/fa6";
+import DynamicIcon from '../Utils/Dynamicicon';
+import { MdPreview } from "react-icons/md";
+import { MdOpenInNew } from "react-icons/md";
+function CustomTabPanel({ children, value, index, style, ...other }) {
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      style={{
+        height: value === index ? '100%' : 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        ...style,
+      }}
       {...other}
     >
       {value === index && (
-        <Box sx={{ height: '100%', overflowY: 'auto', backgroundColor: THEME_COLORS.surfaceLight }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', backgroundColor: THEME_COLORS.surfaceLight }}>
           {children}
         </Box>
       )}
@@ -572,6 +588,7 @@ const ObjectData = (props) => {
         itemValue={item.value}
         disabled={item.isAutomatic}
         mfilesid={props.mfilesId}
+        item={item}
       />
     );
   }, [props.selectedObject, props.checkedItems, props.formValues, props.vault, props.mfilesId, setAssignmentPayload, handleInputChange, renderValue]);
@@ -586,6 +603,7 @@ const ObjectData = (props) => {
       itemValue={item.value}
       disabled={item.isAutomatic}
       mfilesid={props.mfilesId}
+      item={item}
     />
   ), [props.formValues, props.vault, props.mfilesId, handleInputChange]);
 
@@ -732,7 +750,7 @@ const ObjectData = (props) => {
               }}
             >
               {item.propName} 
-              {item.isRequired && <span style={{ color: '#d32f2f', marginLeft: 2 }}>*</span>}:
+              {item.isRequired && <span style={{ color: '#d32f2f', marginLeft: 2 , marginRight:2}}>*</span>} :
             </Typography>
 
             {/* Value / Input */}
@@ -920,9 +938,9 @@ const ObjectData = (props) => {
                         {group.classGroupName}
                       </Typography>
                       {expandedGroups[group.classGroupId] ? (
-                        <ExpandLess sx={{ color: THEME_COLORS.primary }} />
+                        <ExpandLess style={{ color: THEME_COLORS.primary }} />
                       ) : (
-                        <ExpandMore sx={{ color: THEME_COLORS.primary }} />
+                        <ExpandMore style={{ color: THEME_COLORS.primary }} />
                       )}
                     </Box>
                   </ListItem>
@@ -943,8 +961,8 @@ const ObjectData = (props) => {
                           }}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-
-                            {props.selectedObjectId === 0 ? <FaFileCirclePlus style={{ color: '#2a68af', fontSize: '16px' }} /> : <FaFolderPlus style={{ color: '#2a68af', fontSize: '16px' }} />}
+                            {/* <FaFolderPlus style={{ color: '#2a68af', fontSize: '16px' }} /> */}
+                            {props.selectedObjectId === 0 ? <FaFileCirclePlus style={{ color: '#2a68af', fontSize: '16px' }} /> : <DynamicIcon  name={props.selectedObject.classTypeName} color={THEME_COLORS.primary} size={16}/>}
 
                             <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
                               {member.className}
@@ -1035,8 +1053,8 @@ const ObjectData = (props) => {
       </Dialog>
 
 
-      <Box>
-        <Box sx={{ display: 'flex', flexDirection: 'row' }} className='bg-white'>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', flexShrink: 0 }} className='bg-white'>
           <Tabs
             variant="scrollable"
             value={value}
@@ -1081,7 +1099,7 @@ const ObjectData = (props) => {
           </Tabs>
         </Box>
 
-        <Box sx={{ flexGrow: 1, margin: 0, color: '#333' }}>
+        <Box sx={{ flexGrow: 1, margin: 0, color: '#333', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: '0%', width: '100%' }}>
 
             {props.previewObjectProps.length < 1 ? (
@@ -1094,7 +1112,7 @@ const ObjectData = (props) => {
                 justifyContent: 'center',
                 mx: 'auto'
               }}>
-                <FaInfoCircle className="fas fa-info-circle my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
+                <FaInfoCircle className="my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
                 {props.loadingobject ? (
                   <Typography variant="body2" className='loading-indicator text-dark my-2' sx={{ textAlign: 'center' }}>
                     <CircularProgress size="20px" style={{ color: THEME_COLORS.primary, marginRight: '10px' }} />  Loading metadata<span>.</span><span>.</span><span>.</span>
@@ -1110,14 +1128,14 @@ const ObjectData = (props) => {
                 </Typography>
               </Box>
             ) : (
-              <Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{
                   backgroundColor: '#ecf4fc',
-
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 2
+                  gap: 2,
+                  flexShrink: 0,
                 }}
                   onClick={toggleExpand}
                 >
@@ -1204,14 +1222,15 @@ const ObjectData = (props) => {
                                 }}
                               />
                             ) : (
-                              <FaFolder
-                                style={{
-                                  color: '#2a68af',
-                                  fontSize: '25px',
-                                  marginRight: '10px',
-                                  flexShrink: 0,
-                                }}
-                              />
+                              // <FaFolder
+                              //   style={{
+                              //     color: '#2a68af',
+                              //     fontSize: '25px',
+                              //     marginRight: '10px',
+                              //     flexShrink: 0,
+                              //   }}
+                              // />
+                             <span style={{marginRight: '10px',flexShrink: 0}}><DynamicIcon  name={props.selectedObject.classTypeName} color={THEME_COLORS.primary} size={25}/></span> 
                             )}
 
                             <Box
@@ -1237,8 +1256,8 @@ const ObjectData = (props) => {
                     {props.comments.length > 0 && (
                       <Tooltip title="Comments">
                         <Box onClick={navigateToComments} sx={{ position: "relative", display: "flex", alignItems: "center" }}>
-                          <i
-                            className="fas fa-comment-alt"
+                          <FaComments
+                          
                             style={{ fontSize: "18px", cursor: "pointer", color: THEME_COLORS.primary }}
                           />
                           <Box
@@ -1265,11 +1284,11 @@ const ObjectData = (props) => {
                     )}
                     {props.selectedObject && (props.selectedObject.objectID ?? props.selectedObject.objectTypeId) === 0 && props.blob && (
                       <Tooltip title="Download document">
-                        <i
-                          className="fas fa-download"
+                        <FaDownload 
+                     
                           onClick={() => handleDownload(props.blob, props.extension, props.selectedObject.title)}
                           style={{
-                            fontSize: '20px',
+                            fontSize: '25px',
                             cursor: 'pointer',
                             color: THEME_COLORS.primary,
                             padding: '4px'
@@ -1279,11 +1298,10 @@ const ObjectData = (props) => {
                     )}
                     {props.selectedObject?.userPermission?.deletePermission && (
                       <Tooltip title="Delete Object">
-                        <i
-                          className="fas fa-trash"
+                        <FaTrash
                           onClick={() => setDeleteDialogOpen(true)}
                           style={{
-                            fontSize: '20px',
+                            fontSize: '25px',
                             cursor: 'pointer',
                             color: THEME_COLORS.primary,
                             padding: '4px'
@@ -1300,7 +1318,7 @@ const ObjectData = (props) => {
                   </Box>
                 </Box>
 
-                <Box sx={{ backgroundColor: '#f6fafe', overflow: 'hidden' }}>
+                <Box sx={{ backgroundColor: '#f6fafe', overflow: 'hidden', flexShrink: 0 }}>
                   {/* Header */}
 
 
@@ -1348,11 +1366,11 @@ const ObjectData = (props) => {
                   </Collapse>
                 </Box>
 
-                <Box className='p-2' sx={{ backgroundColor: '#fff', fontSize: '12.8px' }}>
+                <Box className='p-2' sx={{ backgroundColor: '#fff', fontSize: '12.8px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <List
                     sx={{
                       p: 0,
-                      height: expanded ? '50vh' : '58vh',
+                      flex: 1,
                       overflowY: 'auto',
                       backgroundColor: '#fff',
                       '& .MuiListItem-root': {
@@ -1383,7 +1401,7 @@ const ObjectData = (props) => {
                             mt: 0,
                           }}
                         >
-                          Class:
+                          Class <span style={{ color: '#d32f2f', marginLeft: 2, marginRight: 2 }}>*</span> :
                         </Typography>
                         <Typography
                           variant="body2"
@@ -1408,298 +1426,244 @@ const ObjectData = (props) => {
 
 
 
-                {/* # footer */}
+                {/* # footer — MFiles-style pinned bar */}
                 <Box
                   sx={{
-                    height: 'auto',
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: '1fr auto' },
-                    alignItems: 'center',
-                    p: 1,
-                    gap: 1,
-                    marginTop: 1,
-                    backgroundColor: '#ecf4fc',
+                    flexShrink: 0,
+                    borderTop: '1px solid #d1e3f7',
+                    backgroundColor: '#f0f6fd',
+                    padding: '16px 4px',
                   }}
                 >
-                  {/* Left Section — Workflow Info */}
-                  <Box
-                    sx={{
+                  {/* Workflow row */}
+                  {!props.loadingWFS && (props.workflows?.length > 0 || props.selectedObjWf) && (
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: 0.5,
+                      px: 1.5,
+                      py: 0.75,
+                      borderBottom: '1px solid #dce8f5',
                       fontSize: '12.8px',
-                      '*': { fontSize: '12.8px !important' },
-                    }}
-                  >
-                    {!props.loadingWFS && (
-                      <>
-                        {(props.workflows?.length > 0 || props.selectedObjWf) && (
-                          <>
-                            {props.selectedObjWf ? (
-                              <>
-                                {/* Existing Workflow */}
-                                <p className="my-1">
-                                  <i
-                                    className="fa-solid fa-arrows-spin mx-2"
-                                    style={{ color: THEME_COLORS.primary }}
-                                  />
-                                  <span>{props.selectedObjWf.workflowTitle || ''}</span>
-                                </p>
+                      color: '#333',
+                    }}>
+                      {props.selectedObjWf ? (
+                        <>
+                          {/* Workflow name chip */}
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            backgroundColor: '#e3edf7',
+                            border: '1px solid #c5d9ed',
+                            borderRadius: '4px',
+                            px: 1,
+                            py: 0.25,
+                            fontSize: '12px',
+                            color: THEME_COLORS.primary,
+                            fontWeight: 500,
+                          }}>
+                            <FaArrowsSpin style={{ fontSize: '11px' }} />
+                            <span>{props.selectedObjWf.workflowTitle || ''}</span>
+                          </Box>
 
-                                <p className="my-1">
-                                  <i className="fas fa-square-full text-warning mx-2" />
+                          {/* State / Transition selector */}
+                          {Array.isArray(props.selectedObjWf?.nextStates) && props.selectedObjWf.nextStates.length > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <LiaLongArrowAltRightSolid style={{ color: THEME_COLORS.primary, fontSize: '16px' }} />
+                              <Select
+                                value={props.selectedState?.title || props.currentState?.title || ''}
+                                onChange={handleStateChange}
+                                size="small"
+                                displayEmpty
+                                renderValue={(selected) => {
+                                  if (!selected) return <span style={{ color: '#aaa' }}>Select transition</span>;
+                                  const wf = props.selectedObjWf?.nextStates?.find((w) => w.title === selected) ||
+                                    (selected === props.currentState?.title ? props.currentState : null);
+                                  const currentTitle = props.currentState?.title || '';
+                                  const nextTitle = wf?.title || wf?.workflowName || '';
+                                  if (currentTitle === nextTitle) return <>{currentTitle}</>;
+                                  return <>{currentTitle} <LiaLongArrowAltRightSolid className="mx-1 text-primary" /> {nextTitle}</>;
+                                }}
+                                sx={{
+                                  fontSize: '12px',
+                                  height: '26px',
+                                  backgroundColor: '#fff',
+                                  border: '1px solid #c5d9ed',
+                                  borderRadius: '4px',
+                                  '.MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                  '.MuiSelect-select': { fontSize: '12px !important', py: '3px' },
+                                }}
+                              >
+                                <MenuItem disabled value={props.currentState?.title || ''} sx={{ fontSize: '12px' }}>
+                                  {props.currentState?.title || 'Current'}
+                                </MenuItem>
+                                {props.selectedObjWf?.nextStates?.map((state) => (
+                                  <MenuItem key={state.id} value={state.title} sx={{ fontSize: '12px' }}>
+                                    <LiaLongArrowAltRightSolid className="mx-1 text-primary" />
+                                    {state.title || ''}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </Box>
+                          ) : (
+                            <Box sx={{
+                              display: 'flex', alignItems: 'center', gap: 0.5,
+                              backgroundColor: '#fff8e1', border: '1px solid #ffe082',
+                              borderRadius: '4px', px: 1, py: 0.25, fontSize: '12px', color: '#795548',
+                            }}>
+                              <FaSquareFull style={{ fontSize: '8px', color: '#FFA000' }} />
+                              <span>{props.currentState?.title || ''}</span>
+                            </Box>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {/* Assign new workflow */}
+                          {props.workflows?.length > 0 && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                              <Select
+                                value={props.newWF?.workflowId || ''}
+                                onChange={handleWFChangeEmpty}
+                                size="small"
+                                displayEmpty
+                                renderValue={(selected) => {
+                                  if (!selected) return (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: '#555' }}>
+                                      <FaArrowsSpin style={{ fontSize: '11px', color: THEME_COLORS.primary }} />
+                                      <span>Assign workflow</span>
+                                    </Box>
+                                  );
+                                  return props.workflows.find((w) => w.workflowId === selected)?.workflowName || '';
+                                }}
+                                sx={{
+                                  fontSize: '12px', height: '26px', backgroundColor: '#fff',
+                                  border: '1px solid #c5d9ed', borderRadius: '4px',
+                                  '.MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                  '.MuiSelect-select': { fontSize: '12px !important', py: '3px' },
+                                }}
+                                MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+                              >
+                                <MenuItem disabled value="" sx={{ fontSize: '12px', color: THEME_COLORS.primary }}>
+                                  Select workflow
+                                </MenuItem>
+                                {props.workflows.map((wf) => (
+                                  <MenuItem key={wf.workflowId} value={wf.workflowId} sx={{ fontSize: '12px' }}>
+                                    {wf.workflowName || ''}
+                                  </MenuItem>
+                                ))}
+                              </Select>
 
-                                  {Array.isArray(props.selectedObjWf?.nextStates) &&
-                                    props.selectedObjWf.nextStates.length > 0 ? (
-                                    <Select
-                                      value={
-                                        props.selectedState?.title ||
-                                        props.currentState?.title ||
-                                        ''
-                                      }
-                                      onChange={handleStateChange}
-                                      size="small"
-                                      displayEmpty
-                                      renderValue={(selected) => {
-                                        if (!selected)
-                                          return <span style={{ color: '#aaa' }}>transition</span>;
-
-                                        const wf =
-                                          props.selectedObjWf?.nextStates?.find(
-                                            (w) => w.title === selected
-                                          ) ||
-                                          (selected === props.currentState?.title
-                                            ? props.currentState
-                                            : null);
-
-                                        const currentTitle = props.currentState?.title || '';
-                                        const nextTitle = wf?.title || wf?.workflowName || '';
-
-                                        // If same state, just show one
-                                        if (currentTitle === nextTitle) {
-                                          return <>{currentTitle}</>;
-                                        }
-
-                                        // Otherwise show transition
-                                        return (
-                                          <>
-                                            {currentTitle}{' '}
-                                            <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />{' '}
-                                            {nextTitle}
-                                          </>
-                                        );
-                                      }}
-
-                                      sx={{
-                                        fontSize: '12.8px !important',
-                                        height: '24px',
-                                        ml: '0.5rem',
-                                        '.MuiSelect-select': { fontSize: '12.8px !important' },
-                                      }}
-                                    >
-                                      <MenuItem
-                                        disabled
-                                        value={props.currentState?.title || ''}
-                                        sx={{ fontSize: '12.8px !important' }}
-                                      >
-                                        {props.currentState?.title || 'Current'}
+                              {props.newWF && (
+                                <>
+                                  <LiaLongArrowAltRightSolid style={{ color: THEME_COLORS.primary, fontSize: '16px' }} />
+                                  <Select
+                                    value={props.newWFState?.stateId || ''}
+                                    onChange={handleStateChangeNew}
+                                    size="small"
+                                    displayEmpty
+                                    renderValue={(selected) => {
+                                      if (!selected) return <span style={{ color: '#999' }}>Select state</span>;
+                                      return props.newWF.states.find((s) => s.stateId === selected)?.stateName || '';
+                                    }}
+                                    sx={{
+                                      fontSize: '12px', height: '26px', backgroundColor: '#fff',
+                                      border: '1px solid #c5d9ed', borderRadius: '4px',
+                                      '.MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                      '.MuiSelect-select': { fontSize: '12px !important', py: '3px' },
+                                    }}
+                                  >
+                                    <MenuItem disabled value="" sx={{ fontSize: '12px', color: THEME_COLORS.primary }}>
+                                      Select state
+                                    </MenuItem>
+                                    {props.newWF.states.map((state) => (
+                                      <MenuItem key={state.stateId} value={state.stateId} sx={{ fontSize: '12px' }}>
+                                        <LiaLongArrowAltRightSolid className="mx-1 text-primary" />
+                                        {state.stateName || ''}
                                       </MenuItem>
+                                    ))}
+                                  </Select>
+                                </>
+                              )}
+                            </Box>
+                          )}
+                        </>
+                      )}
+                    </Box>
+                  )}
 
-                                      {props.selectedObjWf?.nextStates?.map((state) => (
-                                        <MenuItem
-                                          key={state.id}
-                                          value={state.title}
-                                          sx={{ fontSize: '12.8px !important' }}
-                                        >
-                                          <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
-                                          {state.title || ''}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-
-                                  ) : (
-                                    <span style={{ color: '#333', marginLeft: '0.5rem' }}>
-                                      {props.currentState?.title || ''}
-                                    </span>
-                                  )}
-                                </p>
-                              </>
-                            ) : (
-                              <>
-                                {/* Assign New Workflow */}
-                                {props.workflows?.length > 0 && (
-                                  <p className="my-1">
-                                    {props.newWF && (
-                                      <i
-                                        className="fa-solid fa-arrows-spin mx-2"
-                                        style={{ color: THEME_COLORS.primary }}
-                                      />
-                                    )}
-                                    <Select
-                                      value={props.newWF?.workflowId || ''}
-                                      onChange={handleWFChangeEmpty}
-                                      size="small"
-                                      displayEmpty
-                                      renderValue={(selected) => {
-                                        if (!selected)
-                                          return (
-                                            <span style={{ color: '#333' }}>
-                                              <i className="fa-solid fa-arrows-spin mx-2" />
-                                              Assign a workflow?
-                                            </span>
-                                          );
-                                        const wf = props.workflows.find(
-                                          (w) => w.workflowId === selected
-                                        );
-                                        return wf?.workflowName || '';
-                                      }}
-                                      sx={{
-                                        fontSize: '12.8px !important',
-                                        height: '24px',
-                                      }}
-                                      MenuProps={{
-                                        PaperProps: { style: { maxHeight: 300 } },
-                                        MenuListProps: { style: { paddingTop: 0 } },
-                                      }}
-                                    >
-                                      <MenuItem
-                                        disabled
-                                        value=""
-                                        className="shadow-sm"
-                                        style={{
-                                          color: THEME_COLORS.primary,
-                                          fontSize: '12.8px',
-                                          position: 'sticky',
-                                          top: 0,
-                                          background: '#fff',
-                                          zIndex: 1,
-                                          opacity: 0.9,
-                                        }}
-                                      >
-                                        <span>Select workflow</span>
-                                      </MenuItem>
-
-                                      {props.workflows.map((wf) => (
-                                        <MenuItem
-                                          key={wf.workflowId}
-                                          value={wf.workflowId}
-                                          sx={{ fontSize: '12.8px !important' }}
-                                        >
-                                          {wf.workflowName || ''}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  </p>
-                                )}
-
-                                {/* Select Workflow State */}
-                                {props.newWF && (
-                                  <p className="my-1">
-                                    <i className="fas fa-square-full text-warning mx-2" />
-                                    <Select
-                                      value={props.newWFState?.stateId || ''}
-                                      onChange={handleStateChangeNew}
-                                      displayEmpty
-                                      renderValue={(selected) => {
-                                        if (!selected)
-                                          return (
-                                            <span style={{ color: '#555b6e' }}>
-                                              Please select a state
-                                            </span>
-                                          );
-                                        const state = props.newWF.states.find(
-                                          (s) => s.stateId === selected
-                                        );
-                                        return state?.stateName || '';
-                                      }}
-                                      size="small"
-                                      sx={{
-                                        fontSize: '12.8px !important',
-                                        height: '24px',
-                                      }}
-                                    >
-                                      <MenuItem
-                                        disabled
-                                        value=""
-                                        className="shadow-sm"
-                                        style={{
-                                          color: THEME_COLORS.primary,
-                                          fontSize: '12.8px',
-                                          position: 'sticky',
-                                          top: 0,
-                                          background: '#fff',
-                                          zIndex: 1,
-                                          opacity: 0.9,
-                                        }}
-                                      >
-                                        Select state
-                                      </MenuItem>
-
-                                      {props.newWF.states.map((state) => (
-                                        <MenuItem
-                                          key={state.stateId}
-                                          value={state.stateId}
-                                          sx={{ fontSize: '12.8px !important' }}
-                                        >
-                                          <i className="mx-1 fas fa-long-arrow-alt-right text-primary" />
-                                          {state.stateName || ''}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  </p>
-                                )}
-                              </>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </Box>
-
-                  {/* Right Section — Action Buttons */}
+               
+                  <AutomaticPermissionsButton permissions={props.selectedObject} />
+                     {/* Save / Discard action bar */}
                   {(Object.keys(props.formValues || {}).length > 0 ||
                     props.selectedState?.title ||
-                    // props.newWF || props.changedClass ||
                     props.newWF ||
                     (props.approvalPayload && Object.keys(props.approvalPayload).length > 0)) && (
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          className="rounded-pill"
-                          size="large"
-                          variant="contained"
-                          color="primary"
-                          onClick={props.updateObjectMetadata}
-                          disabled={props.isUpdatingMetadata}
-                          sx={{ textTransform: 'none' }}
-                        >
-                          {props.isUpdatingMetadata ? (
-                            <>
-                              <CircularProgress size={12.8} color="inherit" sx={{ mr: 0.5 }} />
-                              <small>Saving...</small>
-                            </>
-                          ) : (
-                            <small>Save</small>
-                          )}
-                        </Button>
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: 1,
+                      px: 1.5,
+                      py: 0.75,
+                    }}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        onClick={props.updateObjectMetadata}
+                        disabled={props.isUpdatingMetadata}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12.8px',
+                          fontWeight: 500,
+                          px: 2,
+                          py: 0.4,
+                          minWidth: 72,
+                          boxShadow: 'none',
+                          '&:hover': { boxShadow: 'none' },
+                        }}
+                      >
+                        {props.isUpdatingMetadata ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <CircularProgress size={12} color="inherit" />
+                            <span>Saving…</span>
+                          </Box>
+                        ) : 'Save'}
+                      </Button>
 
-                        <Button
-                          className="rounded-pill"
-                          size="large"
-                          variant="outlined"
-                          color="primary"
-                          onClick={() => {
-                            props.discardChange();
-                            props.setCheckedItems({});
-                            props.setClassUpdatePayload({});
-                            props.setChangedClass(false);
-                          }}
-                          disabled={props.isUpdatingMetadata}
-                          sx={{ textTransform: 'none' }}
-                        >
-                          <small>Discard</small>
-                        </Button>
-                      </Box>
-                    )}
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => {
+                          props.discardChange();
+                          props.setCheckedItems({});
+                          props.setClassUpdatePayload({});
+                          props.setChangedClass(false);
+                        }}
+                        disabled={props.isUpdatingMetadata}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12.8px',
+                          fontWeight: 500,
+                          px: 2,
+                          py: 0.4,
+                          minWidth: 72,
+                          borderColor: '#c5d9ed',
+                          color: '#555',
+                          '&:hover': { borderColor: THEME_COLORS.primary, color: THEME_COLORS.primary },
+                        }}
+                      >
+                        Discard
+                      </Button>
+                    </Box>
+                  )}
+
                 </Box>
-
-                <AutomaticPermissionsButton permissions={props.selectedObject} />
 
 
 
@@ -1734,7 +1698,8 @@ const ObjectData = (props) => {
                   mx: 'auto'
                 }}
               >
-                <i className="fas fa-tv my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
+                <MdOpenInNew className=" my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
+
                 {props.loadingfile ? (
                   <>
                     <Typography component="div" variant="body2" className='my-2 loading-spinner' sx={{ textAlign: 'center' }}>
@@ -1827,7 +1792,7 @@ const ObjectData = (props) => {
                     mx: 'auto'
                   }}
                 >
-                  <i className="fas fa-comment-alt my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
+                  <FaComments className="my-2" style={{ fontSize: '120px', color: THEME_COLORS.primary }} />
                   <div style={{ fontSize: '16px', marginBottom: '8px' }}>
                     {props.loadingcomments ? (
                       <div className="loading-indicator text-dark">

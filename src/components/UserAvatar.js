@@ -1,4 +1,5 @@
-import { useState } from "react";import { THEME_COLORS } from '../constants/themeColors';
+import { useState } from "react";
+import { THEME_COLORS } from '../constants/themeColors';
 
 import {
   Avatar,
@@ -11,6 +12,13 @@ import {
   ListItemIcon,
   Box,
 } from "@mui/material";
+
+import {
+  FaEnvelope,
+  FaBuilding,
+  FaKey,
+  FaSignOutAlt
+} from "react-icons/fa";
 
 export default function UserAvatarMenu(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -49,25 +57,26 @@ export default function UserAvatarMenu(props) {
           />
         </IconButton>
       </Tooltip>
-<Menu
+     <Menu
   anchorEl={anchorEl}
   open={Boolean(anchorEl)}
   onClose={handleCloseMenu}
   PaperProps={{
+    elevation: 6,
     sx: {
-      minWidth: 180,
-      borderRadius: 2,
-      mt: 1.2,
-      py: 0.3,
+      minWidth: 220,
+      borderRadius: 3,
+      mt: 1.5,
+      py: 0,
       overflow: "visible",
+      boxShadow: "0px 8px 24px rgba(0,0,0,0.08)",
       "&::before": {
         content: '""',
-        display: "block",
         position: "absolute",
         top: 0,
-        left: 18,
-        width: 8,
-        height: 8,
+        left: 22,
+        width: 10,
+        height: 10,
         bgcolor: "background.paper",
         transform: "translateY(-50%) rotate(45deg)",
         zIndex: 0,
@@ -77,23 +86,47 @@ export default function UserAvatarMenu(props) {
   transformOrigin={{ horizontal: "left", vertical: "top" }}
   anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
 >
-  {/* User Info Section */}
-  <Box sx={{ px: 1.5, py: 0.8, bgcolor: "grey.100", borderRadius: "0 0 6px 6px" }}>
-    <Typography variant="subtitle2" fontWeight="600" sx={{ color: THEME_COLORS.primary, fontSize: "12px" }}>
-      <span className="mr-2" style={{fontWeight:'lighter'}}>Hi!</span> {fullName}
+  {/* ===== User Info Section ===== */}
+  <Box
+    sx={{
+      px: 2,
+      py: 1.5,
+      background: `linear-gradient(135deg, ${THEME_COLORS.primary}15, #ffffff)`,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+    }}
+  >
+    <Typography
+      variant="subtitle2"
+      fontWeight="600"
+      sx={{ color: THEME_COLORS.primary }}
+    >
+      Hi, {fullName}
     </Typography>
 
-    <Box sx={{ backgroundColor: THEME_COLORS.primary, color: '#fff', borderRadius: 1.5, p: 0.8, mt: 0.6 }}>
-      <Box display="flex" alignItems="center">
-        <i className="fas fa-envelope" style={{ fontSize: "10px", marginRight: 6 }} />
-        <Typography variant="caption" sx={{ fontSize: "10px" }}>
+    <Box sx={{ mt: 1 }}>
+      <Box display="flex" alignItems="center" mb={0.5}>
+        <FaEnvelope
+          style={{
+            fontSize: 13,
+            marginRight: 8,
+            color: THEME_COLORS.primary,
+          }}
+        />
+        <Typography variant="caption" color="text.secondary">
           {props.user?.email}
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="center" mt={0.4}>
-        <i className="fas fa-building" style={{ fontSize: "10px", marginRight: 6 }} />
-        <Typography variant="caption" sx={{ fontSize: "10px" }}>
+      <Box display="flex" alignItems="center">
+        <FaBuilding
+          style={{
+            fontSize: 13,
+            marginRight: 8,
+            color: THEME_COLORS.primary,
+          }}
+        />
+        <Typography variant="caption" color="text.secondary">
           {props.user?.organization}
         </Typography>
       </Box>
@@ -102,23 +135,50 @@ export default function UserAvatarMenu(props) {
 
   <Divider />
 
-  {/* Reset Password */}
-  <MenuItem onClick={handlePasswordReset} sx={{ py: 0.6 }}>
-    <ListItemIcon sx={{ minWidth: 26 }}>
-      <i className="fas fa-key" style={{ fontSize: "12px", color: THEME_COLORS.primary }} />
+  {/* ===== Reset Password ===== */}
+  <MenuItem
+    onClick={handlePasswordReset}
+    sx={{
+      py: 1,
+      transition: "all 0.2s ease",
+      "&:hover": {
+        backgroundColor: `${THEME_COLORS.primary}10`,
+      },
+    }}
+  >
+    <ListItemIcon sx={{ minWidth: 32 }}>
+      <FaKey
+        style={{
+          fontSize: 15,
+          color: THEME_COLORS.primary,
+        }}
+      />
     </ListItemIcon>
-    <Typography variant="body2" sx={{ fontSize: "12px" }}>Reset Password</Typography>
+    <Typography variant="body2">Reset Password</Typography>
   </MenuItem>
 
-  {/* Logout */}
-  <MenuItem onClick={handleLogout} sx={{ py: 0.6 }}>
-    <ListItemIcon sx={{ minWidth: 26 }}>
-      <i className="fas fa-sign-out-alt" style={{ fontSize: "12px", color: THEME_COLORS.primary }} />
+  {/* ===== Logout ===== */}
+  <MenuItem
+    onClick={handleLogout}
+    sx={{
+      py: 1,
+      transition: "all 0.2s ease",
+      "&:hover": {
+        backgroundColor: `${THEME_COLORS.primary}10`,
+      },
+    }}
+  >
+    <ListItemIcon sx={{ minWidth: 32 }}>
+      <FaSignOutAlt
+        style={{
+          fontSize: 15,
+          color: THEME_COLORS.primary,
+        }}
+      />
     </ListItemIcon>
-    <Typography variant="body2" sx={{ fontSize: "12px" }}>Logout</Typography>
+    <Typography variant="body2">Logout</Typography>
   </MenuItem>
 </Menu>
-
     </>
   );
 }

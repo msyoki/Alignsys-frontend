@@ -12,6 +12,9 @@ import * as constants from './Auth/configs';
 import { FaBook } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa6";
 
+import { FaCheckCircle,FaMinusCircle} from "react-icons/fa";
+import DynamicIcon from './Utils/Dynamicicon';
+
 
 const ColumnSimpleTree = ({
 
@@ -360,7 +363,7 @@ const ColumnSimpleTree = ({
 
               <CheckOutStatusBadgeIcon
                 color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
-                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
+                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? FaCheckCircle : FaMinusCircle}
                 offsetX="-6px"
                 offsetY="-3px"
               >
@@ -392,7 +395,7 @@ const ColumnSimpleTree = ({
 
               <CheckOutStatusBadgeIcon
                 color={Number(item?.checkoutuserid) === Number(mfilesId) ? "#3fa34d" : "#ef233c"}
-                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? "fa-check-circle" : "fa-solid fa-circle-minus"}
+                icon={Number(item?.checkoutuserid) === Number(mfilesId) ? FaCheckCircle : FaMinusCircle}
                 offsetX="-6px"
                 offsetY="-3px"
               >
@@ -412,7 +415,10 @@ const ColumnSimpleTree = ({
 
                   <FaBook size={18} color="#7cb518" />
                 ) : (
-                  <FaFolder size={18} color="#2a68af" />
+                  // <FaFolder size={18} color="#2a68af" />
+                  <DynamicIcon name={item.classTypeName} />
+         
+          
                 )}
               </>)
             }
@@ -695,14 +701,13 @@ const ColumnSimpleTree = ({
   );
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {renderHeader()}
 
       <Box
         sx={{
-          maxHeight: '70vh',
-          height: renderHeight ? renderHeight : '55vh',
-          overflowY: 'scroll',
+          flex: 1,
+          overflowY: 'auto',
           overflowX: 'hidden',
           color: '#333',
           marginLeft: '10px',

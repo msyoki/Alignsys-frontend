@@ -39,11 +39,14 @@ import UserAvatarMenu from '../UserAvatar';
 import History from '../Modals/History';
 import { THEME_COLORS } from '../../constants/themeColors';
 import { THEME_CONFIG } from '../../config/theme.config';
+import ScannerDialog from '../features/scanner/ScannerDialog';
 
 
-
-
-
+import { MdOutlineRecentActors } from "react-icons/md";
+import { FaTrashRestoreAlt } from "react-icons/fa";
+import { IoBarChart } from "react-icons/io5";
+import { FaClockRotateLeft } from "react-icons/fa6";
+import { MdAssignment } from "react-icons/md";
 
 // Custom Hooks
 function useSessionState(key, defaultValue) {
@@ -73,17 +76,17 @@ function useSessionState(key, defaultValue) {
 }
 
 // Tab Panel Component
-function CustomTabPanel({ children, value, index, ...other }) {
+function CustomTabPanel({ children, value, index, style: styleProp, ...other }) {
   return (
     <div
       role="tabpanel"
-      hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      style={{ display: value === index ? 'flex' : 'none', flexDirection: 'column', flex: 1, overflow: 'hidden', ...styleProp }}
       {...other}
     >
       {value === index && (
-        <Box className='my-1' sx={{ height: '100%', overflowY: 'auto', backgroundColor: '#fff' }}>
+        <Box className='my-1' sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', backgroundColor: '#fff' }}>
           {children}
         </Box>
       )}
@@ -117,7 +120,7 @@ function a11yProps2(index) {
 
 const DashboardContent = (props) => {
 
-  // ✅ ADD THIS: Sort view results - latest first
+  // ADD THIS: Sort view results - latest first
   const sortViewResults = useCallback((data) => {
     if (!Array.isArray(data) || data.length === 0) return data;
 
@@ -266,6 +269,8 @@ const DashboardContent = (props) => {
   const [objectHistory, setObjectHistory] = useState([])
   const [loadingHisytory, setLoadingHistory] = useState(false)
 
+  const [scannerDialogOpen, setScannerDialogOpen] = useState(false)
+
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -273,38 +278,7 @@ const DashboardContent = (props) => {
     setRefreshKey(prev => prev + 1); // trigger a reload
   };
 
-  // const handleTabAction = () => {
-  //   // Delay everything inside by 5 seconds
-  //   setTimeout(() => {
-  //     if (selectedTab) {
-  //       switch (selectedTab) {
-  //         case 'Recent':
-  //           props.getRecent?.();
-  //           break;
-  //         case 'Assigned':
-  //           props.getAssigned?.();
-  //           break;
-  //         case 'Deleted':
-  //           props.getDeleted?.();
-  //           break;
-  //         default:
-  //           reloadViews();
-  //           break;
-  //       }
-  //     }
-
-  //     if (props.searchTerm?.length > 0 && props.data?.length > 0) {
-  //       props.searchObject(props.searchTerm, props.selectedVault.guid).then((data) => {
-  //         setLoading(false);
-  //         setSearched(true);
-  //         props.setData(data);
-  //       });
-  //     }
-  //   }, 2500); // ⏱ 5 seconds
-  // };
-
   const handleTabAction = async () => {
-    // ✅ REMOVED the 2.5 second setTimeout delay
 
     if (selectedTab) {
       switch (selectedTab) {
@@ -744,6 +718,7 @@ const DashboardContent = (props) => {
 
   // Main preview functions
   const previewObjectInternal = async (item, isDocument) => {
+    console.log("Previewing item:", item);
     console.log(selectedObject)
     console.log(props.user)
     resetPreviewState();
@@ -1294,9 +1269,11 @@ const DashboardContent = (props) => {
         }
 
 
+
       } catch (error) {
         console.error('Error fetching extension:', error);
       }
+
     };
     fetchExtension();
   }
@@ -1509,7 +1486,7 @@ const DashboardContent = (props) => {
         label: (
           <>
             <TbArrowMerge style={{ color: THEME_COLORS.primary }} />
-            <span className="mx-3">Consolidate Linked Documents</span>
+            <span className="mx-3">Merge Linked Documents</span>
           </>
         ),
         onClick: (itm) => {
@@ -1652,6 +1629,8 @@ const DashboardContent = (props) => {
   return (
     <>
 
+      <ScannerDialog open={scannerDialogOpen} onClose={() => setScannerDialogOpen(false)} fetchItemData={props.fetchItemData} setUploadedFile={props.setUploadedFile} uploadedFile={props.droppedFile} />
+
       <History
         open={openHistory}
         close={() => setOpenHistory(false)}
@@ -1725,7 +1704,7 @@ const DashboardContent = (props) => {
         close={() => setOpenOfficeApp(false)}
         object={objectToEditOnOffice}
         mfilesId={props.selectedVault?.vaultId}
-        handleTabAction={() => handleTabAction()}
+        handleTabAction={handleTabAction}
       />
 
       {/* Split column section */}
@@ -1744,7 +1723,9 @@ const DashboardContent = (props) => {
             backgroundColor: '#fff',
             minWidth: '25%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            height: '100vh',
+            overflow: 'hidden',
           }}
         >
           {/* Header */}
@@ -1789,9 +1770,9 @@ const DashboardContent = (props) => {
 
               {/* Logo wrapper */}
               <Box
-               className='shadow-sm'
+                className='shadow-sm'
                 sx={{
-               
+
                   height: 35, // ensures logo doesn't exceed header height
                   minHeight: 30, // ensures logo doesn't get too small  
                   // maxWidth: 160, // prevents logo from pushing right section
@@ -1806,7 +1787,7 @@ const DashboardContent = (props) => {
                   src={THEME_CONFIG.logos.brandLogo}
                   alt="Logo"
                   onClick={() => window.location.reload()}
-                 
+
                   style={{
                     height: '100%',
                     width: 'auto',
@@ -1890,8 +1871,11 @@ const DashboardContent = (props) => {
                 <AddButtonWithMenu
                   vaultObjectsList={props.vaultObjectsList}
                   fetchItemData={props.fetchItemData}
+
+                  setScannerDialogOpen={setScannerDialogOpen}
                 />
               </Box>
+
             </Box>
           </Box>
           {/* <Button onClick={()=>{reloadViews();alert(value)}}>Reload Current Results</Button> */}
@@ -1904,9 +1888,14 @@ const DashboardContent = (props) => {
             sx={{
               borderColor: 'divider',
               backgroundColor: THEME_COLORS.surfaceLight,
+              minHeight: '36px',
+              '& .MuiTabs-flexContainer': {
+                gap: '2px',
+              },
               '& .MuiTab-root': {
-                height: 'auto',
-                p: '4px 12.8px',
+                height: '36px',
+                minHeight: '36px',
+                p: '0px 10px',
                 backgroundColor: THEME_COLORS.surfaceLight,
                 minWidth: 'auto',
                 textTransform: 'none',
@@ -1918,63 +1907,44 @@ const DashboardContent = (props) => {
               },
               '& .MuiTabs-indicator': {
                 backgroundColor: `${THEME_COLORS.primary} !important`,
-                height: '1px',
+                height: '0.1px',
                 fontWeight: 'normal !important',
-
               }
             }}
           >
             {['Home', 'Recent', 'Assigned', props.user.is_admin === "True" ? 'Deleted' : null, 'Reports'].filter(Boolean).map((label, index) => {
-              const showAssignedCount = label === 'Assigned' && props.assignedData?.length; // number
+              const showAssignedCount = label === 'Assigned' && props.assignedData?.length;
               const showDeletedCount = label === 'Deleted' && props.deletedData?.length;
               return (
                 <Tab
                   key={index}
                   label={
-                    <span
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px', // space between icon/text and count
-                      }}
-                    >
-                      {/* Home icon */}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {label === 'Home' && (
-                        <BiHomeAlt2
-                          style={{
-                            fontSize: '16px',
-                            color: selectedTab === 'Home' ? THEME_COLORS.primary : '#ccc',
-                          }}
-                        />
+                        <BiHomeAlt2 style={{ fontSize: '14px', color: selectedTab === 'Home' ? THEME_COLORS.primary : '#ccc' }} />
+                      )}
+                      {label === 'Recent' && (
+                        <FaClockRotateLeft style={{ fontSize: '14px', color: selectedTab === 'Recent' ? THEME_COLORS.primary : '#ccc' }} />
+                      )}
+                      {label === 'Assigned' && (
+                        <MdAssignment style={{ fontSize: '14px', color: selectedTab === 'Assigned' ? THEME_COLORS.primary : '#ccc' }} />
+                      )}
+                      {label === 'Deleted' && (
+                        <FaTrashRestoreAlt style={{ fontSize: '14px', color: selectedTab === 'Deleted' ? THEME_COLORS.primary : '#ccc' }} />
+                      )}
+                      {label === 'Reports' && (
+                        <IoBarChart style={{ fontSize: '14px', color: selectedTab === 'Reports' ? THEME_COLORS.primary : '#ccc' }} />
                       )}
 
-                      {/* Label text */}
-                      <span>{label}</span>
+                      <span style={{ fontSize: '13px' }}>{label}</span>
 
-                      {/* Assigned count */}
                       {showAssignedCount > 0 && (
-                        <span
-                          style={{
-                            marginLeft: '1px',
-                            fontSize: '12px',
-
-                            color: selectedTab === 'Assigned' ? THEME_COLORS.primary : '#ccc'
-                          }}
-                        >
+                        <span style={{ fontSize: '11px', color: selectedTab === 'Assigned' ? THEME_COLORS.primary : '#ccc' }}>
                           ({props.assignedData.length})
                         </span>
                       )}
-
-                      {/* Assigned count */}
                       {showDeletedCount > 0 && (
-                        <span
-                          style={{
-                            marginLeft: '1px',
-                            fontSize: '12px',
-
-                            color: selectedTab === 'Deleted' ? THEME_COLORS.primary : '#ccc'
-                          }}
-                        >
+                        <span style={{ fontSize: '11px', color: selectedTab === 'Deleted' ? THEME_COLORS.primary : '#ccc' }}>
                           ({props.deletedData.length})
                         </span>
                       )}
@@ -1984,7 +1954,6 @@ const DashboardContent = (props) => {
                     setSelectedTab(label);
                     resetPreview();
                     props.setSearchTerm("")
-
                     if (label === 'Home') {
                       setSelectedViewObjects([]);
                       setViewNavigation([]);
@@ -1998,9 +1967,6 @@ const DashboardContent = (props) => {
                 />
               );
             })}
-
-
-
           </Tabs>
 
           {/* Tab Content */}
@@ -2021,8 +1987,8 @@ const DashboardContent = (props) => {
                 borderColor: '#fff',
                 backgroundColor: '#fff',
               },
-              height: 'auto',
-
+              display: 'flex',
+              flexDirection: 'column',
             }}>
 
             <CustomTabPanel value={value} index={0} style={{ backgroundColor: '#fff', padding: 0, width: '100%', height: '100%' }}>
@@ -2288,7 +2254,10 @@ const DashboardContent = (props) => {
             width: isMobile ? '100%' : '60%',
             backgroundColor: THEME_COLORS.surfaceLight,
             minWidth: '25%',
-            height: '100%'
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
           <ObjectData

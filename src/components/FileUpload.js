@@ -1,20 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Box, Tooltip, IconButton } from '@mui/material';
+import { Box } from '@mui/material';
 import '../styles/FileUpload.css';
 import DynamicFileViewer3 from './Viewer/DynamicFileViewer3';
 import { THEME_COLORS } from '../constants/themeColors';
 import { MdOutlineFileUpload } from "react-icons/md";
 
-
 const FileUploadComponent = (props) => {
     const [fileData, setFileData] = useState(null);
 
-    // Extract file extension
     const getFileExtension = (filename) =>
         filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
 
-    // Convert file to base64
     const convertToBase64 = (file) =>
         new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -23,187 +20,184 @@ const FileUploadComponent = (props) => {
             reader.onerror = reject;
         });
 
-    // Process uploaded file
     useEffect(() => {
         if (!props.uploadedFile) {
             setFileData(null);
             return;
         }
-
         convertToBase64(props.uploadedFile)
-            .then((base64) => {
+            .then((base64) =>
                 setFileData({
                     title: props.uploadedFile.name,
                     base64,
                     extension: getFileExtension(props.uploadedFile.name),
-                });
-            })
+                })
+            )
             .catch(console.error);
     }, [props.uploadedFile]);
 
     const onDrop = useCallback(
         (acceptedFiles) => {
-            if (acceptedFiles?.length) {
-                props.handleFileChange(acceptedFiles[0]);
-            }
+            if (acceptedFiles?.length) props.handleFileChange(acceptedFiles[0]);
         },
         [props]
     );
-    
-    const {
-        getRootProps,
-        getInputProps,
-        isDragActive,
-        open,
-    } = useDropzone({
+
+    const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
         onDrop,
         multiple: false,
-        noClick: !!props.uploadedFile,
+        noClick: true,
+        noDrag: false,
         accept: {
-            // Images (all formats)
             'image/*': [],
-
-            // PDF
             'application/pdf': ['.pdf'],
-
-            // Word
             'application/msword': ['.doc'],
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-
-            // Excel
             'application/vnd.ms-excel': ['.xls'],
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-
-            // PowerPoint
             'application/vnd.ms-powerpoint': ['.ppt'],
             'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-
-            // Text
             'text/plain': ['.txt'],
         },
     });
 
-
-
     return (
+        /*
+         * Root: owns its own border/radius and visual chrome.
+         * Parent only needs to handle positioning (flex, margin).
+         */
         <>
-            {/* Header */}
-            {props.uploadedFile?.name && (
-                <Box
-                    className="chat-header2 p-2"
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        minHeight: 40,
-                    }}
-                >
-                    <Tooltip title={props.uploadedFile.name}>
-                        <span style={{ display: 'flex', alignItems: 'center' }}>
-                            {props.getFileIcon(props.uploadedFile.name)}
-                            <span style={{ marginLeft: 8, fontSize: 12.8 }}>
-                                {props.uploadedFile.name}
-                            </span>
-                        </span>
-                    </Tooltip>
 
-                    <Tooltip title="Replace document">
-                        <IconButton
-                            size="small"
-                            onClick={open}
+            {/* Dropzone — grows to fill all remaining height */}
+            <Box
+                {...getRootProps({
+                    className: 'dropzone', // maintain className
+                    onClick: (e) => {
+                        if (!props.uploadedFile) {
+                            openFileDialog(); // only open if no file uploaded
+                        } else {
+                            e.preventDefault(); // prevent accidental clicks
+                        }
+                    },
+                })}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    backgroundColor: props.uploadedFile ? '#ecf4fc' : '#ecf4fc',
+                    border: props.uploadedFile
+                        ? 'none'
+                        : `1.4px dashed ${props.fileUploadError ? '#CC3333' : '#CC3333'}`,
+                    borderRadius: props.uploadedFile ? 0 : '8px',
+                    position: 'relative',
+                    outline: isDragActive ? '2px dashed #2757aa' : 'none',
+                    outlineOffset: '-2px',
+                    cursor: props.uploadedFile ? 'default' : 'pointer',
+                    overflow: 'hidden',
+                }}
+            >
+                <input {...getInputProps()} />
+
+                {/* Drag-over overlay (replacement mode) */}
+                {isDragActive && props.uploadedFile && (
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            backgroundColor: 'rgba(39, 87, 170, 0.1)',
+                            //border: 'px dashed #2757aa',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 10,
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <Box
                             sx={{
-                                color: THEME_COLORS.primary,
+                                backgroundColor: THEME_COLORS.primary,
+                                color: '#fff',
+                                px: 4,
+                                py: 2,
+                                borderRadius: 2,
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                            }}
+                        >
+                            <MdOutlineFileUpload style={{ fonstSize: 30 }} />
+                            Drop to replace file
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Content: viewer or placeholder */}
+                {props.uploadedFile && fileData ? (
+                    /*
+                     * Viewer wrapper: flex + overflow:hidden so DynamicFileViewer3
+                     * fills the entire available space without overflowing.
+                     */
+                    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+                        <Box
+                            onClick={openFileDialog}
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 1,
+                                px: 2,
+                                py: 0.8,
+                                backgroundColor: '#ddeaf9',
+                                borderBottom: '1px dashed #2757aa',
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                color: '#2757aa',
+                                fontWeight: 500,
+                                transition: 'background-color 0.2s',
                                 '&:hover': {
-                                    backgroundColor: 'rgba(39, 87, 170, 0.1)',
+                                    backgroundColor: '#ccdff5',
                                 },
                             }}
                         >
-                            <i className="fas fa-sync-alt" />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            )}
+                            <MdOutlineFileUpload style={{ fontSize: 15 }} />
+                            <span>
+                                <strong>{props.uploadedFile.name}</strong> — Click here or drag &amp; drop to replace
+                            </span>
+                        </Box>
 
-            {/* Dropzone */}
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div
-                    {...getRootProps({ className: 'dropzone' })}
-                    style={{
-                        height: '100%',
-                        width: '100%',
-                        backgroundColor: props.uploadedFile ? 'transparent' : '#ecf4fc',
-                        border: props.uploadedFile ? 'none' : `1.4px dashed ${props.fileUploadError ? "#CC3333" : "#ccc"}`,
-                        borderRadius: props.uploadedFile ? 0 : 8,
-                        position: 'relative',
-                        outline: isDragActive ? '1px solid #2757aa' : 'none',
-                    }}
-                >
-                    <input {...getInputProps()} />
+                        <DynamicFileViewer3 {...fileData} />
+                    </Box>
+                ) : (
+                    <Box
+                        sx={{
+                            flex: 1,
+                            minHeight: 150,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            textAlign: 'center',
+                            p: 2,
+                        }}
+                    >
+                        <p>Upload a file</p>
+                        <MdOutlineFileUpload
+                            style={{ fontSize: 100, color: THEME_COLORS.primary, margin: 16 }}
+                        />
+                        <p>Drag &amp; drop a file here, or click here to upload</p>
 
-                    {/* Drag overlay */}
-                    {isDragActive && props.uploadedFile && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                inset: 0,
-                                backgroundColor: 'rgba(39, 87, 170, 0.1)',
-                                border: '1px dashed #2757aa',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 10,
-                                pointerEvents: 'none',
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    backgroundColor: THEME_COLORS.primary,
-                                    color: '#fff',
-                                    px: 4,
-                                    py: 2,
-                                    borderRadius: 2,
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                <MdOutlineFileUpload style={{ marginRight: 8 }} />
-                                Drop to replace file
+                        {props.fileUploadError && (
+                            <Box sx={{ color: '#CC3333', fontSize: 13, mt: 1 }}>
+                                {props.fileUploadError}
                             </Box>
-                        </Box>
-                    )}
-
-                    {/* Viewer or Placeholder */}
-                    {props.uploadedFile && fileData ? (
-                        <Box sx={{ flex: 1, overflow: 'auto' }}>
-                            <DynamicFileViewer3 {...fileData} />
-                        </Box>
-                    ) : (
-                        <Box
-                            sx={{
-                                height: '100%',
-                                minHeight: 150,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
-                                textAlign: 'center',
-                                p: 2,
-                            }}
-                        >
-                            <p>Upload a file</p>
-                            <MdOutlineFileUpload
-                                style={{ fontSize: 40, color: THEME_COLORS.primary, margin: 16 }}
-                            />
-                            <p>Drag & drop a file here, or click  here to upload </p>
-
-                            {props.fileUploadError && (
-                                <div style={{ color: '#CC3333', fontSize: 13 }}>
-                                    {props.fileUploadError}
-                                </div>
-                            )}
-                        </Box>
-                    )}
-                </div>
-            </div>
+                        )}
+                    </Box>
+                )}
+            </Box>
         </>
     );
 };

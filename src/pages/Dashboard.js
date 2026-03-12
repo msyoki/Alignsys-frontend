@@ -18,15 +18,20 @@ import { FaPlusCircle } from "react-icons/fa";
 import { FaSignOutAlt } from "react-icons/fa";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 
-import { FaFolderPlus } from "react-icons/fa6";
-import { FaFileCirclePlus } from "react-icons/fa6";
+
+import { FaFolderPlus, FaCaretLeft, FaCaretRight, FaFileCirclePlus } from "react-icons/fa6";
 
 import {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile,
   faFolder, faUserFriends, faPlus, faTag
 } from '@fortawesome/free-solid-svg-icons';
+
+
+
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 import TaskMessenger from '../components/features/ai/TaskMessenger';
 import { THEME_COLORS } from '../constants/themeColors';
+import DynamicIcon from '../components/Utils/Dynamicicon';
 
 const allIcons = {
   faFileAlt, faFolderOpen, faTasks, faChartBar, faUser, faCar, faFile, faFolder, faUserFriends,
@@ -106,7 +111,7 @@ const SidebarMenu = React.memo(({
           className="logo"
           style={{
             width: "auto",
-            maxHeight: "33px",
+            maxHeight: "30px",
             objectFit: "contain",
           }}
         />
@@ -157,10 +162,11 @@ const SidebarMenu = React.memo(({
             </div>
           </div>
 
-          <i
-            className={`fas ${isSublistVisible ? "fa-angle-up" : "fa-angle-down"}`}
-            style={{ transition: "transform 0.3s ease-in-out", fontSize: "18px", flexShrink: 0 }}
-          ></i>
+          {isSublistVisible ? (
+            <FaAngleUp style={{ transition: 'transform 0.3s ease-in-out', fontSize: '18px', flexShrink: 0 }} />
+          ) : (
+            <FaAngleDown style={{ transition: 'transform 0.3s ease-in-out', fontSize: '18px', flexShrink: 0 }} />
+          )}
         </li>
 
         {/* Sublist */}
@@ -287,9 +293,10 @@ const SubList = React.memo(({ isVisible, items, hoveredItem, setHoveredItem, fet
           {/* ICON */}
 
           {item.objectid === 0 ? (
-            <FaFileCirclePlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+            <FaFileCirclePlus style={{ color: THEME_COLORS.primary, fontSize: 15, flexShrink: 0, marginLeft: '16px' }} />
           ) : (
-            <FaFolderPlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+            // <FaFolderPlus style={{ color: THEME_COLORS.primary, fontSize: "13px", flexShrink: 0, marginLeft: '16px' }} />
+            <span style={{marginLeft: '16px' }}><DynamicIcon name={item.namesingular} color={THEME_COLORS.primary} size={15}/></span>
           )}
 
 
@@ -628,6 +635,7 @@ function Dashboard() {
 
   const handleClassSelection = useCallback(async (classId, className, objectId) => {
     // Combine initial state updates into one
+
     setLoadingDialog(true);
     setSelectedClassName(className);
     setSelectedClassId(classId);
@@ -663,6 +671,7 @@ function Dashboard() {
 
     // Helper: fetch templates
     const fetchTemplates = async () => {
+
       try {
         const response = await axios.get(
           `${constants.mfiles_api}/api/Templates/GetClassTemplate/${selectedVault.guid}/${classId}`,
@@ -976,8 +985,15 @@ function Dashboard() {
             
           </Tooltip> */}
           <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
-            <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={toggleSidebar}>
-              <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
+            <div
+              className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`}
+              onClick={toggleSidebar}
+            >
+              {sidebarOpen ? (
+                <FaCaretLeft size={16} color="white" />
+              ) : (
+                <FaCaretRight size={16} color="white" />
+              )}
             </div>
           </Tooltip>
           <DashboardContent
@@ -1031,6 +1047,7 @@ function Dashboard() {
             groupedItems={groupedItems}
             ungroupedItems={ungroupedItems}
             setIsFormOpen={setIsFormOpen}
+             setUploadedFile={setDroppedFile}
           />
         </main>
       </div>

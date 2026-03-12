@@ -64,9 +64,9 @@ const LookupSelect = ({
           value: option.id,
         }));
         // Always include the currently selected value in the options
-        const selectedOption = options.find(opt => opt.value === value) ||
-          defaultOptions.find(opt => opt.value === value);
-        const combined = selectedOption && !formattedOptions.some(opt => opt.value === value)
+        const selectedOption = options.find(opt => String(opt.value) === String(value)) ||
+          defaultOptions.find(opt => String(opt.value) === String(value));
+        const combined = selectedOption && !formattedOptions.some(opt => String(opt.value) === String(value))
           ? [selectedOption, ...formattedOptions]
           : formattedOptions;
         setOptions(combined);
@@ -122,8 +122,9 @@ const LookupSelect = ({
     }),
   };
 
-  // Find the selected option from the current options
-  const selectedOption = options.find(opt => opt.value === value) || null;
+  // Find the selected option — use String() comparison to handle numeric IDs
+  // vs string values passed from AI classification
+  const selectedOption = options.find(opt => String(opt.value) === String(value)) || null;
 
   return (
     <div style={{ position: 'relative' }}>

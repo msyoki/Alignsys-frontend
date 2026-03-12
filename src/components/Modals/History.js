@@ -20,8 +20,20 @@ import SimpleIconTree from '../SimpleIconTree';
 import axios from 'axios';
 import * as constants from '../Auth/configs';
 import DynamicFileViewer3 from '../Viewer/DynamicFileViewer3';
-import Loader from '../Loaders/LoaderMini';import { THEME_COLORS } from '../../constants/themeColors';
+import Loader from '../Loaders/LoaderMini';
+import { THEME_COLORS } from '../../constants/themeColors';
 
+import {
+  FaFolder,
+  FaEnvelope,
+  FaFilePowerpoint,
+  FaFileExcel,
+  FaFileWord,
+  FaFilePdf,
+  FaFileImage,
+  FaFileCsv,
+  FaFileLines
+} from "react-icons/fa6";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -45,51 +57,56 @@ export default function History(props) {
   const col2Ref = useRef(null);
   const isResizing = useRef(false);
 
-  const getIcon = (ext, font) => {
-    if (!ext)
-      return <i className="fas fa-folder" style={{ fontSize: `${font}px`, color: '#2a68af' }} />;
-    const e = ext.replace(/^\./, '').toLowerCase();
+const getIcon = (ext, font) => {
+  if (!ext) {
+    return <FaFolder size={font} color="#2a68af" />;
+  }
 
-    const colorMap = {
-      pdf: '#f21b3f',
-      csv: '#7cb518',
-      txt: '#555b6e',
-      msg: '#ffb703',
-      webp: '#2757aa',
-      xlsx: '#217045',
-      xls: '#217045',
-      ppt: '#d34628',
-      pptx: '#d34628',
-      doc: '#35558b',
-      docx: '#35558b',
-      png: '#2a68af',
-      jpeg: '#2a68af',
-      jpg: '#2a68af',
-      vssettings: '#555b6e',
-    };
+  const e = ext.replace(/^\./, "").toLowerCase();
 
-    const iconClass =
-      e === 'msg'
-        ? 'fa-solid fa-envelope'
-        : e === 'ppt' || e === 'pptx'
-        ? 'fa-solid fa-file-powerpoint'
-        : e === 'xlsx' || e === 'xls'
-        ? 'far fa-file-excel'
-        : e === 'doc' || e === 'docx'
-        ? 'fas fa-file-word'
-        : e === 'pdf'
-        ? 'fas fa-file-pdf'
-        : e === 'png' || e === 'jpeg' || e === 'jpg'
-        ? 'fas fa-file-image'
-        : e === 'csv'
-        ? 'fas fa-file-csv'
-        : e === 'txt'
-        ? 'fas fa-file-alt'
-        : 'fas fa-folder';
-
-    return <i className={iconClass} style={{ fontSize: `${font}px`, color: colorMap[e] || '#2a68af' }} />;
+  const colorMap = {
+    pdf: "#f21b3f",
+    csv: "#7cb518",
+    txt: "#555b6e",
+    msg: "#ffb703",
+    webp: "#2757aa",
+    xlsx: "#217045",
+    xls: "#217045",
+    ppt: "#d34628",
+    pptx: "#d34628",
+    doc: "#35558b",
+    docx: "#35558b",
+    png: "#2a68af",
+    jpeg: "#2a68af",
+    jpg: "#2a68af",
+    vssettings: "#555b6e",
   };
 
+  const iconMap = {
+    msg: FaEnvelope,
+    ppt: FaFilePowerpoint,
+    pptx: FaFilePowerpoint,
+    xlsx: FaFileExcel,
+    xls: FaFileExcel,
+    doc: FaFileWord,
+    docx: FaFileWord,
+    pdf: FaFilePdf,
+    png: FaFileImage,
+    jpeg: FaFileImage,
+    jpg: FaFileImage,
+    csv: FaFileCsv,
+    txt: FaFileLines,
+  };
+
+  const IconComponent = iconMap[e] || FaFolder;
+
+  return (
+    <IconComponent
+      size={font}
+      color={colorMap[e] || "#2a68af"}
+    />
+  );
+};
   const handleClose = () => {
     props.setObjectHistory([]);
     setPreviewData(null);

@@ -6,7 +6,10 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Tabs, Tab, List, ListItem, Typography, Select, MenuItem, Button } from '@mui/material';
 import { Tooltip } from '@mui/material';
 import FileExtIcon from './FileExtIcon';
-import FileExtText from './FileExtText';import { THEME_COLORS } from '../constants/themeColors';
+import FileExtText from './FileExtText';
+import { THEME_COLORS } from '../constants/themeColors';
+
+import { FaBook, FaFolder,FaUser,FaCommentAlt,FaPaperPlane } from 'react-icons/fa';
 
 
 const CommentsComponent = (props) => {
@@ -93,13 +96,13 @@ const CommentsComponent = (props) => {
                 (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
                 props.selectedObject.isSingleFile === true ? (
                 <>
-                  <span className='mx-2'>
+                  <span className='mx-1'>
                     <FileExtIcon
                       fontSize="20px"
                       guid={props.guid}
                       objectId={props.selectedObject.id}
                       classId={props.selectedObject.classId ?? props.selectedObject.classID}
-                      sx={{ fontSize: '25px !important', mr: '10px', flexShrink: 0 }}
+                      sx={{ fontSize: '25px !important', mr: '5px', flexShrink: 0 }}
 
                     />
                   </span>
@@ -120,21 +123,26 @@ const CommentsComponent = (props) => {
                 </>
               ) : (
                 <>
-                  <i
-                    className={
-                      (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
-                        props.selectedObject.isSingleFile === false
-                        ? 'fas fa-book'
-                        : 'fa-solid fa-folder'
-                    }
-                    style={{
-                      color: (props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
-                        props.selectedObject.isSingleFile === false ? '#7cb518' : '#2a68af',
-                      fontSize: '20px',
-                      marginRight: '10px',
-                      flexShrink: 0
-                    }}
-                  />
+                  {(props.selectedObject.objectTypeId === 0 || props.selectedObject.objectID === 0) &&
+                    props.selectedObject.isSingleFile === false ? (
+                    <FaBook
+                      style={{
+                        color: '#7cb518',
+                        fontSize: '20px',
+                        marginRight: '10px',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <FaFolder
+                      style={{
+                        color: '#2a68af',
+                        fontSize: '20px',
+                        marginRight: '10px',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
                   <Box sx={{
                     fontSize: '12.8px',
                     overflow: 'hidden',
@@ -159,7 +167,13 @@ const CommentsComponent = (props) => {
                 const [boldText, regularText] = comment.coment.split(':');
                 return (
                   <div key={index} className="message">
-                    <i className="fas fa-user" style={{ color: THEME_COLORS.primary, fontSize: '20px' }}></i>
+                    <FaUser
+                      style={{
+                        color: THEME_COLORS.primary,
+                        fontSize: '20px',
+                        marginRight: '10px',
+                      }}
+                    />
                     <div className="message-content user-message">
                       <div style={{ fontSize: '12px', color: '#555b6e', marginBottom: '4px' }}>
                         <strong>{boldText}</strong> • {comment.modifiedDate}
@@ -174,7 +188,13 @@ const CommentsComponent = (props) => {
 
             {loading && (
               <div className="message">
-                <i className="fas fa-comment-alt" style={{ color: THEME_COLORS.primary }}></i>
+                <FaCommentAlt
+                  style={{
+                    color: THEME_COLORS.primary,
+                    fontSize: '20px',
+                    marginRight: '10px',
+                  }}
+                />
                 <div className="loading-indicator">
                   Posting<span>.</span><span>.</span><span>.</span>
                 </div>
@@ -207,7 +227,12 @@ const CommentsComponent = (props) => {
                     className="send-button"
                     disabled={loading || !newComment.trim()}
                   >
-                    <i className="fas fa-paper-plane"></i>
+                    <FaPaperPlane
+                      style={{
+                        color: '#fff',
+                        fontSize: '16px',
+                      }}
+                    />
                   </button>
                 </div>
               </form>

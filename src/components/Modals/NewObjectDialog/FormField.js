@@ -4,6 +4,9 @@ import LookupSelect from '../../CustomFormTags/NewObjectFormLookup';
 import LookupMultiSelect from '../../CustomFormTags/NewObjectFormLookupMultiSelect';
 import AddValuelistItem from './../AddValueList';
 
+/* Shared MUI sx for all Select / TextField inputs */
+const INPUT_SX = { fontSize: '13px', color: '#555b6e' };
+
 const FormField = ({
     prop,
     value,
@@ -16,57 +19,59 @@ const FormField = ({
     setAddingValueListItem,
     setOpenAlert,
     setAlertSeverity,
-    setAlertMsg
+    setAlertMsg,
 }) => {
+    /* Read-only / automatic fields */
     if (prop.isAutomatic || !prop.userPermission.editPermission) {
         return (
             <Typography
-                className='my-1'
                 variant="body2"
-                sx={{
-                    fontSize: '13px',
-                    color: '#666',
-                    paddingTop: '8px',
-                    paddingBottom: '8px',
-                    paddingLeft: '14px'
-                }}
+                sx={{ fontSize: '13px', color: '#888', pl: '2px', pt: '8px', pb: '8px' }}
             >
                 ( Automatic )
             </Typography>
         );
     }
 
+    if (prop.isHidden) return null;
+
     const handleChange = (newValue) => onChange(prop.propId, newValue);
 
+    /* ── If the prop already has a locked value just show it ── */
+    const ReadOnly = ({ text }) => (
+        <Typography sx={{ fontSize: '13px', color: '#555b6e', pt: '8px', pb: '4px', pl: '2px' }}>
+            {text}
+        </Typography>
+    );
+
     switch (prop.propertytype) {
+
+        /* ── Plain text / number ── */
         case 'MFDatatypeText':
         case 'MFDatatypeFloating':
         case 'MFDatatypeInteger':
-            if (prop.isHidden) return null;
             return (
                 <TextField
-                    value={prop.value || value}
+                    value={prop.value || value || ''}
                     onChange={(e) => handleChange(e.target.value)}
                     fullWidth
                     required={prop.isRequired}
                     error={!!error}
                     helperText={error}
                     size="small"
-                    className="my-1 bg-white"
+                    sx={{ mt: '2px', backgroundColor: 'white' }}
                     disabled={!!prop.value}
-                    InputProps={{ style: { fontSize: '13px' } }}
-                    InputLabelProps={{ style: { fontSize: '13px' } }}
+                    InputProps={{ sx: INPUT_SX }}
+                    InputLabelProps={{ sx: INPUT_SX }}
                 />
             );
 
+        /* ── Multiline text ── */
         case 'MFDatatypeMultiLineText':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
                 <TextField
-                    label={prop.title}
-                    value={value}
+                    value={value || ''}
                     onChange={(e) => handleChange(e.target.value)}
                     fullWidth
                     required={prop.isRequired}
@@ -75,19 +80,18 @@ const FormField = ({
                     multiline
                     rows={4}
                     size="small"
-                    className="my-1 bg-white"
-                    InputProps={{ style: { fontSize: '13px' } }}
-                    InputLabelProps={{ style: { fontSize: '13px' } }}
+                    sx={{ mt: '2px', backgroundColor: 'white' }}
+                    InputProps={{ sx: INPUT_SX }}
+                    InputLabelProps={{ sx: INPUT_SX }}
                 />
             );
 
+        /* ── Lookup (single) ── */
         case 'MFDatatypeLookup':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
-                <Box display="flex" alignItems="center" className="my-1" sx={{ width: '100%' }}>
-                    <Box sx={{ flex: `0 0 ${prop.allowAdding ? '90%' : '100%'}` }}>
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
+                <Box display="flex" alignItems="center" gap={0.5} sx={{ width: '100%', mt: '2px' }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
                         <LookupSelect
                             userId={parseInt(mfilesId, 10)}
                             propId={prop.propId}
@@ -107,9 +111,7 @@ const FormField = ({
                             vaultGuid={selectedVault?.guid}
                             userID={parseInt(mfilesId, 10)}
                             valuelistID={prop.typeID}
-                            onSuccess={(newItem) => {
-                                // Component will refresh automatically
-                            }}
+                            onSuccess={() => {}}
                             item={prop}
                             handleClassSelection={handleClassSelection}
                             fetchItemData={fetchItemData}
@@ -122,25 +124,23 @@ const FormField = ({
                 </Box>
             );
 
+        /* ── Lookup (multi) ── */
         case 'MFDatatypeMultiSelectLookup':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
-                <Box display="flex" alignItems="center" className="my-1" sx={{ width: '100%' }}>
-                    <Box sx={{ flex: `0 0 ${prop.allowAdding ? '90%' : '100%'}` }}>
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
+                <Box display="flex" alignItems="center" gap={0.5} sx={{ width: '100%', mt: '2px' }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
                         <LookupMultiSelect
                             userId={parseInt(mfilesId, 10)}
                             propId={prop.propId}
                             label={prop.title}
                             onChange={onChange}
-                            value={value || []}
+                            value={Array.isArray(value) ? value : (value ? [value] : [])}
                             required={prop.isRequired}
                             error={!!error}
                             helperText={error}
                             selectedVault={selectedVault}
                             size="small"
-                            className="my-1"
                             fullWidth
                         />
                     </Box>
@@ -149,9 +149,7 @@ const FormField = ({
                             vaultGuid={selectedVault?.guid}
                             userID={parseInt(mfilesId, 10)}
                             valuelistID={prop.typeID}
-                            onSuccess={(newItem) => {
-                                // Component will refresh automatically
-                            }}
+                            onSuccess={() => {}}
                             item={prop}
                             handleClassSelection={handleClassSelection}
                             fetchItemData={fetchItemData}
@@ -164,86 +162,59 @@ const FormField = ({
                 </Box>
             );
 
+        /* ── Boolean ── */
         case 'MFDatatypeBoolean':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
                 <Select
                     size="small"
-                    value={value ?? (prop.value === "Yes" ? true : prop.value === "No" ? false : '')}
+                    value={value ?? (prop.value === 'Yes' ? true : prop.value === 'No' ? false : '')}
                     onChange={(e) => handleChange(e.target.value)}
                     displayEmpty
                     fullWidth
-                    className='bg-white'
                     sx={{
+                        mt: '2px',
                         backgroundColor: 'white',
-                        marginY: '4px',
                         fontSize: '13px',
-                        '& .MuiSelect-select': {
-                            fontSize: '13px',
-                            color: '#555b6e',
-                            paddingTop: '6px',
-                            paddingBottom: '6px',
-                            paddingLeft: '10px',
-                            paddingRight: '10px',
-                            minHeight: 'unset',
-                        },
-                        '& .MuiInputBase-root': {
-                            minHeight: '32px',
-                        },
-                        '& .MuiOutlinedInput-input': {
-                            padding: '6px 10px',
-                            fontSize: '13px',
-                        },
-                        '& .MuiMenuItem-root': {
-                            fontSize: '13px',
-                            color: '#555b6e',
-                        },
+                        color: '#555b6e',
+                        '& .MuiSelect-select': { fontSize: '13px', color: '#555b6e', py: '6px' },
                     }}
                 >
-                    <MenuItem sx={{ fontSize: '13px', color: '#555b6e' }} value=""><em>None</em></MenuItem>
-                    <MenuItem sx={{ fontSize: '13px', color: '#555b6e' }} value={true}>True</MenuItem>
-                    <MenuItem sx={{ fontSize: '13px', color: '#555b6e' }} value={false}>False</MenuItem>
+                    <MenuItem sx={INPUT_SX} value=""><em>None</em></MenuItem>
+                    <MenuItem sx={INPUT_SX} value={true}>True</MenuItem>
+                    <MenuItem sx={INPUT_SX} value={false}>False</MenuItem>
                 </Select>
             );
 
+        /* ── Timestamp ── */
         case 'MFDatatypeTimestamp':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
                 <input
-                    style={{ color: '#555b6e', fontSize: '13px' }}
                     type="datetime-local"
-                    className="form-control bg-white my-1"
+                    className="form-control bg-white"
+                    style={{ color: '#555b6e', fontSize: '13px', marginTop: '2px' }}
                     value={value || ''}
                     onChange={(e) => handleChange(e.target.value)}
                 />
             );
 
+        /* ── Date ── */
         case 'MFDatatypeDate':
-            if (prop.isHidden) return null;
-            return prop.value ? (
-                <p className="p-1 my-1">{prop.value}</p>
-            ) : (
+            if (prop.value) return <ReadOnly text={prop.value} />;
+            return (
                 <TextField
                     type="date"
-                    value={value}
+                    value={value || ''}
                     onChange={(e) => handleChange(e.target.value)}
                     fullWidth
                     required={prop.isRequired}
                     error={!!error}
                     helperText={error}
-                    InputLabelProps={{
-                        shrink: true,
-                        sx: { fontSize: '13px', color: '#555b6e' }
-                    }}
-                    InputProps={{
-                        sx: { fontSize: '13px', color: '#555b6e' }
-                    }}
                     size="small"
-                    className="my-1 bg-white"
+                    sx={{ mt: '2px', backgroundColor: 'white' }}
+                    InputLabelProps={{ shrink: true, sx: INPUT_SX }}
+                    InputProps={{ sx: INPUT_SX }}
                 />
             );
 

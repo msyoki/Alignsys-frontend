@@ -1,26 +1,86 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
     List,
     ListItem,
     Box,
     Typography,
-    Select,
-    MenuItem,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
     Button,
     Collapse,
-    IconButton
 } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import FormField from './FormField';
 import FileExtIcon from '../../FileExtIcon';
 import FileExtText from '../../FileExtText';
 import { THEME_COLORS } from '../../../constants/themeColors';
+import { FaSearch, FaTimes ,FaChevronDown } from 'react-icons/fa';
+import { FaFileCirclePlus, FaFolderPlus } from "react-icons/fa6";
 
+/* ─── Shared label width across all rows ─────────────────────────────────── */
+const LABEL_WIDTH = { xs: '90px', sm: '130px', md: '160px' };
 
+/* ─── Reusable row wrapper ───────────────────────────────────────────────── */
+const FormRow = ({ label, required, children }) => (
+    <Box
+        sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            width: '100%',
+            gap: 1.5,
+            my: '3px',
+            boxSizing: 'border-box',
+        }}
+    >
+        <Typography
+            variant="body2"
+            sx={{
+                color: 'black',
+                minWidth: LABEL_WIDTH,
+                maxWidth: LABEL_WIDTH,
+                fontSize: '13px',
+                textAlign: 'end',
+                flexShrink: 0,
+                pt: '9px',
+                lineHeight: 1.3,
+                wordBreak: 'break-word',
+            }}
+        >
+            {label}{required && <span style={{ color: '#d32f2f' }}> *</span>} :
+        </Typography>
+        <Box sx={{ flex: 1, minWidth: 0, fontSize: '13px', color: '#555b6e' }}>
+            {children}
+        </Box>
+    </Box>
+);
+
+/* ─── Group header used inside the class-change dialog ───────────────────── */
+const GroupHeader = ({ label, expanded, onToggle }) => (
+    <ListItem
+        button
+        onClick={onToggle}
+        sx={{
+            backgroundColor: THEME_COLORS.surfaceLight,
+            mb: 0.5,
+            py: 0.75,
+            borderRadius: '4px',
+            '&:hover': { backgroundColor: '#d9e9f7' },
+        }}
+    >
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 600, color: THEME_COLORS.primary }}>
+                {label}
+            </Typography>
+            {expanded
+                ? <ExpandLess sx={{ color: THEME_COLORS.primary, fontSize: '18px' }} />
+                : <ExpandMore sx={{ color: THEME_COLORS.primary, fontSize: '18px' }} />}
+        </Box>
+    </ListItem>
+);
+
+/* ─── Main component ─────────────────────────────────────────────────────── */
 const PropertiesList = ({
     properties,
     formValues,
@@ -34,7 +94,6 @@ const PropertiesList = ({
     handleClassSelection,
     fetchItemData,
     setAddingValueListItem,
-    // Props for class selection
     groupedItems,
     ungroupedItems,
     selectedClassId,
@@ -42,115 +101,91 @@ const PropertiesList = ({
     onClassChange,
     setOpenAlert,
     setAlertSeverity,
-    setAlertMsg
+    setAlertMsg,
 }) => {
     const [classDialogOpen, setClassDialogOpen] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Create a flat list of all available classes
+    /* flat list used only to decide whether the class selector is clickable */
     const allClasses = useMemo(() => {
         const classes = [];
-
-        // Add grouped classes
-        if (groupedItems) {
-            groupedItems.forEach(group => {
-                group.members.forEach(member => {
-                    if (member.userPermission?.attachObjectsPermission) {
-                        classes.push({
-                            classId: member.classId,
-                            className: member.className,
-                            groupName: group.classGroupName,
-                            groupId: group.classGroupId
-                        });
-                    }
-                });
-            });
-        }
-
-        // Add ungrouped classes
-        if (ungroupedItems) {
-            ungroupedItems.forEach(member => {
-                if (member.userPermission?.attachObjectsPermission) {
-                    classes.push({
-                        classId: member.classId,
-                        className: member.className,
-                        groupName: 'Ungrouped',
-                        groupId: 'ungrouped'
-                    });
-                }
-            });
-        }
-
+        groupedItems?.forEach(group =>
+            group.members.forEach(m => {
+                if (m.userPermission?.attachObjectsPermission)
+                    classes.push({ classId: m.classId, className: m.className });
+            })
+        );
+        ungroupedItems?.forEach(m => {
+            if (m.userPermission?.attachObjectsPermission)
+                classes.push({ classId: m.classId, className: m.className });
+        });
         return classes;
     }, [groupedItems, ungroupedItems]);
 
     const handleClassSelect = (classId, className) => {
-        if (onClassChange) {
-            onClassChange(classId, className, selectedObjectId);
-        }
+      
+        handleClassSelection(classId, className, selectedObjectId);
+        // onClassChange?.(classId, className, selectedObjectId);
         setClassDialogOpen(false);
     };
 
-    const toggleGroup = (groupId) => {
-        setExpandedGroups(prev => ({
-            ...prev,
-            [groupId]: !prev[groupId]
-        }));
-    };
+    const toggleGroup = (id) =>
+        setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
-    // Initialize all groups as collapsed when dialog opens
     const handleOpenDialog = () => {
         setExpandedGroups({});
         setSearchTerm('');
         setClassDialogOpen(true);
     };
 
-    // Filter classes based on search term
-    const filterMembers = (members) => {
-        if (!searchTerm) return members;
-        return members.filter(member => 
-            member.className.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    };
+    const filterMembers = (members) =>
+        searchTerm
+            ? members.filter(m => m.className.toLowerCase().includes(searchTerm.toLowerCase()))
+            : members;
+
+    // Auto-expand groups with matching results while searching,
+    // collapse all when search is cleared
+    useEffect(() => {
+        if (!searchTerm) {
+            setExpandedGroups({});
+            return;
+        }
+
+        const expanded = {};
+        groupedItems?.forEach(g => {
+            const hasMatch = g.members.some(
+                m =>
+                    m.userPermission?.attachObjectsPermission &&
+                    m.className.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            expanded[g.classGroupId] = hasMatch;
+        });
+        if (ungroupedItems?.length > 0) {
+            expanded['ungrouped'] = ungroupedItems.some(
+                m =>
+                    m.userPermission?.attachObjectsPermission &&
+                    m.className.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        setExpandedGroups(expanded);
+    }, [searchTerm, groupedItems, ungroupedItems]);
 
     return (
-        <List sx={{ p: 0, width: '100%', boxSizing: 'border-box' }}>
+        <List sx={{  width: '100%', boxSizing: 'border-box',padding: '20px' }}>
+
+            {/* ── Template banner ── */}
             {templateIsTrue && (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        width: '100%',
-                        gap: 2
-                    }}
-                >
-                    <Typography
-                        className="my-2"
-                        variant="body2"
-                        sx={{
-                            color: 'black',
-                            minWidth: '180px',
-                            maxWidth: '180px',
-                            fontSize: '13px',
-                            textAlign: 'end',
-                            flexShrink: 0
-                        }}
-                    >
-                        FROM TEMPLATE:
-                    </Typography>
-                    <Box className="my-2" sx={{ flex: 1, fontSize: '13px', textAlign: 'start', color: '#555b6e' }}>
-                        <span className='mx-2'>
-                            <FileExtIcon
-                                fontSize={'20px'}
-                                guid={selectedVault?.guid}
-                                objectId={selectedTemplate.id}
-                                classId={selectedTemplate.classID}
-                                version={selectedTemplate.versionId ?? null}
-                            />
-                        </span>
-                        {selectedTemplate?.title}
+                <FormRow label="Template">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', p: '10px' }}>
+                        <FileExtIcon
+                            fontSize="20px"
+                            guid={selectedVault?.guid}
+                            objectId={selectedTemplate.id}
+                            classId={selectedTemplate.classID}
+                            version={selectedTemplate.versionId ?? null}
+                        />
+                        <span>{selectedTemplate?.title}</span>
                         <FileExtText
                             guid={selectedVault?.guid}
                             objectId={selectedTemplate.id}
@@ -158,192 +193,152 @@ const PropertiesList = ({
                             version={selectedTemplate.versionId ?? null}
                         />
                     </Box>
-                </Box>
+                </FormRow>
             )}
 
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    width: '100%',
-                    gap: 2,
-                    boxSizing: 'border-box'
-                }}
-            >
-                <Typography
-                    className="my-2"
-                    variant="body2"
-                    sx={{
-                        color: 'black',
-                        minWidth: { xs: '100px', sm: '140px', md: '180px' },
-                        maxWidth: { xs: '100px', sm: '140px', md: '180px' },
-                        fontSize: '13px',
-                        textAlign: 'end',
-                        flexShrink: 0
-                    }}
-                >
-                    Class :
-                </Typography>
-                <Box className="my-2" sx={{ flex: 1, fontSize: '13px', textAlign: 'start', color: '#555b6e', mr: 4 }}>
-                    {allClasses.length > 1 ? (
-                        <Box
-                            onClick={handleOpenDialog}
-                            sx={{
-                                cursor: 'pointer',
-                                padding: '8px 12px',
-                                border: '1px solid #c4c4c4',
-                                borderRadius: '4px',
-                                backgroundColor: 'white',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                '&:hover': {
-                                    borderColor: THEME_COLORS.primary,
-                                    backgroundColor: '#f8f9fa'
-                                }
-                            }}
-                        >
-                            <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
-                                {selectedClassName}
-                            </Typography>
-                            <i className="fas fa-chevron-down" style={{ fontSize: '12px', color: '#555b6e' }}></i>
-                        </Box>
-                    ) : (
-                        <Typography sx={{ fontSize: '13px', color: '#555b6e', padding: '8px 0' }}>
-                            {selectedClassName}
+            {/* ── Class selector row ── */}
+            <FormRow label="Class">
+                {allClasses.length > 1 ? (
+                    <Box
+                        onClick={handleOpenDialog}
+                        sx={{
+                            cursor: 'pointer',
+                            px: 1.5,
+                            py: 1,
+                            border: '1px solid #c4c4c4',
+                            borderRadius: '4px',
+                            backgroundColor: 'white',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mt: '2px',
+                            '&:hover': { borderColor: THEME_COLORS.primary, backgroundColor: '#f8f9fa' },
+                        }}
+                    >
+                        <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
+                            {selectedClassName} 
                         </Typography>
-                    )}
-                </Box>
-            </Box>
+                        <FaChevronDown style={{ fontSize: '12px', color: '#555b6e' }} />
+                        
+                    </Box>
+                ) : (
+                    <Typography sx={{ fontSize: '13px', color: '#555b6e', pt: '9px' }}>
+                        {selectedClassName}
+                    </Typography>
+                )}
+            </FormRow>
 
-            {/* Class Selection Dialog with Collapsible Groups */}
+            {/* ── Class-change dialog ── */}
             <Dialog
                 open={classDialogOpen}
                 onClose={() => setClassDialogOpen(false)}
                 maxWidth="sm"
                 fullWidth
+                PaperProps={{
+                    sx: {
+                        height: { xs: '90vh', sm: '75vh' },
+                        maxHeight: '90vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }
+                }}
             >
                 <DialogTitle
                     sx={{
                         backgroundColor: THEME_COLORS.primary,
                         color: '#fff',
                         fontSize: '14px',
-                        py: 2
+                        py: 1.5,
+                        flexShrink: 0,
                     }}
                 >
-                    <i className="fas fa-folder-plus mx-2"></i>
+                    <FaFolderPlus style={{ marginRight: 8 }} />
                     Select Class
                 </DialogTitle>
-                <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '500px' }}>
-                    {/* Search Bar - Fixed */}
-                    <Box sx={{ px: 2, pt: 2, pb: 2, backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                border: '1px solid #c4c4c4',
-                                borderRadius: '4px',
-                                padding: '8px 12px',
-                                backgroundColor: 'white',
-                                '&:focus-within': {
-                                    borderColor: THEME_COLORS.primary,
-                                }
+
+                {/* Fixed search bar */}
+                <Box
+                    sx={{
+                        px: 2,
+                        py: 1.5,
+                        borderBottom: '1px solid #e0e0e0',
+                        flexShrink: 0,
+                        backgroundColor: 'white',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            border: '1px solid #c4c4c4',
+                            borderRadius: '4px',
+                            px: 1.5,
+                            py: 0.75,
+                            '&:focus-within': { borderColor: THEME_COLORS.primary },
+                        }}
+                    >
+                        <FaSearch style={{ color: '#555b6e', fontSize: '13px', marginRight: 8 }} />
+                        <input
+                            type="text"
+                            placeholder="Search classes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{
+                                border: 'none',
+                                outline: 'none',
+                                width: '100%',
+                                fontSize: '13px',
+                                color: '#555b6e',
+                                backgroundColor: 'transparent',
                             }}
-                        >
-                            <i className="fas fa-search" style={{ color: '#555b6e', fontSize: '14px', marginRight: '8px' }}></i>
-                            <input
-                                type="text"
-                                placeholder="Search classes..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{
-                                    border: 'none',
-                                    outline: 'none',
-                                    width: '100%',
-                                    fontSize: '13px',
-                                    color: '#555b6e',
-                                    backgroundColor: 'transparent'
-                                }}
+                        />
+                        {searchTerm && (
+                            <FaTimes
+                                onClick={() => setSearchTerm('')}
+                                style={{ color: '#555b6e', fontSize: '13px', cursor: 'pointer', marginLeft: 8 }}
                             />
-                            {searchTerm && (
-                                <i 
-                                    className="fas fa-times" 
-                                    onClick={() => setSearchTerm('')}
-                                    style={{ 
-                                        color: '#555b6e', 
-                                        fontSize: '14px', 
-                                        cursor: 'pointer',
-                                        marginLeft: '8px'
-                                    }}
-                                ></i>
-                            )}
-                        </Box>
+                        )}
                     </Box>
-                    
-                    {/* Scrollable List Container */}
-                    <Box sx={{ flex: 1, overflowY: 'auto', px: 2 }}>
-                        <List sx={{ p: 0, py: 1 }}>
-                        {/* Grouped Classes */}
-                        {groupedItems && groupedItems.map((group) => {
-                            const filteredMembers = filterMembers(
-                                group.members.filter(
-                                    member => member.userPermission?.attachObjectsPermission
-                                )
+                </Box>
+
+                {/* Scrollable list */}
+                <DialogContent sx={{ flex: 1, overflowY: 'auto', p: 0, px: 2, minHeight: 0 }}>
+                    <List sx={{ p: 0, py: 1 }}>
+                        {groupedItems?.map((group) => {
+                            const filtered = filterMembers(
+                                group.members.filter(m => m.userPermission?.attachObjectsPermission)
                             );
-
-                            if (filteredMembers.length === 0) return null;
-
+                            if (filtered.length === 0) return null;
                             return (
                                 <Box key={group.classGroupId}>
-                                    <ListItem
-                                        button
-                                        onClick={() => toggleGroup(group.classGroupId)}
-                                        sx={{
-                                            backgroundColor: THEME_COLORS.surfaceLight,
-                                            mb: 0.5,
-                                            py: 1,
-                                            borderRadius: '4px'
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                                            <Typography
-                                                sx={{
-                                                    fontSize: '13px',
-                                                    fontWeight: 600,
-                                                    color: THEME_COLORS.primary
-                                                }}
-                                            >
-                                                {group.classGroupName}
-                                            </Typography>
-                                            {expandedGroups[group.classGroupId] ? (
-                                                <ExpandLess sx={{ color: THEME_COLORS.primary }} />
-                                            ) : (
-                                                <ExpandMore sx={{ color: THEME_COLORS.primary }} />
-                                            )}
-                                        </Box>
-                                    </ListItem>
-                                    <Collapse in={expandedGroups[group.classGroupId]} timeout="auto" unmountOnExit>
+                                    <GroupHeader
+                                        label={group.classGroupName}
+                                        expanded={!!expandedGroups[group.classGroupId]}
+                                        onToggle={() => toggleGroup(group.classGroupId)}
+                                    />
+                                    <Collapse in={!!expandedGroups[group.classGroupId]} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
-                                            {filteredMembers.map((member) => (
+                                            {filtered.map((member) => (
                                                 <ListItem
                                                     button
                                                     key={member.classId}
                                                     onClick={() => handleClassSelect(member.classId, member.className)}
                                                     sx={{
                                                         pl: 4,
-                                                        py: 1,
-                                                        '&:hover': {
-                                                            backgroundColor: '#f0f4f8'
-                                                        },
-                                                        backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent'
+                                                        py: 0.75,
+                                                        backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent',
+                                                        '&:hover': { backgroundColor: '#f0f4f8' },
                                                     }}
                                                 >
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <i
-                                                            className={`fas ${selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
-                                                            style={{ color: '#2a68af', fontSize: '16px' }}
-                                                        />
+                                                        {selectedObjectId === 0 ? (
+                                                            <FaFileCirclePlus size={15} color="#2a68af" />
+                                                        ) : (
+                                                            <FaFolderPlus size={15} color="#2a68af" />
+                                                        )}
+
+                                                        {selectedObjectId === 0}
+
                                                         <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
                                                             {member.className}
                                                         </Typography>
@@ -356,44 +351,19 @@ const PropertiesList = ({
                             );
                         })}
 
-                        {/* Ungrouped Classes */}
-                        {ungroupedItems && ungroupedItems.length > 0 && (() => {
+                        {(() => {
                             const filteredUngrouped = filterMembers(
-                                ungroupedItems.filter(member => member.userPermission?.attachObjectsPermission)
+                                (ungroupedItems || []).filter(m => m.userPermission?.attachObjectsPermission)
                             );
-                            
                             if (filteredUngrouped.length === 0) return null;
-                            
                             return (
                                 <Box>
-                                    <ListItem
-                                        button
-                                        onClick={() => toggleGroup('ungrouped')}
-                                        sx={{
-                                            backgroundColor: THEME_COLORS.surfaceLight,
-                                            mb: 0.5,
-                                            py: 1,
-                                            borderRadius: '4px'
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                                            <Typography
-                                                sx={{
-                                                    fontSize: '13px',
-                                                    fontWeight: 600,
-                                                    color: THEME_COLORS.primary
-                                                }}
-                                            >
-                                                Ungrouped
-                                            </Typography>
-                                            {expandedGroups['ungrouped'] ? (
-                                                <ExpandLess sx={{ color: THEME_COLORS.primary }} />
-                                            ) : (
-                                                <ExpandMore sx={{ color: THEME_COLORS.primary }} />
-                                            )}
-                                        </Box>
-                                    </ListItem>
-                                    <Collapse in={expandedGroups['ungrouped']} timeout="auto" unmountOnExit>
+                                    <GroupHeader
+                                        label="Ungrouped"
+                                        expanded={!!expandedGroups['ungrouped']}
+                                        onToggle={() => toggleGroup('ungrouped')}
+                                    />
+                                    <Collapse in={!!expandedGroups['ungrouped']} timeout="auto" unmountOnExit>
                                         <List component="div" disablePadding>
                                             {filteredUngrouped.map((member) => (
                                                 <ListItem
@@ -402,18 +372,17 @@ const PropertiesList = ({
                                                     onClick={() => handleClassSelect(member.classId, member.className)}
                                                     sx={{
                                                         pl: 4,
-                                                        py: 1,
-                                                        '&:hover': {
-                                                            backgroundColor: '#f0f4f8'
-                                                        },
-                                                        backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent'
+                                                        py: 0.75,
+                                                        backgroundColor: member.classId === selectedClassId ? '#e3f2fd' : 'transparent',
+                                                        '&:hover': { backgroundColor: '#f0f4f8' },
                                                     }}
                                                 >
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <i
-                                                            className={`fas ${selectedObjectId === 0 ? 'fa-file-circle-plus' : 'fa-folder-plus'}`}
-                                                            style={{ color: '#2a68af', fontSize: '16px' }}
-                                                        />
+                                                        {selectedObjectId === 0 ? (
+                                                            <FaFileCirclePlus size={15} color="#2a68af" />
+                                                        ) : (
+                                                            <FaFolderPlus size={15} color="#2a68af" />
+                                                        )}
                                                         <Typography sx={{ fontSize: '13px', color: '#555b6e' }}>
                                                             {member.className}
                                                         </Typography>
@@ -426,66 +395,45 @@ const PropertiesList = ({
                             );
                         })()}
                     </List>
-                    </Box>
                 </DialogContent>
-                <DialogActions>
+
+                <DialogActions sx={{ flexShrink: 0, borderTop: '1px solid #e0e0e0' }}>
                     <Button
+                        className='rounded-pill'
                         onClick={() => setClassDialogOpen(false)}
                         variant="contained"
                         color="warning"
-                        sx={{ textTransform: 'none', borderRadius: '20px' }}
+                        sx={{
+                            textTransform: 'none',
+                            backgroundColor: '#FFD54F',
+                            color: '#000',
+                            '&:hover': { backgroundColor: '#FFCA28' },
+                        }}
                     >
-                        Close
+                        Cancel
                     </Button>
                 </DialogActions>
             </Dialog>
 
+            {/* ── Property rows ── */}
             {properties.map((prop) => (
                 <ListItem key={prop.propId} sx={{ p: 0, width: '100%', boxSizing: 'border-box' }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                            alignItems: 'flex-start',
-                            width: '100%',
-                            gap: 2,
-                            marginY: '2px',
-                            boxSizing: 'border-box'
-                        }}
-                    >
-                        <Typography
-                            className="my-2"
-                            variant="body2"
-                            sx={{
-                                color: 'black',
-                                minWidth: { xs: '100px', sm: '140px', md: '180px' },
-                                maxWidth: { xs: '100px', sm: '140px', md: '180px' },
-                                fontSize: '13px',
-                                textAlign: 'end',
-                                flexShrink: 0,
-                                pt: '8px'
-                            }}
-                        >
-                            {prop.title} {prop.isRequired && <span className="text-danger"> *</span>} :
-                        </Typography>
-
-                        <Box sx={{ flex: 1, fontSize: '13px', color: '#555b6e', textAlign: 'start', mr: 4 }}>
-                            <FormField
-                                prop={prop}
-                                value={formValues[prop.propId]}
-                                onChange={onInputChange}
-                                error={formErrors[prop.propId]}
-                                selectedVault={selectedVault}
-                                mfilesId={mfilesId}
-                                handleClassSelection={handleClassSelection}
-                                fetchItemData={fetchItemData}
-                                setAddingValueListItem={setAddingValueListItem}
-                                setOpenAlert={setOpenAlert}
-                                setAlertSeverity={setAlertSeverity}
-                                setAlertMsg={setAlertMsg}   
-                            />
-                        </Box>
-                    </Box>
+                    <FormRow label={prop.title} required={prop.isRequired}>
+                        <FormField
+                            prop={prop}
+                            value={formValues[prop.propId]}
+                            onChange={onInputChange}
+                            error={formErrors[prop.propId]}
+                            selectedVault={selectedVault}
+                            mfilesId={mfilesId}
+                            handleClassSelection={handleClassSelection}
+                            fetchItemData={fetchItemData}
+                            setAddingValueListItem={setAddingValueListItem}
+                            setOpenAlert={setOpenAlert}
+                            setAlertSeverity={setAlertSeverity}
+                            setAlertMsg={setAlertMsg}
+                        />
+                    </FormRow>
                 </ListItem>
             ))}
         </List>

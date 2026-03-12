@@ -9,14 +9,13 @@ import {
     List,
     ListItem,
     ListItemIcon,
-    ListItemText
+    ListItemText,
+    Box,
 } from '@mui/material';
-
-import { FaPlus } from "react-icons/fa";
-import { FaFolderPlus } from "react-icons/fa6";
-
-import logo from '../../../images/ZFWHITE.png';import { THEME_COLORS } from '../../../constants/themeColors';
-
+import { FaPlus } from 'react-icons/fa';
+import { FaFolderPlus } from 'react-icons/fa6';
+import logo from '../../../images/ZFWHITE.png';
+import { THEME_COLORS } from '../../../constants/themeColors';
 
 const MainObjectDialog = ({
     open,
@@ -24,30 +23,59 @@ const MainObjectDialog = ({
     vaultObjectsList,
     onSelectItem,
     searchTerm,
-    onSearchChange
+    onSearchChange,
 }) => {
-    const filteredObjects = useMemo(() =>
-        vaultObjectsList?.filter(item =>
-            item.userPermission?.attachObjectsPermission &&
-            item.namesingular.toLowerCase().includes(searchTerm.toLowerCase())
-        ) || [],
+    const filteredObjects = useMemo(
+        () =>
+            vaultObjectsList?.filter(
+                (item) =>
+                    item.userPermission?.attachObjectsPermission &&
+                    item.namesingular.toLowerCase().includes(searchTerm.toLowerCase())
+            ) || [],
         [vaultObjectsList, searchTerm]
     );
 
     return (
-        <Dialog open={open} fullWidth>
+        <Dialog
+            open={open}
+            fullWidth
+            maxWidth="xs"
+            PaperProps={{
+                sx: {
+                    maxHeight: '80vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                },
+            }}
+        >
             <DialogTitle
-                className='p-2 d-flex justify-content-between align-items-center'
-                style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '14px' }}
+                className="p-2 d-flex justify-content-between align-items-center"
+                style={{
+                    backgroundColor: THEME_COLORS.primary,
+                    color: '#fff',
+                    fontSize: '14px',
+                    flexShrink: 0,
+                }}
             >
-                <img className="mx-3" src={logo} alt="Loading" width="130px" />
-                <span className="ml-auto mx-3">
-                    <FaPlus className='mx-2' /> Create
+                <img className="mx-3" src={logo} alt="Logo" width="100px" />
+                <span className="ml-auto mx-3" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <FaPlus /> Create
                 </span>
             </DialogTitle>
 
-            <DialogContent>
-                <p className='my-2' style={{ fontSize: '13px' }}>
+            <DialogContent
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    pt: '12px !important',
+                    px: 2,
+                    pb: 1,
+                    minHeight: 0,
+                }}
+            >
+                <p style={{ fontSize: '13px', marginBottom: 8 }}>
                     Please select from Item types below
                 </p>
 
@@ -55,31 +83,32 @@ const MainObjectDialog = ({
                     variant="outlined"
                     placeholder="Search Object Type..."
                     size="small"
-                    InputLabelProps={{
-                        shrink: true,
-                        sx: { fontSize: '13px', color: '#555b6e' }
-                    }}
-                    InputProps={{
-                        sx: { fontSize: '13px', color: '#555b6e' }
-                    }}
                     fullWidth
                     value={searchTerm}
                     onChange={onSearchChange}
-                    style={{ marginBottom: '10px' }}
+                    InputLabelProps={{ shrink: true, sx: { fontSize: '13px', color: '#555b6e' } }}
+                    InputProps={{ sx: { fontSize: '13px', color: '#555b6e' } }}
+                    sx={{ mb: 1, flexShrink: 0 }}
                 />
 
-                <div style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'hidden' }}>
-                    <List className='p-0 list-group'>
+                {/* Scrollable list */}
+                <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+                    <List className="p-0">
                         {filteredObjects.map((item) => (
                             <ListItem
-                                className="p-0 mx-2"
                                 button
                                 key={item.objectid}
                                 onClick={() => onSelectItem(item.objectid, item.namesingular)}
                                 disablePadding
+                                sx={{
+                                    px: 1,
+                                    py: 0.5,
+                                    borderRadius: '4px',
+                                    '&:hover': { backgroundColor: '#f0f4f8' },
+                                }}
                             >
-                                <ListItemIcon sx={{ minWidth: "auto", marginRight: "4px" }}>
-                                    <FaFolderPlus className="mx-2" style={{ color: "#2a68af", fontSize: "20px" }} />
+                                <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                                    <FaFolderPlus style={{ color: '#2a68af', fontSize: '18px' }} />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.namesingular}
@@ -88,16 +117,20 @@ const MainObjectDialog = ({
                             </ListItem>
                         ))}
                     </List>
-                </div>
+                </Box>
             </DialogContent>
 
-            <DialogActions>
-                <Button 
-                    sx={{ textTransform: 'none' }} 
-                    className='mx-4 rounded-pill' 
-                    color="warning" 
-                    size='small' 
-                    variant="contained" 
+            <DialogActions sx={{ flexShrink: 0, px: 2, pb: 1.5 }}>
+                <Button
+                    sx={{
+                        textTransform: 'none',
+                        backgroundColor: '#FFD54F',
+                        color: '#000',
+                        borderRadius: '20px',
+                        '&:hover': { backgroundColor: '#FFCA28' },
+                    }}
+                    size="small"
+                    variant="contained"
                     onClick={onClose}
                 >
                     Close

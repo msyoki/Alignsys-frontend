@@ -1,4 +1,5 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";import { THEME_COLORS } from '../../constants/themeColors';
+import React, { useRef, useState, useCallback, useMemo } from "react";
+import { THEME_COLORS } from '../../constants/themeColors';
 
 import {
     Dialog,
@@ -12,6 +13,13 @@ import {
     Box,
     Stack
 } from "@mui/material";
+import { FaT } from "react-icons/fa6";
+import { FaUserCircle } from "react-icons/fa";  
+import { FaTimes } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
+import { FaEnvelopeOpen } from "react-icons/fa";
+import { FaUserPlus } from "react-icons/fa";
+import { FaPlusCircle } from "react-icons/fa";
 
 const AddSignersDialog = (props) => {
     // --- Refs ---
@@ -134,22 +142,22 @@ const AddSignersDialog = (props) => {
                                     mb: 1,
                                 }}
                             >
-                                <i className="fas fa-user-circle" style={{ color: THEME_COLORS.primary, marginRight: "6px" }}></i>
+                                <FaUserCircle size={14} style={{ color: THEME_COLORS.primary, marginRight: "6px" }} />
                                 <span style={{ marginRight: "8px", color: "#000", fontSize: '12.8px' }}>{item.email}</span>
 
 
-                                <i
+                                <FaTimes
                                     className="fas fa-times text-danger"
                                     style={{ cursor: "pointer" }}
                                     onClick={(e) => removeSigner(e, item.email)}
-                                ></i>
+                                />
                             </Box>
 
                             {index < signers.length - 1 && (
-                                <i
+                                <FaArrowRight
                                     className="fas fa-arrow-right"
                                     style={{ color: THEME_COLORS.primary, fontSize: "16px", marginRight: "8px" }}
-                                ></i>
+                                />
                             )}
                         </React.Fragment>
                     ))}
@@ -168,7 +176,7 @@ const AddSignersDialog = (props) => {
                         <span style={{ color: THEME_COLORS.primary }}>Instructions</span>: Add signers in the order they should sign. Once the list is complete, proceed to send for signing.
                     </div>
                     <h5 className="mb-2" style={{ fontSize: 13, color: THEME_COLORS.primary }}>
-                        <i className="fas fa-user-plus me-2"></i>Add new signer
+                        <FaUserPlus className="me-2" style={{ color: THEME_COLORS.primary }} />Add new signer
                     </h5>
 
 
@@ -236,7 +244,7 @@ const AddSignersDialog = (props) => {
                                 </>
                             ) : (
                                 <>
-                                    <i className="fas fa-plus-circle mx-2"></i>
+                                    <FaPlusCircle className="mx-2" style={{ color: "white" }} />
                                     Add Signer
                                 </>
                             )}
@@ -281,10 +289,10 @@ const AddSignersDialog = (props) => {
                                     textAlign: "center",
                                 }}
                             >
-                                <i
+                                <FaEnvelopeOpen 
                                     className="fas fa-envelope-open-text"
                                     style={{ fontSize: "48px", color: "#dee2e6" }}
-                                ></i>
+                                />
                                 <Typography variant="subtitle1" color="text.secondary">
                                     No signers added yet
                                 </Typography>

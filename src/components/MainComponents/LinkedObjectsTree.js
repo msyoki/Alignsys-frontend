@@ -21,6 +21,8 @@ import { LuFolderSymlink } from "react-icons/lu";
 import { SiFiles } from "react-icons/si";
 import { MdOutlineFolderCopy } from "react-icons/md";
 import SubLinkedObjectsTree from "./SubLinkedObjectsTree";
+import DynamicIcon from "../Utils/Dynamicicon";
+import { THEME_COLORS } from "../../constants/themeColors";
 
 
 function useSessionState(key, defaultValue) {
@@ -105,14 +107,17 @@ const mergeObjects = (objects) => {
   objects.forEach(obj => {
     const key = `${obj.objecttypeID}-${obj.propertyName}`;
     if (!mergedMap.has(key)) {
-      mergedMap.set(key, {
-        objecttypeID: obj.objecttypeID,
-        propertyName: obj.propertyName,
-        propertyName: obj.propertyName,
-        items: []
-      });
+      mergedMap.set(key, { objecttypeID: obj.objecttypeID, propertyName: obj.propertyName, items: [] });
     }
     mergedMap.get(key).items.push(...obj.items);
+  });
+  mergedMap.forEach((value) => {
+    const seen = new Set();
+    value.items = value.items.filter(item => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
   });
   return Array.from(mergedMap.values());
 };
@@ -156,7 +161,7 @@ const TreeSubItem = memo(({
   const isSingleFile = subItem.isSingleFile === true;
 
   // Generate unique itemId using parentKey to avoid duplicates
-  const uniqueItemId = `${parentKey}-${subItem.id}-${subItem.title?.replace(/[^a-zA-Z0-9]/g, '')?.substring(0, 10)}`;
+  const uniqueItemId = `${parentKey}-${subItem.id}-${subItem.title?.replace(/[^a-zA-Z0-9]/g, '')}`;
 
   return (
     <TreeItem
@@ -227,11 +232,14 @@ const TreeSubItem = memo(({
                   isObjectType0 && !isSingleFile ? (
                     <FaBook style={{ color: '#7cb518', fontSize: '18px', flexShrink: 0 }} />
                   ) : (
-                    <FaFolder style={{ fontSize: '18px', color: '#2a68af', flexShrink: 0 }} />
+                    // <FaFolder style={{ fontSize: '18px', color: '#2a68af', flexShrink: 0 }} />
+                    <DynamicIcon name={subItem.classTypeName} color={THEME_COLORS.primary} size={18}/>
+                  
                   )
                 )
               ) : (
-                <FaFolder style={{ fontSize: "18px", color: "#2a68af", flexShrink: 0 }} />
+                // <FaFolder style={{ fontSize: "18px", color: "#2a68af", flexShrink: 0 }} />
+                <DynamicIcon name={subItem.classTypeName} color={THEME_COLORS.primary} size={18}/>
               )}
 
               {/* Title with optimized spacing */}
@@ -327,12 +335,15 @@ const LinkedObjectsTree = ({
 
   const fetchLinkedObjects = useCallback(async () => {
     setLoading(true);
+    console.log( `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${classId}/${mfilesId}`)
     try {
       const url = `${constants.mfiles_api}/api/objectinstance/LinkedObjects/${selectedVault.guid}/${objectType}/${id}/${classId}/${mfilesId}`;
       const response = await axios.get(url);
       setLinkedObjects(response.data || []);
+      console.log('Fetched linked objects:', response.data);
 
-    } catch {
+    } catch (error){
+      console.log('Error fetching linked objects:', error);
       setLinkedObjects([]);
     }
     setLoading(false);
@@ -540,7 +551,7 @@ const LinkedObjectsTree = ({
                         onRightClick={handleRightClick}
                         onItemClick={handleItemClick}
                         isDocument={false}
-                        parentKey={`obj-${id}-${classId}-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
+                        parentKey={`obj-${id}-${classId}-${index}-${subIndex}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                       />
                     }
                   >
@@ -605,7 +616,7 @@ const LinkedObjectsTree = ({
                         onRightClick={onItemRightClick}
                         onItemClick={handleItemClick}
                         isDocument
-                        parentKey={`doc-${id}-${classId}-${docIndex}`}
+                        parentKey={`doc-${id}-${classId}-${docIndex}-${subIndex}`}
                       />
                     }
                   >

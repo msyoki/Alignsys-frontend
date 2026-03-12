@@ -1,100 +1,110 @@
 import React from 'react';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { List, ListItem, ListItemIcon, ListItemText, Box, Typography } from '@mui/material';
 import FileExtIcon from '../../FileExtIcon';
-import FileExtText from '../../FileExtText';import { THEME_COLORS } from '../../../constants/themeColors';
-
+import FileExtText from '../../FileExtText';
+import { THEME_COLORS } from '../../../constants/themeColors';
 
 const TemplateActions = ({
     templateIsTrue,
     templates,
     selectedVault,
     onUseTemplate,
-    onDontUseTemplates
+    onDontUseTemplates,
 }) => {
     if (templateIsTrue) {
         return (
-            <a
+            <Box
+                component="a"
                 href="#"
-                style={{
+                onClick={(e) => { e.preventDefault(); onDontUseTemplates(); }}
+                sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 1,
                     color: THEME_COLORS.primary,
                     textDecoration: 'none',
-                    transition: 'color 0.2s ease'
+                    fontSize: '13px',
+                    '&:hover': { color: '#4a7bc8' },
                 }}
-                onClick={(e) => {
-                    e.preventDefault();
-                    onDontUseTemplates();
-                }}
-                onMouseEnter={(e) => e.target.style.color = '#4a7bc8'}
-                onMouseLeave={(e) => e.target.style.color = '#2757aa'}
             >
-                <i className="fa-solid fa-upload mx-2"></i>
+                <i className="fa-solid fa-upload" />
                 Upload File Without Template / Change Template
-            </a>
+            </Box>
+        );
+    }
+
+    if (!templates?.length) {
+        return (
+            <Typography sx={{ fontSize: '13px', color: THEME_COLORS.primary }}>
+                No templates available
+            </Typography>
         );
     }
 
     return (
         <List
-            className="p-0"
+            disablePadding
             sx={{
-                width: '100%',
                 display: 'flex',
                 flexDirection: 'row',
                 flexWrap: 'wrap',
                 gap: 1,
-                alignItems: 'center'
+                alignItems: 'flex-start',
+                p: 0,
             }}
         >
-            {templates && templates.length > 0 ? (
-                templates.map((item) => (
-                    <ListItem
-                        button
-                        key={item.id}
-                        onClick={() => onUseTemplate(item)}
-                        className="rounded-md transition hover:scale-105"
+            {templates.map((item) => (
+                <ListItem
+                    button
+                    key={item.id}
+                    onClick={() => onUseTemplate(item)}
+                    sx={{
+                        width: 'auto',
+                        maxWidth: { xs: '100%', sm: '220px' },
+                        p: 0.75,
+                        border: '1px solid #dee2e6',
+                        borderRadius: '6px',
+                        transition: 'box-shadow 0.15s, border-color 0.15s',
+                        '&:hover': {
+                            backgroundColor: '#f8f9fa',
+                            borderColor: THEME_COLORS.primary,
+                            boxShadow: '0 1px 4px rgba(39,87,170,0.15)',
+                        },
+                    }}
+                >
+                    <ListItemIcon sx={{ minWidth: 'auto', mr: 0.75 }}>
+                        <FileExtIcon
+                            fontSize="18px"
+                            guid={selectedVault?.guid}
+                            objectId={item.id}
+                            classId={item.classID}
+                            version={item.versionId ?? null}
+                        />
+                    </ListItemIcon>
+                    <ListItemText
                         sx={{
-                            width: 'auto',
-                            minWidth: 'fit-content',
-                            p: 1,
                             m: 0,
-                            border: '1px solid #dee2e6',
-                            '&:hover': {
-                                backgroundColor: '#f8f9fa'
-                            }
+                            '& .MuiTypography-root': {
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            },
                         }}
-                    >
-                        <ListItemIcon sx={{ minWidth: "auto", marginRight: "6px" }}>
-                            <span className='mx-2'>
-                                <FileExtIcon
-                                    fontSize={'20px'}
+                        primary={
+                            <>
+                                {item.title}
+                                <FileExtText
                                     guid={selectedVault?.guid}
                                     objectId={item.id}
                                     classId={item.classID}
                                     version={item.versionId ?? null}
                                 />
-                            </span>
-                        </ListItemIcon>
-                        <ListItemText
-                            sx={{ '& .MuiTypography-root': { fontSize: '12px', whiteSpace: 'nowrap' } }}
-                            primary={
-                                <>
-                                    {item.title}
-                                    <FileExtText
-                                        guid={selectedVault?.guid}
-                                        objectId={item.id}
-                                        classId={item.classID}
-                                        version={item.versionId ?? null}
-                                    />
-                                </>
-                            }
-                        />
-                    </ListItem>
-                ))
-            ) : (
-                <p className="text-center my-2" style={{ color: THEME_COLORS.primary }}>
-                    No templates available
-                </p>
-            )}
+                            </>
+                        }
+                    />
+                </ListItem>
+            ))}
         </List>
     );
 };

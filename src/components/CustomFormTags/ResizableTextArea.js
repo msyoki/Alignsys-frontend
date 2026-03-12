@@ -1,16 +1,38 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import {
+  FaUpRightAndDownLeftFromCenter,
+  FaUpDown,
+  FaLock
+} from "react-icons/fa6";
 
 // Enhanced textarea with user-adjustable sizing
-const ResizableTextarea = ({ 
-  item, 
-  props, 
-  handleInputChange, 
-  renderValue, 
-  getInputStyle 
+const ResizableTextarea = ({
+  item,
+  props,
+  handleInputChange,
+  renderValue,
+  getInputStyle
 }) => {
   // State for user's preferred sizing mode
   const [resizeMode, setResizeMode] = useState('auto'); // 'auto', 'manual', 'fixed'
   const [userHeight, setUserHeight] = useState(null);
+
+
+
+    // Get icon for current resize mode
+const getResizeIcon = () => {
+  switch (resizeMode) {
+    case 'auto':
+      return FaUpRightAndDownLeftFromCenter;
+    case 'manual':
+      return FaUpDown;
+    case 'fixed':
+      return FaLock;
+    default:
+      return FaUpRightAndDownLeftFromCenter;
+  }
+};
+  const ResizeIcon = getResizeIcon();
 
   // Dynamic textarea styles based on resize mode
   // Calculate default height: 8 rows = ~160px (20px per row with 1.3 line-height + padding)
@@ -64,7 +86,7 @@ const ResizableTextarea = ({
       const scrollHeight = element.scrollHeight;
       const newHeight = Math.max(DEFAULT_HEIGHT, scrollHeight);
       element.style.height = newHeight + 'px';
-      
+
       // Store the computed height
       setUserHeight(newHeight + 'px');
     }
@@ -81,7 +103,7 @@ const ResizableTextarea = ({
           }
         }
       });
-      
+
       resizeObserver.observe(element);
       return () => resizeObserver.disconnect();
     }
@@ -97,10 +119,10 @@ const ResizableTextarea = ({
       // Initial resize on mount
       setTimeout(() => autoResize(el), 0);
       el.addEventListener('input', handleInput);
-      
+
       return () => el.removeEventListener('input', handleInput);
     }
-    
+
     // Manual resize setup
     if (resizeMode === 'manual') {
       const resizeObserver = new ResizeObserver((entries) => {
@@ -111,7 +133,7 @@ const ResizableTextarea = ({
           }
         }
       });
-      
+
       resizeObserver.observe(el);
       return () => resizeObserver.disconnect();
     }
@@ -125,15 +147,7 @@ const ResizableTextarea = ({
     setResizeMode(nextMode);
   }, [resizeMode]);
 
-  // Get icon for current resize mode
-  const getResizeIcon = () => {
-    switch (resizeMode) {
-      case 'auto': return 'fas fa-expand-arrows-alt';
-      case 'manual': return 'fas fa-arrows-alt-v';
-      case 'fixed': return 'fas fa-lock';
-      default: return 'fas fa-expand-arrows-alt';
-    }
-  };
+
 
   // Get tooltip text for current mode
   const getTooltipText = () => {
@@ -160,7 +174,7 @@ const ResizableTextarea = ({
           paddingRight: '40px', // Space for resize button
         }}
       />
-      
+
       {/* Resize Mode Toggle Button */}
       <button
         type="button"
@@ -191,9 +205,9 @@ const ResizableTextarea = ({
           e.target.style.backgroundColor = 'transparent';
         }}
       >
-        <i className={getResizeIcon()} />
+        <ResizeIcon size={16} />
       </button>
-      
+
       {/* Optional: Size indicator */}
       {resizeMode !== 'auto' && (
         <div
@@ -217,12 +231,12 @@ const ResizableTextarea = ({
 };
 
 // Alternative: Simpler version with just manual resize option
-const SimpleResizableTextarea = ({ 
-  item, 
-  props, 
-  handleInputChange, 
-  renderValue, 
-  getInputStyle 
+const SimpleResizableTextarea = ({
+  item,
+  props,
+  handleInputChange,
+  renderValue,
+  getInputStyle
 }) => {
   const [allowManualResize, setAllowManualResize] = useState(false);
 
@@ -253,7 +267,7 @@ const SimpleResizableTextarea = ({
     }
   }, [allowManualResize]);
 
-  
+
 
   return (
     <div style={{ position: 'relative' }}>
@@ -270,7 +284,7 @@ const SimpleResizableTextarea = ({
           paddingRight: '35px',
         }}
       />
-      
+
       {/* Toggle resize mode button */}
       <button
         type="button"
@@ -291,22 +305,26 @@ const SimpleResizableTextarea = ({
           transition: 'all 0.2s ease',
         }}
       >
-        <i className={allowManualResize ? 'fas fa-arrows-alt-v' : 'fas fa-expand-arrows-alt'} />
+        {allowManualResize ? (
+          <FaUpDown size={16} />
+        ) : (
+          <FaUpRightAndDownLeftFromCenter size={16} />
+        )}
       </button>
     </div>
   );
 };
 
 // Enhanced version with size presets
-const PresetResizableTextarea = ({ 
-  item, 
-  props, 
-  handleInputChange, 
-  renderValue, 
-  getInputStyle 
+const PresetResizableTextarea = ({
+  item,
+  props,
+  handleInputChange,
+  renderValue,
+  getInputStyle
 }) => {
   const [selectedSize, setSelectedSize] = useState('auto');
-  
+
   const sizePresets = {
     auto: { height: 'auto', resize: 'none', label: 'Auto' },
     small: { height: '60px', resize: 'none', label: 'Small' },
@@ -336,7 +354,7 @@ const PresetResizableTextarea = ({
     el.addEventListener('input', autoResize);
     return () => el.removeEventListener('input', autoResize);
   }, [selectedSize]);
-  
+
 
   return (
     <div style={{ position: 'relative' }}>
@@ -353,7 +371,7 @@ const PresetResizableTextarea = ({
           paddingRight: '80px',
         }}
       />
-      
+
       {/* Size selector dropdown */}
       <select
         value={selectedSize}

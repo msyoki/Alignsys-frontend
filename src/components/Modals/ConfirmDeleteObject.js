@@ -8,7 +8,9 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
-import logo from '../../images/ZFWHITE.webp'import { THEME_COLORS } from '../../constants/themeColors';
+import logo from '../../images/ZFWHITE.webp'
+import { THEME_COLORS } from '../../constants/themeColors';
+import { FaTriangleExclamation } from "react-icons/fa6";
 
 
 function ConfirmDeleteObject(props) {
@@ -26,7 +28,7 @@ function ConfirmDeleteObject(props) {
             {/* Content */}
             <DialogContent sx={{ p: 2, textAlign: 'center', width: '400px' }} >
         
-                <i class="fa-solid fa-triangle-exclamation  mx-2 my-2" style={{ color: THEME_COLORS.primary, fontSize: 60 }}></i>
+                <FaTriangleExclamation className="mx-2 my-2" style={{ color: THEME_COLORS.primary, fontSize: 60 }} />
                
                 <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
                     Are you sure you want to delete?

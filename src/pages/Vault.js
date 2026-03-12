@@ -25,6 +25,9 @@ import AttachExistingVault from '../components/AttachExistingVault';
 import { THEME_COLORS } from '../constants/themeColors';
 
 
+import { BiSolidCog } from "react-icons/bi";
+import { FaSignOutAlt } from "react-icons/fa";
+import { FaDatabase } from "react-icons/fa";
 
 const VaultSelectForm = () => {
   const { authTokens, user ,logoutUser} = useContext(Authcontext);
@@ -157,7 +160,7 @@ const VaultSelectForm = () => {
                   value={vault.guid}
                   sx={{ fontSize: '14px' }}
                 >
-                  <i className="fa-solid fa-database me-2" style={{ color: THEME_COLORS.primary }}></i> {vault.name}
+                  <FaDatabase className="me-2" style={{ color: THEME_COLORS.primary }} /> {vault.name}
                 </MenuItem>
               ))}
             </Select>
@@ -181,7 +184,7 @@ const VaultSelectForm = () => {
                 },
               }}
             >
-              <i className="fa-solid fa-cog me-2"></i>
+              <BiSolidCog className="me-2" style={{ color: THEME_COLORS.primary }} />
               Admin Dashboard
             </Button>
           )}
@@ -199,7 +202,7 @@ const VaultSelectForm = () => {
                 },
               }}
             >
-              <i className="fas fa-sign-out-alt mx-2" style={{ fontSize: "18px" }}></i>
+              <FaSignOutAlt className="mx-2" style={{ fontSize: "18px" }} />
               Log Out 
             </Button>
           

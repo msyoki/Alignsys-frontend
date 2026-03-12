@@ -16,6 +16,15 @@ const LookupMultiSelect = ({
   selectedVault,
   disabled,
 }) => {
+  // Guard: AI classification (and any other source) may pass a plain string or
+  // number instead of an array. Normalise once here so every .filter / .includes
+  // call below is always operating on an array.
+  const safeValue = Array.isArray(value)
+    ? value
+    : value !== null && value !== undefined && value !== ''
+      ? String(value).split(',').map(v => v.trim()).filter(Boolean)
+      : [];
+
   const [options, setOptions] = useState([]);
   const [defaultOptions, setDefaultOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -36,11 +45,10 @@ const LookupMultiSelect = ({
       // Merge with selected values to ensure all are present
       const combined = [
         ...formattedOptions,
-        ...value
-          .filter(val => !formattedOptions.some(opt => opt.value === val))
+        ...safeValue
+          .filter(val => !formattedOptions.some(opt => String(opt.value) === String(val)))
           .map(val => {
-            // Try to find label from previous options or fallback to value
-            const prev = options.find(opt => opt.value === val);
+            const prev = options.find(opt => String(opt.value) === String(val));
             return prev || { value: val, label: String(val) };
           }),
       ];
@@ -52,16 +60,16 @@ const LookupMultiSelect = ({
   };
 
   // Map value prop to selectedOptions for react-select
+  // Use String() comparison to handle numeric IDs vs string values from AI
   const selectedOptions = options.concat(defaultOptions)
     .filter((option, idx, arr) =>
-      value.includes(option.value) &&
+      safeValue.some(v => String(v) === String(option.value)) &&
       arr.findIndex(o => o.value === option.value) === idx
     )
     .map(option => ({ value: option.value, label: option.label }));
 
   // Fetch initial/default options
   useEffect(() => {
-
     fetchOptions();
     // eslint-disable-next-line
   }, [propId, selectedVault, userId]);
@@ -72,10 +80,10 @@ const LookupMultiSelect = ({
       // Reset to default options + selected
       const combined = [
         ...defaultOptions,
-        ...value
-          .filter(val => !defaultOptions.some(opt => opt.value === val))
+        ...safeValue
+          .filter(val => !defaultOptions.some(opt => String(opt.value) === String(val)))
           .map(val => {
-            const prev = options.find(opt => opt.value === val);
+            const prev = options.find(opt => String(opt.value) === String(val));
             return prev || { value: val, label: String(val) };
           }),
       ];
@@ -96,10 +104,10 @@ const LookupMultiSelect = ({
         // Merge search results with selected values (avoid duplicates)
         const combined = [
           ...formattedOptions,
-          ...value
-            .filter(val => !formattedOptions.some(opt => opt.value === val))
+          ...safeValue
+            .filter(val => !formattedOptions.some(opt => String(opt.value) === String(val)))
             .map(val => {
-              const prev = options.find(opt => opt.value === val);
+              const prev = options.find(opt => String(opt.value) === String(val));
               return prev || { value: val, label: String(val) };
             }),
         ];

@@ -11,6 +11,22 @@ import FileExtIcon from '../FileExtIcon';
 import FileExtText from '../FileExtText';
 import { THEME_COLORS } from '../../constants/themeColors';
 
+import {
+  FaSearchMinus,
+  FaSearchPlus,
+  FaDownload,
+  FaMinus,
+  FaPlus,
+  FaCompressAlt,
+  FaExpandAlt,
+  FaSun,
+  FaMoon,
+  FaTv,
+  FaBan
+} from "react-icons/fa";
+import { FaRotateRight } from "react-icons/fa6";
+
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -121,15 +137,15 @@ const ImageViewer = React.memo(({ src }) => {
       <ImageControls>
         <div className="d-flex align-items-center gap-2 mx-1">
           <span className='mx-2'>
-            <i onClick={handlers.zoomOut} className="mx-2 fa-solid fa-magnifying-glass-minus" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
+            <FaSearchMinus  onClick={handlers.zoomOut} className="mx-2" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
             <span style={{ minWidth: '40px', textAlign: 'center', fontSize: '12.5px', color: '#333' }}>
               {zoomDisplay}%
             </span>
-            <i onClick={handlers.zoomIn} className="mx-2 fa-solid fa-magnifying-glass-plus" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
+            <FaSearchPlus onClick={handlers.zoomIn} className="mx-2" style={{ fontSize: '20px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
           </span>
           <Tooltip title="Reset Zoom">
             <button onClick={handlers.reset} className="btn btn-light px-1 py-0" style={{ fontSize: '12.5px', border: `1px solid ${THEME_COLORS.primary}`, color: THEME_COLORS.primary }}>
-              <i className="fa-solid fa-rotate-right me-1" style={{ fontSize: '12px' }} />
+              <FaRotateRight className="me-1" style={{ fontSize: '12px' }} />
               Reset
             </button>
           </Tooltip>
@@ -141,7 +157,7 @@ const ImageViewer = React.memo(({ src }) => {
           </Tooltip>
         </div>
         <Tooltip title="Download Image">
-          <i onClick={handlers.download} className="fas fa-download" style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
+          <FaDownload onClick={handlers.download} className="mx-2" style={{ fontSize: '18px', color: THEME_COLORS.primary, cursor: 'pointer' }} />
         </Tooltip>
       </ImageControls>
       <ImageWrapper>

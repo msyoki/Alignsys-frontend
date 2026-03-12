@@ -21,6 +21,8 @@ import { LuFolderSymlink } from "react-icons/lu";
 import { SiFiles } from "react-icons/si";
 import { BiSolidCopyAlt } from "react-icons/bi";
 import { MdOutlineFolderCopy } from "react-icons/md";
+import DynamicIcon from "../Utils/Dynamicicon";
+import { THEME_COLORS } from "../../constants/themeColors";
 
 function useSessionState(key, defaultValue) {
     const getInitialValue = () => {
@@ -100,20 +102,23 @@ const formatDate = (dateString) => {
 
 // Optimized merge function
 const mergeObjects = (objects) => {
-    const mergedMap = new Map();
-    objects.forEach(obj => {
-        const key = `${obj.objecttypeID}-${obj.propertyName}`;
-        if (!mergedMap.has(key)) {
-            mergedMap.set(key, {
-                objecttypeID: obj.objecttypeID,
-                propertyName: obj.propertyName,
-                propertyName: obj.propertyName,
-                items: []
-            });
-        }
-        mergedMap.get(key).items.push(...obj.items);
+  const mergedMap = new Map();
+  objects.forEach(obj => {
+    const key = `${obj.objecttypeID}-${obj.propertyName}`;
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, { objecttypeID: obj.objecttypeID, propertyName: obj.propertyName, items: [] });
+    }
+    mergedMap.get(key).items.push(...obj.items);
+  });
+  mergedMap.forEach((value) => {
+    const seen = new Set();
+    value.items = value.items.filter(item => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
     });
-    return Array.from(mergedMap.values());
+  });
+  return Array.from(mergedMap.values());
 };
 
 // Updated TreeSubItem with unique itemId generation and selection highlighting
@@ -155,7 +160,7 @@ const TreeSubItem = memo(({
     const isSingleFile = subItem.isSingleFile === true;
 
     // Generate unique itemId using parentKey to avoid duplicates
-    const uniqueItemId = `${parentKey}-${subItem.id}-${subItem.title?.replace(/[^a-zA-Z0-9]/g, '')?.substring(0, 10)}`;
+    const uniqueItemId = `${parentKey}-${subItem.id}-${subItem.title?.replace(/[^a-zA-Z0-9]/g, '')}`;
 
     return (
         <TreeItem
@@ -200,11 +205,13 @@ const TreeSubItem = memo(({
                                     isObjectType0 && !isSingleFile ? (
                                         <FaBook style={{ color: '#7cb518', fontSize: '18px', flexShrink: 0 }} />
                                     ) : (
-                                        <FaFolder style={{ fontSize: '18px', color: '#2a68af', flexShrink: 0 }} />
+                                        // <FaFolder style={{ fontSize: '18px', color: '#2a68af', flexShrink: 0 }} />
+                                        <DynamicIcon name={subItem.classTypeName} color={THEME_COLORS.primary} size={18}/>
                                     )
                                 )
                             ) : (
-                                <FaFolder style={{ fontSize: "18px", color: "#2a68af", flexShrink: 0 }} />
+                                // <FaFolder style={{ fontSize: "18px", color: "#2a68af", flexShrink: 0 }} />
+                                <DynamicIcon name={subItem.classTypeName} color={THEME_COLORS.primary} size={18}/>
                             )}
 
                             {/* Title with optimized spacing */}
@@ -508,7 +515,7 @@ const SubLinkedObjectsTree = ({
                                         onRightClick={handleRightClick}
                                         onItemClick={handleItemClick}
                                         isDocument={false}
-                                        parentKey={`${treePrefix}sub-${id}-${classId}-obj-${index}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
+                                        parentKey={`${treePrefix}sub-${id}-${classId}-obj-${index}-${subIndex}-${obj.propertyName?.replace(/[^a-zA-Z0-9]/g, '')}`}
                                     />
                                 ))}
                             </TreeItem>
@@ -553,7 +560,7 @@ const SubLinkedObjectsTree = ({
                                         onRightClick={onItemRightClick}
                                         onItemClick={handleItemClick}
                                         isDocument={true}
-                                        parentKey={`${treePrefix}sub-${id}-${classId}-doc-${docIndex}`}
+                                        parentKey={`${treePrefix}sub-${id}-${classId}-doc-${docIndex}-${subIndex}`}
                                     />
                                 ))
                             )}

@@ -20,6 +20,9 @@ import '../styles/Navbar.css';
 
 import { THEME_COLORS } from '../constants/themeColors';
 import { THEME_CONFIG } from '../config/theme.config';
+
+import { FaBars,FaCaretRight,FaTrash,FaArrowLeft, FaSignOutAlt, FaDatabase,FaCaretLeft, FaLayerGroup, FaUsers, FaEdit, FaPlus, FaTag, FaPlusCircle } from 'react-icons/fa'; 
+
 // Material-UI components
 import {
     Typography,
@@ -231,16 +234,16 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                             }}
                         />
                     </div>
-                    
+
                     {/* Menu Items */}
                     <ul className="menu-items">
-                         <li className="menu-item main-li shadow-lg text-center">
-                            
+                        <li className="menu-item main-li shadow-lg text-center">
+
                             {user.organization}
                         </li>
                         <li onClick={onNavigateHome} className="menu-item main-li shadow-lg">
-                             <i class="fas fa-backward"  style={{ fontSize: "18px" }}></i>
-                            <span style={{ fontSize: "14px" }}>Return Home</span>
+                            <FaArrowLeft style={{ fontSize: "18px" }} />
+                            <span className='mx-2' style={{ fontSize: "14px" }}>Return Home</span>
                         </li>
 
                     </ul>
@@ -248,8 +251,8 @@ const Sidebar = memo(({ sidebarOpen, user, userDisplayName, onNavigateHome, onLo
                         <ul className="bottom-buttons">
 
                             <li onClick={onLogout} className="menu-item main-li shadow-lg">
-                                <i className="fas fa-sign-out-alt" style={{ fontSize: "18px" }}></i>
-                                <span style={{ fontSize: "14px" }}>Logout</span>
+                                <FaSignOutAlt style={{ fontSize: "18px" }} />
+                                <span className='mx-2' style={{ fontSize: "14px" }}>Logout</span>
                             </li>
                         </ul>
                     </div>
@@ -307,7 +310,7 @@ const PropertyRow = memo(({ property, index, onPropertyChange, onRemoveProperty 
         </Grid>
         <Grid item xs={12} sm={2}>
             <ButtonComponent onClick={() => onRemoveProperty(index)} sx={STYLES.smallButtonStyle}>
-                <i className="fas fa-trash mx-1"></i> Remove Property
+                <FaTrash className="mx-1" style={{ fontSize: "12px" }} /> Remove Property
             </ButtonComponent>
         </Grid>
     </Grid>
@@ -325,7 +328,7 @@ const HeaderBox = memo(({ children, className, sx = {} }) => (
 const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
     <>
         <h6 className='shadow-lg p-3'>
-            <i className="fa-solid fa-database mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
+            <FaDatabase className="mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }} />
             {selectedVault.name} ( Vault Objects )
         </h6>
         <div id='vaultobjects' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
@@ -341,7 +344,7 @@ const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
                         {vaultObjects.map((row) => (
                             <TableRow key={row.object_id}>
                                 <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                    <i className="fas fa-layer-group mx-2" style={{ fontSize: '12.8px', color: '#2a68af' }}></i>
+                                    <FaLayerGroup className="mx-2" style={{ fontSize: '12.8px', color: '#2a68af' }} />
                                     {row.name_singular}
                                 </TableCell>
                                 <TableCell style={{ borderBottom: 'none' }}>{row.object_id}</TableCell>
@@ -357,7 +360,7 @@ const ObjectsTable = memo(({ vaultObjects, selectedVault }) => (
 const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers }) => (
     <div id='permissions' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
         <h6 className='shadow-lg p-2'>
-            <i className="fa-solid fa-database mx-2" style={{ fontSize: '12.8px' }}></i>
+            <FaDatabase className="mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }} />
             {selectedVault.name} ( User Groups )
         </h6>
         <TableContainer component={Paper} sx={{ boxShadow: 'none' }} className='shadow-lg p-3' style={{ overflowY: 'auto' }}>
@@ -370,7 +373,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                 className='my-2 rounded-pill'
             >
                 <small>
-                    <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Add New User Group
+                    <FaUsers className="mx-1" style={{ fontSize: '11px', cursor: 'pointer' }} /> Add New User Group
                 </small>
             </Button>
 
@@ -386,7 +389,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                     {userGroups.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell component="th" scope="row" style={{ borderBottom: 'none' }}>
-                                <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: '#2a68af' }}></i>
+                                <FaUsers className="mx-2" style={{ fontSize: '12.8px', color: '#2a68af' }} />
                                 {row.title}
                             </TableCell>
                             <TableCell style={{ borderBottom: 'none' }}>{row.id}</TableCell>
@@ -400,7 +403,7 @@ const VaultGroupsTable = memo(({ userGroups, selectedVault, onSelectedGroupUsers
                                     className='rounded-pill'
                                 >
                                     <small>
-                                        <i className="fas fa-users" style={{ fontSize: '11px', cursor: 'pointer' }}></i> Manage Users
+                                        <FaUsers className="mx-1" style={{ fontSize: '11px', cursor: 'pointer' }} /> Manage Users
                                     </small>
                                 </Button>
                             </TableCell>
@@ -826,7 +829,11 @@ function AdminDashboard() {
                 <main className={`content ${sidebarOpen ? 'shifted' : 'full-width'}`}>
                     <Tooltip title={sidebarOpen ? 'Minimize sidebar' : 'Expand sidebar'}>
                         <div className={`bump-toggle ${sidebarOpen ? 'attached' : 'moved'}`} onClick={navigationHandlers.toggleSidebar}>
-                            <i style={{ fontSize: '16px' }} className={`fas fa-${sidebarOpen ? 'caret-left' : 'caret-right'} mx-2`} ></i>
+                            {sidebarOpen ? (
+                                <FaCaretLeft style={{ fontSize: '16px', margin: '0 8px' }} />
+                            ) : (
+                                <FaCaretRight style={{ fontSize: '16px', margin: '0 8px' }} />
+                            )}
                         </div>
                     </Tooltip>
                     <div id="container" ref={containerRef} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', backgroundColor: '#fff' }}>
@@ -862,7 +869,7 @@ function AdminDashboard() {
                                             },
                                         }}
                                     >
-                                        <i className="fa-solid fa-bars" style={{ fontSize: '25px', color: THEME_COLORS.primary }} />
+                                        <FaBars style={{ fontSize: '25px', color: THEME_COLORS.primary }} />
                                     </Box>
 
                                     <img
@@ -874,7 +881,7 @@ function AdminDashboard() {
                                     />
                                 </Box>
 
-                              
+
                                 {/* User Avatar */}
                                 <Tooltip title={`${user.first_name} ${user.last_name}`}>
                                     <Avatar
@@ -892,7 +899,7 @@ function AdminDashboard() {
 
 
 
-                         
+
 
 
                             {/* <HeaderBox className="shadow-lg" sx={{ backgroundColor: '#eef2f7' }}>
@@ -943,7 +950,7 @@ function AdminDashboard() {
                                     user={user}
                                 />
                             </div>
-                            
+
 
 
                             <Box sx={{ minHeight: 352, minWidth: 250 }}>
@@ -992,18 +999,18 @@ function AdminDashboard() {
                                     </TreeItem>
 
                                 </SimpleTreeView>
-                                   <div style={{
-                                backgroundColor: '#eef2f7',
-                                fontSize: '12.8px',
-                                borderRadius: '4px',
-                                textAlign: 'center',
-                                padding: '10px',
-                            }}>
-                               ADMIN MANAGER
-                            </div>
+                                <div style={{
+                                    backgroundColor: '#eef2f7',
+                                    fontSize: '12.8px',
+                                    borderRadius: '4px',
+                                    textAlign: 'center',
+                                    padding: '10px',
+                                }}>
+                                    ADMIN MANAGER
+                                </div>
 
                             </Box>
-                            
+
 
 
 
@@ -1018,7 +1025,7 @@ function AdminDashboard() {
                             {viewStates.createObject && (
                                 <div id="newobject" style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <Box sx={{ p: 3, boxShadow: 2, fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
-                                        <i className="fas fa-plus mx-2" style={{ fontSize: '12.8px' }}></i> Create New Object
+                                        <FaPlus className="mx-2" style={{ fontSize: '12.8px' }} /> Create New Object
                                     </Box>
                                     <Typography variant="body2" sx={{ my: 3, fontSize: '0.8em' }}>
                                         Please create your new object type below with the respective properties
@@ -1041,10 +1048,10 @@ function AdminDashboard() {
                                             </Grid>
                                             <Grid item xs={12}>
                                                 <ButtonComponent size="sm" onClick={formHandlers.addProperty} sx={STYLES.buttonStyle}>
-                                                    <i className="fas fa-tag mx-1"></i> Add Property
+                                                    <FaTag className="mx-1" style={{ fontSize: '12.8px' }} /> Add Property
                                                 </ButtonComponent>
                                                 <ButtonComponent onClick={additionalHandlers.handleSubmit} sx={STYLES.buttonStyle}>
-                                                    <i className="fas fa-plus-circle mx-1"></i> Create Object
+                                                    <FaPlusCircle className="mx-1" style={{ fontSize: '12.8px' }} /> Create Object
                                                 </ButtonComponent>
                                             </Grid>
                                         </Grid>
@@ -1062,7 +1069,7 @@ function AdminDashboard() {
                             {viewStates.objectStructure && (
                                 <div id='updateobjstructure' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <h6 className='shadow-lg p-2' style={{ fontSize: '1.2em' }}>
-                                        <i className="fas fa-edit mx-2" style={{ fontSize: '12.8px' }}></i> Update Object
+                                        <FaEdit className="mx-2" style={{ fontSize: '12.8px' }} /> Update Object
                                     </h6>
                                     <ObjComponent
                                         selectedObjectStructure={selectedItems.objectStructure}
@@ -1083,7 +1090,7 @@ function AdminDashboard() {
                             {viewStates.loginAccounts && (
                                 <div id='usermanagement' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
+                                        <FaUsers className="mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }} />
                                         LOGIN ACCOUNTS
                                     </p>
                                     <OrganizationUsersTable users={organizationusers} />
@@ -1093,7 +1100,7 @@ function AdminDashboard() {
                             {viewStates.loginActivity && (
                                 <div id='loginactivity' style={{ fontSize: '12.8px', marginBottom: '20px' }}>
                                     <p className='shadow-lg p-3'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }}></i>
+                                        <FaUsers className="mx-2" style={{ fontSize: '12.8px', color: THEME_COLORS.primary }} />
                                         ACTIVITY LOGS
                                     </p>
                                     <LoginActivityTable user={user} />
@@ -1103,7 +1110,7 @@ function AdminDashboard() {
                             {viewStates.vaultUsers && (
                                 <div className='p-2' id='vaultusermanagement' style={{ fontSize: '12.8px' }}>
                                     <p className='shadow-lg p-2'>
-                                        <i className="fas fa-users mx-2" style={{ fontSize: '12px', color: THEME_COLORS.primary }}></i>
+                                        <FaUsers className="mx-2" style={{ fontSize: '12px', color: THEME_COLORS.primary }} />
                                         <span style={{ color: THEME_COLORS.primary }}>  {toUpperCase(selectedItems.vault.name)}</span>  ACCOUNTS
 
                                     </p>

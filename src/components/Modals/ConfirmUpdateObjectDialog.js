@@ -8,7 +8,9 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
-import logo from '../../images/ZFWHITE.webp'import { THEME_COLORS } from '../../constants/themeColors';
+import logo from '../../images/ZFWHITE.webp'
+import { THEME_COLORS } from '../../constants/themeColors';
+import { FaTriangleExclamation } from "react-icons/fa6";
 
 
 const ConfirmUpdateDialog = (props) => {
@@ -20,7 +22,7 @@ const ConfirmUpdateDialog = (props) => {
                 style={{ backgroundColor: THEME_COLORS.primary, color: '#fff', fontSize: '15px' }}
             >
 
-                <img className="mx-3" src={logo} alt="Loading" width="130px" />
+                <img className="mx-3" src={logo} alt="Loading" width="100px" />
                 <span className="ml-auto mx-3">
                     Unsaved Changes
                 </span>
@@ -36,7 +38,7 @@ const ConfirmUpdateDialog = (props) => {
                         </Box>
                     </>
                     :
-                    <Typography variant="body1" className='p-2'> <i className='fas fa-exclamation-triangle mx-2 text-warning' style={{ fontSize: '40px' }}></i><span style={{ fontSize: '11.5px' }}>You have unsaved changes to:   <br /><span style={{ color: '#2a68af' }}>{props.message}</span></span></Typography>
+                    <Typography variant="body1" className='p-2'> <FaTriangleExclamation className="mx-2 my-2 text-warning" style={{ fontSize: '40px' }} /><span style={{ fontSize: '11.5px' }}>You have unsaved changes to:   <br /><span style={{ color: '#2a68af' }}>{props.message}</span></span></Typography>
                 }
 
 

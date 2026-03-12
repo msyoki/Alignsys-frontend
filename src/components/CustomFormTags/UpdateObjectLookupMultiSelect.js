@@ -15,6 +15,7 @@ const LookupMultiSelect = ({
   itemValue,
   disabled,
   mfilesid,
+  item
 }) => {
   const [options, setOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +24,7 @@ const LookupMultiSelect = ({
   // Set selectedOptions from itemValue on mount or change
   useEffect(() => {
     if (itemValue && Array.isArray(itemValue)) {
+      console.log(item)
       setSelectedOptions(
         itemValue.map((item) => ({
           value: item.id,
@@ -54,8 +56,11 @@ const LookupMultiSelect = ({
             (opt) => !formattedOptions.some((fo) => fo.value === opt.value)
           ),
         ];
+        console.log(`${constants.mfiles_api}/api/ValuelistInstance/${selectedVault.guid}/${propId}/${mfilesid}/`)
+        console.log(propId)
+        console.log(response.data)
 
-        setOptions(combined);
+        setOptions(formattedOptions);
       } catch  {
         // console.error('Error fetching lookup options:', error);
       }

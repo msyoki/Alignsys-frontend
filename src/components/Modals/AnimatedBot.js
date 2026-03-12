@@ -1,4 +1,6 @@
-import React from "react";import { THEME_COLORS } from '../../constants/themeColors';
+import React from "react";
+import { THEME_COLORS } from '../../constants/themeColors';
+import { FaAndroid } from "react-icons/fa";
 
 
 const AnimatedAndroidIcon = () => {
@@ -20,7 +22,7 @@ const AnimatedAndroidIcon = () => {
           }
         `}
       </style>
-      <i className="fa-brands fa-android my-2" style={iconStyle}></i>
+      <FaAndroid className=" my-2" style={iconStyle}/>
     </>
   );
 };

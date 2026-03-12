@@ -10,7 +10,8 @@ import {
   Box
 } from '@mui/material';
 import * as constants from '../Auth/configs';
-import axios from 'axios';import { THEME_COLORS } from '../../constants/themeColors';
+import axios from 'axios';
+import { THEME_COLORS } from '../../constants/themeColors';
 
 
 
@@ -54,7 +55,7 @@ function OfficeApp(props) {
     };
     window.addEventListener("blur", handleBlur);
 
-    // ✅ Use iframe to silently try to open the plugin
+    // Use iframe to silently try to open the plugin
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
     iframe.src = appUrl;
@@ -62,21 +63,14 @@ function OfficeApp(props) {
 
 
     // Wait a few seconds
-    // setTimeout(() => {
-    //   window.removeEventListener("blur", handleBlur);
-    //   document.body.removeChild(iframe);
-
-    //   if (!pluginOpened) {
-    //     const confirmed = window.confirm(
-    //       "The Alignsys Office plugin doesn’t seem to be installed or didn’t open.\nWould you like to download it now?"
-    //     );
-    //     if (confirmed) handleDownloadPlugin();
-    //   }
-    // }, 4000);
+    setTimeout(() => {
+      props.handleTabAction()
+    }, 4000);
 
     // Close dialog right away
+
     props.close();
-    //  props.handleTabAction()
+
   };
 
   const handleDownloadPlugin = () => {

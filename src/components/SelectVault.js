@@ -4,6 +4,7 @@ import Authcontext from '../components/Auth/Authprovider';
 import axios from 'axios';
 import * as constants from './Auth/configs';
 import { THEME_COLORS } from '../constants/themeColors';
+import { FaDatabase } from "react-icons/fa";
 
 const VaultSelectForm = ({ onVaultChange }) => {
   const { authTokens } = useContext(Authcontext);
@@ -76,7 +77,7 @@ const VaultSelectForm = ({ onVaultChange }) => {
         </MenuItem>
         {vaults.map((vault) => (
           <MenuItem key={vault.guid} value={vault.guid}>
-            <i className="fa-solid  fa-database me-2" style={{ color: THEME_COLORS.primary }}></i>
+            <FaDatabase className="me-2" style={{ color: THEME_COLORS.primary }} />
             <span className="text-dark" style={{ fontSize: '12px' }}>{vault.name}</span>
           </MenuItem>
         ))}

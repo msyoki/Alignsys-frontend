@@ -114,12 +114,11 @@ const TOOLTIP_INNER_STYLES = {
 };
 
 const SCROLLABLE_CONTAINER_STYLES = {
-    height: '50%vh',
-    overflowY: 'auto'
+    overflowY: 'visible'
 };
 
 const MAIN_CONTENT_STYLES = {
-    maxHeight: '60vh',
+    maxHeight: '100%',
     overflowY: 'auto'
 };
 
@@ -896,7 +895,7 @@ const ViewsList = (props) => {
             ) :
                 <>
                     {props.selectedViewObjects.length > 0 || props.viewNavigation.length > 0 ? (
-                        <>
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                             {/* Breadcrumb section — fixed and not scrollable */}
                             <div
                                 style={{
@@ -919,7 +918,7 @@ const ViewsList = (props) => {
                             </div>
 
                             {/* Scrollable main content */}
-                            <div>
+                            <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
                                 {props.selectedViewObjects.length > 0 ? (
                                     <>
                                         <div className="text-dark" style={MAIN_CONTENT_STYLES}>
@@ -971,7 +970,6 @@ const ViewsList = (props) => {
                                                     headerTitle="Search Results"
                                                     nameColumnLabel="Name"
                                                     dateColumnLabel="Date Modified"
-                                                    renderHeight="60vh"
                                                     tabIndex={0}
                                                 />
                                             );
@@ -1020,10 +1018,10 @@ const ViewsList = (props) => {
                                     </div>
                                 )}
                             </div>
-                        </>
+                        </div>
 
                     ) : (
-                        <span>
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
                             {filteredCommonViews.length > 0 && (
                                 <div className='bg-white my-1'>
                                     <h6
@@ -1138,10 +1136,7 @@ const ViewsList = (props) => {
                                     </h6>
 
                                     {showOtherViewSublist && (
-                                        <div style={{
-                                            height: filteredCommonViews?.length < 1 ? '70vh' : '50%vh',
-                                            overflowY: 'auto',
-                                        }} className='text-dark bg-white'>
+                                        <div className='text-dark bg-white'>
                                             {filteredOtherViews.map((view, index) => (
                                                 <ViewListItem
                                                     key={index}
@@ -1156,7 +1151,7 @@ const ViewsList = (props) => {
                                     )}
                                 </div>
                             )}
-                        </span>
+                        </div>
                     )}
                 </>}
 

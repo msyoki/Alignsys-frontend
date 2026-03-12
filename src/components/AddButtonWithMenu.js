@@ -4,6 +4,10 @@ import { THEME_COLORS } from '../constants/themeColors';
 import { MdOutlineScanner } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
 
+import { FaFolderPlus } from "react-icons/fa6";
+import { FaFileCirclePlus } from "react-icons/fa6";
+import DynamicIcon from './Utils/Dynamicicon';
+
 const AddButtonWithMenu = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -38,11 +42,12 @@ const AddButtonWithMenu = (props) => {
   return (
     <>
       <Tooltip title="Create/Add new object or document">
-        <i
+        <FaPlus
           onClick={handleIconClick}
-          className="fas fa-plus mx-2"
+          className="mx-2"
           style={iconStyle}
         />
+
       </Tooltip>
 
       {permittedObjects.length > 0 && (
@@ -85,27 +90,43 @@ const AddButtonWithMenu = (props) => {
                   handleClose();
                 }}
               >
-                <i
-                  className={
-                    item.objectid === 0
-                      ? "fas fa-file-circle-plus"
-                      : "fas fa-folder-plus"
-                  }
-                  style={menuItemIconStyle}
-                />
-                <span className="mx-2">{item.namesingular}</span>
+
+                {
+                  item.objectid === 0 ? (
+                    <FaFileCirclePlus style={menuItemIconStyle} />
+                  ) : (
+                    // <FaFolderPlus style={menuItemIconStyle} />
+                    <DynamicIcon name={item.namesingular} color={THEME_COLORS.primary} size={18} />
+                  )
+                }
+                <span className="mx-1">{item.namesingular}</span>
               </MenuItem>
             ))}
           </Box>
 
           {/* Footer */}
-          <Box className="shadow-sm">
-            <MenuItem sx={{ fontSize: 13 }} onClick={handleClose}>
+          {/* Footer */}
+          <Box
+            sx={{
+              fontSize: 13,
+              px: 2,
+              py: 1,
+              backgroundColor: "#fff",
+              cursor: "pointer",
+              "&:hover": { backgroundColor: "#f5f5f5" },
+            }}
+            className="shadow-sm"
+            onClick={() => {
+              props.setScannerDialogOpen(true);
+              handleClose();
+            }}
+          >
+            <div className="d-flex align-items-center">
               <MdOutlineScanner
-                style={{ fontSize: 18, marginRight: "0.5rem", color: "#555" }}
+                style={{ fontSize: 18, marginRight: "0.5rem", color: THEME_COLORS.primary }}
               />
               <span>Add Document from Scanner ...</span>
-            </MenuItem>
+            </div>
           </Box>
         </Menu>
       )}

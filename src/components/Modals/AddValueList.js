@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import * as constants from '../Auth/configs';
+import { FaSquarePlus } from "react-icons/fa6";
 
 const AddValuelistItem = ({
     vaultGuid,
@@ -21,44 +22,61 @@ const AddValuelistItem = ({
     setAddingValueListItem,
     setOpenAlert,
     setAlertSeverity,
-    setAlertMsg
+    setAlertMsg,
 }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleClickOpen = (e) => {
+    /* Safe wrappers — all three props are optional (noop-defaulted upstream)
+       but AddValueList itself must never call them without checking, because
+       it can be rendered inside a nested ValueListObjectDialog that was opened
+       without these props.                                                    */
+    const safeSetAdding = (val) => {
+        if (typeof setAddingValueListItem === 'function') setAddingValueListItem(val);
+    };
+    const safeAlert = (severity, msg) => {
+        if (typeof setOpenAlert === 'function') setOpenAlert(true);
+        if (typeof setAlertSeverity === 'function') setAlertSeverity(severity);
+        if (typeof setAlertMsg === 'function') setAlertMsg(msg);
+    };
 
+    const handleClickOpen = (e) => {
         e.stopPropagation();
 
         if (item?.objectTypeVL) {
-            console.log('Auto-fetching because objectTypeVL is true:', item);
+            // Delegate to parent to open the full ValueListObjectDialog
             if (typeof fetchItemData === 'function') {
                 fetchItemData(item.typeID, item.title);
-                console.log(item)
             } else {
                 console.warn('fetchItemData is not a function');
             }
+            // Signal parent that we're adding (will be reset by parent when its dialog closes)
+            safeSetAdding(true);
             return;
         }
 
+        // Simple name-entry dialog
+        safeSetAdding(true);
         setOpen(true);
     };
 
     const handleClose = (e) => {
         if (e) e.stopPropagation();
         setOpen(false);
+        setName('');
+        // Reset the flag so the parent form isn't stuck in "adding" state
+        safeSetAdding(false);
     };
 
     const handleSubmit = async (e) => {
         e.stopPropagation();
 
-        if (!name.trim()) return alert('Please enter a name');
+        if (!name.trim()) return;
 
         setLoading(true);
         try {
             const payload = { vaultGuid, userID, valuelistID, name };
-            console.log('Submitting payload:', payload);
 
             const response = await axios.post(
                 `${constants.mfiles_api}/api/ValuelistInstance/AddValuelistItem`,
@@ -71,26 +89,13 @@ const AddValuelistItem = ({
                 }
             );
 
-            console.log('Item added:', response.data);
+            if (onSuccess) onSuccess(response.data);
 
-            // Call onSuccess but don't close parent dialog
-            if (onSuccess) {
-                onSuccess(response.data);
-            }
-
-            // Refresh valuelist data if available
-            // if (typeof fetchItemData === 'function') {
-            //     fetchItemData(valuelistID, item.title);
-            // }
-            setOpenAlert(true);
-            setAlertSeverity("success");
-            setAlertMsg("Value list object created successfully");
-
-            handleClose();
-            setName('');
+            safeAlert('success', 'Value list item created successfully');
+            handleClose(); // also resets name and safeSetAdding(false)
         } catch (error) {
             console.error('Error adding valuelist item:', error);
-            alert('Failed to add item. See console for details.');
+            safeAlert('error', 'Failed to add item. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -98,18 +103,18 @@ const AddValuelistItem = ({
 
     return (
         <>
-            <i
-                className="fa-solid fa-square-plus"
-                onClick={(e) => { handleClickOpen(e); setAddingValueListItem(true) }}
+            <FaSquarePlus
+                onClick={handleClickOpen}
                 title="Add item"
                 style={{
                     marginLeft: '8px',
                     cursor: 'pointer',
-                    fontSize: '1.5rem',
+                    fontSize: '2.2rem',
                     color: '#007bff',
                     padding: '6px',
                     borderRadius: '8px',
                     transition: 'all 0.2s ease',
+
                 }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
@@ -119,26 +124,20 @@ const AddValuelistItem = ({
                     e.currentTarget.style.backgroundColor = 'transparent';
                     e.currentTarget.style.color = '#007bff';
                 }}
-                onMouseDown={(e) => {
-                    e.currentTarget.style.transform = 'scale(0.92)';
-                }}
-                onMouseUp={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                }}
-            ></i>
+                onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+                onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            />
 
-
-            {/* Separate dialog with disablePortal to prevent z-index issues */}
             <Dialog
                 open={open}
                 onClose={handleClose}
-                disablePortal={false}
-                style={{ zIndex: 1500 }} // Higher z-index than parent dialog
-                onClick={(e) => e.stopPropagation()} // Prevent clicks from bubbling
+                style={{ zIndex: 1500 }}
+                onClick={(e) => e.stopPropagation()}
             >
                 <DialogTitle sx={{ fontSize: '15px' }}>
-                    {`Add new ${item?.title || 'valuelist'}`}
+                    {`Add new ${item?.title || 'value list item'}`}
                 </DialogTitle>
+
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -150,18 +149,28 @@ const AddValuelistItem = ({
                         onChange={(e) => setName(e.target.value)}
                         disabled={loading}
                         onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !loading) {
-                                handleSubmit(e);
-                            }
+                            if (e.key === 'Enter' && !loading) handleSubmit(e);
                         }}
+                        error={name.trim() === '' && name.length > 0}
+                        helperText={name.trim() === '' && name.length > 0 ? 'Name cannot be empty' : ''}
                     />
                 </DialogContent>
+
                 <DialogActions>
-                    <Button onClick={handleClose} disabled={loading}>
+                    <Button
+                        onClick={handleClose}
+                        disabled={loading}
+                        sx={{ textTransform: 'none' }}
+                    >
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-                        {loading ? 'Adding...' : 'Add'}
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        disabled={loading || !name.trim()}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        {loading ? 'Adding…' : 'Add'}
                     </Button>
                 </DialogActions>
             </Dialog>

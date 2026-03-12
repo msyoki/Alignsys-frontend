@@ -1,11 +1,10 @@
-// components/StatusBadgeIcon.jsx
 import React from 'react';
 import { Badge } from '@mui/material';
 
 const CheckOutStatusBadgeIcon = ({
   children,               // the wrapped icon (e.g., <FileExtIcon />)
   color = '#3fa34d',      // badge icon color
-  icon = 'fa-check-circle', // Font Awesome icon
+  icon: IconComponent,    // renamed for proper JSX use
   size = 8,               // badge icon size
   vertical = 'bottom',    // position of badge
   horizontal = 'left',
@@ -16,15 +15,14 @@ const CheckOutStatusBadgeIcon = ({
     <Badge
       overlap="circular"
       badgeContent={
-        <i
-          className={`fas ${icon}`}
+        <IconComponent
           style={{
             color,
             fontSize: `${size}px`,
             textShadow: '0 0 1px #fff, 0 0 1px #fff, 0 0 2px #fff',
             filter: 'drop-shadow(0 0 0.5px #fff)',
           }}
-        ></i>
+        />
       }
       anchorOrigin={{ vertical, horizontal }}
       sx={{
